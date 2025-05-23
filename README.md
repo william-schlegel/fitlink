@@ -30,40 +30,81 @@ Next.js 15 fullstack template with better-auth for authentication and drizzle-or
 
 ## Getting Started
 
-1. Clone the repository
+Clone the repository
 
 ```bash
 git clone https://github.com/rudrodip/titan.git
 ```
 
-2. Install dependencies
+Install dependencies
 
 ```bash
 bun install
 ```
 
-3. Create environment file
+Create environment file
 
 ```bash
 cp .env.example .env
 ```
 
-4. Generate database schema
+Provide environment variables in `.env` file
+
+- `BETTER_AUTH_SECRET`: Secret key for Better Auth authentication generate one [here](https://www.better-auth.com/docs/installation#set-environment-variables)
+- `BETTER_AUTH_URL`: Better Auth URL (e.g., `http://localhost:3000`)
+- `DATABASE_URL`: PostgreSQL connection string provided from Neon (e.g., `postgresql://username:password@neon:5432/titan`)
+
+Generate database schema
 
 ```bash
 bun run db:generate
 ```
 
-5. Migrate database
+Migrate database
 
 ```bash
 bun run db:migrate
 ```
 
-6. Run the development server
+Run the development server
 
 ```bash
 bun dev
 ```
 
-7. Open the browser and navigate to `http://localhost:3000`
+Open the browser and navigate to `http://localhost:3000`
+
+## Using a Local Database
+
+Have Docker installed on your system. Before running the db:generate command from Getting Started, run the following command in the project directory to start a local database:
+
+```bash
+docker-compose up -d
+```
+
+Use the following environment variables in `.env` file:
+- `DATABASE_URL`: `postgres://postgres:postgres@localhost:5432/titan`
+
+Add the `pg` and `@types/pg` dependencies to your project:
+
+```bash
+bun add pg
+bun add -D @types/pg
+```
+
+Then, change the `/src/lib/db/index.ts` file to use the `drizzle-orm/node-postgres` and `pg` package instead of `@neondatabase/serverless`:
+
+```typescript
+import * as schema from "@/lib/db/schema";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+
+const sql = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+export const db = drizzle(sql, { schema });
+```
+
+Continue steps from Getting Started e.g. generating the database schema, applying migrations, and running the dev server.
+
+Open the browser and navigate to `http://localhost:3000`
