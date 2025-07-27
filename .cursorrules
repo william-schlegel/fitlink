@@ -1,0 +1,111 @@
+# Cursor Rules for VideoAch Project
+
+## Project Overview
+
+This is a Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRPC, and React Query. The project appears to be a coaching/sports management platform.
+
+## Technology Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **Database**: PostgreSQL with Drizzle ORM
+- **API**: tRPC for type-safe APIs
+- **State Management**: React Query (TanStack Query)
+- **Validation**: Zod
+- **Package Manager**: Bun (with npm fallback)
+- **Path mapping**: @/\* for source project
+
+## Code Style & Conventions
+
+### TypeScript
+
+- Use strict TypeScript configuration
+- Prefer explicit types over `any`
+- Use proper type imports from Drizzle ORM
+- Leverage Zod schemas for runtime validation
+- Use proper enum types from the database schema
+
+### React & Next.js
+
+- Use React 19 features when appropriate
+- Follow Next.js 15 App Router conventions
+- Use Server Components by default, Client Components when needed
+- Implement proper error boundaries
+- Use Next.js built-in optimizations (Image, Link, etc.)
+
+### Database & Drizzle ORM
+
+- Follow the existing schema patterns in `src/db/schema.ts`
+- Use proper relations and indexes
+- Leverage Drizzle's type safety
+- Use migrations for schema changes
+- Follow the enum naming conventions (e.g., `roleEnum`, `notificationTypeEnum`)
+
+### API & tRPC
+
+- Create type-safe APIs using tRPC
+- Use proper input/output validation with Zod
+- Follow the existing tRPC router patterns
+- Implement proper error handling
+
+### Styling
+
+- Use Tailwind CSS v4 utilities
+- Follow mobile-first responsive design
+- Use semantic class names
+- Leverage Tailwind's design system
+
+## File Structure Guidelines
+
+- Keep components in `src/app` for page-specific components
+- Use proper Next.js file conventions (`page.tsx`, `layout.tsx`, `loading.tsx`, etc.)
+- Database schema in `src/db/schema.ts`
+- Environment variables in `src/env.ts`
+- Follow the existing project structure
+
+## Best Practices
+
+- Use proper error handling and loading states
+- Implement proper TypeScript types for all data
+- Use React Query for server state management
+- Follow accessibility guidelines
+- Write clean, readable code with proper comments
+- Use proper naming conventions (camelCase for variables, PascalCase for components)
+
+## Database Schema Patterns
+
+- Use PostgreSQL enums for constrained values
+- Implement proper relations between tables
+- Use indexes for performance
+- Follow the existing naming conventions
+- Use proper data types (text, timestamp, boolean, etc.)
+
+## Security Considerations
+
+- Validate all inputs with Zod
+- Use proper authentication and authorization
+- Sanitize user inputs
+- Follow Next.js security best practices
+
+## Performance
+
+- Use Next.js optimizations (Turbopack, Server Components)
+- Implement proper caching strategies
+- Use React Query for efficient data fetching
+- Optimize database queries with proper indexes
+
+## Development Workflow
+
+- Use Bun for package management when possible
+- Follow the existing ESLint configuration
+- Use TypeScript strict mode
+- Test thoroughly before committing
+
+## Common Patterns to Follow
+
+- Use the existing enum patterns for database constraints
+- Follow the notification system patterns
+- Use proper user role management
+- Implement proper subscription and coaching models
+- Follow the existing file upload and document management patterns
