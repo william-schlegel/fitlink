@@ -1,6 +1,7 @@
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { auth } from "../auth/server";
 
 /**
  * 1. CONTEXT
@@ -10,8 +11,13 @@ import { ZodError } from "zod";
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
+  const authSession = await auth.api.getSession({
+    headers: opts.headers,
+  });
+
   return {
     headers: opts.headers,
+    user: authSession?.user,
   };
 };
 
@@ -56,3 +62,14 @@ export const createTRPCRouter = t.router;
  * can still access user session data if they are logged in.
  */
 export const publicProcedure = t.procedure;
+
+export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+  if (!ctx.user?.id) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: {
+      user: ctx.user,
+    },
+  });
+});

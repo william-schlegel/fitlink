@@ -3,6 +3,7 @@ import "./globals.css";
 import { TRPCProvider } from "@/lib/trpc/provider";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import AppWrapper from "./_components/appWrapper";
 
 export const metadata: Metadata = {
   title: "VideoAch - Coaching Platform",
@@ -21,7 +22,9 @@ export default async function RootLayout({
     <html lang={locale} data-theme="cupcake">
       <body className={`scroll-smooth antialiased`}>
         <NextIntlClientProvider messages={messages}>
-          <TRPCProvider>{children}</TRPCProvider>
+          <TRPCProvider>
+            <AppWrapper>{children}</AppWrapper>
+          </TRPCProvider>
         </NextIntlClientProvider>
       </body>
     </html>

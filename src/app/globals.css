@@ -2,3 +2,97 @@
 @plugin "daisyui" {
   themes: all;
 }
+
+h1 {
+  @apply space-x-2 py-4 text-4xl font-bold text-primary;
+}
+h2 {
+  @apply space-x-2 py-3 text-3xl font-bold text-primary;
+}
+h3 {
+  @apply space-x-2 py-3 text-2xl font-semibold text-secondary;
+}
+h4 {
+  @apply space-x-2 py-2 text-xl font-semibold text-secondary;
+}
+label {
+  @apply label font-semibold text-primary;
+}
+
+label.required::after {
+  content: "*";
+  color: red;
+  font-size: 0.8em;
+  padding-inline-start: 0.25em;
+  align-self: start;
+}
+
+textarea {
+  @apply textarea w-full;
+}
+
+select {
+  @apply select w-full;
+}
+
+.pill {
+  @apply flex flex-wrap items-center gap-2 border border-neutral bg-base-200 p-[0.5rem] text-base-content;
+  border-radius: var(--rounded-btn, 0.5rem);
+}
+
+.pill-xs {
+  @apply px-[0.25rem] py-[0.125rem] text-xs;
+}
+
+.input-group {
+  @apply flex items-center gap-2;
+}
+
+html {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
+    Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+}
+
+body {
+  @apply scroll-smooth;
+}
+
+.bg-gradient-home-hero {
+  --hero-bg-opacity: 0.3;
+  object-fit: fill;
+  background: linear-gradient(
+        oklab(from var(--color-base-100) l a b / 30%),
+        oklab(from var(--color-base-100) l a b / 30%)
+      )
+      0px 0px / 100% 100% no-repeat no-repeat,
+    radial-gradient(
+        circle at 50% 50%,
+        var(--color-secondary) 0%,
+        rgba(0, 0, 0, 0) 65%,
+        rgba(0, 0, 0, 0) 100%
+      ) -35% -65% / 100% 150% no-repeat no-repeat,
+    radial-gradient(
+        ellipse at 50% 50%,
+        var(--color-accent) 0%,
+        rgba(0, 0, 0, 0) 65%,
+        rgba(0, 0, 0, 0) 100%
+      )
+      25% 25% / 110% 110% no-repeat no-repeat,
+    conic-gradient(
+        from 30deg at 0% 0%,
+        var(--color-accent) 0%,
+        var(--color-error) 45%,
+        rgba(0, 0, 0, 0) 70%
+      )
+      0px 0px / 100% 100% no-repeat no-repeat,
+    linear-gradient(-6deg, var(--color-info) 0%, 40%, var(--color-info) 100%)
+      0px 0px / 100% 100% no-repeat no-repeat;
+}
+
+.image-home-hero {
+  mask-image: url(/images/image-home-mask.svg);
+  mask-repeat: no-repeat;
+  -webkit-mask-image: url(/images/image-home-mask.svg);
+  -webkit-mask-repeat: no-repeat;
+}

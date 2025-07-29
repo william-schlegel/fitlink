@@ -8,7 +8,7 @@ This is a Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRP
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS v4
+- **Styling**: DaisyUI
 - **Database**: PostgreSQL with Drizzle ORM
 - **API**: tRPC for type-safe APIs
 - **State Management**: React Query (TanStack Query)
@@ -51,10 +51,10 @@ This is a Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRP
 
 ### Styling
 
-- Use Tailwind CSS v4 utilities
+- Use DaisyUI class names first and Tailwind CSS v4 utilities for details
 - Follow mobile-first responsive design
 - Use semantic class names
-- Leverage Tailwind's design system
+- Leverage DaisyUI's design system
 
 ## File Structure Guidelines
 

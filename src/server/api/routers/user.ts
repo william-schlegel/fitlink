@@ -1,19 +1,24 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/lib/trpc/server";
-import { UserRoleArray } from "@/db/schema";
+import { user, UserRoleArray } from "@/db/schema";
+import { db } from "@/db";
+import { eq } from "drizzle-orm";
 
 export const userRouter = createTRPCRouter({
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
-    .query(({ input }) => {
-      // This is a mock implementation
-      // In a real app, you would query your database here
-      return {
-        id: input.id,
-        name: "John Doe",
-        email: "john@example.com",
-        role: "MEMBER" as const,
-      };
+    .query(async ({ input }) => {
+      const foundUser = await db.query.user.findFirst({
+        with: {
+          pricing: {
+            with: {
+              features: true,
+            },
+          },
+        },
+        where: eq(user.id, input.id),
+      });
+      return foundUser;
     }),
 
   list: publicProcedure
