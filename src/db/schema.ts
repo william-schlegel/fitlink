@@ -13,13 +13,17 @@ import {
 import { relations } from "drizzle-orm";
 
 // Enums
-export const roleEnum = pgEnum("Role", [
+
+export const UserRoleArray = [
   "MEMBER",
   "COACH",
   "MANAGER",
   "MANAGER_COACH",
   "ADMIN",
-]);
+] as const;
+export type UserRole = (typeof UserRoleArray)[number];
+
+export const roleEnum = pgEnum("Role", UserRoleArray);
 
 export const userDocumentTypeEnum = pgEnum("UserDocumentType", [
   "DOCUMENT",

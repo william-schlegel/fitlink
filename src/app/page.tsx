@@ -1,5 +1,6 @@
 "use client";
 
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { trpc } from "@/lib/trpc/client";
 import { useState } from "react";
 
@@ -41,6 +42,7 @@ export default function HomePage() {
         <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">
           VideoAch - tRPC Demo
         </h1>
+        <LanguageSwitcher />
 
         {/* Health Check Section */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">

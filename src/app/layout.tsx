@@ -1,21 +1,28 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { TRPCProvider } from "@/lib/trpc/provider";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "VideoAch - Coaching Platform",
   description: "A modern coaching and sports management platform",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body className={`scroll-smooth antialiased`}>
-        <TRPCProvider>{children}</TRPCProvider>
+        <NextIntlClientProvider messages={messages}>
+          <TRPCProvider>{children}</TRPCProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

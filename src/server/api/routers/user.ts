@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/lib/trpc/server";
+import { UserRoleArray } from "@/db/schema";
 
 export const userRouter = createTRPCRouter({
   getById: publicProcedure
@@ -31,8 +32,8 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(1),
-        email: z.string().email(),
-        role: z.enum(["MEMBER", "COACH", "MANAGER", "MANAGER_COACH", "ADMIN"]),
+        email: z.email(),
+        role: z.enum(UserRoleArray),
       })
     )
     .mutation(({ input }) => {
