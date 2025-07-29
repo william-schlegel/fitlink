@@ -18,7 +18,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} data-theme="cupcake">
       <body className={`scroll-smooth antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <TRPCProvider>{children}</TRPCProvider>
