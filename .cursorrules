@@ -36,11 +36,12 @@ This is a Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRP
 
 ### Database & Drizzle ORM
 
-- Follow the existing schema patterns in `src/db/schema.ts`
+- Follow the existing schema patterns in `src/db/schema/*.ts`
 - Use proper relations and indexes
 - Leverage Drizzle's type safety
 - Use migrations for schema changes
 - Follow the enum naming conventions (e.g., `roleEnum`, `notificationTypeEnum`)
+- Never use Prisma
 
 ### API & tRPC
 

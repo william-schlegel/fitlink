@@ -6,7 +6,7 @@ import { Stars } from "lucide-react";
 export default function Footer() {
   const t = useTranslations("common");
   return (
-    <footer className="footer bg-neutral text-neutral-content mt-auto gap-4 p-10">
+    <footer className="footer footer-horizontal bg-neutral text-neutral-content mt-auto gap-4 p-10">
       <div className="flex items-center gap-4">
         <Stars size={60} />
         <p>

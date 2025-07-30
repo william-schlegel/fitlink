@@ -2,6 +2,9 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { auth } from "../auth/server";
+import { user } from "@/db/schema/auth";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
 
 /**
  * 1. CONTEXT
@@ -63,13 +66,16 @@ export const createTRPCRouter = t.router;
  */
 export const publicProcedure = t.procedure;
 
-export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
   if (!ctx.user?.id) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+  const u = await db.query.user.findFirst({
+    where: eq(user.id, ctx.user.id),
+  });
   return next({
     ctx: {
-      user: ctx.user,
+      user: { ...ctx.user, role: u?.role },
     },
   });
 });

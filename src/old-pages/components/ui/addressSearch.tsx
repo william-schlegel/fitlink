@@ -1,15 +1,16 @@
-import { env } from "@/env";
-import { useTranslations } from "next-intl";
+import useDebounce from "@lib/useDebounce";
+import { env } from "@root/src/env/client.mjs";
+import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
-import { useDebounceValue } from "usehooks-ts";
+import { type DefaultTFuncReturn } from "i18next";
 
 type Props = {
-  label?: string;
+  label?: DefaultTFuncReturn;
   defaultAddress?: string;
   onSearch: (adr: AddressData) => void;
   required?: boolean;
   iconSearch?: boolean;
-  error?: string;
+  error?: DefaultTFuncReturn;
   className?: string;
 };
 
@@ -29,9 +30,9 @@ const AddressSearch = ({
   className,
 }: Props) => {
   const [address, setAddress] = useState("");
-  const [debouncedAddress] = useDebounceValue<string>(address, 500);
+  const debouncedAddress = useDebounce<string>(address, 500);
   const [addresses, setAddresses] = useState<AddressData[]>([]);
-  const t = useTranslations("common");
+  const { t } = useTranslation("common");
 
   useEffect(() => {
     if (defaultAddress) setAddress(defaultAddress);
@@ -66,7 +67,7 @@ const AddressSearch = ({
       {label ? (
         <label className={`label ${required ? "required" : ""}`}>{label}</label>
       ) : null}
-      <div className={`dropdown dropdown-bottom ${className ?? ""}`}>
+      <div className={`dropdown-bottom dropdown ${className ?? ""}`}>
         <div className="input-group">
           {iconSearch ? (
             <span>
@@ -77,7 +78,7 @@ const AddressSearch = ({
             </span>
           ) : null}
           <input
-            className="input input-bordered w-full"
+            className="input-bordered input w-full"
             value={address}
             onChange={(e) => handleSelect(e.currentTarget.value)}
             list="addresses"
@@ -87,7 +88,7 @@ const AddressSearch = ({
         </div>
         {error ? <p className="label-text-alt text-error">{error}</p> : null}
         {addresses.length > 0 ? (
-          <ul className="menu dropdown-content w-full rounded-box bg-base-100 p-2 shadow">
+          <ul className="dropdown-content menu rounded-box w-full bg-base-100 p-2 shadow">
             {addresses.map((adr, idx) => (
               <li key={`ADR-${idx}`}>
                 <button
@@ -139,6 +140,5 @@ async function searchAddresses(address: string): Promise<AddressData[]> {
         };
       }
     ) ?? [];
-
   return locations;
 }

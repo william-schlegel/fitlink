@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/lib/trpc/server";
-import { user, UserRoleArray } from "@/db/schema";
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
+import { roleEnum } from "@/db/schema/enums";
+import { user } from "@/db/schema/auth";
 
 export const userRouter = createTRPCRouter({
   getById: publicProcedure
@@ -38,7 +39,7 @@ export const userRouter = createTRPCRouter({
       z.object({
         name: z.string().min(1),
         email: z.email(),
-        role: z.enum(UserRoleArray),
+        role: z.enum(roleEnum.enumValues),
       })
     )
     .mutation(({ input }) => {

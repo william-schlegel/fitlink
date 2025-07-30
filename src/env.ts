@@ -14,6 +14,8 @@ export const env = createEnv({
     FACEBOOK_CLIENT_SECRET: z.string(),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
+    AWS_ACCESS_KEY_ID_WSC: z.string(),
+    AWS_SECRET_ACCESS_KEY_WSC: z.string(),
   },
 
   /**
@@ -40,6 +42,8 @@ export const env = createEnv({
     FACEBOOK_CLIENT_SECRET: process.env.FACEBOOK_CLIENT_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    AWS_ACCESS_KEY_ID_WSC: process.env.AWS_ACCESS_KEY_ID_WSC,
+    AWS_SECRET_ACCESS_KEY_WSC: process.env.AWS_SECRET_ACCESS_KEY_WSC,
 
     NEXT_PUBLIC_HOSTNAME: process.env.NEXT_PUBLIC_HOSTNAME,
     NEXT_PUBLIC_BETA: process.env.NEXT_PUBLIC_BETA,
