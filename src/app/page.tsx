@@ -4,6 +4,7 @@ import Image from "next/image";
 import { redirect, RedirectType } from "next/navigation";
 import ButtonLink from "./_components/ui/buttonLink";
 import FindClub from "./_components/_sections/findClub";
+import FindCoach from "./_components/_sections/findCoach";
 
 export default async function HomePage() {
   const user = await getActualUser();
@@ -59,7 +60,7 @@ export default async function HomePage() {
       <section id="find-coach" className="bg-base-100">
         <div className="container mx-auto p-4 @container">
           <h2>{t("find-coach")}</h2>
-          {/* <FindCoach /> */}
+          <FindCoach />
         </div>
       </section>
     </>

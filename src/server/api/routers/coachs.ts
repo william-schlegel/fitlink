@@ -7,7 +7,7 @@ import {
   publicProcedure,
 } from "@/lib/trpc/server";
 import { db } from "@/db";
-import { and, asc, eq, gte, lte, or } from "drizzle-orm";
+import { and, asc, eq, gte, like, lte, or } from "drizzle-orm";
 import { calculateBBox, calculateDistance } from "@/lib/distance";
 import { getDocUrl } from "./files";
 import {
@@ -19,7 +19,7 @@ import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
 import { user } from "@/db/schema/auth";
 import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { userCoach } from "@/db/schema/user";
-import { club } from "@/db/schema/club";
+import { club, coachingActivity } from "@/db/schema/club";
 
 const CertificationData = z.object({
   id: z.cuid(),
@@ -445,36 +445,53 @@ export const coachRouter = createTRPCRouter({
         input.locationLat,
         input.range
       );
-      return db.query.coachingPrice.findMany({
-        where: {
-          target: "COMPANY",
-          coach: {
-            coachingActivities: input?.activityName
-              ? {
-                  some: { name: { contains: input.activityName } },
-                }
-              : undefined,
-            AND: [
-              { longitude: { gte: bbox?.[0]?.[0] ?? LONGITUDE } },
-              { longitude: { lte: bbox?.[1]?.[0] ?? LONGITUDE } },
-              { latitude: { gte: bbox?.[1]?.[1] ?? LATITUDE } },
-              { latitude: { lte: bbox?.[0]?.[1] ?? LATITUDE } },
-            ],
-          },
-          AND: [
-            { perHourPhysical: { gte: input.priceMin } },
-            { perHourPhysical: { lte: input.priceMax } },
-          ],
-        },
-      });
+      const uc = db
+        .select()
+        .from(userCoach)
+        .where(
+          and(
+            gte(userCoach.longitude, bbox?.[0]?.[0] ?? LONGITUDE),
+            lte(userCoach.longitude, bbox?.[1]?.[0] ?? LONGITUDE),
+            gte(userCoach.latitude, bbox?.[1]?.[1] ?? LATITUDE),
+            lte(userCoach.latitude, bbox?.[0]?.[1] ?? LATITUDE)
+          )
+        )
+        .as("user_coaches");
+      return db
+        .select()
+        .from(coachingPrice)
+        .where(
+          and(
+            eq(coachingPrice.target, "COMPANY"),
+            eq(coachingPrice.perHourPhysical, input.priceMin),
+            eq(coachingPrice.perHourPhysical, input.priceMax)
+          )
+        )
+        .leftJoin(uc, eq(coachingPrice.coachId, uc.userId));
+      // userCoach: {
+      //   coachingActivities: input?.activityName
+      //     ? {
+      //         some: { name: { contains: input.activityName } },
+      //       }
+      //     : undefined,
+      //   AND: [
+      //     { longitude: { gte: bbox?.[0]?.[0] ?? LONGITUDE } },
+      //     { longitude: { lte: bbox?.[1]?.[0] ?? LONGITUDE } },
+      //     { latitude: { gte: bbox?.[1]?.[1] ?? LATITUDE } },
+      //     { latitude: { lte: bbox?.[0]?.[1] ?? LATITUDE } },
+      //   ],
+      // },
+      // AND: [
+
+      // ],
+      // },
     }),
   getOfferWithDetails: publicProcedure
     .input(z.cuid())
     .query(async ({ input }) => {
       const offer = await db.query.coachingPrice.findFirst({
-        where: {
-          id: input,
-        },
+        where: eq(coachingPrice.id, input),
+
         with: {
           coach: {
             with: {
@@ -510,151 +527,151 @@ export const coachRouter = createTRPCRouter({
     }),
   getCoachOffers: protectedProcedure.input(z.cuid()).query(({ input }) =>
     db.query.coachingPrice.findMany({
-      where: { coachId: input },
+      where: eq(coachingPrice.coachId, input),
       with: {
         coachingLevel: true,
       },
     })
   ),
-  createCoachOffer: protectedProcedure
-    .input(OfferData.omit({ id: true }))
-    .mutation(async ({ input }) => {
-      const pricing = await db.query.pricing.findFirst({
-        where: {
-          users: {
-            some: {
-              id: input.coachId,
-            },
-          },
-        },
-        with: {
-          features: true,
-        },
-      });
-      const target = pricing?.features.find(
-        (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY"
-      )
-        ? input.target
-        : "INDIVIDUAL";
-      return db.query.coachingPrice.create({
-        data: {
-          name: input.name,
-          description: input.description,
-          target,
-          excludingTaxes: input.excludingTaxes,
-          coachId: input.coachId,
-          inHouse: input.inHouse,
-          physical: input.physical,
-          myPlace: input.myPlace,
-          publicPlace: input.publicPlace,
-          startDate: input.startDate,
-          webcam: input.webcam,
-          freeHours: input.freeHours,
-          perDayPhysical: input.perDayPhysical,
-          perDayWebcam: input.perDayWebcam,
-          perHourPhysical: input.perHourPhysical,
-          perHourWebcam: input.perHourWebcam,
-          travelFee: input.travelFee,
-          travelLimit: input.travelLimit,
-          packs: {
-            createMany: {
-              data: input.packs.map((pack) => ({
-                nbHours: pack.nbHours,
-                packPrice: pack.packPrice,
-              })),
-            },
-          },
-          coachingLevel: {
-            createMany: {
-              data: input.levels.map((level) => ({
-                level,
-              })),
-            },
-          },
-        },
-      });
-    }),
-  updateCoachOffer: protectedProcedure
-    .input(OfferData.partial())
-    .mutation(async ({ input }) => {
-      const pricing = await db.query.pricing.findFirst({
-        where: {
-          users: {
-            some: {
-              id: input.coachId,
-            },
-          },
-        },
-        with: {
-          features: true,
-        },
-      });
-      const target = pricing?.features.find(
-        (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY"
-      )
-        ? input.target ?? "INDIVIDUAL"
-        : "INDIVIDUAL";
-      await db.query.coachingPricePack.deleteMany({
-        where: {
-          coachingPriceId: input.id,
-        },
-      });
-      await db.query.coachingLevel.deleteMany({
-        where: {
-          offerId: input.id,
-        },
-      });
-      return db.query.coachingPrice.update({
-        where: { id: input.id },
-        data: {
-          name: input.name,
-          description: input.description,
-          target,
-          excludingTaxes: input.excludingTaxes,
-          coachId: input.coachId,
-          inHouse: input.inHouse,
-          physical: input.physical,
-          myPlace: input.myPlace,
-          publicPlace: input.publicPlace,
-          startDate: input.startDate,
-          webcam: input.webcam,
-          freeHours: input.freeHours,
-          perDayPhysical: input.perDayPhysical,
-          perDayWebcam: input.perDayWebcam,
-          perHourPhysical: input.perHourPhysical,
-          perHourWebcam: input.perHourWebcam,
-          travelFee: input.travelFee,
-          travelLimit: input.travelLimit,
-          packs: {
-            createMany: {
-              data:
-                input?.packs?.map((pack) => ({
-                  nbHours: pack.nbHours,
-                  packPrice: pack.packPrice,
-                })) ?? [],
-            },
-          },
-          coachingLevel: {
-            createMany: {
-              data:
-                input?.levels?.map((level) => ({
-                  level,
-                })) ?? [],
-            },
-          },
-        },
-      });
-    }),
-  deleteCoachOffer: protectedProcedure
-    .input(z.cuid())
-    .mutation(({ input }) =>
-      db.query.coachingPrice.delete({ where: { id: input } })
-    ),
+  // createCoachOffer: protectedProcedure
+  //   .input(OfferData.omit({ id: true }))
+  //   .mutation(async ({ input }) => {
+  //     const pricing = await db.query.pricing.findFirst({
+  //       where: {
+  //         users: {
+  //           some: {
+  //             id: input.coachId,
+  //           },
+  //         },
+  //       },
+  //       with: {
+  //         features: true,
+  //       },
+  //     });
+  //     const target = pricing?.features.find(
+  //       (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY"
+  //     )
+  //       ? input.target
+  //       : "INDIVIDUAL";
+  //     return db.query.coachingPrice.create({
+  //       data: {
+  //         name: input.name,
+  //         description: input.description,
+  //         target,
+  //         excludingTaxes: input.excludingTaxes,
+  //         coachId: input.coachId,
+  //         inHouse: input.inHouse,
+  //         physical: input.physical,
+  //         myPlace: input.myPlace,
+  //         publicPlace: input.publicPlace,
+  //         startDate: input.startDate,
+  //         webcam: input.webcam,
+  //         freeHours: input.freeHours,
+  //         perDayPhysical: input.perDayPhysical,
+  //         perDayWebcam: input.perDayWebcam,
+  //         perHourPhysical: input.perHourPhysical,
+  //         perHourWebcam: input.perHourWebcam,
+  //         travelFee: input.travelFee,
+  //         travelLimit: input.travelLimit,
+  //         packs: {
+  //           createMany: {
+  //             data: input.packs.map((pack) => ({
+  //               nbHours: pack.nbHours,
+  //               packPrice: pack.packPrice,
+  //             })),
+  //           },
+  //         },
+  //         coachingLevel: {
+  //           createMany: {
+  //             data: input.levels.map((level) => ({
+  //               level,
+  //             })),
+  //           },
+  //         },
+  //       },
+  //     });
+  //   }),
+  // updateCoachOffer: protectedProcedure
+  //   .input(OfferData.partial())
+  //   .mutation(async ({ input }) => {
+  //     const pricing = await db.query.pricing.findFirst({
+  //       where: {
+  //         users: {
+  //           some: {
+  //             id: input.coachId,
+  //           },
+  //         },
+  //       },
+  //       with: {
+  //         features: true,
+  //       },
+  //     });
+  //     const target = pricing?.features.find(
+  //       (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY"
+  //     )
+  //       ? input.target ?? "INDIVIDUAL"
+  //       : "INDIVIDUAL";
+  //     await db.query.coachingPricePack.deleteMany({
+  //       where: {
+  //         coachingPriceId: input.id,
+  //       },
+  //     });
+  //     await db.query.coachingLevel.deleteMany({
+  //       where: {
+  //         offerId: input.id,
+  //       },
+  //     });
+  //     return db.query.coachingPrice.update({
+  //       where: { id: input.id },
+  //       data: {
+  //         name: input.name,
+  //         description: input.description,
+  //         target,
+  //         excludingTaxes: input.excludingTaxes,
+  //         coachId: input.coachId,
+  //         inHouse: input.inHouse,
+  //         physical: input.physical,
+  //         myPlace: input.myPlace,
+  //         publicPlace: input.publicPlace,
+  //         startDate: input.startDate,
+  //         webcam: input.webcam,
+  //         freeHours: input.freeHours,
+  //         perDayPhysical: input.perDayPhysical,
+  //         perDayWebcam: input.perDayWebcam,
+  //         perHourPhysical: input.perHourPhysical,
+  //         perHourWebcam: input.perHourWebcam,
+  //         travelFee: input.travelFee,
+  //         travelLimit: input.travelLimit,
+  //         packs: {
+  //           createMany: {
+  //             data:
+  //               input?.packs?.map((pack) => ({
+  //                 nbHours: pack.nbHours,
+  //                 packPrice: pack.packPrice,
+  //               })) ?? [],
+  //           },
+  //         },
+  //         coachingLevel: {
+  //           createMany: {
+  //             data:
+  //               input?.levels?.map((level) => ({
+  //                 level,
+  //               })) ?? [],
+  //           },
+  //         },
+  //       },
+  //     });
+  //   }),
+  // deleteCoachOffer: protectedProcedure
+  //   .input(z.cuid())
+  //   .mutation(({ input }) =>
+  //     db.query.coachingPrice.delete({ where: { id: input } })
+  //   ),
   getOfferActivityByName: publicProcedure.input(z.string()).query(({ input }) =>
-    db.query.coachingActivity.findMany({
-      where: { name: { contains: input } },
-      take: 25,
-      distinct: "name",
-    })
+    db
+      .selectDistinctOn([coachingActivity.name])
+      .from(coachingActivity)
+      .where(like(coachingActivity.name, `%${input}%`))
+      .limit(25)
   ),
 });

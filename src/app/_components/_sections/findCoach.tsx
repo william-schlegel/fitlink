@@ -1,3 +1,5 @@
+"use client";
+
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import turfCircle from "@turf/circle";
@@ -11,6 +13,7 @@ import Map, { Layer, Marker, Source, useMap } from "react-map-gl/mapbox";
 import ButtonIcon from "../ui/buttonIcon";
 import { env } from "@/env";
 import hslToHex from "@/lib/hslToHex";
+import Rating from "../ui/rating";
 
 type FindCoachProps = {
   address?: string;
@@ -33,7 +36,7 @@ function FindCoach({
   });
   const [range, setRange] = useState(10);
   const [hoveredId, setHoveredId] = useState("");
-  const coachSearch = trpc.coachs.getCoachsFromDistance.useQuery(
+  const coachSearch = trpc.coach.getCoachsFromDistance.useQuery(
     {
       locationLat: myAddress.lat,
       locationLng: myAddress.lng,
@@ -98,8 +101,8 @@ function FindCoach({
     item: TCoachItem;
     onHover: (id: string) => void;
   }) {
-    const ref = useRef<HTMLTableRowElement | null>(null);
-    const isHovered = useHover(ref);
+    const ref = useRef<HTMLTableRowElement>(null);
+    const isHovered = useHover(ref as React.RefObject<HTMLElement>);
 
     useEffect(() => {
       if (isHovered) onHover(item.id);
@@ -133,7 +136,7 @@ function FindCoach({
               rel="noreferrer"
             >
               <ButtonIcon
-                title={t("page-coach", { name: item.publicName })}
+                title={t("page-coach", { name: item.publicName ?? "" })}
                 iconComponent={<i className="bx bx-link-external bx-xs" />}
                 buttonSize="sm"
                 buttonVariant="Icon-Outlined-Primary"

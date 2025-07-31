@@ -53,6 +53,7 @@ export const clubRelations = relations(club, ({ one, many }) => ({
   subscriptions: many(subscription),
   events: many(event),
   marketPlaceSearchs: many(coachMarketPlace),
+  coachs: many(userCoach),
 }));
 
 export const site = pgTable(
