@@ -1,5 +1,4 @@
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import { RoomReservation } from "@prisma/client";
 import { z } from "zod";
 import {
   createTRPCRouter,
@@ -12,6 +11,7 @@ import { room, site } from "@/db/schema/club";
 import { calculateBBox, calculateDistance } from "@/lib/distance";
 import { user } from "@/db/schema/auth";
 import { pricing, pricingFeature } from "@/db/schema/subscription";
+import { roomReservationEnum } from "@/db/schema/enums";
 
 const SiteObject = z.object({
   id: z.cuid(),
@@ -27,7 +27,7 @@ const RoomObject = z.object({
   id: z.cuid(),
   siteId: z.cuid(),
   name: z.string(),
-  reservation: z.enum(RoomReservation),
+  reservation: z.enum(roomReservationEnum.enumValues),
   capacity: z.number(),
   unavailable: z.boolean(),
   openWithClub: z.boolean().default(true),

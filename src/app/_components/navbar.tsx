@@ -1,16 +1,17 @@
 "use client";
-import type { Feature, Role } from "@prisma/client";
+
 import Link from "next/link";
 import { type TThemes } from "./themeSelector";
 import { env } from "@/env";
 import { useTranslations } from "next-intl";
 import { useUser } from "@/lib/auth/client";
+import { roleEnum, featureEnum } from "@/db/schema/enums";
 
 type MenuDefinitionType = {
   label: string;
   page: string;
-  access: ("VISITOR" | Role)[];
-  featured?: Feature;
+  access: ("VISITOR" | (typeof roleEnum.enumValues)[number])[];
+  featured?: (typeof featureEnum.enumValues)[number];
 };
 
 const BETA = env.NEXT_PUBLIC_BETA === "true";
@@ -221,13 +222,13 @@ export default function Navbar({ theme, onChangeTheme }: NavbarProps) {
                 {/* <UserButton /> */}
               </>
             ) : (
-              <Link href="/sign-in">{tAuth("signin.connect")}</Link>
+              <Link href="/user/signin">{tAuth("signin.connect")}</Link>
             )}
           </>
         ) : (
           <ul className="menu menu-horizontal p-0">
             <li>
-              <Link href="/sign-in">{tAuth("signin.connect")}</Link>{" "}
+              <Link href="/user/signin">{tAuth("signin.connect")}</Link>{" "}
             </li>
           </ul>
         )}

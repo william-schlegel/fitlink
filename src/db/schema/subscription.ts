@@ -18,11 +18,12 @@ import {
 } from "./enums";
 import { activity, activityGroup, club, room, site } from "./club";
 import { userMember } from "./user";
+import { createId } from "@paralleldrive/cuid2";
 
 export const paiement = pgTable(
   "Paiement",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     userId: text("user_id").notNull(),
     subscriptionId: text("subscription_id").notNull(),
     amount: real("amount").notNull(),
@@ -48,7 +49,7 @@ export const paiementRelations = relations(paiement, ({ one }) => ({
 export const subscription = pgTable(
   "Subscription",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     mode: subscriptionModeEnum("mode").default("ALL_INCLUSIVE"),
     restriction: subscriptionRestrictionEnum("restriction").default("CLUB"),
@@ -83,7 +84,7 @@ export const subscriptionRelations = relations(
 );
 
 export const pricing = pgTable("Pricing", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(createId),
   roleTarget: roleEnum("role_target").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -104,7 +105,7 @@ export const pricingRelations = relations(pricing, ({ many }) => ({
 export const pricingOption = pgTable(
   "PricingOption",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     weight: integer("weight").notNull(), // for sorting
     pricingId: text("pricing_id").notNull(),
@@ -120,7 +121,7 @@ export const pricingOptionRelations = relations(pricingOption, ({ one }) => ({
 export const pricingFeature = pgTable(
   "PricingFeature",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     feature: featureEnum("feature").notNull(),
     pricingId: text("pricing_id").notNull(),
   },

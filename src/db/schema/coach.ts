@@ -16,11 +16,12 @@ import {
 } from "./enums";
 import { userCoach, userDocument } from "./user";
 import { activityGroup, club, site } from "./club";
+import { createId } from "@paralleldrive/cuid2";
 
 export const coachingLevel = pgTable(
   "CoachingLevel",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     offerId: text("offer_id").notNull(),
     level: coachingLevelListEnum("level").notNull(),
   },
@@ -37,7 +38,7 @@ export const coachingLevelRelations = relations(coachingLevel, ({ one }) => ({
 export const coachingPrice = pgTable(
   "CoachingPrice",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     target: coachingTargetEnum("target").default("INDIVIDUAL"),
     excludingTaxes: boolean("excluding_taxes").default(false),
@@ -74,7 +75,7 @@ export const coachingPriceRelations = relations(
 export const coachingPricePack = pgTable(
   "CoachingPricePack",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     nbHours: integer("nb_hours").default(1),
     packPrice: real("pack_price").default(0),
     mode: packModeEnum("mode").default("PHYSICAL"),
@@ -96,7 +97,7 @@ export const coachingPricePackRelations = relations(
 );
 
 export const certificationGroup = pgTable("CertificationGroup", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(createId),
   name: text("name").notNull(),
 });
 
@@ -110,7 +111,7 @@ export const certificationGroupRelations = relations(
 export const certificationModule = pgTable(
   "CertificationModule",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     certificationGroupId: text("certification_group_id").notNull(),
   },
@@ -135,7 +136,7 @@ export const certificationModuleRelations = relations(
 export const certification = pgTable(
   "Certification",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     obtainedIn: timestamp("obtained_in").notNull(),
     documentId: text("document_id").unique(),
@@ -164,7 +165,7 @@ export const certificationRelations = relations(
 export const coachMarketPlace = pgTable(
   "CoachMarketPlace",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     type: coachMarketPlaceTypeEnum("type").notNull(),
     clubId: text("club_id"),
     coachId: text("coach_id"),

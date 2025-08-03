@@ -206,6 +206,7 @@
       "email-code": "Code reçu par email",
       "credentials": "Connectez-vous avec votre email et mot de passe (méthode la moins sécurisée, sous votre responsabilité)",
       "local": "email",
+      "magic-link": "Entrez votre email pour recevoir un lien de connexion (magic link)",
       "create-account": "Créer un nouveau compte",
       "user-created": "Utilisateur créé",
       "enter-password": "Entrez votre mot de passe",
@@ -213,6 +214,8 @@
       "forgotten-password": "Mot de passe oublié ?",
       "password-mandatory": "L'email est obligatoire",
       "continue": "Continuer",
+      "continue-with-link": "Continuer avec le lien magique",
+      "check-your-mail": "Vérifiez votre boite mail à l'adresse {{email}} et cliquez sur le lien fourni pour accéder à l'application",
       "close-page": "Vous pouvez fermer cette page",
       "wrong-credentials": "Erreur dans l'email ou le mot de passe"
     }
@@ -763,7 +766,7 @@
       }
     }
   },
-  "page": {
+  "pages": {
     "club": {
       "manage-page": "Gérer ma page",
       "select-club": "Sélectionner le club à présenter",

@@ -7,7 +7,7 @@ import {
   publicProcedure,
 } from "@/lib/trpc/server";
 import { db } from "@/db";
-import { and, asc, eq, gte, like, lte, or } from "drizzle-orm";
+import { and, asc, eq, gte, ilike, lte, or } from "drizzle-orm";
 import { calculateBBox, calculateDistance } from "@/lib/distance";
 import { getDocUrl } from "./files";
 import {
@@ -671,7 +671,7 @@ export const coachRouter = createTRPCRouter({
     db
       .selectDistinctOn([coachingActivity.name])
       .from(coachingActivity)
-      .where(like(coachingActivity.name, `%${input}%`))
+      .where(ilike(coachingActivity.name, `%${input}%`))
       .limit(25)
   ),
 });

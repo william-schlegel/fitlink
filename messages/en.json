@@ -762,7 +762,7 @@
       }
     }
   },
-  "page": {
+  "pages": {
     "club": {
       "manage-page": "Gérer ma page",
       "select-club": "Sélectionner le club à présenter",

@@ -7,11 +7,12 @@ import {
 } from "./enums";
 import { userCoach, userDocument } from "./user";
 import { club, event } from "./club";
+import { createId } from "@paralleldrive/cuid2";
 
 export const pageSectionElement = pgTable(
   "PageSectionElement",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     title: text("title"),
     subTitle: text("sub_title"),
     elementType: pageSectionElementTypeEnum("element_type"),
@@ -39,7 +40,7 @@ export const pageSectionElementRelations = relations(
 export const pageSection = pgTable(
   "PageSection",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     model: pageSectionModelEnum("model").notNull(),
     title: text("title"),
     subTitle: text("sub_title"),
@@ -58,7 +59,7 @@ export const pageSectionRelations = relations(pageSection, ({ one, many }) => ({
 export const page = pgTable(
   "Page",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     target: pageTargetEnum("target").default("HOME"),
     clubId: text("club_id"),

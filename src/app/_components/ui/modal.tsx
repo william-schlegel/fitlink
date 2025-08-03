@@ -1,8 +1,9 @@
-import { type DefaultTFuncReturn } from "i18next";
-import { useTranslation } from "next-i18next";
+"use client";
+
 import { type ReactNode, useRef, useId, useEffect, useCallback } from "react";
 import { type FieldErrors } from "react-hook-form";
 import { type ButtonSize, type TIconButtonVariant } from "./buttonIcon";
+import { useTranslations } from "next-intl";
 
 export type TModalVariant =
   | TIconButtonVariant
@@ -12,12 +13,12 @@ export type TModalVariant =
   | "Outlined-Secondary";
 
 type Props = {
-  title: DefaultTFuncReturn | undefined;
+  title: string | undefined;
   handleSubmit?: () => void;
   handleCancel?: () => void;
   children: ReactNode;
-  submitButtonText?: DefaultTFuncReturn;
-  cancelButtonText?: DefaultTFuncReturn;
+  submitButtonText?: string;
+  cancelButtonText?: string;
   errors?: FieldErrors;
   buttonIcon?: ReactNode;
   onOpenModal?: () => void;
@@ -46,7 +47,7 @@ export default function Modal({
 }: Props) {
   const closeRef = useRef<HTMLInputElement>(null);
   const modalId = useId();
-  const { t } = useTranslation("common");
+  const t = useTranslations("common");
 
   const close = useCallback(() => {
     if (!closeRef.current) return;

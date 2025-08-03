@@ -33,6 +33,12 @@ export const Themes = [
   "night",
   "coffee",
   "winter",
+  "dim",
+  "nord",
+  "sunset",
+  "caramellatte",
+  "abyss",
+  "silk",
 ] as const;
 export type TThemes = (typeof Themes)[number];
 
@@ -45,6 +51,11 @@ const ThemeSelector = ({ onSelect, onSave }: Props) => {
   const [theme, setTheme] = useLocalStorage<TThemes>("pageTheme", "cupcake");
   const t = useTranslations("pages");
 
+  function handleChangeTheme(theme: TThemes) {
+    setTheme(theme);
+    onSelect(theme);
+  }
+
   useEffect(() => {
     onSelect(theme);
   }, [theme, onSelect]);
@@ -53,7 +64,7 @@ const ThemeSelector = ({ onSelect, onSave }: Props) => {
     <div className="flex items-center gap-2">
       <select
         value={theme}
-        onChange={(e) => setTheme(e.target.value as TThemes)}
+        onChange={(e) => handleChangeTheme(e.target.value as TThemes)}
         className="w-fit"
       >
         {Themes.map((theme) => (

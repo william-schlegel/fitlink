@@ -15,6 +15,7 @@ import { certification, coachingPrice, coachMarketPlace } from "./coach";
 import { page, pageSectionElement } from "./page";
 import { planning, planningActivity } from "./planning";
 import { subscription } from "./subscription";
+import { createId } from "@paralleldrive/cuid2";
 
 export const userCoach = pgTable(
   "UserCoach",
@@ -55,7 +56,7 @@ export const userCoachRelations = relations(userCoach, ({ one, many }) => ({
 }));
 
 export const userMember = pgTable("UserMember", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(createId),
   userId: text("user_id").notNull().unique(),
   inscriptionFeeOffered: boolean("inscription_fee_offered").default(false),
   cancelationFeeOffered: boolean("cancelation_fee_offered").default(false),
@@ -71,7 +72,7 @@ export const userMemberRelations = relations(userMember, ({ one, many }) => ({
 }));
 
 export const userManager = pgTable("UserManager", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(createId),
   userId: text("user_id").notNull().unique(),
 });
 
@@ -86,7 +87,7 @@ export const userManagerRelations = relations(userManager, ({ one, many }) => ({
 export const userDocument = pgTable(
   "UserDocument",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     userId: text("user_id").notNull(),
     documentType: userDocumentTypeEnum("document_type").default("DOCUMENT"),
     fileType: text("file_type").notNull(),
@@ -112,7 +113,7 @@ export const userDocumentRelations = relations(
 export const userNotification = pgTable(
   "UserNotification",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     type: notificationTypeEnum("type").notNull(),
     userToId: text("user_to_id").notNull(),
     userFromId: text("user_from_id").notNull(),

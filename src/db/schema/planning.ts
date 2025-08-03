@@ -11,21 +11,22 @@ import { user } from "./auth";
 import { dayNameEnum } from "./enums";
 import { activity, club, room, site } from "./club";
 import { userCoach } from "./user";
+import { createId } from "@paralleldrive/cuid2";
 
 export const openingCalendar = pgTable("OpeningCalendar", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(createId),
   startDate: timestamp("start_date").notNull().defaultNow(),
 });
 
 export const dayOpeningTime = pgTable("DayOpeningTime", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(createId),
   name: dayNameEnum("name").notNull(),
   wholeDay: boolean("whole_day").default(false),
   closed: boolean("closed").default(false),
 });
 
 export const openingTime = pgTable("OpeningTime", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(createId),
   opening: text("opening").notNull(), // format HH:MM
   closing: text("closing").notNull(), // format HH:MM
 });
@@ -33,7 +34,7 @@ export const openingTime = pgTable("OpeningTime", {
 export const planning = pgTable(
   "Planning",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name"),
     clubId: text("club_id").notNull(),
     siteId: text("site_id"),
@@ -73,7 +74,7 @@ export const planningRelations = relations(planning, ({ one, many }) => ({
 export const planningActivity = pgTable(
   "PlanningActivity",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     planningId: text("planning_id").notNull(),
     activityId: text("activity_id").notNull(),
     siteId: text("site_id").notNull(),
@@ -121,7 +122,7 @@ export const planningActivityRelations = relations(
 export const reservation = pgTable(
   "Reservation",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     planningActivityId: text("planning_activity_id"),
     activityId: text("activity_id"),
     activitySlot: integer("activity_slot"),

@@ -19,11 +19,12 @@ import { page } from "./page";
 import { subscription } from "./subscription";
 import { certification, certificationModule, coachMarketPlace } from "./coach";
 import { roomReservationEnum } from "./enums";
+import { createId } from "@paralleldrive/cuid2";
 
 export const club = pgTable(
   "Club",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     address: text("address").notNull(),
     managerId: text("manager_id").notNull(),
@@ -59,7 +60,7 @@ export const clubRelations = relations(club, ({ one, many }) => ({
 export const site = pgTable(
   "Site",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     address: text("address").notNull(),
     searchAddress: text("search_address"),
@@ -87,7 +88,7 @@ export const siteRelations = relations(site, ({ one, many }) => ({
 export const room = pgTable(
   "Room",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     reservation: roomReservationEnum("reservation").default("NONE"),
     capacity: integer("capacity").notNull(),
@@ -115,7 +116,7 @@ export const roomRelations = relations(room, ({ one, many }) => ({
 export const event = pgTable(
   "Event",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     clubId: text("club_id").notNull(),
     name: text("name").notNull(),
     brief: text("brief").notNull(),
@@ -159,7 +160,7 @@ export const eventRelations = relations(event, ({ one }) => ({
 export const activityGroup = pgTable(
   "ActivityGroup",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     default: boolean("default").default(false),
     coachId: text("coach_id"),
@@ -185,7 +186,7 @@ export const activityGroupRelations = relations(
 export const activity = pgTable(
   "Activity",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     groupId: text("group_id").notNull(),
     clubId: text("club_id").notNull(),
@@ -215,7 +216,7 @@ export const activityRelations = relations(activity, ({ one, many }) => ({
 export const coachingActivity = pgTable(
   "CoachingActivity",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     coachId: text("coach_id").notNull(),
   },

@@ -1,4 +1,3 @@
-import { type UserDocument, UserDocumentType } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
@@ -17,6 +16,7 @@ import {
 import { db } from "@/db";
 import { userDocument } from "@/db/schema/user";
 import { and, eq } from "drizzle-orm";
+import { userDocumentTypeEnum } from "@/db/schema/enums";
 
 const s3 = new S3Client({
   region: "eu-west-3",
@@ -56,10 +56,6 @@ export async function getDocUrl(userId: string, documentId: string) {
   );
 }
 
-interface DocMetadata extends UserDocument {
-  url: string;
-}
-
 export const fileRouter = createTRPCRouter({
   createPresignedUrl: protectedProcedure
     .input(
@@ -71,7 +67,7 @@ export const fileRouter = createTRPCRouter({
           .default(1024 * 1024),
         fileType: z.string(),
         fileName: z.string(),
-        documentType: z.enum(UserDocumentType),
+        documentType: z.enum(userDocumentTypeEnum.enumValues),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -85,7 +81,6 @@ export const fileRouter = createTRPCRouter({
       const document = await db
         .insert(userDocument)
         .values({
-          id: crypto.randomUUID(),
           userId,
           documentType: input.documentType,
           fileType: input.fileType,
@@ -146,7 +141,7 @@ export const fileRouter = createTRPCRouter({
     .input(
       z.object({
         userId: z.cuid(),
-        documentType: z.nativeEnum(UserDocumentType).optional(),
+        documentType: z.enum(userDocumentTypeEnum.enumValues).optional(),
       })
     )
     .query(async ({ ctx, input }) => {

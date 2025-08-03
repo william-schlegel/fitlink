@@ -16,6 +16,13 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: z.string(),
     AWS_ACCESS_KEY_ID_WSC: z.string(),
     AWS_SECRET_ACCESS_KEY_WSC: z.string(),
+    // SMTP Email Configuration
+    SMTP_HOST: z.string(),
+    SMTP_PORT: z.string().transform((val) => parseInt(val, 10)),
+    SMTP_USER: z.string(),
+    SMTP_PASS: z.string(),
+    SMTP_FROM_EMAIL: z.email(),
+    SMTP_FROM_NAME: z.string(),
   },
 
   /**
@@ -49,6 +56,14 @@ export const env = createEnv({
     NEXT_PUBLIC_BETA: process.env.NEXT_PUBLIC_BETA,
     NEXT_PUBLIC_MAPBOX_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
     NEXT_PUBLIC_MAPQUEST_KEY: process.env.NEXT_PUBLIC_MAPQUEST_KEY,
+
+    // SMTP Email Configuration
+    SMTP_HOST: process.env.SMTP_HOST,
+    SMTP_PORT: process.env.SMTP_PORT,
+    SMTP_USER: process.env.SMTP_USER,
+    SMTP_PASS: process.env.SMTP_PASS,
+    SMTP_FROM_EMAIL: process.env.SMTP_FROM_EMAIL,
+    SMTP_FROM_NAME: process.env.SMTP_FROM_NAME,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

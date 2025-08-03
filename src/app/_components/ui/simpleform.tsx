@@ -1,3 +1,5 @@
+"use client";
+
 import type {
   UseFormRegister,
   FieldErrors,
@@ -11,17 +13,16 @@ import {
   type HTMLInputTypeAttribute,
 } from "react";
 import Spinner from "./spinner";
-import { useTranslation } from "next-i18next";
-import { type DefaultTFuncReturn } from "i18next";
+import { useTranslations } from "next-intl";
 
 type SimpleFormField<T> = {
-  label?: DefaultTFuncReturn;
+  label?: string;
   name: keyof T;
-  required?: boolean | DefaultTFuncReturn;
+  required?: boolean | string;
   component?: ReactNode;
   type?: HTMLInputTypeAttribute;
   disabled?: boolean;
-  unit?: DefaultTFuncReturn;
+  unit?: string;
   rows?: number;
 };
 
@@ -44,7 +45,7 @@ export default function SimpleForm<T extends FieldValues>({
   children,
   className = "",
   isLoading = false,
-}: SimpleFormProps<T>): JSX.Element {
+}: SimpleFormProps<T>): ReactNode {
   return (
     <form
       className={`grid grid-cols-[auto_1fr] gap-2 ${className ?? ""}`}
@@ -142,7 +143,7 @@ export default function SimpleForm<T extends FieldValues>({
 type TextErrorProps = { err: string | undefined };
 
 export function TextError({ err }: TextErrorProps) {
-  const { t } = useTranslation("common");
+  const t = useTranslations("common");
   if (!err) return null;
   const msg = err || t("required") || "Error";
 
