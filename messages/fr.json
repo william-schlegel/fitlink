@@ -197,6 +197,7 @@
       "cancel": "Annuler"
     },
     "signin": {
+      "name": "Nom",
       "connect": "Se connecter",
       "connect-with-account": "Se connecter avec mon compte",
       "or": "Ou",

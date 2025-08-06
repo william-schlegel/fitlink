@@ -51,7 +51,7 @@ export default function FormEmail() {
         />
         <div className="col-span-full flex flex-col gap-4">
           <p>{t("signin.credentials")}</p>
-          <button type="submit" className="btn-outline btn w-full">
+          <button type="submit" className="btn btn-outline w-full">
             {t("signin.connect-with-account")} {t("signin.local")}
           </button>
         </div>

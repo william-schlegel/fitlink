@@ -2,7 +2,6 @@
 
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import turfCircle from "@turf/circle";
 import Link from "next/link";
 import { type TThemes } from "../themeSelector";
 import { useTranslations } from "next-intl";
@@ -14,6 +13,7 @@ import ButtonIcon from "../ui/buttonIcon";
 import { env } from "@/env";
 import hslToHex from "@/lib/hslToHex";
 import Rating from "../ui/rating";
+import generateCircle from "./utils";
 
 type FindCoachProps = {
   address?: string;
@@ -74,13 +74,7 @@ function FindCoach({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
   const circle = useMemo(() => {
-    const center = [myAddress.lng ?? LONGITUDE, myAddress.lat ?? LATITUDE];
-    const c = turfCircle(center, range ?? 10, {
-      steps: 64,
-      units: "kilometers",
-      properties: {},
-    });
-    return c;
+    return generateCircle(myAddress.lat, myAddress.lng, range);
   }, [myAddress.lat, myAddress.lng, range]);
   const [selectedCoachs, setSelectedCoachs] = useState(new Set<string>());
 

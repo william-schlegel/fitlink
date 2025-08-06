@@ -1,7 +1,7 @@
 "use client";
 
-import Modal from "@/app/_components/ui/modal";
-import SimpleForm from "@/app/_components/ui/simpleform";
+import Modal from "@/components/ui/modal";
+import SimpleForm from "@/components/ui/simpleform";
 import { toast } from "@/lib/toast";
 import { trpc } from "@/lib/trpc/client";
 import { useTranslations } from "next-intl";
@@ -52,16 +52,16 @@ export default function CreateAccount() {
         errors={errors}
         register={register}
         fields={[
-          { name: "name", label: t("profile.name"), required: true },
+          { name: "name", label: t("signin.name"), required: true },
           {
             name: "email",
-            label: t("profile.my-email"),
+            label: t("signin.my-email"),
             type: "email",
             required: true,
           },
           {
             name: "password",
-            label: t("profile.password"),
+            label: t("signin.password"),
             type: "password",
             required: true,
           },

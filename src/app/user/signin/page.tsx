@@ -51,7 +51,9 @@ export default async function SignIn({
               {t("signin.wrong-credentials")}
             </div>
           ) : null}
-          <Providers providers={providers} />
+          <Providers
+            providers={providers.map((p) => ({ id: p.id, name: p.name }))}
+          />
           <div className="divider">{t("signin.or")}</div>
           <FormEmail />
 

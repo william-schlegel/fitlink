@@ -2,7 +2,6 @@
 
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import turfCircle from "@turf/circle";
 import Link from "next/link";
 import { type TThemes } from "../themeSelector";
 import { useTranslations } from "next-intl";
@@ -13,6 +12,7 @@ import Map, { Layer, Marker, Source, useMap } from "react-map-gl/mapbox";
 import ButtonIcon from "../ui/buttonIcon";
 import { env } from "@/env";
 import hslToHex from "@/lib/hslToHex";
+import generateCircle from "./utils";
 
 type FindClubProps = {
   address?: string;
@@ -67,14 +67,9 @@ function FindClub({ address = "" }: FindClubProps) {
     const set = new Set(grps);
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }
+
   const circle = useMemo(() => {
-    const center = [myAddress.lng ?? LONGITUDE, myAddress.lat ?? LATITUDE];
-    const c = turfCircle(center, range ?? 10, {
-      steps: 64,
-      units: "kilometers",
-      properties: {},
-    });
-    return c;
+    return generateCircle(myAddress.lat, myAddress.lng, range);
   }, [myAddress.lat, myAddress.lng, range]);
 
   function ClubRow({

@@ -6,6 +6,7 @@ import { env } from "@/env";
 import { useTranslations } from "next-intl";
 import { useUser } from "@/lib/auth/client";
 import { roleEnum, featureEnum } from "@/db/schema/enums";
+import { useLocalStorage } from "usehooks-ts";
 
 type MenuDefinitionType = {
   label: string;
@@ -90,16 +91,18 @@ const MENUS: MenuDefinitionType[] = [
   },
 ];
 
-type NavbarProps = Readonly<{
-  theme: TThemes;
-  onChangeTheme: (newTheme: TThemes) => void;
-}>;
-
-export default function Navbar({ theme, onChangeTheme }: NavbarProps) {
+export default function Navbar() {
   const { data: user } = useUser();
   const userId = user?.id;
   const t = useTranslations("common");
   const tAuth = useTranslations("auth");
+  const [theme, setTheme] = useLocalStorage<TThemes>("theme", "cupcake");
+
+  const onChangeTheme = (newTheme: TThemes) => {
+    setTheme(newTheme);
+    const html = document.querySelector("html");
+    html?.setAttribute("data-theme", newTheme);
+  };
 
   // const { notifications, unread, formatMessage } = useNotifications(userId);
   // const user = trpc.users.getUserById.useQuery(userId ?? "", {

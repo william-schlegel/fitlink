@@ -2,9 +2,9 @@ import { getActualUser } from "@/lib/auth/server";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { redirect, RedirectType } from "next/navigation";
-import ButtonLink from "./_components/ui/buttonLink";
-import FindClub from "./_components/_sections/findClub";
-import FindCoach from "./_components/_sections/findCoach";
+import ButtonLink from "../components/ui/buttonLink";
+import FindClub from "../components/sections/findClub";
+import FindCoach from "../components/sections/findCoach";
 
 export default async function HomePage() {
   const user = await getActualUser();
