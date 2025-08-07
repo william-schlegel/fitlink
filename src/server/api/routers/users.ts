@@ -11,7 +11,9 @@ import { user } from "@/db/schema/auth";
 import { getDocUrl } from "./files";
 import { reservation } from "@/db/schema/planning";
 import { TRPCError } from "@trpc/server";
-import { userCoach } from "@/db/schema/user";
+import { userCoach, userManager, userMember } from "@/db/schema/user";
+import { club, coachingActivity } from "@/db/schema/club";
+import { subscription } from "@/db/schema/subscription";
 
 const UserFilter = z
   .object({
@@ -23,46 +25,81 @@ const UserFilter = z
   })
   .partial();
 
-type Filter = {
-  name?: object;
-  email?: object;
-  role?: (typeof roleEnum.enumValues)[number];
-  dueDate?: object;
-};
-export const userRouter = createTRPCRouter({
-  getUserById: publicProcedure.input(z.cuid()).query(async ({ ctx, input }) => {
-    const u = await db.query.user.findFirst({
-      where: eq(user.id, input),
+export async function getUserById(id: string) {
+  const u = await db.query.user.findFirst({
+    where: eq(user.id, id),
+    with: {
+      pricing: {
+        with: {
+          features: true,
+        },
+      },
+      paiements: true,
+      accounts: true,
+    },
+  });
+  let coachData:
+    | (typeof userCoach.$inferSelect & {
+        coachingActivities?: (typeof coachingActivity.$inferSelect)[];
+      })
+    | null
+    | undefined = null;
+  if (u?.role === "COACH" || u?.role === "MANAGER_COACH") {
+    coachData = await db.query.userCoach.findFirst({
+      where: eq(userCoach.userId, id),
       with: {
-        coachData: {
-          with: {
-            coachingActivities: true,
-          },
-        },
-        pricing: {
-          with: {
-            features: true,
-          },
-        },
-        paiements: true,
-        accounts: true,
+        coachingActivities: true,
       },
     });
-    // TODO: add chat token
-    // if (u?.id && !u?.chatToken) {
-    //   const token = createToken(user.id);
-    //   user.chatToken = token;
-    //   await ctx.prisma.user.update({
-    //     where: { id: input },
-    //     data: { chatToken: token },
-    //   });
-    // }
-    let profileImageUrl = u?.image ?? "/images/dummy.jpg";
-    if (u?.profileImageId) {
-      profileImageUrl = await getDocUrl(u.id, u.profileImageId);
-    }
-    return { ...u, profileImageUrl };
-  }),
+  }
+  let memberData:
+    | (typeof userMember.$inferSelect & {
+        subscriptions?: (typeof subscription.$inferSelect)[];
+      })
+    | null
+    | undefined = null;
+  if (u?.role === "MEMBER") {
+    memberData = await db.query.userMember.findFirst({
+      where: eq(userMember.userId, id),
+      with: {
+        subscriptions: true,
+      },
+    });
+  }
+  let managerData:
+    | (typeof userManager.$inferSelect & {
+        managedClubs?: (typeof club.$inferSelect)[];
+      })
+    | null
+    | undefined = null;
+  if (u?.role === "MANAGER" || u?.role === "MANAGER_COACH") {
+    managerData = await db.query.userManager.findFirst({
+      where: eq(userManager.userId, id),
+      with: {
+        managedClubs: true,
+      },
+    });
+  }
+  // TODO: add chat token
+  // if (u?.id && !u?.chatToken) {
+  //   const token = createToken(user.id);
+  //   user.chatToken = token;
+  //   await ctx.prisma.user.update({
+  //     where: { id: input },
+  //     data: { chatToken: token },
+  //   });
+  // }
+  let profileImageUrl = u?.image ?? "/images/dummy.jpg";
+  if (u?.profileImageId) {
+    profileImageUrl = await getDocUrl(u.id, u.profileImageId);
+  }
+  return { ...u, coachData, memberData, managerData, profileImageUrl };
+}
+
+export const userRouter = createTRPCRouter({
+  getUserById: publicProcedure
+    .input(z.cuid())
+    .query(async ({ input }) => getUserById(input)),
   getUserSubscriptionsById: protectedProcedure
     .input(z.cuid())
     .query(({ input }) => {

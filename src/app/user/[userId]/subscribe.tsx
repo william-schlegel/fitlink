@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { useRouter } from "next/router";
 import type { GetServerSidePropsContext } from "next";
 import { useTranslation } from "next-i18next";
@@ -9,7 +8,7 @@ import Layout from "@root/src/components/layout";
 import { isCUID } from "@lib/checkValidity";
 import { trpc } from "@trpcclient/trpc";
 import { useDisplaySubscriptionInfo } from "../../manager/[userId]/[clubId]/subscription";
-import { List } from "../../member/[userId]";
+import { List } from "../../member/[userId]/page";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { formatDateLocalized } from "@lib/formatDate";

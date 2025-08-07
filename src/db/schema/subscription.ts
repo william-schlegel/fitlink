@@ -17,7 +17,7 @@ import {
   subscriptionRestrictionEnum,
 } from "./enums";
 import { activity, activityGroup, club, room, site } from "./club";
-import { userMember } from "./user";
+import { userMember, userMemberToSubscription } from "./user";
 import { createId } from "@paralleldrive/cuid2";
 
 export const paiement = pgTable(
@@ -77,7 +77,7 @@ export const subscriptionRelations = relations(
     paiements: many(paiement),
     activitieGroups: many(activityGroup),
     activities: many(activity),
-    users: many(userMember),
+    users: many(userMemberToSubscription),
     sites: many(site),
     rooms: many(room),
   })
