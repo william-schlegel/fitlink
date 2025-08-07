@@ -3,6 +3,7 @@ import { getUserById } from "@/server/api/routers/users";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect, RedirectType } from "next/navigation";
+import Subscription from "./subscription";
 
 /***
  *
@@ -53,8 +54,7 @@ export default async function MemberDashboard({
       </h2>
       <section className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(20rem,30rem))] justify-center gap-4">
         {queryUser?.memberData?.subscriptions?.map((sub) => (
-          <div key={sub.id}>{sub.name}</div>
-          // <Subscription key={sub.id} subscription={sub} />
+          <Subscription key={sub.subscriptionId} subscription={sub} />
         ))}
       </section>
       <section className="grid auto-rows-auto gap-2 lg:grid-cols-2">
@@ -569,65 +569,6 @@ export default async function MemberDashboard({
 //           {slot.slot}
 //         </span>
 //       ))}
-//     </div>
-//   );
-// }
-
-// type SubscriptionProps = {
-//   subscription: Subscription & {
-//     sites: Site[];
-//     activities: Activity[];
-//     rooms: Room[];
-//     activitieGroups: ActivityGroup[];
-//     club: Club;
-//   };
-// };
-
-// function Subscription({ subscription }: SubscriptionProps) {
-//   const { shortInfo, sites, rooms, activityGroups, activities } =
-//     useDisplaySubscriptionInfo(
-//       subscription.mode,
-//       subscription.restriction,
-//       subscription.activitieGroups.map((ag) => ag.id),
-//       subscription.activities.map((ag) => ag.id),
-//       subscription.sites.map((ag) => ag.id),
-//       subscription.rooms.map((ag) => ag.id)
-//     );
-//   return (
-//     <div className="card w-full bg-base-100 shadow-xl">
-//       <div className="card-body">
-//         <div className="flex items-center justify-between">
-//           <h3 className="card-title text-primary">{subscription.name}</h3>
-//           <span className="badge-primary badge">{subscription.club.name}</span>
-//         </div>
-//         {shortInfo ? <p>{shortInfo}</p> : ""}
-//         <div className="flex gap-2">
-//           <List label="sites" items={sites} />
-//           <List label="rooms" items={rooms} />
-//           <List label="activity-groups" items={activityGroups} />
-//           <List label="activities" items={activities} />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// type ListProps = {
-//   label: string;
-//   items: string[];
-// };
-
-// export function List({ label, items }: ListProps) {
-//   const { t } = useTranslation("dashboard");
-//   if (!items.length) return null;
-//   return (
-//     <div className="flex flex-1 flex-col">
-//       <h4>{t(label, { count: items.length })}</h4>
-//       <ul>
-//         {items.map((item, idx) => (
-//           <li key={`ITEM-${idx}`}>{item}</li>
-//         ))}
-//       </ul>
 //     </div>
 //   );
 // }

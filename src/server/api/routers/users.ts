@@ -11,9 +11,13 @@ import { user } from "@/db/schema/auth";
 import { getDocUrl } from "./files";
 import { reservation } from "@/db/schema/planning";
 import { TRPCError } from "@trpc/server";
-import { userCoach, userManager, userMember } from "@/db/schema/user";
+import {
+  userCoach,
+  userManager,
+  userMember,
+  userMemberToSubscription,
+} from "@/db/schema/user";
 import { club, coachingActivity } from "@/db/schema/club";
-import { subscription } from "@/db/schema/subscription";
 
 const UserFilter = z
   .object({
@@ -42,8 +46,7 @@ export async function getUserById(id: string) {
     | (typeof userCoach.$inferSelect & {
         coachingActivities?: (typeof coachingActivity.$inferSelect)[];
       })
-    | null
-    | undefined = null;
+    | undefined = undefined;
   if (u?.role === "COACH" || u?.role === "MANAGER_COACH") {
     coachData = await db.query.userCoach.findFirst({
       where: eq(userCoach.userId, id),
@@ -54,10 +57,9 @@ export async function getUserById(id: string) {
   }
   let memberData:
     | (typeof userMember.$inferSelect & {
-        subscriptions?: (typeof subscription.$inferSelect)[];
+        subscriptions?: (typeof userMemberToSubscription.$inferSelect)[];
       })
-    | null
-    | undefined = null;
+    | undefined = undefined;
   if (u?.role === "MEMBER") {
     memberData = await db.query.userMember.findFirst({
       where: eq(userMember.userId, id),
@@ -70,8 +72,7 @@ export async function getUserById(id: string) {
     | (typeof userManager.$inferSelect & {
         managedClubs?: (typeof club.$inferSelect)[];
       })
-    | null
-    | undefined = null;
+    | undefined = undefined;
   if (u?.role === "MANAGER" || u?.role === "MANAGER_COACH") {
     managerData = await db.query.userManager.findFirst({
       where: eq(userManager.userId, id),
@@ -93,7 +94,13 @@ export async function getUserById(id: string) {
   if (u?.profileImageId) {
     profileImageUrl = await getDocUrl(u.id, u.profileImageId);
   }
-  return { ...u, coachData, memberData, managerData, profileImageUrl };
+  return {
+    ...u,
+    coachData: coachData ?? { coachingActivities: [] },
+    memberData: memberData ?? { subscriptions: [] },
+    managerData: managerData ?? { managedClubs: [] },
+    profileImageUrl,
+  };
 }
 
 export const userRouter = createTRPCRouter({
