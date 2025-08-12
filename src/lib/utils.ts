@@ -1,7 +1,6 @@
-import { z } from "zod";
+import { isCuid } from "@paralleldrive/cuid2";
 
 export function isCUID(value: unknown) {
-  const schema = z.cuid();
-  const check = schema.safeParse(value);
-  return check.success;
+  if (typeof value !== "string") return false;
+  return isCuid(value);
 }

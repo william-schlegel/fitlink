@@ -20,7 +20,7 @@ import { createId } from "@paralleldrive/cuid2";
 export const userCoach = pgTable(
   "UserCoach",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(createId),
     userId: text("user_id").notNull().unique(),
     publicName: text("public_name"),
     description: text("description"),

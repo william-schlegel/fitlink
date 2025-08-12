@@ -16,7 +16,13 @@ import {
   reservation,
 } from "./planning";
 import { page } from "./page";
-import { subscription } from "./subscription";
+import {
+  subscription,
+  subscriptionToActivity,
+  subscriptionToActivityGroup,
+  subscriptionToRoom,
+  subscriptionToSite,
+} from "./subscription";
 import { certification, certificationModule, coachMarketPlace } from "./coach";
 import { roomReservationEnum } from "./enums";
 import { createId } from "@paralleldrive/cuid2";
@@ -81,7 +87,7 @@ export const siteRelations = relations(site, ({ one, many }) => ({
   calendars: many(openingCalendar),
   plannings: many(planning),
   planningActivities: many(planningActivity),
-  subscriptions: many(subscription),
+  subscriptions: many(subscriptionToSite),
   marketPlaceSearchs: many(coachMarketPlace),
 }));
 
@@ -108,7 +114,7 @@ export const roomRelations = relations(room, ({ one, many }) => ({
   calendars: many(openingCalendar),
   plannings: many(planning),
   planningActivities: many(planningActivity),
-  subscriptions: many(subscription),
+  subscriptions: many(subscriptionToRoom),
   reservations: many(reservation),
   activities: many(activity),
 }));
@@ -178,7 +184,7 @@ export const activityGroupRelations = relations(
     }),
     certifications: many(certification),
     certificationModules: many(certificationModule),
-    subscriptions: many(subscription),
+    subscriptions: many(subscriptionToActivityGroup),
     marketPlaceSearchs: many(coachMarketPlace),
   })
 );
@@ -210,7 +216,7 @@ export const activityRelations = relations(activity, ({ one, many }) => ({
   }),
   rooms: many(room),
   planningActivities: many(planningActivity),
-  subscriptions: many(subscription),
+  subscriptions: many(subscriptionToActivity),
   reservations: many(reservation),
 }));
 export const coachingActivity = pgTable(

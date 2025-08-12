@@ -1,6 +1,6 @@
 import { createTRPCRouter } from "@/lib/trpc/server";
 import { userRouter } from "./routers/users";
-import { healthRouter } from "./routers/health";
+import { healthRouter } from "../../../health";
 import { siteRouter } from "./routers/sites";
 import { coachRouter } from "./routers/coachs";
 

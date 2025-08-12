@@ -17,7 +17,7 @@ import {
   subscriptionRestrictionEnum,
 } from "./enums";
 import { activity, activityGroup, club, room, site } from "./club";
-import { userMember, userMemberToSubscription } from "./user";
+import { userMemberToSubscription } from "./user";
 import { createId } from "@paralleldrive/cuid2";
 
 export const paiement = pgTable(
@@ -75,11 +75,11 @@ export const subscriptionRelations = relations(
       references: [club.id],
     }),
     paiements: many(paiement),
-    activitieGroups: many(activityGroup),
-    activities: many(activity),
+    activitieGroups: many(subscriptionToActivityGroup),
+    activities: many(subscriptionToActivity),
     users: many(userMemberToSubscription),
-    sites: many(site),
-    rooms: many(room),
+    sites: many(subscriptionToSite),
+    rooms: many(subscriptionToRoom),
   })
 );
 
@@ -135,30 +135,124 @@ export const pricingFeatureRelations = relations(pricingFeature, ({ one }) => ({
   }),
 }));
 
-export const subscriptionActivityGroups = pgTable(
-  "subscription_activity_groups",
+export const subscriptionToActivityGroup = pgTable(
+  "subscription_to_activity_group",
   {
-    subscriptionId: text("subscription_id").notNull(),
-    activityGroupId: text("activity_group_id").notNull(),
-  }
+    subscriptionId: text("subscription_id")
+      .notNull()
+      .references(() => subscription.id),
+    activityGroupId: text("activity_group_id")
+      .notNull()
+      .references(() => activityGroup.id),
+  },
+  (table) => [
+    index("subscription_to_activity_group_idx").on(
+      table.subscriptionId,
+      table.activityGroupId
+    ),
+  ]
 );
 
-export const subscriptionActivities = pgTable("subscription_activities", {
-  subscriptionId: text("subscription_id").notNull(),
-  activityId: text("activity_id").notNull(),
-});
+export const subscriptionToActivityGroupRelations = relations(
+  subscriptionToActivityGroup,
+  ({ one }) => ({
+    subscription: one(subscription, {
+      fields: [subscriptionToActivityGroup.subscriptionId],
+      references: [subscription.id],
+    }),
+    activityGroup: one(activityGroup, {
+      fields: [subscriptionToActivityGroup.activityGroupId],
+      references: [activityGroup.id],
+    }),
+  })
+);
 
-export const subscriptionUsers = pgTable("subscription_users", {
-  subscriptionId: text("subscription_id").notNull(),
-  userMemberId: text("user_member_id").notNull(),
-});
+export const subscriptionToActivity = pgTable(
+  "subscription_to_activity",
+  {
+    subscriptionId: text("subscription_id")
+      .notNull()
+      .references(() => subscription.id),
+    activityId: text("activity_id")
+      .notNull()
+      .references(() => activity.id),
+  },
+  (table) => [
+    index("subscription_to_activity_idx").on(
+      table.subscriptionId,
+      table.activityId
+    ),
+  ]
+);
 
-export const subscriptionSites = pgTable("subscription_sites", {
-  subscriptionId: text("subscription_id").notNull(),
-  siteId: text("site_id").notNull(),
-});
+export const subscriptionToActivityRelations = relations(
+  subscriptionToActivity,
+  ({ one }) => ({
+    subscription: one(subscription, {
+      fields: [subscriptionToActivity.subscriptionId],
+      references: [subscription.id],
+    }),
+    activity: one(activity, {
+      fields: [subscriptionToActivity.activityId],
+      references: [activity.id],
+    }),
+  })
+);
 
-export const subscriptionRooms = pgTable("subscription_rooms", {
-  subscriptionId: text("subscription_id").notNull(),
-  roomId: text("room_id").notNull(),
-});
+export const subscriptionToSite = pgTable(
+  "subscription_to_site",
+  {
+    subscriptionId: text("subscription_id")
+      .notNull()
+      .references(() => subscription.id),
+    siteId: text("site_id")
+      .notNull()
+      .references(() => site.id),
+  },
+  (table) => [
+    index("subscription_to_site_idx").on(table.subscriptionId, table.siteId),
+  ]
+);
+
+export const subscriptionToSiteRelations = relations(
+  subscriptionToSite,
+  ({ one }) => ({
+    subscription: one(subscription, {
+      fields: [subscriptionToSite.subscriptionId],
+      references: [subscription.id],
+    }),
+    site: one(site, {
+      fields: [subscriptionToSite.siteId],
+      references: [site.id],
+    }),
+  })
+);
+
+export const subscriptionToRoom = pgTable(
+  "subscription_to_room",
+  {
+    subscriptionId: text("subscription_id")
+      .notNull()
+      .references(() => subscription.id),
+    roomId: text("room_id")
+      .notNull()
+      .references(() => room.id),
+  },
+  (table) => [
+    index("subscription_to_room_idx").on(table.subscriptionId, table.roomId),
+  ]
+);
+
+export const subscriptionToRoomRelations = relations(
+  subscriptionToRoom,
+  ({ one }) => ({
+    subscription: one(subscription, {
+      fields: [subscriptionToRoom.subscriptionId],
+      references: [subscription.id],
+    }),
+    room: one(room, {
+      fields: [subscriptionToRoom.roomId],
+      references: [room.id],
+    }),
+  })
+);

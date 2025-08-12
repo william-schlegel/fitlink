@@ -22,18 +22,18 @@ import { userCoach } from "@/db/schema/user";
 import { club, coachingActivity } from "@/db/schema/club";
 
 const CertificationData = z.object({
-  id: z.cuid(),
+  id: z.cuid2(),
   name: z.string(),
   obtainedIn: z.date(),
-  documentId: z.cuid().optional(),
-  userId: z.cuid(),
-  modules: z.array(z.cuid()),
-  activityGroups: z.array(z.cuid()),
+  documentId: z.cuid2().optional(),
+  userId: z.cuid2(),
+  modules: z.array(z.cuid2()),
+  activityGroups: z.array(z.cuid2()),
 });
 
 const OfferData = z.object({
-  coachId: z.cuid(),
-  id: z.cuid(),
+  coachId: z.cuid2(),
+  id: z.cuid2(),
   name: z.string(),
   target: z.enum(coachingTargetEnum.enumValues),
   excludingTaxes: z.boolean(),
@@ -62,7 +62,7 @@ const OfferData = z.object({
 
 export const coachRouter = createTRPCRouter({
   getCoachById: protectedProcedure
-    .input(z.cuid())
+    .input(z.cuid2())
     .query(async ({ ctx, input }) => {
       const coach = await db.query.user.findFirst({
         where: eq(user.id, input),
@@ -231,18 +231,21 @@ export const coachRouter = createTRPCRouter({
       },
     })
   ),
-  getCoachsForClub: publicProcedure.input(z.cuid()).query(async ({ input }) => {
-    const clb = await db.query.club.findFirst({
-      where: eq(club.id, input),
-      with: {
-        coachs: { with: { user: { columns: { id: true, name: true } } } },
-      },
-    });
-    return (
-      clb?.coachs.map((c: { user: { id: string; name: string } }) => c.user) ??
-      []
-    );
-  }),
+  getCoachsForClub: publicProcedure
+    .input(z.cuid2())
+    .query(async ({ input }) => {
+      const clb = await db.query.club.findFirst({
+        where: eq(club.id, input),
+        with: {
+          coachs: { with: { user: { columns: { id: true, name: true } } } },
+        },
+      });
+      return (
+        clb?.coachs.map(
+          (c: { user: { id: string; name: string } }) => c.user
+        ) ?? []
+      );
+    }),
 
   getCertificationsForCoach: protectedProcedure
     .input(z.string())
@@ -259,7 +262,7 @@ export const coachRouter = createTRPCRouter({
         },
       })
     ),
-  getCertificationById: protectedProcedure.input(z.cuid()).query(({ input }) =>
+  getCertificationById: protectedProcedure.input(z.cuid2()).query(({ input }) =>
     db.query.certification.findFirst({
       where: eq(certification.id, input),
       with: {
@@ -274,7 +277,7 @@ export const coachRouter = createTRPCRouter({
     })
   ),
   getCertificationGroupById: protectedProcedure
-    .input(z.cuid())
+    .input(z.cuid2())
     .query(({ input }) =>
       db.query.certificationGroup.findFirst({
         where: eq(certificationGroup.id, input),
@@ -288,7 +291,7 @@ export const coachRouter = createTRPCRouter({
   //       modules: z.array(
   //         z.object({
   //           name: z.string(),
-  //           activityIds: z.array(z.cuid()),
+  //           activityIds: z.array(z.cuid2()),
   //         })
   //       ),
   //     })
@@ -317,7 +320,7 @@ export const coachRouter = createTRPCRouter({
   // updateGroup: protectedProcedure
   //   .input(
   //     z.object({
-  //       id: z.cuid(),
+  //       id: z.cuid2(),
   //       name: z.string(),
   //     })
   //   )
@@ -332,8 +335,8 @@ export const coachRouter = createTRPCRouter({
   // updateActivitiesForModule: protectedProcedure
   //   .input(
   //     z.object({
-  //       moduleId: z.cuid(),
-  //       activityIds: z.array(z.cuid()),
+  //       moduleId: z.cuid2(),
+  //       activityIds: z.array(z.cuid2()),
   //     })
   //   )
   //   .mutation(({ ctx, input }) =>
@@ -348,7 +351,7 @@ export const coachRouter = createTRPCRouter({
   //   ),
 
   // deleteGroup: protectedProcedure
-  //   .input(z.cuid())
+  //   .input(z.cuid2())
   //   .mutation(async ({ ctx, input }) => {
   //     if (ctx.session.user.role !== Role.ADMIN)
   //       throw new TRPCError({
@@ -364,8 +367,8 @@ export const coachRouter = createTRPCRouter({
   //   .input(
   //     z.object({
   //       name: z.string(),
-  //       groupId: z.cuid(),
-  //       activityIds: z.array(z.cuid()),
+  //       groupId: z.cuid2(),
+  //       activityIds: z.array(z.cuid2()),
   //     })
   //   )
   //   .mutation(({ ctx, input }) =>
@@ -382,9 +385,9 @@ export const coachRouter = createTRPCRouter({
   // updateModule: protectedProcedure
   //   .input(
   //     z.object({
-  //       id: z.cuid(),
+  //       id: z.cuid2(),
   //       name: z.string(),
-  //       activityIds: z.array(z.cuid()),
+  //       activityIds: z.array(z.cuid2()),
   //     })
   //   )
   //   .mutation(({ ctx, input }) =>
@@ -399,13 +402,13 @@ export const coachRouter = createTRPCRouter({
   //     })
   //   ),
   // deleteModule: protectedProcedure
-  //   .input(z.cuid())
+  //   .input(z.cuid2())
   //   .mutation(async ({ ctx, input }) => {
   //     return db.query.certificationModule.delete({
   //       where: { id: input },
   //     });
   //   }),
-  getCoachData: protectedProcedure.input(z.cuid()).query(({ input }) =>
+  getCoachData: protectedProcedure.input(z.cuid2()).query(({ input }) =>
     db.query.userCoach.findFirst({
       where: eq(userCoach.userId, input),
       with: {
@@ -419,7 +422,7 @@ export const coachRouter = createTRPCRouter({
       },
     })
   ),
-  getOfferById: protectedProcedure.input(z.cuid()).query(({ input }) =>
+  getOfferById: protectedProcedure.input(z.cuid2()).query(({ input }) =>
     db.query.coachingPrice.findFirst({
       where: eq(coachingPrice.id, input),
       with: {
@@ -487,7 +490,7 @@ export const coachRouter = createTRPCRouter({
       // },
     }),
   getOfferWithDetails: publicProcedure
-    .input(z.cuid())
+    .input(z.cuid2())
     .query(async ({ input }) => {
       const offer = await db.query.coachingPrice.findFirst({
         where: eq(coachingPrice.id, input),
@@ -525,7 +528,7 @@ export const coachRouter = createTRPCRouter({
       }
       return { ...offer, imageUrl };
     }),
-  getCoachOffers: protectedProcedure.input(z.cuid()).query(({ input }) =>
+  getCoachOffers: protectedProcedure.input(z.cuid2()).query(({ input }) =>
     db.query.coachingPrice.findMany({
       where: eq(coachingPrice.coachId, input),
       with: {
@@ -663,7 +666,7 @@ export const coachRouter = createTRPCRouter({
   //     });
   //   }),
   // deleteCoachOffer: protectedProcedure
-  //   .input(z.cuid())
+  //   .input(z.cuid2())
   //   .mutation(({ input }) =>
   //     db.query.coachingPrice.delete({ where: { id: input } })
   //   ),

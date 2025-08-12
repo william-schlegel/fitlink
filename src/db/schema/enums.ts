@@ -10,6 +10,8 @@ export const roleEnum = pgEnum("Role", [
   "ADMIN",
 ]);
 
+export type RoleEnum = (typeof roleEnum.enumValues)[number];
+
 export const userDocumentTypeEnum = pgEnum("UserDocumentType", [
   "DOCUMENT",
   "IMAGE",
@@ -98,6 +100,8 @@ export const featureEnum = pgEnum("Feature", [
   "MANAGER_SHOP",
   "MANAGER_EMPLOYEES",
 ]);
+
+export type FeatureEnum = (typeof featureEnum.enumValues)[number];
 
 export const pageTargetEnum = pgEnum("PageTarget", [
   "HOME",

@@ -60,7 +60,7 @@ export const fileRouter = createTRPCRouter({
   createPresignedUrl: protectedProcedure
     .input(
       z.object({
-        userId: z.string().cuid(),
+        userId: z.string().cuid2(),
         maxSize: z
           .number()
           .optional()
@@ -98,7 +98,7 @@ export const fileRouter = createTRPCRouter({
   createPresignedUrlDirect: protectedProcedure
     .input(
       z.object({
-        userId: z.cuid(),
+        userId: z.cuid2(),
         fileId: z.uuid(),
         fileType: z.string(),
         maxSize: z
@@ -123,7 +123,7 @@ export const fileRouter = createTRPCRouter({
       return { ...presigned };
     }),
   getDocumentUrlById: publicProcedure
-    .input(z.cuid())
+    .input(z.cuid2())
     .query(async ({ input }) => {
       if (!input) return { url: "", fileype: "" };
       const document = await db.query.userDocument.findFirst({
@@ -140,7 +140,7 @@ export const fileRouter = createTRPCRouter({
   getDocumentsForUser: protectedProcedure
     .input(
       z.object({
-        userId: z.cuid(),
+        userId: z.cuid2(),
         documentType: z.enum(userDocumentTypeEnum.enumValues).optional(),
       })
     )
@@ -169,7 +169,7 @@ export const fileRouter = createTRPCRouter({
     }),
   deleteUserDocument: protectedProcedure
     .input(
-      z.object({ userId: z.string().cuid(), documentId: z.string().cuid() })
+      z.object({ userId: z.string().cuid2(), documentId: z.string().cuid2() })
     )
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== "ADMIN" && ctx.user.id !== input.userId) {

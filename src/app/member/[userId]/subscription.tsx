@@ -1,22 +1,9 @@
-import { activity, activityGroup, room, site } from "@/db/schema/club";
-import { subscription } from "@/db/schema/subscription";
 import { getDescription } from "@/lib/subscriptions";
 import { getDataNames } from "@/server/api/routers/subscription";
+import { MemberSubscription } from "@/server/api/routers/users";
 import { useTranslations } from "next-intl";
-
 type SubscriptionProps = {
-  subscription: {
-    name: string;
-    club: {
-      name: string;
-    };
-    mode: (typeof subscription.$inferSelect)["mode"];
-    restriction: (typeof subscription.$inferSelect)["restriction"];
-    activitieGroups: (typeof activityGroup.$inferSelect)[];
-    activities: (typeof activity.$inferSelect)[];
-    sites: (typeof site.$inferSelect)[];
-    rooms: (typeof room.$inferSelect)[];
-  };
+  subscription: MemberSubscription;
 };
 
 export default async function Subscription({
@@ -25,17 +12,17 @@ export default async function Subscription({
   const { shortInfo } = await getDescription(
     subscription.mode,
     subscription.restriction,
-    subscription.activitieGroups.map((ag) => ag.id),
-    subscription.activities.map((ag) => ag.id),
-    subscription.sites.map((ag) => ag.id),
-    subscription.rooms.map((ag) => ag.id)
+    subscription.activitieGroups.map((ag: { id: string }) => ag.id),
+    subscription.activities.map((ag: { id: string }) => ag.id),
+    subscription.sites.map((ag: { id: string }) => ag.id),
+    subscription.rooms.map((ag: { id: string }) => ag.id)
   );
 
   const { sites, rooms, activityGroups, activities } = await getDataNames(
-    subscription.sites.map((ag) => ag.id),
-    subscription.rooms.map((ag) => ag.id),
-    subscription.activitieGroups.map((ag) => ag.id),
-    subscription.activities.map((ag) => ag.id)
+    subscription.sites.map((ag: { id: string }) => ag.id),
+    subscription.rooms.map((ag: { id: string }) => ag.id),
+    subscription.activitieGroups.map((ag: { id: string }) => ag.id),
+    subscription.activities.map((ag: { id: string }) => ag.id)
   );
 
   return (

@@ -15,7 +15,7 @@ import { z } from "zod";
 import { asc, eq, inArray } from "drizzle-orm";
 
 // const subscriptionObject = z.object({
-//   id: z.cuid(),
+//   id: z.cuid2(),
 //   name: z.string(),
 //   highlight: z.string(),
 //   description: z.string(),
@@ -23,7 +23,7 @@ import { asc, eq, inArray } from "drizzle-orm";
 //   monthly: z.number(),
 //   yearly: z.number(),
 //   cancelationFee: z.number(),
-//   clubId: z.cuid(),
+//   clubId: z.cuid2(),
 //   mode: z.enum(subscriptionModeEnum.enumValues),
 //   restriction: z.enum(subscriptionRestrictionEnum.enumValues),
 // });
@@ -54,7 +54,7 @@ export async function getDataNames(
 }
 
 export const subscriptionRouter = createTRPCRouter({
-  getSubscriptionById: publicProcedure.input(z.cuid()).query(({ input }) => {
+  getSubscriptionById: publicProcedure.input(z.cuid2()).query(({ input }) => {
     return db.query.subscription.findFirst({
       where: eq(subscription.id, input),
       with: {
@@ -67,7 +67,7 @@ export const subscriptionRouter = createTRPCRouter({
     });
   }),
   getSubscriptionsForClub: protectedProcedure
-    .input(z.cuid())
+    .input(z.cuid2())
     .query(({ input }) => {
       return db.query.subscription.findMany({
         where: eq(subscription.clubId, input),
@@ -92,11 +92,11 @@ export const subscriptionRouter = createTRPCRouter({
   // updateSubscriptionSelection: protectedProcedure
   //   .input(
   //     z.object({
-  //       subscriptionId: z.cuid(),
-  //       sites: z.array(z.cuid()),
-  //       rooms: z.array(z.cuid()),
-  //       activityGroups: z.array(z.cuid()),
-  //       activities: z.array(z.cuid()),
+  //       subscriptionId: z.cuid2(),
+  //       sites: z.array(z.cuid2()),
+  //       rooms: z.array(z.cuid2()),
+  //       activityGroups: z.array(z.cuid2()),
+  //       activities: z.array(z.cuid2()),
   //     })
   //   )
   //   .mutation(({ input }) => {
@@ -113,7 +113,7 @@ export const subscriptionRouter = createTRPCRouter({
   //     });
   //   }),
   // deleteSubscription: protectedProcedure
-  //   .input(z.cuid())
+  //   .input(z.cuid2())
   //   .mutation(async ({ input }) => {
   //     const sub = await db.query.subscription.findFirst({
   //       where: eq(subscription.id, input),
@@ -138,11 +138,11 @@ export const subscriptionRouter = createTRPCRouter({
   getPossibleChoice: protectedProcedure
     .input(
       z.object({
-        clubId: z.cuid(),
+        clubId: z.cuid2(),
         mode: z.enum(subscriptionModeEnum.enumValues),
         restriction: z.enum(subscriptionRestrictionEnum.enumValues),
-        siteIds: z.array(z.cuid()),
-        roomIds: z.array(z.cuid()),
+        siteIds: z.array(z.cuid2()),
+        roomIds: z.array(z.cuid2()),
       })
     )
     .query(async ({ input }) => {
@@ -260,10 +260,10 @@ export const subscriptionRouter = createTRPCRouter({
   getDataNames: publicProcedure
     .input(
       z.object({
-        siteIds: z.array(z.cuid()),
-        roomIds: z.array(z.cuid()),
-        activityGroupIds: z.array(z.cuid()),
-        activityIds: z.array(z.cuid()),
+        siteIds: z.array(z.cuid2()),
+        roomIds: z.array(z.cuid2()),
+        activityGroupIds: z.array(z.cuid2()),
+        activityIds: z.array(z.cuid2()),
       })
     )
     .query(async ({ input }) =>

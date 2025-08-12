@@ -18,7 +18,7 @@ export default function Providers({
           onClick={() =>
             authClient.signIn.social({
               provider: provider.id,
-              callbackURL: "/videoach",
+              callbackURL: "/",
             })
           }
         >

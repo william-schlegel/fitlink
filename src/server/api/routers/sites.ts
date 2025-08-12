@@ -14,8 +14,8 @@ import { pricing, pricingFeature } from "@/db/schema/subscription";
 import { roomReservationEnum } from "@/db/schema/enums";
 
 const SiteObject = z.object({
-  id: z.cuid(),
-  clubId: z.cuid(),
+  id: z.cuid2(),
+  clubId: z.cuid2(),
   name: z.string(),
   address: z.string(),
   searchAddress: z.string(),
@@ -24,8 +24,8 @@ const SiteObject = z.object({
 });
 
 const RoomObject = z.object({
-  id: z.cuid(),
-  siteId: z.cuid(),
+  id: z.cuid2(),
+  siteId: z.cuid2(),
   name: z.string(),
   reservation: z.enum(roomReservationEnum.enumValues),
   capacity: z.number(),
@@ -35,7 +35,7 @@ const RoomObject = z.object({
 });
 
 export const siteRouter = createTRPCRouter({
-  getSiteById: protectedProcedure.input(z.cuid()).query(({ input }) => {
+  getSiteById: protectedProcedure.input(z.cuid2()).query(({ input }) => {
     return db.query.site.findFirst({
       where: eq(site.id, input),
       with: { rooms: true },
@@ -99,8 +99,8 @@ export const siteRouter = createTRPCRouter({
   // updateSiteCalendar: protectedProcedure
   //   .input(
   //     z.object({
-  //       id: z.string().cuid(),
-  //       calendarId: z.string().cuid(),
+  //       id: z.string().cuid2(),
+  //       calendarId: z.string().cuid2(),
   //     })
   //   )
   //   .mutation(({ ctx, input }) =>
@@ -112,12 +112,12 @@ export const siteRouter = createTRPCRouter({
   //     })
   //   ),
   // deleteSite: protectedProcedure
-  //   .input(z.string().cuid())
+  //   .input(z.string().cuid2())
   //   .mutation(({ ctx, input }) =>
   //     ctx.prisma.site.delete({ where: { id: input } })
   //   ),
   /**  ------------------- ROOMS -------------------- **/
-  getRoomById: protectedProcedure.input(z.cuid()).query(({ input }) => {
+  getRoomById: protectedProcedure.input(z.cuid2()).query(({ input }) => {
     return db.query.room.findFirst({
       where: eq(room.id, input),
     });
@@ -161,17 +161,17 @@ export const siteRouter = createTRPCRouter({
   //     });
   //   }),
   // deleteRoom: protectedProcedure
-  //   .input(z.string().cuid())
+  //   .input(z.string().cuid2())
   //   .mutation(({ ctx, input }) =>
   //     ctx.prisma.room.delete({ where: { id: input } })
   //   ),
   // updateRoomCalendar: protectedProcedure
   //   .input(
   //     z.object({
-  //       id: z.string().cuid(),
+  //       id: z.string().cuid2(),
   //       openWithClub: z.boolean().optional(),
   //       openWithSite: z.boolean().optional(),
-  //       calendarId: z.string().cuid().optional(),
+  //       calendarId: z.string().cuid2().optional(),
   //     })
   //   )
   //   .mutation(({ ctx, input }) =>

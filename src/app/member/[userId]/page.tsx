@@ -14,12 +14,10 @@ import Subscription from "./subscription";
 export default async function MemberDashboard({
   params,
 }: {
-  params: Promise<{ userId: string }>;
+  params: { userId: string };
 }) {
   const user = await getActualUser();
-  console.log("user :>> ", user);
-  const userId = (await params).userId;
-  console.log("userId :>> ", userId);
+  const userId = params.userId;
   if (!user || (user.role !== "MEMBER" && user.role !== "ADMIN")) {
     redirect("/", RedirectType.replace);
   }
@@ -54,7 +52,7 @@ export default async function MemberDashboard({
       </h2>
       <section className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(20rem,30rem))] justify-center gap-4">
         {queryUser?.memberData?.subscriptions?.map((sub) => (
-          <Subscription key={sub.subscriptionId} subscription={sub} />
+          <Subscription key={sub.id} subscription={sub} />
         ))}
       </section>
       <section className="grid auto-rows-auto gap-2 lg:grid-cols-2">
