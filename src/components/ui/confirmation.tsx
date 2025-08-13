@@ -1,14 +1,13 @@
-import { type DefaultTFuncReturn } from "i18next";
-import { useTranslation } from "next-i18next";
 import { type ReactNode } from "react";
 import { type ButtonSize } from "./buttonIcon";
 import Modal, { type TModalVariant } from "./modal";
+import { useTranslations } from "next-intl";
 
 type Props = {
-  title: DefaultTFuncReturn;
-  message: DefaultTFuncReturn;
-  textConfirmation?: DefaultTFuncReturn;
-  textCancel?: DefaultTFuncReturn;
+  title: string;
+  message: string;
+  textConfirmation?: string;
+  textCancel?: string;
   onConfirm: () => void;
   onCancel?: () => void;
   buttonIcon?: ReactNode;
@@ -27,7 +26,7 @@ function Confirmation({
   variant = "Secondary",
   buttonSize = "md",
 }: Props) {
-  const { t } = useTranslation("common");
+  const t = useTranslations("common");
   return (
     <Modal
       title={title}
@@ -41,7 +40,10 @@ function Confirmation({
     >
       <h3>{title}</h3>
       <div className="flex flex-col">
-        {message && message.split("|").map((p, idx) => <p key={idx}>{p}</p>)}
+        {message &&
+          message
+            .split("|")
+            .map((p: string, idx: number) => <p key={idx}>{p}</p>)}
       </div>
     </Modal>
   );

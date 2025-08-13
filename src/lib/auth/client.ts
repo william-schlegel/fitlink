@@ -1,7 +1,6 @@
 import { env } from "@/env";
 import { createAuthClient } from "better-auth/react";
 import { trpc } from "../trpc/client";
-import { isCUID } from "../utils";
 import { magicLinkClient } from "better-auth/client/plugins";
 import { GetUserByIdOptions } from "@/server/api/routers/users";
 

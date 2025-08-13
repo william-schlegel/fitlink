@@ -60,6 +60,7 @@ export type GetUserByIdOptions = {
   withImage?: boolean;
   withMemberData?: boolean;
   withFeatures?: boolean;
+  withPricing?: boolean;
 };
 
 export async function getUserById(id: string, options?: GetUserByIdOptions) {
@@ -97,6 +98,17 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
     });
   }
 
+  let pricingData: typeof pricing.$inferSelect | undefined = undefined;
+
+  if (options?.withPricing) {
+    pricingData = await db.query.pricing.findFirst({
+      where: eq(pricing.id, id),
+      with: {
+        features: true,
+      },
+    });
+  }
+
   let features: (typeof featureEnum.enumValues)[number][] = [];
   if (options?.withFeatures) {
     const featuresData = await db.query.pricing.findFirst({
@@ -123,12 +135,16 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
     role: u.role,
     profileImageId: u.profileImageId,
     profileImageUrl,
+    pricingId: u.pricingId,
+    trialUntil: u.trialUntil,
+    monthlyPayment: u.monthlyPayment,
     accounts: u.accounts.map((a) => ({
       id: a.id,
       provider: a.providerId,
     })),
     coachData,
     memberData,
+    pricing: pricingData,
     features,
   };
 
