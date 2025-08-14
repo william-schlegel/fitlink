@@ -16,11 +16,11 @@ import { toast } from "@/lib/toast";
 import Spinner from "../ui/spinner";
 import Confirmation from "../ui/confirmation";
 import SimpleForm from "../ui/simpleform";
-import { ROLE_LIST } from "@/lib/useUserInfo";
 import {
   PricingComponent as PricingCard,
   PricingContainer,
 } from "../ui/pricing";
+import { ROLE_LIST } from "@/lib/data";
 
 type UserFormValues = {
   name: string;

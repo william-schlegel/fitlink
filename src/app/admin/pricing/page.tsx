@@ -2,7 +2,6 @@ import { RoleEnum } from "@/db/schema/enums";
 import { pricing } from "@/db/schema/subscription";
 import createLink from "@/lib/createLink";
 import { getActualUser } from "@/lib/auth/server";
-import { getRoleName } from "@/lib/useUserInfo";
 import { getAllPricing, getPricingById } from "@/server/api/routers/pricing";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
@@ -14,6 +13,7 @@ import {
   UpdatePricing,
 } from "@/components/modals/managePricing";
 import { PricingComponent } from "@/components/ui/pricing";
+import { getRoleName } from "@/server/lib/userTools";
 
 export type Pricing = typeof pricing.$inferSelect;
 
@@ -23,7 +23,8 @@ export default async function PricingManagement({
   searchParams: Promise<{ pricingId: string }>;
 }) {
   const { pricingId } = await searchParams;
-
+  const tAuth = await getTranslations("auth");
+  const t = await getTranslations("admin");
   const pricingQuery = await getAllPricing();
 
   if (pricingId === "")
@@ -36,11 +37,10 @@ export default async function PricingManagement({
     gd.set(p.roleTarget, act);
   }
   const groupedData = Array.from(gd).map((g) => ({
-    name: t(`auth:${getRoleName(g[0] as RoleEnum)}`),
+    name: tAuth(getRoleName(g[0] as RoleEnum)),
     items: g[1],
   }));
 
-  const t = await getTranslations("admin");
   const user = await getActualUser();
 
   if (user && user.role !== "ADMIN") return <div>{t("admin-only")}</div>;
@@ -81,6 +81,7 @@ type PricingContentProps = {
 
 export async function PricingContent({ pricingId }: PricingContentProps) {
   const pricingQuery = await getPricingById(pricingId);
+  if (!pricingQuery) return null;
   return (
     <div className="flex w-full flex-col gap-4">
       <PricingComponent data={pricingQuery} />

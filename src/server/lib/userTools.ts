@@ -1,4 +1,6 @@
+import { RoleEnum } from "@/db/schema/enums";
 import { getActualUser } from "@/lib/auth/server";
+import { ROLE_LIST } from "@/lib/data";
 import { TRPCError } from "@trpc/server";
 
 export async function isAdmin(throwError: boolean = true) {
@@ -13,4 +15,8 @@ export async function isAdmin(throwError: boolean = true) {
     return null;
   }
   return user;
+}
+
+export function getRoleName(role: RoleEnum) {
+  return ROLE_LIST.find((r) => r.value === role)?.label ?? "???";
 }

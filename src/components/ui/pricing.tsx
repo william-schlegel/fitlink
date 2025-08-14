@@ -2,6 +2,7 @@
 import { type ReactNode, useState } from "react";
 import { useTranslations } from "next-intl";
 import { GetPricingById } from "@/server/api/routers/pricing";
+import { twMerge } from "tailwind-merge";
 
 type Props = Readonly<{
   data: GetPricingById;
@@ -23,12 +24,18 @@ export function PricingComponent({
 
   return (
     <div
-      className={`card ${compact ? "w-fit" : "w-96"} bg-base-100 ${
-        hl ? "border-4 border-primary" : ""
-      } shadow-xl ${data?.deleted ? "border-4 border-red-600" : ""}`}
+      className={twMerge(
+        "card  w-96 bg-base-100 shadow-xl",
+        compact && "w-fit",
+        hl && "border-4 border-primary",
+        data?.deleted && "border-4 border-red-600"
+      )}
     >
       <div
-        className={`card-body items-center text-center ${compact ? "p-2" : ""}`}
+        className={twMerge(
+          "card-body items-center text-center",
+          compact && "p-2"
+        )}
       >
         {data?.deleted ? (
           <div className="alert alert-warning text-center">
@@ -51,9 +58,10 @@ export function PricingComponent({
         ) : null}
         {data?.free ? (
           <p
-            className={`${
-              compact ? "py-1" : "py-4"
-            } text-xl font-bold text-accent`}
+            className={twMerge(
+              "py-4 text-xl font-bold text-accent",
+              compact && "py-1"
+            )}
           >
             {t("pricing.free")}
           </p>
@@ -61,18 +69,20 @@ export function PricingComponent({
           <>
             <div className="flex items-center gap-2">
               <button
-                className={`btn btn-primary btn-sm ${
-                  monthlyPrice ? "" : "btn-outline"
-                }`}
+                className={twMerge(
+                  "btn btn-primary btn-sm",
+                  !monthlyPrice && "btn-outline"
+                )}
                 onClick={() => setMonthlyPrice(true)}
                 type="button"
               >
                 {t("pricing.monthly")}
               </button>
               <button
-                className={`btn btn-primary btn-sm ${
-                  monthlyPrice ? "btn-outline" : ""
-                }`}
+                className={twMerge(
+                  "btn btn-primary btn-sm",
+                  monthlyPrice && "btn-outline"
+                )}
                 onClick={() => setMonthlyPrice(false)}
                 type="button"
               >
@@ -80,9 +90,10 @@ export function PricingComponent({
               </button>
             </div>
             <p
-              className={`${
-                compact ? "py-1" : "py-4"
-              } text-xl font-bold text-accent`}
+              className={twMerge(
+                "py-4 text-xl font-bold text-accent",
+                compact && "py-1"
+              )}
             >
               {monthlyPrice
                 ? t("pricing.price-monthly", {
@@ -121,9 +132,10 @@ export function PricingContainer({
 }: PricingContainerProps) {
   return (
     <div
-      className={`flex flex-wrap items-stretch gap-4 ${
-        compact ? "justify-start" : "justify-center py-12"
-      }`}
+      className={twMerge(
+        "flex flex-wrap items-stretch gap-4 justify-center py-12",
+        compact && "justify-start"
+      )}
     >
       {children}
     </div>

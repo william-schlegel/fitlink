@@ -34,8 +34,8 @@ import { trpc } from "@/lib/trpc/client";
 import { toast } from "@/lib/toast";
 import Spinner from "../ui/spinner";
 import Confirmation from "../ui/confirmation";
-import { ROLE_LIST } from "@/lib/useUserInfo";
 import ButtonIcon from "../ui/buttonIcon";
+import { ROLE_LIST } from "@/lib/data";
 
 type PricingFormValues = {
   title: string;
@@ -88,8 +88,8 @@ export const CreatePricing = ({ variant = "Primary" }: CreatePricingProps) => {
         monthly: Number(data.monthly),
         yearly: Number(data.yearly),
       },
-      options: data.options,
-      features,
+      options: data.options ?? [],
+      features: features ?? [],
     });
   };
 

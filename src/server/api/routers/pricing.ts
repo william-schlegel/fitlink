@@ -51,7 +51,7 @@ export const pricingRouter = createTRPCRouter({
     .query(({ input }) => {
       return db.query.pricing.findMany({
         where: and(eq(pricing.roleTarget, input), isNull(pricing.deletionDate)),
-        with: { options: true },
+        with: { options: true, features: true },
         orderBy: [asc(pricing.monthly)],
       });
     }),
@@ -64,26 +64,37 @@ export const pricingRouter = createTRPCRouter({
         features: z.array(z.enum(featureEnum.enumValues)),
       })
     )
-    .mutation(({ input, ctx }) => {
+    .mutation(async ({ input, ctx }) => {
       if (ctx.user.role !== "ADMIN")
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to create a pricing",
         });
-      // return db.insert(pricing).values({
-      //     ...input.base,
-      //     options: {
-      //       createMany: {
-      //         data: input.options.map((o, i) => ({ name: o, weight: i })),
-      //       },
-      //     },
-      //     features: {
-      //       createMany: {
-      //         data: input.features.map((f) => ({ feature: f })),
-      //       },
-      //       },
-      //   },
-      // });
+      const [newPricing] = await db
+        .insert(pricing)
+        .values(input.base)
+        .returning();
+
+      if (input.options.length > 0) {
+        await db.insert(pricingOption).values(
+          input.options.map((o, i) => ({
+            name: o,
+            weight: i,
+            pricingId: newPricing.id,
+          }))
+        );
+      }
+
+      if (input.features.length > 0) {
+        await db.insert(pricingFeature).values(
+          input.features.map((f) => ({
+            feature: f,
+            pricingId: newPricing.id,
+          }))
+        );
+      }
+
+      return newPricing;
     }),
   updatePricing: protectedProcedure
     .input(

@@ -24,6 +24,12 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} data-theme="cupcake">
+      <head>
+        <link
+          href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+          rel="stylesheet"
+        />
+      </head>
       <body className={`scroll-smooth antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <TRPCProvider>

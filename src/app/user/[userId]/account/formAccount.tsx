@@ -8,7 +8,6 @@ import { useTranslations } from "next-intl";
 import { getUserById } from "@/server/api/routers/users";
 import { RoleEnum } from "@/db/schema/enums";
 import { isCUID } from "@/lib/utils";
-import { ROLE_LIST } from "@/lib/useUserInfo";
 import AddressSearch from "@/components/ui/addressSearch";
 import generateCircle from "@/components/sections/utils";
 import hslToHex from "@/lib/hslToHex";
@@ -21,6 +20,7 @@ import { isDate, startOfToday } from "date-fns";
 import Confirmation from "@/components/ui/confirmation";
 import { useMemo, useState } from "react";
 import { SubscriptionForm } from "@/components/modals/manageUser";
+import { ROLE_LIST } from "@/lib/data";
 
 type FormValues = {
   searchAddress: string;
