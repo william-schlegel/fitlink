@@ -124,12 +124,13 @@ export default function FormAccount({
       className={`flex flex-col gap-4 xl:grid xl:grid-cols-2 xl:items-start`}
       onSubmit={handleSubmit(onSubmit)}
     >
-      <section className={`grid grid-cols-[auto_1fr] gap-2`}>
-        <label>{t("account.my-role")}</label>
+      <section className={`grid grid-cols-[auto_1fr] gap-2 items-center`}>
+        <label htmlFor="select-role">{t("account.my-role")}</label>
         {userData?.role === "ADMIN" ? (
-          <div>{t("account.admin")}</div>
+          <div id="select-role">{t("account.admin")}</div>
         ) : (
           <select
+            id="select-role"
             className="max-w-xs"
             {...register("role")}
             defaultValue={userData?.role ?? "MEMBER"}
@@ -143,23 +144,29 @@ export default function FormAccount({
         )}
         {fields?.role === "COACH" || fields.role === "MANAGER_COACH" ? (
           <>
-            <label>{t("account.public-name")}</label>
+            <label htmlFor="publicName">{t("account.public-name")}</label>
             <input
+              id="publicName"
               {...register("publicName")}
               className="input-bordered input w-full"
             />
             <div className="col-span-2">
-              <label className="self-start">
+              <label htmlFor="description">
                 {t("account.short-presentation")}
               </label>
-              <textarea {...register("description")} rows={3} />
-              <label className="self-start">{t("account.about-me")}</label>
-              <textarea {...register("aboutMe")} rows={6} />
-              <label className="self-start">
+              <textarea
+                id="description"
+                {...register("description")}
+                rows={3}
+              />
+              <label htmlFor="aboutMe">{t("account.about-me")}</label>
+              <textarea id="aboutMe" {...register("aboutMe")} rows={6} />
+              <label htmlFor="publicActivities">
                 {t("account.public-activities")}
               </label>
               <div className="input-group">
                 <input
+                  id="publicActivities"
                   className="input-bordered input w-full"
                   value={newActivity}
                   onChange={(e) => setNewActivity(e.target.value)}
@@ -207,24 +214,27 @@ export default function FormAccount({
               className="col-span-2"
             />
             <div className="col-span-2 flex justify-between">
-              <label>{t("account.longitude")}</label>
+              <label htmlFor="longitude">{t("account.longitude")}</label>
               <input
+                id="longitude"
                 {...register("longitude")}
                 className="input-bordered input w-full"
                 disabled
               />
-              <label>{t("account.latitude")}</label>
+              <label htmlFor="latitude">{t("account.latitude")}</label>
               <input
+                id="latitude"
                 {...register("latitude")}
                 className="input-bordered input w-full"
                 disabled
               />
             </div>
             <div className="flex gap-2">
-              <label>{t("account.range")}</label>
+              <label htmlFor="range">{t("account.range")}</label>
               <div className="form-control">
                 <div className="input-group">
                   <input
+                    id="range"
                     type="number"
                     className="input-bordered input"
                     {...register("range")}
@@ -246,8 +256,8 @@ export default function FormAccount({
                 mapStyle="mapbox://styles/mapbox/streets-v9"
                 mapboxAccessToken={env.NEXT_PUBLIC_MAPBOX_TOKEN}
                 attributionControl={false}
-                longitude={fields.longitude}
-                latitude={fields.latitude}
+                longitude={fields.longitude ?? LONGITUDE}
+                latitude={fields.latitude ?? LATITUDE}
               >
                 <Source type="geojson" data={circle}>
                   <Layer

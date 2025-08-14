@@ -5,6 +5,7 @@ import type {
   FieldErrors,
   Path,
   FieldValues,
+  RegisterOptions,
 } from "react-hook-form";
 import {
   type FormEventHandler,
@@ -14,10 +15,11 @@ import {
 } from "react";
 import Spinner from "./spinner";
 import { useTranslations } from "next-intl";
+import { twMerge } from "tailwind-merge";
 
 type SimpleFormField<T> = {
   label?: string;
-  name: keyof T;
+  name: Path<T>;
   required?: boolean | string;
   component?: ReactNode;
   type?: HTMLInputTypeAttribute;
@@ -48,7 +50,10 @@ export default function SimpleForm<T extends FieldValues>({
 }: SimpleFormProps<T>): ReactNode {
   return (
     <form
-      className={`grid grid-cols-[auto_1fr] gap-2 ${className ?? ""}`}
+      className={twMerge(
+        "grid grid-cols-[auto_1fr] gap-2 items-start",
+        className
+      )}
       onSubmit={typeof onSubmit === "function" ? (e) => onSubmit(e) : undefined}
     >
       {isLoading ? (
@@ -57,14 +62,35 @@ export default function SimpleForm<T extends FieldValues>({
         fields.map((field) => {
           const fn = field.name as string;
           const isTextArea = field.rows && !isNaN(field.rows) && field.rows > 1;
+          const requiredOption =
+            field.required === true
+              ? true
+              : typeof field.required === "string"
+              ? field.required
+              : undefined;
+
+          const inputRegisterOptions = {
+            ...(requiredOption !== undefined
+              ? { required: requiredOption }
+              : {}),
+            ...(field.type === "date" ? { valueAsDate: true } : {}),
+            ...(field.type === "number" ? { valueAsNumber: true } : {}),
+          } as const;
+
+          const textareaRegisterOptions = {
+            ...(requiredOption !== undefined
+              ? { required: requiredOption }
+              : {}),
+          } as const;
           return (
             <Fragment key={fn}>
               {field.type === "checkbox" ? (
                 <div className="form-control col-span-2">
                   <label
-                    className={`label cursor-pointer justify-start gap-4 ${
-                      field.required ? "required" : ""
-                    }`}
+                    className={twMerge(
+                      "label cursor-pointer justify-start gap-4",
+                      field.required && "required"
+                    )}
                   >
                     <input
                       type="checkbox"
@@ -79,9 +105,10 @@ export default function SimpleForm<T extends FieldValues>({
                 <>
                   {field.label !== undefined ? (
                     <label
-                      className={`${field.required ? "required" : ""} ${
-                        isTextArea ? "self-start" : ""
-                      }`}
+                      className={twMerge(
+                        field.required && "required",
+                        isTextArea && "self-start"
+                      )}
                     >
                       {field.label}
                     </label>
@@ -92,13 +119,15 @@ export default function SimpleForm<T extends FieldValues>({
                     {field.component ? (
                       field.component
                     ) : field.unit !== undefined ? (
-                      <div className="input-group">
+                      <div className="input-group items-center">
                         <input
-                          {...register(fn as Path<T>, {
-                            required: field.required ?? false,
-                            valueAsDate: field.type === "date",
-                            valueAsNumber: field.type === "number",
-                          })}
+                          {...register(
+                            fn as Path<T>,
+                            inputRegisterOptions as unknown as RegisterOptions<
+                              T,
+                              Path<T>
+                            >
+                          )}
                           type={field.type || "text"}
                           disabled={field.disabled}
                           className="input-bordered input"
@@ -107,19 +136,25 @@ export default function SimpleForm<T extends FieldValues>({
                       </div>
                     ) : isTextArea ? (
                       <textarea
-                        {...register(fn as Path<T>, {
-                          required: field.required ?? false,
-                        })}
+                        {...register(
+                          fn as Path<T>,
+                          textareaRegisterOptions as unknown as RegisterOptions<
+                            T,
+                            Path<T>
+                          >
+                        )}
                         disabled={field.disabled}
                         rows={field.rows}
                       />
                     ) : (
                       <input
-                        {...register(fn as Path<T>, {
-                          required: field.required ?? false,
-                          valueAsDate: field.type === "date",
-                          valueAsNumber: field.type === "number",
-                        })}
+                        {...register(
+                          fn as Path<T>,
+                          inputRegisterOptions as unknown as RegisterOptions<
+                            T,
+                            Path<T>
+                          >
+                        )}
                         type={field.type || "text"}
                         disabled={field.disabled}
                         className="input-bordered input w-full"
@@ -145,7 +180,7 @@ type TextErrorProps = { err: string | undefined };
 export function TextError({ err }: TextErrorProps) {
   const t = useTranslations("common");
   if (!err) return null;
-  const msg = err || t("required") || "Error";
+  const msg = err || t("navigation.required") || "Error";
 
   return <p className="text-sm text-error">{msg}</p>;
 }

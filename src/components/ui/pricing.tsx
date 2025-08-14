@@ -1,16 +1,16 @@
 "use client";
 import { type ReactNode, useState } from "react";
-import { type getPricingById } from "@/server/pricing";
 import { useTranslations } from "next-intl";
+import { GetPricingById } from "@/server/api/routers/pricing";
 
 type Props = Readonly<{
-  data: Awaited<ReturnType<typeof getPricingById>>["data"];
+  data: GetPricingById;
   onSelect?: (id: string, monthly: boolean) => void;
   compact?: boolean;
   forceHighlight?: boolean;
 }>;
 
-export function Pricing({
+export function PricingComponent({
   data,
   onSelect,
   compact = false,
@@ -33,7 +33,7 @@ export function Pricing({
         {data?.deleted ? (
           <div className="alert alert-warning text-center">
             {t("pricing.deleted", {
-              date: data?.deletionDate?.toLocaleDateString(),
+              date: data?.deletionDate?.toLocaleDateString() ?? "",
             })}
           </div>
         ) : null}
@@ -86,10 +86,10 @@ export function Pricing({
             >
               {monthlyPrice
                 ? t("pricing.price-monthly", {
-                    price: data?.monthly,
+                    price: data?.monthly ?? 0,
                   })
                 : t("pricing.price-yearly", {
-                    price: data?.yearly,
+                    price: data?.yearly ?? 0,
                   })}
             </p>
           </>

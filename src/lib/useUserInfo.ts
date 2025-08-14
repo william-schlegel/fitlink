@@ -1,3 +1,5 @@
+"use client";
+
 import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
 import { useEffect, useState } from "react";
 import { useSession } from "./auth/client";

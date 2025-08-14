@@ -2,7 +2,6 @@
 @plugin "daisyui" {
   themes: all;
 }
-
 h1 {
   @apply space-x-2 py-4 text-4xl font-bold text-primary;
 }
@@ -14,9 +13,6 @@ h3 {
 }
 h4 {
   @apply space-x-2 py-2 text-xl font-semibold text-secondary;
-}
-label {
-  @apply label font-semibold text-primary;
 }
 
 label.required::after {
@@ -48,11 +44,11 @@ select {
   @apply flex items-center gap-2;
 }
 
-/* html {
+html {
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
     Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
-} */
+}
 
 .bg-gradient-home-hero {
   --hero-bg-opacity: 0.3;

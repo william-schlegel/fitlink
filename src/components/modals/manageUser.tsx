@@ -17,7 +17,10 @@ import Spinner from "../ui/spinner";
 import Confirmation from "../ui/confirmation";
 import SimpleForm from "../ui/simpleform";
 import { ROLE_LIST } from "@/lib/useUserInfo";
-import { Pricing as PricingCard, PricingContainer } from "../ui/pricing";
+import {
+  PricingComponent as PricingCard,
+  PricingContainer,
+} from "../ui/pricing";
 
 type UserFormValues = {
   name: string;

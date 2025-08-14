@@ -13,6 +13,7 @@ import {
   pricingFeature,
   pricingOption,
 } from "@/db/schema/subscription";
+import { isAdmin } from "@/server/lib/userTools";
 
 const PricingObject = z.object({
   id: z.cuid2(),
@@ -25,13 +26,26 @@ const PricingObject = z.object({
   yearly: z.number().optional().default(0),
 });
 
+export async function getAllPricing() {
+  await isAdmin();
+  return db.query.pricing.findMany({
+    orderBy: [asc(pricing.roleTarget), asc(pricing.monthly)],
+  });
+}
+
+export async function getPricingById(id: string) {
+  return db.query.pricing.findFirst({
+    where: eq(pricing.id, id),
+    with: { options: true, features: true },
+  });
+}
+
+export type GetPricingById = Awaited<ReturnType<typeof getPricingById>>;
+
 export const pricingRouter = createTRPCRouter({
-  getPricingById: publicProcedure.input(z.cuid2()).query(({ input }) => {
-    return db.query.pricing.findFirst({
-      where: eq(pricing.id, input),
-      with: { options: true, features: true },
-    });
-  }),
+  getPricingById: publicProcedure
+    .input(z.cuid2())
+    .query(async ({ input }) => await getPricingById(input)),
   getPricingForRole: publicProcedure
     .input(z.enum(roleEnum.enumValues))
     .query(({ input }) => {
@@ -41,16 +55,7 @@ export const pricingRouter = createTRPCRouter({
         orderBy: [asc(pricing.monthly)],
       });
     }),
-  getAllPricing: protectedProcedure.query(({ ctx }) => {
-    if (ctx.user.role !== "ADMIN")
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "You are not authorized to query pricing",
-      });
-    return db.query.pricing.findMany({
-      orderBy: [asc(pricing.roleTarget), asc(pricing.monthly)],
-    });
-  }),
+  getAllPricing: protectedProcedure.query(async () => await getAllPricing()),
   createPricing: protectedProcedure
     .input(
       z.object({
