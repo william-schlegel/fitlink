@@ -15,12 +15,12 @@ type MenuDefinitionType = {
 const MENUS: MenuDefinitionType[] = [
   {
     label: "navigation.dashboard",
-    page: "/dashboard",
+    page: "/",
     access: ["ADMIN", "COACH", "MANAGER", "MANAGER_COACH", "MEMBER"],
   },
   {
     label: "navigation.find-club",
-    page: "/#find-club",
+    page: "/videoach/#find-club",
     access: ["VISITOR"],
   },
   {
@@ -31,7 +31,7 @@ const MENUS: MenuDefinitionType[] = [
 
   {
     label: "navigation.find-coach",
-    page: "/#find-coach",
+    page: "/videoach/#find-coach",
     access: ["VISITOR"],
   },
   { label: "navigation.manager-offer", page: "/manager", access: ["VISITOR"] },

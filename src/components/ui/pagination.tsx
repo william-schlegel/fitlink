@@ -3,7 +3,7 @@ import React from "react";
 type Props = {
   count: number;
   actualPage: number;
-  onPageClick: (page: number) => void;
+  onPageClick?: (page: number) => void;
   perPage: number;
 };
 
@@ -16,7 +16,7 @@ function Pagination({ count, actualPage, onPageClick, perPage }: Props) {
         <button
           key={`page-${pg}`}
           className={`btn btn-sm ${pg === actualPage ? "btn-active" : ""}`}
-          onClick={() => onPageClick(pg)}
+          onClick={() => onPageClick?.(pg)}
         >
           {pg}
         </button>

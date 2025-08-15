@@ -106,7 +106,7 @@ export const CreatePricing = ({ variant = "Primary" }: CreatePricingProps) => {
       title={t("pricing.new")}
       buttonIcon={<i className="bx bx-plus bx-sm" />}
       variant={variant}
-      className="w-10/12 max-w-3xl"
+      className="w-10/12 max-w-[90vw]"
       handleSubmit={form.handleSubmit(onSubmit, onError)}
     >
       <h3>{t("pricing.new")}</h3>
@@ -205,7 +205,7 @@ export const UpdatePricing = ({
         handleSubmit={form.handleSubmit(onSubmit, onError)}
         buttonIcon={<i className="bx bx-edit bx-sm" />}
         variant={variant}
-        className="w-10/12 max-w-3xl"
+        className="w-10/12 max-w-[90vw]"
       >
         <h3>{t("pricing.update")}</h3>
         {queryPricing.isLoading ? (
@@ -335,7 +335,7 @@ function PricingForm() {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-3 gap-4">
       <form className={`grid grid-cols-[auto_1fr] items-center gap-2`}>
         <label>{t("pricing.name")}</label>
         <div className="flex flex-col gap-2">
@@ -471,20 +471,24 @@ function PricingForm() {
             />
           </button>
         </div>
+      </div>
+      <div>
         <label>{t("pricing.features")}</label>
         <div className="border border-primary p-2">
           {getListForRole(fields.roleTarget ?? "MEMBER").map((f, idx) => (
             <label
               key={f.value}
-              className="label cursor-pointer justify-start gap-4"
+              className="label cursor-pointer justify-start gap-4 hover:bg-primary/10"
+              htmlFor={f.value}
             >
               <input
+                id={f.value}
                 type="checkbox"
                 className="checkbox-primary checkbox"
                 {...register(`features.${idx}`)}
                 defaultChecked={false}
               />
-              <span className="label-text">{t(f.label)}</span>
+              <span className="text-wrap">{t(f.label)}</span>
             </label>
           ))}
         </div>

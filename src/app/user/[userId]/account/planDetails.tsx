@@ -1,5 +1,7 @@
+"use client";
+
 import { formatMoney } from "@/lib/formatNumber";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 
 type PlanDetailsProps = {
   monthlyPayment: boolean;
@@ -9,14 +11,14 @@ type PlanDetailsProps = {
   free: boolean | null;
 };
 
-export default async function PlanDetails({
+export default function PlanDetails({
   monthlyPayment,
   name,
   monthly,
   yearly,
   free,
 }: PlanDetailsProps) {
-  const t = await getTranslations("auth");
+  const t = useTranslations("auth");
   if (!name) return null;
   return (
     <>

@@ -21,6 +21,8 @@ import Confirmation from "@/components/ui/confirmation";
 import { useMemo, useState } from "react";
 import { SubscriptionForm } from "@/components/modals/manageUser";
 import { ROLE_LIST } from "@/lib/data";
+import { toast } from "@/lib/toast";
+import { useRouter } from "next/navigation";
 
 type FormValues = {
   searchAddress: string;
@@ -63,6 +65,16 @@ export default function FormAccount({
     },
   });
   const t = useTranslations("auth");
+  const router = useRouter();
+  const updateUser = trpc.users.updateUser.useMutation({
+    onSuccess() {
+      toast.success(t("account.user-updated"));
+      router.refresh();
+    },
+    onError(error) {
+      toast.error(t("account.user-updated-error", { error: error.message }));
+    },
+  });
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     if (!isCUID(data.pricingId) && !isCUID(userData?.pricingId)) {
@@ -72,21 +84,21 @@ export default function FormAccount({
       });
       return;
     } else clearErrors("pricingId");
-    // updateUser.mutate({
-    //   id: myUserId,
-    //   searchAddress: data.searchAddress,
-    //   longitude: data.longitude,
-    //   latitude: data.latitude,
-    //   role: data.role,
-    //   range: Number(data.range),
-    //   description: data.description,
-    //   aboutMe: data.aboutMe,
-    //   coachingActivities: data.coachingActivities,
-    //   publicName: data.publicName,
-    //   pricingId: data.pricingId || (userQuery.data?.pricingId ?? ""),
-    //   monthlyPayment: data.monthlyPayment,
-    //   cancelationDate: data.cancelationDate ?? undefined,
-    // });
+    updateUser.mutate({
+      id: userData.id,
+      searchAddress: data.searchAddress,
+      longitude: data.longitude,
+      latitude: data.latitude,
+      role: data.role,
+      range: Number(data.range ?? 0),
+      description: data.description,
+      aboutMe: data.aboutMe,
+      coachingActivities: data.coachingActivities,
+      publicName: data.publicName,
+      pricingId: data.pricingId || (userData?.pricingId ?? ""),
+      monthlyPayment: data.monthlyPayment,
+      cancelationDate: data.cancelationDate ?? undefined,
+    });
   };
 
   const circle = useMemo(() => {

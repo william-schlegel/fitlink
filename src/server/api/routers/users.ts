@@ -26,6 +26,8 @@ import {
   site,
 } from "@/db/schema/club";
 import { pricing, subscription } from "@/db/schema/subscription";
+import { isAdmin } from "@/server/lib/userTools";
+import { TUserFilter } from "@/app/admin/users/userFilter";
 // import bcrypt from "bcrypt";
 
 type FullSubscription = typeof subscription.$inferSelect & {
@@ -262,6 +264,67 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
   // };
 }
 
+export async function getAllUsers(input: {
+  filter: TUserFilter;
+  skip: number;
+  take: number;
+}) {
+  await isAdmin(true);
+  const filter: SQL[] = [];
+  if (input.filter?.name)
+    filter.push(ilike(user.name, `%${input.filter.name}%`));
+  if (input.filter?.email)
+    filter.push(ilike(user.email, `%${input.filter.email}%`));
+  if (input.filter?.role) filter.push(eq(user.role, input.filter.role));
+  if (input.filter?.dueDate)
+    filter.push(eq(user.cancelationDate, input.filter.dueDate));
+  return db.transaction(async (tx) => {
+    const userCount = await tx
+      .select({ count: count() })
+      .from(user)
+      .where(and(...filter));
+    const users = await tx
+      .select()
+      .from(user)
+      .where(and(...filter))
+      .limit(input.take)
+      .offset(input.skip);
+    return { userCount: userCount[0].count, users };
+  });
+}
+
+export async function getUserFullById(id: string) {
+  await isAdmin(true);
+  return db.query.user.findFirst({
+    where: eq(user.id, id),
+    with: {
+      pricing: true,
+      paiements: true,
+      managerData: {
+        with: {
+          managedClubs: {
+            columns: {
+              id: true,
+            },
+            with: {
+              sites: { columns: { id: true } },
+              activities: { columns: { id: true } },
+              subscriptions: { columns: { id: true } },
+            },
+          },
+        },
+      },
+      coachData: {
+        with: {
+          certifications: true,
+          page: true,
+          // clubs: true,
+        },
+      },
+    },
+  });
+}
+
 export const userRouter = createTRPCRouter({
   getUserById: publicProcedure
     .input(
@@ -276,7 +339,7 @@ export const userRouter = createTRPCRouter({
           .optional(),
       })
     )
-    .query(async ({ input }) => getUserById(input.id, input.options)),
+    .query(({ input }) => getUserById(input.id, input.options)),
   getUserSubscriptionsById: protectedProcedure
     .input(z.string())
     .query(async ({ input }) => {
@@ -336,36 +399,7 @@ export const userRouter = createTRPCRouter({
     }),
   getUserFullById: protectedProcedure
     .input(z.string())
-    .query(({ ctx, input }) => {
-      if (ctx.user?.role !== "ADMIN")
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Only an admin user can acceed full",
-        });
-      return db.query.user.findFirst({
-        where: eq(user.id, input),
-        with: {
-          pricing: true,
-          paiements: true,
-          managerData: {
-            with: {
-              managedClubs: {
-                columns: {
-                  id: true,
-                },
-              },
-            },
-          },
-          coachData: {
-            with: {
-              certifications: true,
-              page: true,
-              clubs: true,
-            },
-          },
-        },
-      });
-    }),
+    .query(({ input }) => getUserFullById(input)),
   getAllUsers: protectedProcedure
     .input(
       z.object({
@@ -374,33 +408,7 @@ export const userRouter = createTRPCRouter({
         take: z.number(),
       })
     )
-    .query(({ ctx, input }) => {
-      if (ctx.user?.role !== "ADMIN")
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Only an admin user can acceed users",
-        });
-      const filter: SQL[] = [];
-      if (input.filter?.name)
-        filter.push(ilike(user.name, `%${input.filter.name}%`));
-      if (input.filter?.email)
-        filter.push(ilike(user.email, `%${input.filter.email}%`));
-      if (input.filter?.role) filter.push(eq(user.role, input.filter.role));
-      if (input.filter?.dueDate)
-        filter.push(eq(user.cancelationDate, input.filter.dueDate));
-      return db.transaction(async (tx) => {
-        await tx
-          .select({ count: count() })
-          .from(user)
-          .where(and(...filter));
-        await tx
-          .select()
-          .from(user)
-          .where(and(...filter))
-          .limit(input.take)
-          .offset(input.skip);
-      });
-    }),
+    .query(({ input }) => getAllUsers(input)),
 
   updateUser: protectedProcedure
     .input(
@@ -432,63 +440,67 @@ export const userRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
           message: "Only an admin user can give admin access",
         });
-      if (input.role === "COACH" || input.role === "MANAGER_COACH") {
-        await db.delete(userCoach).where(eq(userCoach.userId, input.id));
-        await db.insert(userCoach).values({
-          userId: input.id,
-          longitude: input.longitude,
-          latitude: input.latitude,
-          searchAddress: input.searchAddress,
-          range: input.range,
-          publicName: input.publicName,
-          aboutMe: input.aboutMe,
-          description: input.description,
-          // coachingActivities: Array.isArray(input.coachingActivities)
-          //   ? {
-          //       create: input.coachingActivities?.map((a) => ({ name: a })),
-          //     }
-          //   : undefined,
-        });
-        // create: {
-        //   userId: input.id,
-        //   longitude: input.longitude,
-        //   latitude: input.latitude,
-        //   searchAddress: input.searchAddress,
-        //   range: input.range,
-        //   publicName: input.publicName,
-        //   aboutMe: input.aboutMe,
-        //   description: input.description,
-        //   coachingActivities: Array.isArray(input.coachingActivities)
-        //     ? {
-        //         create: input.coachingActivities?.map((a) => ({ name: a })),
-        //       }
-        //     : undefined,
-        // },
-        // });
-      }
 
-      // update role in stream chat if admin
-      // if (input.role === "ADMIN") {
-      //   await streamchatClient.partialUpdateUser({
-      //     id: input.id,
-      //     set: { role: "admin" },
-      //   });
-      // }
+      db.transaction(async (tx) => {
+        if (input.role === "COACH" || input.role === "MANAGER_COACH") {
+          await tx.delete(userCoach).where(eq(userCoach.userId, input.id));
+          await tx.insert(userCoach).values({
+            userId: input.id,
+            longitude: input.longitude,
+            latitude: input.latitude,
+            searchAddress: input.searchAddress,
+            range: input.range,
+            publicName: input.publicName,
+            aboutMe: input.aboutMe,
+            description: input.description,
+            // coachingActivities: Array.isArray(input.coachingActivities)
+            //   ? {
+            //       create: input.coachingActivities?.map((a) => ({ name: a })),
+            //     }
+            //   : undefined,
+          });
+          // create: {
+          //   userId: input.id,
+          //   longitude: input.longitude,
+          //   latitude: input.latitude,
+          //   searchAddress: input.searchAddress,
+          //   range: input.range,
+          //   publicName: input.publicName,
+          //   aboutMe: input.aboutMe,
+          //   description: input.description,
+          //   coachingActivities: Array.isArray(input.coachingActivities)
+          //     ? {
+          //         create: input.coachingActivities?.map((a) => ({ name: a })),
+          //       }
+          //     : undefined,
+          // },
+          // });
+        }
 
-      return db
-        .update(user)
-        .set({
-          name: input.name,
-          email: input.email,
-          phone: input.phone,
-          address: input.address,
-          role: input.role,
-          profileImageId: input.profileImageId,
-          pricingId: input.pricingId,
-          monthlyPayment: input.monthlyPayment,
-          cancelationDate: input.cancelationDate,
-        })
-        .where(eq(user.id, input.id));
+        // update role in stream chat if admin
+        // if (input.role === "ADMIN") {
+        //   await streamchatClient.partialUpdateUser({
+        //     id: input.id,
+        //     set: { role: "admin" },
+        //   });
+        // }
+
+        return tx
+          .update(user)
+          .set({
+            name: input.name,
+            email: input.email,
+            phone: input.phone,
+            address: input.address,
+            role: input.role,
+            profileImageId: input.profileImageId,
+            pricingId: input.pricingId,
+            monthlyPayment: input.monthlyPayment,
+            cancelationDate: input.cancelationDate,
+          })
+          .where(eq(user.id, input.id))
+          .returning();
+      });
     }),
   deleteUser: protectedProcedure
     .input(z.string())

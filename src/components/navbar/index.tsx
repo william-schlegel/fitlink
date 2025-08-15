@@ -52,7 +52,7 @@ export default async function Navbar({
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal p-0">
           <li>
-            <Link href={"/"}>{t("navigation.home")}</Link>
+            <Link href={"/videoach"}>{t("navigation.home")}</Link>
           </li>
           <Menu />
         </ul>
@@ -133,7 +133,7 @@ export default async function Navbar({
 const Logo = () => {
   return (
     <div className="flex-1">
-      <Link href={"/"} className="btn btn-ghost text-2xl capitalize">
+      <Link href={"/videoach"} className="btn btn-ghost text-2xl capitalize">
         Videoach
       </Link>
       {BETA ? (

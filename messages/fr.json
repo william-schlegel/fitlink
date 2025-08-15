@@ -133,6 +133,8 @@
       "trial-offer": "Profitez de notre offre 30j gratuits pour essayer le service !",
       "trial-remaining": "{count, plural, =0 {C'est votre dernier jour d'essai} =1 {Il ne vous reste plus qu'un jour d'essai} other {Il vous reste # jours d'essai}}",
       "save-account": "Enregistrer mes informations de compte",
+      "user-updated": "Vos informations de compte ont été mises à jour",
+      "user-updated-error": "Une erreur est survenue lors de la mise à jour de vos informations de compte : {error}",
       "per-month": "/mois",
       "per-year": "/an",
       "free": "Gratuit"

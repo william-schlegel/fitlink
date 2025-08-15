@@ -50,6 +50,13 @@ html {
     Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
 }
 
+.btn {
+  border-start-start-radius: var(--join-ss, var(--radius-field));
+  border-start-end-radius: var(--join-se, var(--radius-field));
+  border-end-end-radius: var(--join-ee, var(--radius-field));
+  border-end-start-radius: var(--join-es, var(--radius-field));
+}
+
 .bg-gradient-home-hero {
   --hero-bg-opacity: 0.3;
   object-fit: fill;

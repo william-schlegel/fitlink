@@ -128,7 +128,7 @@ export const DeleteUser = ({
 };
 
 function UserForm() {
-  const t = useTranslations("auth");
+  const t = useTranslations();
   const form = useFormContext<UserFormValues>();
 
   return (
@@ -137,24 +137,24 @@ function UserForm() {
       register={form.register}
       fields={[
         {
-          label: t("name"),
+          label: t("auth.name"),
           name: "name",
-          required: t("user-name-mandatory"),
+          required: t("auth.user-name-mandatory"),
         },
         {
-          label: t("email"),
+          label: t("auth.email"),
           name: "email",
           type: "email",
-          required: t("user-email-mandatory"),
+          required: t("auth.user-email-mandatory"),
         },
         {
-          label: t("role"),
+          label: t("auth.role"),
           name: "role",
           component: (
             <select className="max-w-xs" {...form.register("role")}>
               {ROLE_LIST.map((rl) => (
                 <option key={rl.value} value={rl.value}>
-                  {t(rl.label)}
+                  {t(`common.roles.${rl.value}`)}
                 </option>
               ))}
             </select>

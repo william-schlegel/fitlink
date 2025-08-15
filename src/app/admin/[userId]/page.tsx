@@ -21,7 +21,7 @@ export default async function AdminDashboard() {
       className="container mx-auto my-2 space-y-2 p-2"
     >
       <h1 className="flex justify-between">{t("admin-dashboard")}</h1>
-      <section className="stats shadow">
+      <section className="stats shadow w-full">
         <div className="stat">
           <div className="stat-figure text-primary">
             <i className="bx bx-building bx-lg" />
