@@ -22,6 +22,8 @@ export function PricingComponent({
 
   const hl = forceHighlight ?? data?.highlighted;
 
+  console.log("data >>>>", data);
+
   return (
     <div
       className={twMerge(
@@ -46,7 +48,7 @@ export function PricingComponent({
         ) : null}
         <h2 className="card-title text-3xl font-bold">{data?.title}</h2>
         <p>{data?.description}</p>
-        {!compact ? (
+        {compact ? null : (
           <ul className="self-start py-8">
             {data?.options.map((option) => (
               <li key={option.id} className="flex items-center gap-4">
@@ -55,7 +57,7 @@ export function PricingComponent({
               </li>
             ))}
           </ul>
-        ) : null}
+        )}
         {data?.free ? (
           <p
             className={twMerge(

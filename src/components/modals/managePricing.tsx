@@ -36,6 +36,7 @@ import Spinner from "../ui/spinner";
 import Confirmation from "../ui/confirmation";
 import ButtonIcon from "../ui/buttonIcon";
 import { ROLE_LIST } from "@/lib/data";
+import { useRouter } from "next/navigation";
 
 type PricingFormValues = {
   title: string;
@@ -56,11 +57,14 @@ type CreatePricingProps = {
 export const CreatePricing = ({ variant = "Primary" }: CreatePricingProps) => {
   const t = useTranslations("admin");
   const utils = trpc.useUtils();
+  const router = useRouter();
+
   const createPricing = trpc.pricing.createPricing.useMutation({
     onSuccess: () => {
       utils.pricing.getAllPricing.invalidate();
       form.reset();
       toast.success(t("pricing.created"));
+      router.refresh();
     },
     onError(error) {
       toast.error(error.message);
@@ -126,6 +130,7 @@ export const UpdatePricing = ({
   const utils = trpc.useUtils();
   const { getListForRole } = useFeature();
   const queryPricing = trpc.pricing.getPricingById.useQuery(pricingId);
+  const router = useRouter();
 
   useEffect(() => {
     if (!queryPricing?.data) return;
@@ -156,6 +161,7 @@ export const UpdatePricing = ({
       utils.pricing.getPricingById.invalidate(pricingId);
       form.reset();
       toast.success(t("pricing.updated"));
+      router.refresh();
     },
     onError(error) {
       toast.error(error.message);

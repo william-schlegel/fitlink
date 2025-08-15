@@ -1,5 +1,6 @@
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool, neonConfig } from "@neondatabase/serverless";
+import ws from "ws";
 import * as auth from "./schema/auth";
 import * as club from "./schema/club";
 import * as coach from "./schema/coach";
@@ -10,8 +11,14 @@ import * as subscription from "./schema/subscription";
 import * as user from "./schema/user";
 import { env } from "@/env";
 
-const sql = neon(env.DATABASE_URL);
-export const db = drizzle(sql, {
+// Configure WebSocket support
+neonConfig.webSocketConstructor = ws;
+
+// Create a connection pool
+const pool = new Pool({
+  connectionString: env.DATABASE_URL,
+});
+export const db = drizzle(pool, {
   schema: {
     ...auth,
     ...club,

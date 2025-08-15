@@ -70,31 +70,34 @@ export const pricingRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
           message: "You are not authorized to create a pricing",
         });
-      const [newPricing] = await db
-        .insert(pricing)
-        .values(input.base)
-        .returning();
 
-      if (input.options.length > 0) {
-        await db.insert(pricingOption).values(
-          input.options.map((o, i) => ({
-            name: o,
-            weight: i,
-            pricingId: newPricing.id,
-          }))
-        );
-      }
+      return await db.transaction(async (tx) => {
+        const [newPricing] = await tx
+          .insert(pricing)
+          .values(input.base)
+          .returning();
 
-      if (input.features.length > 0) {
-        await db.insert(pricingFeature).values(
-          input.features.map((f) => ({
-            feature: f,
-            pricingId: newPricing.id,
-          }))
-        );
-      }
+        if (input.options.length > 0) {
+          await tx.insert(pricingOption).values(
+            input.options.map((o, i) => ({
+              name: o,
+              weight: i,
+              pricingId: newPricing.id,
+            }))
+          );
+        }
 
-      return newPricing;
+        if (input.features.length > 0) {
+          await tx.insert(pricingFeature).values(
+            input.features.map((f) => ({
+              feature: f,
+              pricingId: newPricing.id,
+            }))
+          );
+        }
+
+        return newPricing;
+      });
     }),
   updatePricing: protectedProcedure
     .input(
@@ -110,27 +113,50 @@ export const pricingRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
           message: "You are not authorized to modify a pricing",
         });
-      await db
-        .delete(pricingOption)
-        .where(eq(pricingOption.pricingId, input.base.id ?? ""));
-      await db
-        .delete(pricingFeature)
-        .where(eq(pricingFeature.pricingId, input.base.id ?? ""));
-      // return db.update(pricing).set({
-      //   data: {
-      //     ...input.base,
-      //     options: {
-      //       createMany: {
-      //         data: input.options.map((o, i) => ({ name: o, weight: i })),
-      //       },
-      //     },
-      //     features: {
-      //       createMany: {
-      //         data: input.features.map((f) => ({ feature: f })),
-      //       },
-      //     },
-      //   },
-      // });
+
+      if (!input.base.id)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Pricing ID is required",
+        });
+
+      const pricingId = input.base.id;
+
+      return await db.transaction(async (tx) => {
+        await tx
+          .delete(pricingOption)
+          .where(eq(pricingOption.pricingId, pricingId));
+        await tx
+          .delete(pricingFeature)
+          .where(eq(pricingFeature.pricingId, pricingId));
+
+        const [updatedPricing] = await tx
+          .update(pricing)
+          .set(input.base)
+          .where(eq(pricing.id, pricingId))
+          .returning();
+
+        if (input.options.length > 0) {
+          await tx.insert(pricingOption).values(
+            input.options.map((o, i) => ({
+              name: o,
+              weight: i,
+              pricingId: pricingId,
+            }))
+          );
+        }
+
+        if (input.features.length > 0) {
+          await tx.insert(pricingFeature).values(
+            input.features.map((f) => ({
+              feature: f,
+              pricingId: pricingId,
+            }))
+          );
+        }
+
+        return updatedPricing;
+      });
     }),
   deletePricing: protectedProcedure
     .input(z.string())
