@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { featureEnum, roleEnum } from "@/db/schema/enums";
+import { featureEnum, RoleEnum, roleEnum } from "@/db/schema/enums";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -42,19 +42,21 @@ export async function getPricingById(id: string) {
 
 export type GetPricingById = Awaited<ReturnType<typeof getPricingById>>;
 
+export async function getPricingForRole(role: RoleEnum) {
+  return db.query.pricing.findMany({
+    where: and(eq(pricing.roleTarget, role), isNull(pricing.deletionDate)),
+    with: { options: true, features: true },
+    orderBy: [asc(pricing.monthly)],
+  });
+}
+
 export const pricingRouter = createTRPCRouter({
   getPricingById: publicProcedure
     .input(z.cuid2())
     .query(async ({ input }) => await getPricingById(input)),
   getPricingForRole: publicProcedure
     .input(z.enum(roleEnum.enumValues))
-    .query(({ input }) => {
-      return db.query.pricing.findMany({
-        where: and(eq(pricing.roleTarget, input), isNull(pricing.deletionDate)),
-        with: { options: true, features: true },
-        orderBy: [asc(pricing.monthly)],
-      });
-    }),
+    .query(({ input }) => getPricingForRole(input)),
   getAllPricing: protectedProcedure.query(async () => await getAllPricing()),
   createPricing: protectedProcedure
     .input(
