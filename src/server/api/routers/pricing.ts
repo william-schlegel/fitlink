@@ -42,9 +42,12 @@ export async function getPricingById(id: string) {
 
 export type GetPricingById = Awaited<ReturnType<typeof getPricingById>>;
 
-export async function getPricingForRole(role: RoleEnum) {
+export async function getPricingForRole(internalRole: RoleEnum) {
   return db.query.pricing.findMany({
-    where: and(eq(pricing.roleTarget, role), isNull(pricing.deletionDate)),
+    where: and(
+      eq(pricing.roleTarget, internalRole),
+      isNull(pricing.deletionDate)
+    ),
     with: { options: true, features: true },
     orderBy: [asc(pricing.monthly)],
   });
@@ -67,7 +70,7 @@ export const pricingRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      if (ctx.user.role !== "ADMIN")
+      if (ctx.user.internalRole !== "ADMIN")
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to create a pricing",
@@ -110,7 +113,7 @@ export const pricingRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      if (ctx.user.role !== "ADMIN")
+      if (ctx.user.internalRole !== "ADMIN")
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to modify a pricing",
@@ -163,7 +166,7 @@ export const pricingRouter = createTRPCRouter({
   deletePricing: protectedProcedure
     .input(z.string())
     .mutation(({ input, ctx }) => {
-      if (ctx.user.role !== "ADMIN")
+      if (ctx.user.internalRole !== "ADMIN")
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to delete a pricing",
@@ -178,7 +181,7 @@ export const pricingRouter = createTRPCRouter({
   undeletePricing: protectedProcedure
     .input(z.string())
     .mutation(({ input, ctx }) => {
-      if (ctx.user.role !== "ADMIN")
+      if (ctx.user.internalRole !== "ADMIN")
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to undelete a pricing",
@@ -193,7 +196,7 @@ export const pricingRouter = createTRPCRouter({
   deletePricingOption: protectedProcedure
     .input(z.string())
     .mutation(({ input, ctx }) => {
-      if (ctx.user.role !== "ADMIN")
+      if (ctx.user.internalRole !== "ADMIN")
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to delete a pricing option",

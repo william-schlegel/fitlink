@@ -91,7 +91,7 @@ const Menu = () => {
     <>
       {MENUS.map((menu) => {
         if (
-          (user?.role && menu.access.includes(user.role)) ||
+          (user?.internalRole && menu.access.includes(user.internalRole)) ||
           (!user && menu.access.includes("VISITOR"))
         ) {
           const locked =

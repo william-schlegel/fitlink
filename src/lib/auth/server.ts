@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { user } from "@/db/schema/auth";
 import { magicLink } from "better-auth/plugins";
 import { sendEmail } from "../email";
+import { admin } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -31,6 +32,9 @@ export const auth = betterAuth({
           html: `clickez <a href="${url}">ici</a> pour valider votre connexion<br/>ou copiez le lien suivant: ${url}<br/>token: ${token}`,
         });
       },
+    }),
+    admin({
+      defaultRole: "regular",
     }),
   ],
 });

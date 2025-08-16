@@ -362,7 +362,7 @@ function PricingForm() {
             <p className="text-sm text-error">{errors.description.message}</p>
           ) : null}
         </div>
-        <label>{t("pricing.role")}</label>
+        <label>{t("pricing.internalRole")}</label>
         <select
           className="max-w-xs"
           {...register("roleTarget")}
@@ -552,79 +552,79 @@ const Option = ({ option }: OptionProps) => {
 type TFeature = Readonly<{
   value: FeatureEnum;
   label: string;
-  role: RoleEnum[];
+  internalRole: RoleEnum[];
 }>;
 
 const PRICING_FEATURES: TFeature[] = [
   {
     value: "COACH_CERTIFICATION",
     label: "feature.coach-certification",
-    role: ["COACH", "MANAGER_COACH"],
+    internalRole: ["COACH", "MANAGER_COACH"],
   },
   {
     value: "COACH_OFFER",
     label: "feature.coach-offer",
-    role: ["COACH", "MANAGER_COACH"],
+    internalRole: ["COACH", "MANAGER_COACH"],
   },
   {
     value: "COACH_OFFER_COMPANY",
     label: "feature.coach-offer-company",
-    role: ["COACH", "MANAGER_COACH"],
+    internalRole: ["COACH", "MANAGER_COACH"],
   },
   {
     value: "COACH_MEETING",
     label: "feature.coach-meeting",
-    role: ["COACH", "MANAGER_COACH"],
+    internalRole: ["COACH", "MANAGER_COACH"],
   },
   {
     value: "COACH_MARKET_PLACE",
     label: "feature.coach-market-place",
-    role: ["COACH", "MANAGER_COACH"],
+    internalRole: ["COACH", "MANAGER_COACH"],
   },
   {
     value: "MANAGER_MULTI_CLUB",
     label: "feature.manager-multi-club",
-    role: ["MANAGER", "MANAGER_COACH"],
+    internalRole: ["MANAGER", "MANAGER_COACH"],
   },
   {
     value: "MANAGER_MULTI_SITE",
     label: "feature.manager-multi-site",
-    role: ["MANAGER", "MANAGER_COACH"],
+    internalRole: ["MANAGER", "MANAGER_COACH"],
   },
   {
     value: "MANAGER_COACH",
     label: "feature.manager-coach",
-    role: ["MANAGER", "MANAGER_COACH"],
+    internalRole: ["MANAGER", "MANAGER_COACH"],
   },
   {
     value: "MANAGER_EVENT",
     label: "feature.manager-event",
-    role: ["MANAGER", "MANAGER_COACH"],
+    internalRole: ["MANAGER", "MANAGER_COACH"],
   },
   {
     value: "MANAGER_PLANNING",
     label: "feature.manager-planning",
-    role: ["MANAGER", "MANAGER_COACH"],
+    internalRole: ["MANAGER", "MANAGER_COACH"],
   },
   {
     value: "MANAGER_ROOM",
     label: "feature.manager-room",
-    role: ["MANAGER", "MANAGER_COACH"],
+    internalRole: ["MANAGER", "MANAGER_COACH"],
   },
   {
     value: "MANAGER_MARKET_PLACE",
     label: "feature.manager-market-place",
-    role: ["MANAGER", "MANAGER_COACH"],
+    internalRole: ["MANAGER", "MANAGER_COACH"],
   },
   {
     value: "MANAGER_SHOP",
     label: "feature.manager-shop",
-    role: ["MANAGER", "MANAGER_COACH"],
+    internalRole: ["MANAGER", "MANAGER_COACH"],
   },
   {
     value: "MANAGER_EMPLOYEES",
     label: "feature.manager-employees",
-    role: ["MANAGER", "MANAGER_COACH"],
+    internalRole: ["MANAGER", "MANAGER_COACH"],
   },
 ] as const;
 
@@ -642,8 +642,10 @@ export function useFeature() {
     return t(getLabel(value));
   }
 
-  function getListForRole(role: RoleEnum) {
-    return PRICING_FEATURES.filter((f) => f.role.includes(role));
+  function getListForRole(internalRole: RoleEnum) {
+    return PRICING_FEATURES.filter((f) =>
+      f.internalRole.includes(internalRole)
+    );
   }
 
   return { getName, getListForRole };

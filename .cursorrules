@@ -107,6 +107,6 @@ This is a Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRP
 
 - Use the existing enum patterns for database constraints
 - Follow the notification system patterns
-- Use proper user role management
+- Use proper user internalRole management
 - Implement proper subscription and coaching models
 - Follow the existing file upload and document management patterns

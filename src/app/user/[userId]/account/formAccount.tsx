@@ -28,7 +28,7 @@ type FormValues = {
   searchAddress: string;
   longitude: number;
   latitude: number;
-  role: RoleEnum;
+  internalRole: RoleEnum;
   range: number;
   description: string;
   aboutMe: string;
@@ -60,7 +60,7 @@ export default function FormAccount({
   const fields = useWatch({
     control,
     defaultValue: {
-      role: "MEMBER",
+      internalRole: "MEMBER",
       coachingActivities: [],
     },
   });
@@ -89,7 +89,7 @@ export default function FormAccount({
       searchAddress: data.searchAddress,
       longitude: data.longitude,
       latitude: data.latitude,
-      role: data.role,
+      internalRole: data.internalRole,
       range: Number(data.range ?? 0),
       description: data.description,
       aboutMe: data.aboutMe,
@@ -137,15 +137,17 @@ export default function FormAccount({
       onSubmit={handleSubmit(onSubmit)}
     >
       <section className={`grid grid-cols-[auto_1fr] gap-2 items-center`}>
-        <label htmlFor="select-role">{t("account.my-role")}</label>
-        {userData?.role === "ADMIN" ? (
-          <div id="select-role">{t("account.admin")}</div>
+        <label htmlFor="select-internalRole">
+          {t("account.my-internalRole")}
+        </label>
+        {userData?.internalRole === "ADMIN" ? (
+          <div id="select-internalRole">{t("account.admin")}</div>
         ) : (
           <select
-            id="select-role"
+            id="select-internalRole"
             className="max-w-xs"
-            {...register("role")}
-            defaultValue={userData?.role ?? "MEMBER"}
+            {...register("internalRole")}
+            defaultValue={userData?.internalRole ?? "MEMBER"}
           >
             {ROLE_LIST.filter((rl) => rl.value !== "ADMIN").map((rl) => (
               <option key={rl.value} value={rl.value}>
@@ -154,7 +156,8 @@ export default function FormAccount({
             ))}
           </select>
         )}
-        {fields?.role === "COACH" || fields.role === "MANAGER_COACH" ? (
+        {fields?.internalRole === "COACH" ||
+        fields.internalRole === "MANAGER_COACH" ? (
           <>
             <label htmlFor="publicName">{t("account.public-name")}</label>
             <input
@@ -213,7 +216,8 @@ export default function FormAccount({
       </section>
 
       <section>
-        {fields?.role === "COACH" || fields.role === "MANAGER_COACH" ? (
+        {fields?.internalRole === "COACH" ||
+        fields.internalRole === "MANAGER_COACH" ? (
           <div className={`mb-2 grid  grid-cols-[auto_1fr] gap-2`}>
             <AddressSearch
               label={t("account.google-address")}
@@ -304,7 +308,7 @@ export default function FormAccount({
           <div className="flex flex-col gap-2">
             <h2>{t("account.plan")}</h2>
             {userData?.pricingId &&
-            userData.pricing?.roleTarget === fields?.role ? (
+            userData.pricing?.roleTarget === fields?.internalRole ? (
               <>
                 <label className="self-start">{t("account.actual-plan")}</label>
                 <div className="flex gap-2">
@@ -348,7 +352,9 @@ export default function FormAccount({
             ) : null}
 
             <SubscriptionForm
-              role={fields.role ?? userData?.role ?? "MEMBER"}
+              internalRole={
+                fields.internalRole ?? userData?.internalRole ?? "MEMBER"
+              }
               subscriptionId={userData?.pricingId ?? fields.pricingId}
               onNewPlan={(newPId, monthly) => {
                 setValue("pricingId", newPId);

@@ -23,7 +23,7 @@ function ActivityGroupManagement() {
   const [agId, setAgId] = useState("");
   const { t } = useTranslation("admin");
 
-  if (sessionData && sessionData.user?.role !== Role.ADMIN)
+  if (sessionData && sessionData.user?.internalRole !== Role.ADMIN)
     return <div>{t("admin-only")}</div>;
 
   return (
@@ -166,7 +166,7 @@ export const getServerSideProps = async ({
   res,
 }: GetServerSidePropsContext) => {
   const session = await unstable_getServerSession(req, res, authOptions);
-  if (session?.user?.role !== Role.ADMIN)
+  if (session?.user?.internalRole !== Role.ADMIN)
     return {
       redirect: {
         permanent: false,

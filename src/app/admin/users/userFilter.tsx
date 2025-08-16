@@ -10,7 +10,7 @@ import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 export type TUserFilter = {
   name?: string;
   email?: string;
-  role?: RoleEnum;
+  internalRole?: RoleEnum;
   dueDate?: Date;
 };
 
@@ -29,7 +29,7 @@ export default function UserFilter({ filter }: { filter: TUserFilter }) {
     const flt: TUserFilter = {};
     if (data.name) flt.name = data.name;
     if (data.email) flt.email = data.email;
-    if (data.role) flt.role = data.role;
+    if (data.internalRole) flt.internalRole = data.internalRole;
     router.push(`/admin/users?filter=${JSON.stringify(flt)}`);
   };
 
@@ -51,10 +51,10 @@ export default function UserFilter({ filter }: { filter: TUserFilter }) {
             name: "email",
           },
           {
-            label: t("role"),
-            name: "role",
+            label: t("internalRole"),
+            name: "internalRole",
             component: (
-              <select className="max-w-xs" {...register("role")}>
+              <select className="max-w-xs" {...register("internalRole")}>
                 <option></option>
                 {ROLE_LIST.filter((rl) => rl.value !== "ADMIN").map((rl) => (
                   <option key={rl.value} value={rl.value}>

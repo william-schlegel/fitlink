@@ -25,7 +25,7 @@ import { ROLE_LIST } from "@/lib/data";
 type UserFormValues = {
   name: string;
   email: string;
-  role: RoleEnum;
+  internalRole: RoleEnum;
 };
 
 type PropsUpdateDelete = {
@@ -48,7 +48,7 @@ export const UpdateUser = ({
       form.reset({
         name: queryUser.data.name ?? "",
         email: queryUser.data.email ?? "",
-        role: queryUser.data.role ?? "MEMBER",
+        internalRole: queryUser.data.internalRole ?? "MEMBER",
       });
     }
   }, [queryUser.data, form]);
@@ -148,10 +148,10 @@ function UserForm() {
           required: t("auth.user-email-mandatory"),
         },
         {
-          label: t("auth.role"),
-          name: "role",
+          label: t("auth.internalRole"),
+          name: "internalRole",
           component: (
-            <select className="max-w-xs" {...form.register("role")}>
+            <select className="max-w-xs" {...form.register("internalRole")}>
               {ROLE_LIST.map((rl) => (
                 <option key={rl.value} value={rl.value}>
                   {t(`common.roles.${rl.value}`)}
@@ -166,19 +166,19 @@ function UserForm() {
 }
 
 type SubscriptionFormProps = {
-  role: RoleEnum | undefined;
+  internalRole: RoleEnum | undefined;
   subscriptionId?: string;
   onNewPlan: (subscriptionId: string, monthlyPayment: boolean) => void;
 };
 
 export function SubscriptionForm({
-  role,
+  internalRole,
   subscriptionId = "",
   onNewPlan,
 }: SubscriptionFormProps) {
   const t = useTranslations("auth");
   const pricingQuery = trpc.pricing.getPricingForRole.useQuery(
-    role ?? "MEMBER"
+    internalRole ?? "MEMBER"
   );
   const [closeModal, setCloseModal] = useState(false);
 

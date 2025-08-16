@@ -75,7 +75,7 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
   });
   return next({
     ctx: {
-      user: { ...ctx.user, role: u?.role },
+      user: { ...ctx.user, internalRole: u?.internalRole },
     },
   });
 });

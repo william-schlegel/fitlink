@@ -1,11 +1,13 @@
 "use client";
-import { useUser } from "@/lib/auth/client";
+import { authClient, useUser } from "@/lib/auth/client";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function UserButton() {
   const t = useTranslations("common");
+  const router = useRouter();
   const { data: user } = useUser({ withImage: true });
 
   if (!user) return null;
@@ -37,11 +39,15 @@ export default function UserButton() {
         </li>
         <li>
           <div
-          // onClick={() => {
-          //   signOut({
-          //     redirect: true,
-          //   });
-          // }}
+            onClick={() => {
+              authClient.signOut({
+                fetchOptions: {
+                  onSuccess: () => {
+                    router.push("/");
+                  },
+                },
+              });
+            }}
           >
             {t("navigation.disconnect")}
           </div>

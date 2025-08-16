@@ -1,5 +1,5 @@
 {
-  "id": "bb8af8f8-04d0-42b6-a193-6abdad2724db",
+  "id": "bd7139ea-e3ba-44dd-8012-8e36e9908fc0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -160,6 +160,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "impersonated_by": {
+          "name": "impersonated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -232,8 +238,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "role": {
-          "name": "role",
+        "internal_role": {
+          "name": "internal_role",
           "type": "Role",
           "typeSchema": "public",
           "primaryKey": false,
@@ -300,6 +306,32 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'regular'"
+        },
+        "banned": {
+          "name": "banned",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "ban_reason": {
+          "name": "ban_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ban_expires": {
+          "name": "ban_expires",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -3028,8 +3060,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.subscription_activities": {
-      "name": "subscription_activities",
+    "public.subscription_to_activity": {
+      "name": "subscription_to_activity",
       "schema": "",
       "columns": {
         "subscription_id": {
@@ -3045,16 +3077,65 @@
           "notNull": true
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "subscription_to_activity_idx": {
+          "name": "subscription_to_activity_idx",
+          "columns": [
+            {
+              "expression": "subscription_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "activity_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "subscription_to_activity_subscription_id_Subscription_id_fk": {
+          "name": "subscription_to_activity_subscription_id_Subscription_id_fk",
+          "tableFrom": "subscription_to_activity",
+          "tableTo": "Subscription",
+          "columnsFrom": [
+            "subscription_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "subscription_to_activity_activity_id_Activity_id_fk": {
+          "name": "subscription_to_activity_activity_id_Activity_id_fk",
+          "tableFrom": "subscription_to_activity",
+          "tableTo": "Activity",
+          "columnsFrom": [
+            "activity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.subscription_activity_groups": {
-      "name": "subscription_activity_groups",
+    "public.subscription_to_activity_group": {
+      "name": "subscription_to_activity_group",
       "schema": "",
       "columns": {
         "subscription_id": {
@@ -3070,16 +3151,65 @@
           "notNull": true
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "subscription_to_activity_group_idx": {
+          "name": "subscription_to_activity_group_idx",
+          "columns": [
+            {
+              "expression": "subscription_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "activity_group_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "subscription_to_activity_group_subscription_id_Subscription_id_fk": {
+          "name": "subscription_to_activity_group_subscription_id_Subscription_id_fk",
+          "tableFrom": "subscription_to_activity_group",
+          "tableTo": "Subscription",
+          "columnsFrom": [
+            "subscription_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "subscription_to_activity_group_activity_group_id_ActivityGroup_id_fk": {
+          "name": "subscription_to_activity_group_activity_group_id_ActivityGroup_id_fk",
+          "tableFrom": "subscription_to_activity_group",
+          "tableTo": "ActivityGroup",
+          "columnsFrom": [
+            "activity_group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.subscription_rooms": {
-      "name": "subscription_rooms",
+    "public.subscription_to_room": {
+      "name": "subscription_to_room",
       "schema": "",
       "columns": {
         "subscription_id": {
@@ -3095,16 +3225,65 @@
           "notNull": true
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "subscription_to_room_idx": {
+          "name": "subscription_to_room_idx",
+          "columns": [
+            {
+              "expression": "subscription_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "room_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "subscription_to_room_subscription_id_Subscription_id_fk": {
+          "name": "subscription_to_room_subscription_id_Subscription_id_fk",
+          "tableFrom": "subscription_to_room",
+          "tableTo": "Subscription",
+          "columnsFrom": [
+            "subscription_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "subscription_to_room_room_id_Room_id_fk": {
+          "name": "subscription_to_room_room_id_Room_id_fk",
+          "tableFrom": "subscription_to_room",
+          "tableTo": "Room",
+          "columnsFrom": [
+            "room_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.subscription_sites": {
-      "name": "subscription_sites",
+    "public.subscription_to_site": {
+      "name": "subscription_to_site",
       "schema": "",
       "columns": {
         "subscription_id": {
@@ -3120,33 +3299,57 @@
           "notNull": true
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.subscription_users": {
-      "name": "subscription_users",
-      "schema": "",
-      "columns": {
-        "subscription_id": {
-          "name": "subscription_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_member_id": {
-          "name": "user_member_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
+      "indexes": {
+        "subscription_to_site_idx": {
+          "name": "subscription_to_site_idx",
+          "columns": [
+            {
+              "expression": "subscription_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "site_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "subscription_to_site_subscription_id_Subscription_id_fk": {
+          "name": "subscription_to_site_subscription_id_Subscription_id_fk",
+          "tableFrom": "subscription_to_site",
+          "tableTo": "Subscription",
+          "columnsFrom": [
+            "subscription_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "subscription_to_site_site_id_Site_id_fk": {
+          "name": "subscription_to_site_site_id_Site_id_fk",
+          "tableFrom": "subscription_to_site",
+          "tableTo": "Site",
+          "columnsFrom": [
+            "site_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -3428,6 +3631,80 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_member_to_subscription": {
+      "name": "user_member_to_subscription",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subscription_id": {
+          "name": "subscription_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "user_member_to_subscription_idx": {
+          "name": "user_member_to_subscription_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "subscription_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "user_member_to_subscription_user_id_UserMember_id_fk": {
+          "name": "user_member_to_subscription_user_id_UserMember_id_fk",
+          "tableFrom": "user_member_to_subscription",
+          "tableTo": "UserMember",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "user_member_to_subscription_subscription_id_Subscription_id_fk": {
+          "name": "user_member_to_subscription_subscription_id_Subscription_id_fk",
+          "tableFrom": "user_member_to_subscription",
+          "tableTo": "Subscription",
+          "columnsFrom": [
+            "subscription_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

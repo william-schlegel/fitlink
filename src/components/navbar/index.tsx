@@ -10,10 +10,10 @@ const BETA = env.NEXT_PUBLIC_BETA === "true";
 
 export default async function Navbar({
   userId,
-  role,
+  internalRole,
 }: {
   userId: string | undefined;
-  role: RoleEnum | undefined | null;
+  internalRole: RoleEnum | undefined | null;
 }) {
   const t = await getTranslations("common");
   const tAuth = await getTranslations("auth");
@@ -110,7 +110,7 @@ export default async function Navbar({
             {userId ? (
               <>
                 <span className="badge badge-primary">
-                  {t(`roles.${role}`)}
+                  {t(`roles.${internalRole}`)}
                 </span>
                 <UserButton />
               </>

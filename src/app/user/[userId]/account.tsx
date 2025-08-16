@@ -30,7 +30,7 @@ type FormValues = {
   searchAddress: string;
   longitude: number;
   latitude: number;
-  role: Role;
+  internalRole: Role;
   range: number;
   description: string;
   aboutMe: string;
@@ -55,7 +55,7 @@ export default function Account() {
         searchAddress: data?.coachData?.searchAddress ?? "",
         longitude: data?.coachData?.longitude ?? LONGITUDE,
         latitude: data?.coachData?.latitude ?? LATITUDE,
-        role: data?.role ?? Role.MEMBER,
+        internalRole: data?.internalRole ?? Role.MEMBER,
         range: data?.coachData?.range ?? 10,
         description: data?.coachData?.description ?? "",
         aboutMe: data?.coachData?.aboutMe ?? "",
@@ -83,7 +83,7 @@ export default function Account() {
   const fields = useWatch({
     control,
     defaultValue: {
-      role: "MEMBER",
+      internalRole: "MEMBER",
       coachingActivities: [],
     },
   });
@@ -119,7 +119,7 @@ export default function Account() {
       searchAddress: data.searchAddress,
       longitude: data.longitude,
       latitude: data.latitude,
-      role: data.role,
+      internalRole: data.internalRole,
       range: Number(data.range),
       description: data.description,
       aboutMe: data.aboutMe,
@@ -176,14 +176,14 @@ export default function Account() {
         onSubmit={handleSubmit(onSubmit)}
       >
         <section className={`grid grid-cols-[auto_1fr] gap-2`}>
-          <label>{t("account.my-role")}</label>
-          {userQuery.data?.role === Role.ADMIN ? (
+          <label>{t("account.my-internalRole")}</label>
+          {userQuery.data?.internalRole === Role.ADMIN ? (
             <div>{t("account.admin")}</div>
           ) : (
             <select
               className="max-w-xs"
-              {...register("role")}
-              defaultValue={userQuery.data?.role}
+              {...register("internalRole")}
+              defaultValue={userQuery.data?.internalRole}
             >
               {ROLE_LIST.filter((rl) => rl.value !== Role.ADMIN).map((rl) => (
                 <option key={rl.value} value={rl.value}>
@@ -192,7 +192,8 @@ export default function Account() {
               ))}
             </select>
           )}
-          {fields?.role === "COACH" || fields.role === "MANAGER_COACH" ? (
+          {fields?.internalRole === "COACH" ||
+          fields.internalRole === "MANAGER_COACH" ? (
             <>
               <label>{t("account.public-name")}</label>
               <input
@@ -245,7 +246,8 @@ export default function Account() {
         </section>
 
         <section>
-          {fields?.role === "COACH" || fields.role === "MANAGER_COACH" ? (
+          {fields?.internalRole === "COACH" ||
+          fields.internalRole === "MANAGER_COACH" ? (
             <div className={`mb-2 grid  grid-cols-[auto_1fr] gap-2`}>
               <AddressSearch
                 label={t("account.google-address")}
@@ -333,7 +335,7 @@ export default function Account() {
             <div className="flex flex-col gap-2">
               <h2>{t("account.plan")}</h2>
               {userQuery.data?.pricingId &&
-              userQuery.data.pricing?.roleTarget === fields?.role ? (
+              userQuery.data.pricing?.roleTarget === fields?.internalRole ? (
                 <>
                   <label className="self-start">
                     {t("account.actual-plan")}
@@ -380,7 +382,11 @@ export default function Account() {
               ) : null}
 
               <SubscriptionForm
-                role={fields.role ?? userQuery.data?.role ?? "MEMBER"}
+                internalRole={
+                  fields.internalRole ??
+                  userQuery.data?.internalRole ??
+                  "MEMBER"
+                }
                 subscriptionId={userQuery.data?.pricingId ?? fields.pricingId}
                 onNewPlan={(newPId, monthly) => {
                   setValue("pricingId", newPId);

@@ -25,7 +25,7 @@ import { getRoleName, ROLE_LIST } from "@lib/useUserInfo";
 type UserFilter = {
   name?: string;
   email?: string;
-  role?: Role;
+  internalRole?: Role;
   dueDate?: Date;
 };
 
@@ -52,7 +52,7 @@ function UserManagement() {
     const flt: UserFilter = {};
     if (data.name) flt.name = data.name;
     if (data.email) flt.email = data.email;
-    if (data.role) flt.role = data.role;
+    if (data.internalRole) flt.internalRole = data.internalRole;
     setFilter(flt);
   };
 
@@ -60,7 +60,7 @@ function UserManagement() {
     console.error("errors", errors);
   };
 
-  if (sessionData && sessionData.user?.role !== Role.ADMIN)
+  if (sessionData && sessionData.user?.internalRole !== Role.ADMIN)
     return <div>{t("admin-only")}</div>;
 
   return (
@@ -100,10 +100,13 @@ function UserManagement() {
                       name: "email",
                     },
                     {
-                      label: t("auth:role"),
-                      name: "role",
+                      label: t("auth:internalRole"),
+                      name: "internalRole",
                       component: (
-                        <select className="max-w-xs" {...register("role")}>
+                        <select
+                          className="max-w-xs"
+                          {...register("internalRole")}
+                        >
                           <option></option>
                           {ROLE_LIST.filter(
                             (rl) => rl.value !== Role.ADMIN
@@ -138,12 +141,12 @@ function UserManagement() {
                     <span>{user.name}</span>
                     <span
                       className={`${
-                        user.role === "MEMBER"
+                        user.internalRole === "MEMBER"
                           ? "badge-secondary"
                           : "badge-accent"
                       } badge`}
                     >
-                      {t(`auth:${getRoleName(user.role)}`)}
+                      {t(`auth:${getRoleName(user.internalRole)}`)}
                     </span>
                   </button>
                 </li>
@@ -213,7 +216,9 @@ export function UserContent({ userId }: UserContentProps) {
           <h2 className="flex items-center justify-between gap-2">
             {t("user.plan")}
             <span className="badge-primary badge">
-              {t(`auth:${getRoleName(userQuery.data?.role ?? "MEMBER")}`)}
+              {t(
+                `auth:${getRoleName(userQuery.data?.internalRole ?? "MEMBER")}`
+              )}
             </span>
           </h2>
           {isInTrial && (
@@ -262,8 +267,8 @@ export function UserContent({ userId }: UserContentProps) {
               </label>
             </span>
           </div>
-          {userQuery.data?.role === "MANAGER" ||
-          userQuery.data?.role === "MANAGER_COACH" ? (
+          {userQuery.data?.internalRole === "MANAGER" ||
+          userQuery.data?.internalRole === "MANAGER_COACH" ? (
             <>
               <h3>{t("user.manager-activity")}</h3>
               <div className="stats shadow">
@@ -307,8 +312,8 @@ export function UserContent({ userId }: UserContentProps) {
               </div>
             </>
           ) : null}
-          {userQuery.data?.role === "COACH" ||
-          userQuery.data?.role === "MANAGER_COACH" ? (
+          {userQuery.data?.internalRole === "COACH" ||
+          userQuery.data?.internalRole === "MANAGER_COACH" ? (
             <>
               <h3>{t("user.coach-activity")}</h3>
               <div className="stats shadow">
@@ -343,8 +348,8 @@ export function UserContent({ userId }: UserContentProps) {
               </div>
             </>
           ) : null}
-          {(userQuery.data?.role === "COACH" ||
-            userQuery.data?.role === "MANAGER_COACH") &&
+          {(userQuery.data?.internalRole === "COACH" ||
+            userQuery.data?.internalRole === "MANAGER_COACH") &&
           userQuery.data?.coachData?.page &&
           userQuery.data.coachData.page.published ? (
             <Link
@@ -372,7 +377,7 @@ export const getServerSideProps = async ({
   res,
 }: GetServerSidePropsContext) => {
   const session = await unstable_getServerSession(req, res, authOptions);
-  if (session?.user?.role !== Role.ADMIN)
+  if (session?.user?.internalRole !== Role.ADMIN)
     return {
       redirect: {
         permanent: false,

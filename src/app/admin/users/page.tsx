@@ -15,16 +15,17 @@ const PER_PAGE = 20;
 export default async function UserManagement({
   searchParams,
 }: {
-  searchParams: Promise<{ filter: TUserFilter; page: number; userId: string }>;
+  searchParams: Promise<{ filter: string; page: number; userId: string }>;
 }) {
-  const { filter = {}, page = 0, userId = "" } = await searchParams;
+  const { filter = "{}", page = 0, userId = "" } = await searchParams;
   const tCommon = await getTranslations("common");
   const t = await getTranslations("admin");
   const user = await getActualUser();
-  if (user?.role !== "ADMIN") return <div>{t("admin-only")}</div>;
+  if (user?.internalRole !== "ADMIN") return <div>{t("admin-only")}</div>;
+  const parsedFilter = JSON.parse(filter) as TUserFilter;
 
   const userQuery = await getAllUsers({
-    filter,
+    filter: parsedFilter,
     skip: page * PER_PAGE,
     take: PER_PAGE,
   });
@@ -43,37 +44,43 @@ export default async function UserManagement({
               <span className="flex items-center gap-4">
                 {t("user.filter")}
                 <span className="badge-info badge">
-                  {Object.keys(filter).length}
+                  {Object.keys(parsedFilter).length}
                 </span>
               </span>
             </div>
             <div className="collapse-content">
-              <UserFilter filter={filter} />
+              <UserFilter filter={parsedFilter} />
             </div>
           </div>
-          <ul className="menu overflow-hidden rounded bg-base-100">
-            {userQuery.users.map((user) => (
-              <li key={user.id}>
-                <Link
-                  className={`flex w-full items-center justify-between text-center ${
-                    userId === user.id ? "active" : ""
-                  }`}
-                  href={`/admin/users?userId=${user.id}`}
-                >
-                  <span>{user.name}</span>
-                  <span
-                    className={`${
-                      user.role === "MEMBER"
-                        ? "badge-secondary"
-                        : "badge-accent"
-                    } badge`}
+          {userQuery.users.length === 0 ? (
+            <div className="text-center">
+              <p>{t("user.no-users")}</p>
+            </div>
+          ) : (
+            <ul className="menu overflow-hidden rounded bg-base-100">
+              {userQuery.users.map((user) => (
+                <li key={user.id}>
+                  <Link
+                    className={`flex w-full items-center justify-between text-center ${
+                      userId === user.id ? "active" : ""
+                    }`}
+                    href={`/admin/users?userId=${user.id}`}
                   >
-                    {tCommon(`roles.${user.role ?? "MEMBER"}`)}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+                    <span>{user.name}</span>
+                    <span
+                      className={`${
+                        user.internalRole === "MEMBER"
+                          ? "badge-secondary"
+                          : "badge-accent"
+                      } badge`}
+                    >
+                      {tCommon(`roles.${user.internalRole ?? "MEMBER"}`)}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
           <Pagination
             actualPage={page}
             count={userQuery.userCount ?? 0}

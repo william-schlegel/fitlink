@@ -5,7 +5,7 @@ import { TRPCError } from "@trpc/server";
 
 export async function isAdmin(throwError: boolean = true) {
   const user = await getActualUser();
-  if (user?.role !== "ADMIN") {
+  if (user?.internalRole !== "ADMIN") {
     if (throwError) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
@@ -17,6 +17,6 @@ export async function isAdmin(throwError: boolean = true) {
   return user;
 }
 
-export function getRoleName(role: RoleEnum) {
-  return ROLE_LIST.find((r) => r.value === role)?.label ?? "???";
+export function getRoleName(internalRole: RoleEnum) {
+  return ROLE_LIST.find((r) => r.value === internalRole)?.label ?? "???";
 }

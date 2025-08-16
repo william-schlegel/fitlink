@@ -11,7 +11,7 @@
       "description": "Description",
       "description-mandatory": "La description est obligatoire",
       "free": "Gratuit",
-      "role": "S'applique à",
+      "internalRole": "S'applique à",
       "euro-per-month": "€/mois",
       "euro-per-year": "€/an",
       "tarif-mandatory": "Le prix est obligatoire",
@@ -64,7 +64,8 @@
       "user-created": "Utilisateur créé",
       "user-updated": "Utilisateur mis à jour",
       "user-deleted": "Utilisateur supprimé",
-      "unrated": "Non noté"
+      "unrated": "Non noté",
+      "no-users": "Aucun utilisateur trouvé"
     },
     "ag": {
       "manage-ag": "Gérer les activités",
@@ -111,7 +112,7 @@
       "your-account": "Votre compte",
       "pricing-mandatory": "Vous devez choisir un abonnement (même gratuit)",
       "payments": "Paiements",
-      "my-role": "Mon rôle",
+      "my-internalRole": "Mon rôle",
       "admin": "Administrateur",
       "public-name": "Nom public",
       "short-presentation": "Présentation rapide",
@@ -141,7 +142,7 @@
     },
     "change-my-name": "Changer mon nom",
     "welcome": "Bienvenue",
-    "role": "Rôle",
+    "internalRole": "Rôle",
     "user": "Utilisateur",
     "coach": "Coach",
     "manager": "Manager",

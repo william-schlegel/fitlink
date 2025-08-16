@@ -220,7 +220,10 @@ export const coachRouter = createTRPCRouter({
   //   ),
   getAllCoachs: publicProcedure.query(() =>
     db.query.user.findMany({
-      where: or(eq(user.role, "COACH"), eq(user.role, "MANAGER_COACH")),
+      where: or(
+        eq(user.internalRole, "COACH"),
+        eq(user.internalRole, "MANAGER_COACH")
+      ),
       with: {
         coachData: {
           with: {
@@ -353,7 +356,7 @@ export const coachRouter = createTRPCRouter({
   // deleteGroup: protectedProcedure
   //   .input(z.cuid2())
   //   .mutation(async ({ ctx, input }) => {
-  //     if (ctx.session.user.role !== Role.ADMIN)
+  //     if (ctx.session.user.internalRole !== Role.ADMIN)
   //       throw new TRPCError({
   //         code: "UNAUTHORIZED",
   //         message: "You are not authorized to delete this group",

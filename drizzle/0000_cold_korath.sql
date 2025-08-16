@@ -38,6 +38,7 @@ CREATE TABLE "session" (
 	"ip_address" text,
 	"user_agent" text,
 	"user_id" text NOT NULL,
+	"impersonated_by" text,
 	CONSTRAINT "session_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
@@ -48,7 +49,7 @@ CREATE TABLE "user" (
 	"email_verified" boolean NOT NULL,
 	"image" text,
 	"profile_image_id" text,
-	"role" "Role" DEFAULT 'MEMBER',
+	"internal_role" "Role" DEFAULT 'MEMBER',
 	"pricing_id" text,
 	"monthly_payment" boolean DEFAULT false,
 	"trial_until" timestamp,
@@ -59,6 +60,10 @@ CREATE TABLE "user" (
 	"chat_token" text,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL,
+	"role" text DEFAULT 'regular',
+	"banned" boolean DEFAULT false,
+	"ban_reason" text,
+	"ban_expires" timestamp,
 	CONSTRAINT "user_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
@@ -431,29 +436,24 @@ CREATE TABLE "Subscription" (
 	"club_id" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "subscription_activities" (
+CREATE TABLE "subscription_to_activity" (
 	"subscription_id" text NOT NULL,
 	"activity_id" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "subscription_activity_groups" (
+CREATE TABLE "subscription_to_activity_group" (
 	"subscription_id" text NOT NULL,
 	"activity_group_id" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "subscription_rooms" (
+CREATE TABLE "subscription_to_room" (
 	"subscription_id" text NOT NULL,
 	"room_id" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "subscription_sites" (
+CREATE TABLE "subscription_to_site" (
 	"subscription_id" text NOT NULL,
 	"site_id" text NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "subscription_users" (
-	"subscription_id" text NOT NULL,
-	"user_member_id" text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "UserCoach" (
@@ -498,6 +498,11 @@ CREATE TABLE "UserMember" (
 	CONSTRAINT "UserMember_user_id_unique" UNIQUE("user_id")
 );
 --> statement-breakpoint
+CREATE TABLE "user_member_to_subscription" (
+	"user_id" text NOT NULL,
+	"subscription_id" text NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "UserNotification" (
 	"id" text PRIMARY KEY NOT NULL,
 	"type" "NotificationType" NOT NULL,
@@ -514,6 +519,16 @@ CREATE TABLE "UserNotification" (
 --> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "subscription_to_activity" ADD CONSTRAINT "subscription_to_activity_subscription_id_Subscription_id_fk" FOREIGN KEY ("subscription_id") REFERENCES "public"."Subscription"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "subscription_to_activity" ADD CONSTRAINT "subscription_to_activity_activity_id_Activity_id_fk" FOREIGN KEY ("activity_id") REFERENCES "public"."Activity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "subscription_to_activity_group" ADD CONSTRAINT "subscription_to_activity_group_subscription_id_Subscription_id_fk" FOREIGN KEY ("subscription_id") REFERENCES "public"."Subscription"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "subscription_to_activity_group" ADD CONSTRAINT "subscription_to_activity_group_activity_group_id_ActivityGroup_id_fk" FOREIGN KEY ("activity_group_id") REFERENCES "public"."ActivityGroup"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "subscription_to_room" ADD CONSTRAINT "subscription_to_room_subscription_id_Subscription_id_fk" FOREIGN KEY ("subscription_id") REFERENCES "public"."Subscription"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "subscription_to_room" ADD CONSTRAINT "subscription_to_room_room_id_Room_id_fk" FOREIGN KEY ("room_id") REFERENCES "public"."Room"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "subscription_to_site" ADD CONSTRAINT "subscription_to_site_subscription_id_Subscription_id_fk" FOREIGN KEY ("subscription_id") REFERENCES "public"."Subscription"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "subscription_to_site" ADD CONSTRAINT "subscription_to_site_site_id_Site_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."Site"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_member_to_subscription" ADD CONSTRAINT "user_member_to_subscription_user_id_UserMember_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."UserMember"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_member_to_subscription" ADD CONSTRAINT "user_member_to_subscription_subscription_id_Subscription_id_fk" FOREIGN KEY ("subscription_id") REFERENCES "public"."Subscription"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "user_pricing_idx" ON "user" USING btree ("pricing_id");--> statement-breakpoint
 CREATE INDEX "activity_group_idx" ON "Activity" USING btree ("group_id");--> statement-breakpoint
 CREATE INDEX "activity_club_idx" ON "Activity" USING btree ("club_id");--> statement-breakpoint
@@ -555,7 +570,12 @@ CREATE INDEX "paiement_subscription_idx" ON "Paiement" USING btree ("subscriptio
 CREATE INDEX "pricing_feature_pricing_idx" ON "PricingFeature" USING btree ("pricing_id");--> statement-breakpoint
 CREATE INDEX "pricing_option_pricing_idx" ON "PricingOption" USING btree ("pricing_id");--> statement-breakpoint
 CREATE INDEX "subscription_club_idx" ON "Subscription" USING btree ("club_id");--> statement-breakpoint
+CREATE INDEX "subscription_to_activity_idx" ON "subscription_to_activity" USING btree ("subscription_id","activity_id");--> statement-breakpoint
+CREATE INDEX "subscription_to_activity_group_idx" ON "subscription_to_activity_group" USING btree ("subscription_id","activity_group_id");--> statement-breakpoint
+CREATE INDEX "subscription_to_room_idx" ON "subscription_to_room" USING btree ("subscription_id","room_id");--> statement-breakpoint
+CREATE INDEX "subscription_to_site_idx" ON "subscription_to_site" USING btree ("subscription_id","site_id");--> statement-breakpoint
 CREATE INDEX "user_coach_user_idx" ON "UserCoach" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "user_document_user_idx" ON "UserDocument" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "user_member_to_subscription_idx" ON "user_member_to_subscription" USING btree ("user_id","subscription_id");--> statement-breakpoint
 CREATE INDEX "user_notification_user_to_idx" ON "UserNotification" USING btree ("user_to_id");--> statement-breakpoint
 CREATE INDEX "user_notification_user_from_idx" ON "UserNotification" USING btree ("user_from_id");

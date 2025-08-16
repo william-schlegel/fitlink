@@ -28,7 +28,7 @@ export const user = pgTable(
     emailVerified: boolean("email_verified").notNull(),
     image: text("image"),
     profileImageId: text("profile_image_id"),
-    role: roleEnum("role").default("MEMBER"),
+    internalRole: roleEnum("internal_role").default("MEMBER"),
     pricingId: text("pricing_id"),
     monthlyPayment: boolean("monthly_payment").default(false),
     trialUntil: timestamp("trial_until"),
@@ -39,6 +39,10 @@ export const user = pgTable(
     chatToken: text("chat_token"),
     createdAt: timestamp("created_at").notNull(),
     updatedAt: timestamp("updated_at").notNull(),
+    role: text("role").default("regular"),
+    banned: boolean("banned").default(false),
+    banReason: text("ban_reason"),
+    banExpires: timestamp("ban_expires"),
   },
   (table) => [index("user_pricing_idx").on(table.pricingId)]
 );
@@ -80,6 +84,7 @@ export const session = pgTable("session", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
+  impersonatedBy: text("impersonated_by"),
 });
 
 export const sessionRelations = relations(session, ({ one }) => ({

@@ -29,9 +29,9 @@ export const dashboardRouter = createTRPCRouter({
     .input(z.string())
     .query(async ({ ctx, input }) => {
       if (
-        ctx.user.role !== "ADMIN" &&
-        ctx.user.role !== "MANAGER" &&
-        ctx.user.role !== "MANAGER_COACH"
+        ctx.user.internalRole !== "ADMIN" &&
+        ctx.user.internalRole !== "MANAGER" &&
+        ctx.user.internalRole !== "MANAGER_COACH"
       )
         throw new TRPCError({
           code: "UNAUTHORIZED",
@@ -117,9 +117,9 @@ export const dashboardRouter = createTRPCRouter({
     .input(z.string())
     .query(async ({ ctx, input }) => {
       if (
-        ctx.user.role !== "ADMIN" &&
-        ctx.user.role !== "COACH" &&
-        ctx.user.role !== "MANAGER_COACH"
+        ctx.user.internalRole !== "ADMIN" &&
+        ctx.user.internalRole !== "COACH" &&
+        ctx.user.internalRole !== "MANAGER_COACH"
       )
         throw new TRPCError({
           code: "UNAUTHORIZED",
@@ -142,7 +142,7 @@ export const dashboardRouter = createTRPCRouter({
       return clubData;
     }),
   getAdminData: protectedProcedure.query(async ({ ctx }) => {
-    if (ctx.user.role !== "ADMIN")
+    if (ctx.user.internalRole !== "ADMIN")
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "You are not admin",

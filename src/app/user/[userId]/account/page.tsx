@@ -23,7 +23,7 @@ export default async function Account({
   //       searchAddress: data?.coachData?.searchAddress ?? "",
   //       longitude: data?.coachData?.longitude ?? LONGITUDE,
   //       latitude: data?.coachData?.latitude ?? LATITUDE,
-  //       role: data?.role ?? Role.MEMBER,
+  //       internalRole: data?.internalRole ?? Role.MEMBER,
   //       range: data?.coachData?.range ?? 10,
   //       description: data?.coachData?.description ?? "",
   //       aboutMe: data?.coachData?.aboutMe ?? "",

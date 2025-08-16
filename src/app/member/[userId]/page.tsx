@@ -18,7 +18,10 @@ export default async function MemberDashboard({
 }) {
   const user = await getActualUser();
   const userId = params.userId;
-  if (!user || (user.role !== "MEMBER" && user.role !== "ADMIN")) {
+  if (
+    !user ||
+    (user.internalRole !== "MEMBER" && user.internalRole !== "ADMIN")
+  ) {
     redirect("/", RedirectType.replace);
   }
   const t = await getTranslations("dashboard");

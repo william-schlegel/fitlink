@@ -3,10 +3,11 @@ import { createAuthClient } from "better-auth/react";
 import { trpc } from "../trpc/client";
 import { magicLinkClient } from "better-auth/client/plugins";
 import { GetUserByIdOptions } from "@/server/api/routers/users";
+import { adminClient } from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
   baseURL: env.NEXT_PUBLIC_HOSTNAME,
-  plugins: [magicLinkClient()],
+  plugins: [magicLinkClient(), adminClient()],
 });
 
 export const { useSession } = authClient;

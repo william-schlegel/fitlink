@@ -71,7 +71,7 @@ export const fileRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      if (ctx.user.role !== "ADMIN" && ctx.user.id !== input.userId) {
+      if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not allowed to upload a file",
@@ -108,7 +108,7 @@ export const fileRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      if (ctx.user.role !== "ADMIN" && ctx.user.id !== input.userId) {
+      if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not allowed to upload a file",
@@ -145,7 +145,7 @@ export const fileRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      if (ctx.user.role !== "ADMIN" && ctx.user.id !== input.userId) {
+      if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not allowed to get these files",
@@ -172,7 +172,7 @@ export const fileRouter = createTRPCRouter({
       z.object({ userId: z.string().cuid2(), documentId: z.string().cuid2() })
     )
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "ADMIN" && ctx.user.id !== input.userId) {
+      if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not allowed to delete this file",

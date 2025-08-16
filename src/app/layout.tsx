@@ -34,7 +34,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <TRPCProvider>
             <div className="bg-base-200 grid min-h-screen grid-rows-[auto_1fr_auto]">
-              <Navbar userId={user?.id} role={user?.role} />
+              <Navbar userId={user?.id} internalRole={user?.internalRole} />
               <main>{children}</main>
               <Footer />
             </div>

@@ -45,7 +45,7 @@ export default async function UserContent({ userId }: UserContentProps) {
           <h2 className="flex items-center justify-between gap-2">
             {t("admin.user.plan")}
             <span className="badge-primary badge">
-              {t(`common.roles.${userQuery?.role ?? "MEMBER"}`)}
+              {t(`common.roles.${userQuery?.internalRole ?? "MEMBER"}`)}
             </span>
           </h2>
           {isInTrial && (
@@ -78,8 +78,8 @@ export default async function UserContent({ userId }: UserContentProps) {
               monthlyPayment={userQuery?.monthlyPayment ?? false}
             />
           </div>
-          {userQuery?.role === "MANAGER" ||
-          userQuery?.role === "MANAGER_COACH" ? (
+          {userQuery?.internalRole === "MANAGER" ||
+          userQuery?.internalRole === "MANAGER_COACH" ? (
             <>
               <h3>{t("admin.user.manager-activity")}</h3>
               <div className="stats shadow">
@@ -122,8 +122,8 @@ export default async function UserContent({ userId }: UserContentProps) {
               </div>
             </>
           ) : null}
-          {userQuery?.role === "COACH" ||
-          userQuery?.role === "MANAGER_COACH" ? (
+          {userQuery?.internalRole === "COACH" ||
+          userQuery?.internalRole === "MANAGER_COACH" ? (
             <>
               <h3>{t("admin.user.coach-activity")}</h3>
               <div className="stats shadow">
@@ -157,8 +157,8 @@ export default async function UserContent({ userId }: UserContentProps) {
               </div>
             </>
           ) : null}
-          {(userQuery?.role === "COACH" ||
-            userQuery?.role === "MANAGER_COACH") &&
+          {(userQuery?.internalRole === "COACH" ||
+            userQuery?.internalRole === "MANAGER_COACH") &&
           userQuery?.coachData?.page &&
           userQuery.coachData.page.published ? (
             <Link

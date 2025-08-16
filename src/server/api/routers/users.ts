@@ -42,7 +42,7 @@ const UserFilter = z
   .object({
     name: z.string(),
     email: z.string(),
-    role: z.enum(roleEnum.enumValues),
+    internalRole: z.enum(roleEnum.enumValues),
     dueDate: z.date(),
     dateOperation: z.enum(["gt", "lt"]),
   })
@@ -90,7 +90,7 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
 
   if (
     options?.withMemberData &&
-    (u?.role === "COACH" || u?.role === "MANAGER_COACH")
+    (u?.internalRole === "COACH" || u?.internalRole === "MANAGER_COACH")
   ) {
     coachData = await db.query.userCoach.findFirst({
       where: eq(userCoach.userId, id),
@@ -134,7 +134,7 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
     email: u.email,
     phone: u.phone,
     address: u.address,
-    role: u.role,
+    internalRole: u.internalRole,
     profileImageId: u.profileImageId,
     profileImageUrl,
     pricingId: u.pricingId,
@@ -167,7 +167,7 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
   //       coachingActivities?: (typeof coachingActivity.$inferSelect)[];
   //     })
   //   | undefined = undefined;
-  // if (u?.role === "COACH" || u?.role === "MANAGER_COACH") {
+  // if (u?.internalRole === "COACH" || u?.internalRole === "MANAGER_COACH") {
   //   coachData = await db.query.userCoach.findFirst({
   //     where: eq(userCoach.userId, id),
   //     with: {
@@ -180,7 +180,7 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
   //       subscriptions?: FullSubscription[];
   //     })
   //   | undefined = undefined;
-  // if (u?.role === "MEMBER") {
+  // if (u?.internalRole === "MEMBER") {
   //   const memberJoin = await db.query.userMember.findFirst({
   //     where: eq(userMember.userId, id),
   //     with: {
@@ -234,7 +234,7 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
   //       managedClubs?: (typeof club.$inferSelect)[];
   //     })
   //   | undefined = undefined;
-  // if (u?.role === "MANAGER" || u?.role === "MANAGER_COACH") {
+  // if (u?.internalRole === "MANAGER" || u?.internalRole === "MANAGER_COACH") {
   //   managerData = await db.query.userManager.findFirst({
   //     where: eq(userManager.userId, id),
   //     with: {
@@ -270,14 +270,18 @@ export async function getAllUsers(input: {
   take: number;
 }) {
   await isAdmin(true);
+  console.log("input", input);
   const filter: SQL[] = [];
   if (input.filter?.name)
     filter.push(ilike(user.name, `%${input.filter.name}%`));
   if (input.filter?.email)
     filter.push(ilike(user.email, `%${input.filter.email}%`));
-  if (input.filter?.role) filter.push(eq(user.role, input.filter.role));
+  if (input.filter?.internalRole)
+    filter.push(eq(user.internalRole, input.filter.internalRole));
   if (input.filter?.dueDate)
     filter.push(eq(user.cancelationDate, input.filter.dueDate));
+
+  console.log("filter", filter);
   return db.transaction(async (tx) => {
     const userCount = await tx
       .select({ count: count() })
@@ -418,7 +422,7 @@ export const userRouter = createTRPCRouter({
         email: z.email().optional(),
         phone: z.string().optional(),
         address: z.string().optional(),
-        role: z.enum(roleEnum.enumValues).optional(),
+        internalRole: z.enum(roleEnum.enumValues).optional(),
         pricingId: z.cuid2().optional(),
         monthlyPayment: z.boolean().optional(),
         cancelationDate: z.date().optional(),
@@ -435,14 +439,17 @@ export const userRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      if (input.role === "ADMIN" && ctx.user?.role !== "ADMIN")
+      if (input.internalRole === "ADMIN" && ctx.user?.internalRole !== "ADMIN")
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Only an admin user can give admin access",
         });
 
       db.transaction(async (tx) => {
-        if (input.role === "COACH" || input.role === "MANAGER_COACH") {
+        if (
+          input.internalRole === "COACH" ||
+          input.internalRole === "MANAGER_COACH"
+        ) {
           await tx.delete(userCoach).where(eq(userCoach.userId, input.id));
           await tx.insert(userCoach).values({
             userId: input.id,
@@ -477,11 +484,11 @@ export const userRouter = createTRPCRouter({
           // });
         }
 
-        // update role in stream chat if admin
-        // if (input.role === "ADMIN") {
+        // update internalRole in stream chat if admin
+        // if (input.internalRole === "ADMIN") {
         //   await streamchatClient.partialUpdateUser({
         //     id: input.id,
-        //     set: { role: "admin" },
+        //     set: { internalRole: "admin" },
         //   });
         // }
 
@@ -492,7 +499,7 @@ export const userRouter = createTRPCRouter({
             email: input.email,
             phone: input.phone,
             address: input.address,
-            role: input.role,
+            internalRole: input.internalRole,
             profileImageId: input.profileImageId,
             pricingId: input.pricingId,
             monthlyPayment: input.monthlyPayment,
@@ -505,7 +512,7 @@ export const userRouter = createTRPCRouter({
   deleteUser: protectedProcedure
     .input(z.string())
     .mutation(({ ctx, input }) => {
-      if (ctx.user?.role !== "ADMIN")
+      if (ctx.user?.internalRole !== "ADMIN")
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Only an admin user can delete a user",
@@ -515,7 +522,7 @@ export const userRouter = createTRPCRouter({
   updatePaymentPeriod: protectedProcedure
     .input(z.object({ userId: z.string(), monthlyPayment: z.boolean() }))
     .mutation(({ ctx, input }) => {
-      if (ctx.user?.id !== input.userId && ctx.user?.role !== "ADMIN")
+      if (ctx.user?.id !== input.userId && ctx.user?.internalRole !== "ADMIN")
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Only an admin or actual user can change periodicity",

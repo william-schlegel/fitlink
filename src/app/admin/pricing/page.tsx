@@ -43,7 +43,8 @@ export default async function PricingManagement({
 
   const user = await getActualUser();
 
-  if (user && user.role !== "ADMIN") return <div>{t("admin-only")}</div>;
+  if (user && user.internalRole !== "ADMIN")
+    return <div>{t("admin-only")}</div>;
 
   return (
     <div
