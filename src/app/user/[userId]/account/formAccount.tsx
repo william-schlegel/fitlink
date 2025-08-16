@@ -23,6 +23,7 @@ import { SubscriptionForm } from "@/components/modals/manageUser";
 import { ROLE_LIST } from "@/lib/data";
 import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 type FormValues = {
   searchAddress: string;

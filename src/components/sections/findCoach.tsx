@@ -14,6 +14,7 @@ import { env } from "@/env";
 import hslToHex from "@/lib/hslToHex";
 import Rating from "../ui/rating";
 import generateCircle from "./utils";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 type FindCoachProps = {
   address?: string;

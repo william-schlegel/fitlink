@@ -28,6 +28,7 @@ import {
 import { pricing, subscription } from "@/db/schema/subscription";
 import { isAdmin } from "@/server/lib/userTools";
 import { TUserFilter } from "@/app/admin/users/userFilter";
+import { auth } from "@/lib/auth/server";
 // import bcrypt from "bcrypt";
 
 type FullSubscription = typeof subscription.$inferSelect & {
@@ -601,50 +602,38 @@ export const userRouter = createTRPCRouter({
   //       },
   //     })
   //   ,
-  // createUserWithCredentials: publicProcedure
-  //   .input(
-  //     z.object({
-  //       name: z.string(),
-  //       email: z.string().email(),
-  //       password: z.string(),
-  //     })
-  //   )
-  //   .mutation(async ({ ctx, input }) => {
-  //     // check if user exist with email
-  //     const userData = await db.query.user.findFirst({
-  //       where: eq(user.email, input.email),
-  //     });
-  //     if (userData)
-  //       throw new TRPCError({
-  //         code: "CONFLICT",
-  //         message: "email already in use",
-  //       });
-  //     // encrypt password
-  //     const encPwd = await bcrypt.hash(input.password, 12);
-  //     // create user
-  //     return db.insert(user).values({
-  //         email: input.email,
-  //         password: encPwd,
-  //         name: input.name,
-  //     });
-  //   }),
-  // getUserByCredentials: publicProcedure
-  //   .input(z.object({ email: z.email(), password: z.string() }))
-  //   .query(async ({ input }) => {
-  //     const userData = await db.query.user.findFirst({
-  //       where: eq(user.email, input.email ),
-  //     });
-  //     if (!userData)
-  //       throw new TRPCError({
-  //         code: "BAD_REQUEST",
-  //         message: "wrong credentials",
-  //       });
-  //     const pwdOk = await bcrypt.compare(input.password, userData.password ?? "");
-  //     if (!pwdOk)
-  //       throw new TRPCError({
-  //         code: "BAD_REQUEST",
-  //         message: "wrong credentials",
-  //       });
-  //     return user;
-  //   }),
+  createUserWithCredentials: publicProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        email: z.string().email(),
+        password: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      // check if user exist with email
+      const userData = await db.query.user.findFirst({
+        where: eq(user.email, input.email),
+      });
+      if (userData)
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "email already in use",
+        });
+      const newUser = await auth.api.createUser({
+        body: {
+          email: input.email,
+          password: input.password,
+          name: input.name,
+          role: "user",
+          data: { internalRole: "MEMBER" },
+        },
+      });
+      if (newUser.user?.id) return await getUserById(newUser.user.id);
+
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to create user",
+      });
+    }),
 });

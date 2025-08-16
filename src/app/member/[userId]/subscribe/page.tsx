@@ -1,0 +1,24 @@
+import FindClub from "@/components/sections/findClub";
+import Title from "@/components/title";
+import { getUserById } from "@/server/api/routers/users";
+import { getTranslations } from "next-intl/server";
+
+export default async function Subscribe({
+  params,
+}: {
+  params: Promise<{ userId: string }>;
+}) {
+  const t = await getTranslations("auth");
+
+  const userId = (await params).userId;
+  const userQuery = await getUserById(userId);
+  return (
+    <div className="container mx-auto my-2 space-y-2 p-2">
+      <Title title={t("new-subscription")} />
+      <h1 className="flex justify-between">{t("new-subscription")}</h1>
+      <h2>{t("find-club")}</h2>
+      <p>{t("how-to-subscribe")}</p>
+      <FindClub address={userQuery?.address ?? ""} />
+    </div>
+  );
+}

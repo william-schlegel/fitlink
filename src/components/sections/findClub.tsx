@@ -13,6 +13,7 @@ import ButtonIcon from "../ui/buttonIcon";
 import { env } from "@/env";
 import hslToHex from "@/lib/hslToHex";
 import generateCircle from "./utils";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 type FindClubProps = {
   address?: string;

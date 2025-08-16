@@ -17,8 +17,11 @@ export default function FormEmail() {
         }
         className="grid grid-cols-[auto,1fr] gap-2"
       >
-        <label className="required">{t("signin.my-email")}</label>
+        <label htmlFor="email" className="required">
+          {t("signin.my-email")}
+        </label>
         <input
+          id="email"
           type="email"
           required
           name="email"
@@ -40,8 +43,11 @@ export default function FormEmail() {
         }
         className="grid grid-cols-[auto,1fr] gap-2"
       >
-        <label className="required">{t("signin.password")}</label>
+        <label htmlFor="password" className="required">
+          {t("signin.password")}
+        </label>
         <input
+          id="password"
           type="password"
           required
           name="password"
