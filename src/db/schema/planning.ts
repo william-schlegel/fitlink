@@ -69,6 +69,7 @@ export const planningRelations = relations(planning, ({ one, many }) => ({
     references: [userCoach.userId],
   }),
   planningActivities: many(planningActivity),
+  openingCalendars: many(openingCalendarPlannings),
 }));
 
 export const planningActivity = pgTable(
@@ -157,27 +158,219 @@ export const reservationRelations = relations(reservation, ({ one }) => ({
   }),
 }));
 
-export const openingCalendarRooms = pgTable("opening_calendar_rooms", {
-  openingCalendarId: text("opening_calendar_id").notNull(),
-  roomId: text("room_id").notNull(),
-});
+// Many-to-many intermediate tables for openingCalendar relationships
+export const openingCalendarClubs = pgTable(
+  "OpeningCalendarClubs",
+  {
+    id: text("id").primaryKey().$defaultFn(createId),
+    openingCalendarId: text("opening_calendar_id")
+      .notNull()
+      .references(() => openingCalendar.id),
+    clubId: text("club_id")
+      .notNull()
+      .references(() => club.id),
+  },
+  (table) => [
+    index("opening_calendar_clubs_calendar_idx").on(table.openingCalendarId),
+    index("opening_calendar_clubs_club_idx").on(table.clubId),
+  ]
+);
 
-export const openingCalendarClubs = pgTable("opening_calendar_clubs", {
-  openingCalendarId: text("opening_calendar_id").notNull(),
-  clubId: text("club_id").notNull(),
-});
+export const openingCalendarSites = pgTable(
+  "OpeningCalendarSites",
+  {
+    id: text("id").primaryKey().$defaultFn(createId),
+    openingCalendarId: text("opening_calendar_id")
+      .notNull()
+      .references(() => openingCalendar.id),
+    siteId: text("site_id")
+      .notNull()
+      .references(() => site.id),
+  },
+  (table) => [
+    index("opening_calendar_sites_calendar_idx").on(table.openingCalendarId),
+    index("opening_calendar_sites_site_idx").on(table.siteId),
+  ]
+);
 
-export const openingCalendarSites = pgTable("opening_calendar_sites", {
-  openingCalendarId: text("opening_calendar_id").notNull(),
-  siteId: text("site_id").notNull(),
-});
+export const openingCalendarRooms = pgTable(
+  "OpeningCalendarRooms",
+  {
+    id: text("id").primaryKey().$defaultFn(createId),
+    openingCalendarId: text("opening_calendar_id")
+      .notNull()
+      .references(() => openingCalendar.id),
+    roomId: text("room_id")
+      .notNull()
+      .references(() => room.id),
+  },
+  (table) => [
+    index("opening_calendar_rooms_calendar_idx").on(table.openingCalendarId),
+    index("opening_calendar_rooms_room_idx").on(table.roomId),
+  ]
+);
 
-export const dayOpeningTimeCalendars = pgTable("day_opening_time_calendars", {
-  dayOpeningTimeId: text("day_opening_time_id").notNull(),
-  openingCalendarId: text("opening_calendar_id").notNull(),
-});
+export const openingCalendarPlannings = pgTable(
+  "OpeningCalendarPlannings",
+  {
+    id: text("id").primaryKey().$defaultFn(createId),
+    openingCalendarId: text("opening_calendar_id")
+      .notNull()
+      .references(() => openingCalendar.id),
+    planningId: text("planning_id")
+      .notNull()
+      .references(() => planning.id),
+  },
+  (table) => [
+    index("opening_calendar_plannings_calendar_idx").on(
+      table.openingCalendarId
+    ),
+    index("opening_calendar_plannings_planning_idx").on(table.planningId),
+  ]
+);
 
-export const openingTimeDays = pgTable("opening_time_days", {
-  openingTimeId: text("opening_time_id").notNull(),
-  dayOpeningTimeId: text("day_opening_time_id").notNull(),
-});
+export const dayOpeningTimeCalendars = pgTable(
+  "DayOpeningTimeCalendars",
+  {
+    id: text("id").primaryKey().$defaultFn(createId),
+    dayOpeningTimeId: text("day_opening_time_id")
+      .notNull()
+      .references(() => dayOpeningTime.id),
+    openingCalendarId: text("opening_calendar_id")
+      .notNull()
+      .references(() => openingCalendar.id),
+  },
+  (table) => [
+    index("day_opening_time_calendars_day_idx").on(table.dayOpeningTimeId),
+    index("day_opening_time_calendars_calendar_idx").on(
+      table.openingCalendarId
+    ),
+  ]
+);
+
+export const openingTimeDays = pgTable(
+  "OpeningTimeDays",
+  {
+    id: text("id").primaryKey().$defaultFn(createId),
+    openingTimeId: text("opening_time_id")
+      .notNull()
+      .references(() => openingTime.id),
+    dayOpeningTimeId: text("day_opening_time_id")
+      .notNull()
+      .references(() => dayOpeningTime.id),
+  },
+  (table) => [
+    index("opening_time_days_time_idx").on(table.openingTimeId),
+    index("opening_time_days_day_idx").on(table.dayOpeningTimeId),
+  ]
+);
+
+// Relations for openingCalendar
+export const openingCalendarRelations = relations(
+  openingCalendar,
+  ({ many }) => ({
+    clubs: many(openingCalendarClubs),
+    sites: many(openingCalendarSites),
+    rooms: many(openingCalendarRooms),
+    plannings: many(openingCalendarPlannings),
+    dayOpeningTimes: many(dayOpeningTimeCalendars),
+  })
+);
+
+// Relations for intermediate tables
+export const openingCalendarClubsRelations = relations(
+  openingCalendarClubs,
+  ({ one }) => ({
+    openingCalendar: one(openingCalendar, {
+      fields: [openingCalendarClubs.openingCalendarId],
+      references: [openingCalendar.id],
+    }),
+    club: one(club, {
+      fields: [openingCalendarClubs.clubId],
+      references: [club.id],
+    }),
+  })
+);
+
+export const openingCalendarSitesRelations = relations(
+  openingCalendarSites,
+  ({ one }) => ({
+    openingCalendar: one(openingCalendar, {
+      fields: [openingCalendarSites.openingCalendarId],
+      references: [openingCalendar.id],
+    }),
+    site: one(site, {
+      fields: [openingCalendarSites.siteId],
+      references: [site.id],
+    }),
+  })
+);
+
+export const openingCalendarRoomsRelations = relations(
+  openingCalendarRooms,
+  ({ one }) => ({
+    openingCalendar: one(openingCalendar, {
+      fields: [openingCalendarRooms.openingCalendarId],
+      references: [openingCalendar.id],
+    }),
+    room: one(room, {
+      fields: [openingCalendarRooms.roomId],
+      references: [room.id],
+    }),
+  })
+);
+
+export const openingCalendarPlanningsRelations = relations(
+  openingCalendarPlannings,
+  ({ one }) => ({
+    openingCalendar: one(openingCalendar, {
+      fields: [openingCalendarPlannings.openingCalendarId],
+      references: [openingCalendar.id],
+    }),
+    planning: one(planning, {
+      fields: [openingCalendarPlannings.planningId],
+      references: [planning.id],
+    }),
+  })
+);
+
+// Relations for dayOpeningTime and openingTime
+export const dayOpeningTimeRelations = relations(
+  dayOpeningTime,
+  ({ many }) => ({
+    openingTimes: many(openingTimeDays),
+    calendars: many(dayOpeningTimeCalendars),
+  })
+);
+
+export const dayOpeningTimeCalendarsRelations = relations(
+  dayOpeningTimeCalendars,
+  ({ one }) => ({
+    dayOpeningTime: one(dayOpeningTime, {
+      fields: [dayOpeningTimeCalendars.dayOpeningTimeId],
+      references: [dayOpeningTime.id],
+    }),
+    openingCalendar: one(openingCalendar, {
+      fields: [dayOpeningTimeCalendars.openingCalendarId],
+      references: [openingCalendar.id],
+    }),
+  })
+);
+
+export const openingTimeRelations = relations(openingTime, ({ many }) => ({
+  days: many(openingTimeDays),
+}));
+
+export const openingTimeDaysRelations = relations(
+  openingTimeDays,
+  ({ one }) => ({
+    openingTime: one(openingTime, {
+      fields: [openingTimeDays.openingTimeId],
+      references: [openingTime.id],
+    }),
+    dayOpeningTime: one(dayOpeningTime, {
+      fields: [openingTimeDays.dayOpeningTimeId],
+      references: [dayOpeningTime.id],
+    }),
+  })
+);

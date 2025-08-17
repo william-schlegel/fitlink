@@ -59,9 +59,9 @@ export const CreatePricing = ({ variant = "Primary" }: CreatePricingProps) => {
   const utils = trpc.useUtils();
   const router = useRouter();
 
-  const createPricing = trpc.pricing.createPricing.useMutation({
+  const createPricing = trpc.pricings.createPricing.useMutation({
     onSuccess: () => {
-      utils.pricing.getAllPricing.invalidate();
+      utils.pricings.getAllPricing.invalidate();
       form.reset();
       toast.success(t("pricing.created"));
       router.refresh();
@@ -129,7 +129,7 @@ export const UpdatePricing = ({
   const t = useTranslations("admin");
   const utils = trpc.useUtils();
   const { getListForRole } = useFeature();
-  const queryPricing = trpc.pricing.getPricingById.useQuery(pricingId);
+  const queryPricing = trpc.pricings.getPricingById.useQuery(pricingId);
   const router = useRouter();
 
   useEffect(() => {
@@ -156,9 +156,9 @@ export const UpdatePricing = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryPricing.data]);
 
-  const updatePricing = trpc.pricing.updatePricing.useMutation({
+  const updatePricing = trpc.pricings.updatePricing.useMutation({
     onSuccess: () => {
-      utils.pricing.getPricingById.invalidate(pricingId);
+      utils.pricings.getPricingById.invalidate(pricingId);
       form.reset();
       toast.success(t("pricing.updated"));
       router.refresh();
@@ -227,10 +227,10 @@ export const DeletePricing = ({
   const utils = trpc.useUtils();
   const t = useTranslations("admin");
 
-  const deletePricing = trpc.pricing.deletePricing.useMutation({
+  const deletePricing = trpc.pricings.deletePricing.useMutation({
     onSuccess: () => {
-      utils.pricing.getPricingById.invalidate(pricingId);
-      utils.pricing.getAllPricing.invalidate();
+      utils.pricings.getPricingById.invalidate(pricingId);
+      utils.pricings.getAllPricing.invalidate();
       toast.success(t("pricing.deleted"));
     },
     onError(error) {
@@ -258,10 +258,10 @@ export const UndeletePricing = ({
   const utils = trpc.useUtils();
   const t = useTranslations("admin");
 
-  const undeletePricing = trpc.pricing.undeletePricing.useMutation({
+  const undeletePricing = trpc.pricings.undeletePricing.useMutation({
     onSuccess: () => {
-      utils.pricing.getPricingById.invalidate(pricingId);
-      utils.pricing.getAllPricing.invalidate();
+      utils.pricings.getPricingById.invalidate(pricingId);
+      utils.pricings.getAllPricing.invalidate();
       toast.success(t("pricing.restored"));
     },
     onError(error) {
@@ -293,7 +293,7 @@ function PricingForm() {
   } = useFormContext<PricingFormValues>();
   const refOpt = useRef<HTMLInputElement>(null);
   const deleteIsOver = useRef(false);
-  const deletePricingOption = trpc.pricing.deletePricingOption.useMutation();
+  const deletePricingOption = trpc.pricings.deletePricingOption.useMutation();
   const fields = useWatch({
     control,
     defaultValue: { free: false, features: [], options: [] },

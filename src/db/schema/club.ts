@@ -8,9 +8,11 @@ import {
   integer,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { userCoach, userDocument, userManager } from "./user";
+import { userCoach, userDocument, userManager, userMember } from "./user";
 import {
-  openingCalendar,
+  openingCalendarClubs,
+  openingCalendarSites,
+  openingCalendarRooms,
   planning,
   planningActivity,
   reservation,
@@ -54,13 +56,14 @@ export const clubRelations = relations(club, ({ one, many }) => ({
   }),
   sites: many(site),
   activities: many(activity),
-  calendars: many(openingCalendar),
   pages: many(page),
   plannings: many(planning),
   subscriptions: many(subscription),
   events: many(event),
   marketPlaceSearchs: many(coachMarketPlace),
-  coachs: many(userCoach),
+  openingCalendars: many(openingCalendarClubs),
+  members: many(clubMembers),
+  coaches: many(clubCoachs),
 }));
 
 export const site = pgTable(
@@ -84,11 +87,11 @@ export const siteRelations = relations(site, ({ one, many }) => ({
     references: [club.id],
   }),
   rooms: many(room),
-  calendars: many(openingCalendar),
   plannings: many(planning),
   planningActivities: many(planningActivity),
   subscriptions: many(subscriptionToSite),
   marketPlaceSearchs: many(coachMarketPlace),
+  openingCalendars: many(openingCalendarSites),
 }));
 
 export const room = pgTable(
@@ -111,12 +114,12 @@ export const roomRelations = relations(room, ({ one, many }) => ({
     fields: [room.siteId],
     references: [site.id],
   }),
-  calendars: many(openingCalendar),
   plannings: many(planning),
   planningActivities: many(planningActivity),
   subscriptions: many(subscriptionToRoom),
   reservations: many(reservation),
-  activities: many(activity),
+  openingCalendars: many(openingCalendarRooms),
+  activities: many(roomActivities),
 }));
 
 export const event = pgTable(
@@ -214,10 +217,10 @@ export const activityRelations = relations(activity, ({ one, many }) => ({
     fields: [activity.clubId],
     references: [club.id],
   }),
-  rooms: many(room),
   planningActivities: many(planningActivity),
   subscriptions: many(subscriptionToActivity),
   reservations: many(reservation),
+  rooms: many(roomActivities),
 }));
 export const coachingActivity = pgTable(
   "CoachingActivity",
@@ -239,17 +242,87 @@ export const coachingActivityRelations = relations(
   })
 );
 
-export const clubMembers = pgTable("club_members", {
-  clubId: text("club_id").notNull(),
-  memberUserId: text("member_user_id").notNull(),
-});
+export const clubMembers = pgTable(
+  "ClubMembers",
+  {
+    id: text("id").primaryKey().$defaultFn(createId),
+    clubId: text("club_id")
+      .notNull()
+      .references(() => club.id),
+    memberUserId: text("member_user_id")
+      .notNull()
+      .references(() => userMember.userId),
+  },
+  (table) => [
+    index("club_members_club_idx").on(table.clubId),
+    index("club_members_member_idx").on(table.memberUserId),
+  ]
+);
 
-export const clubCoachs = pgTable("club_coachs", {
-  clubId: text("club_id").notNull(),
-  coachUserId: text("coach_user_id").notNull(),
-});
+export const clubCoachs = pgTable(
+  "ClubCoachs",
+  {
+    id: text("id").primaryKey().$defaultFn(createId),
+    clubId: text("club_id")
+      .notNull()
+      .references(() => club.id),
+    coachUserId: text("coach_user_id")
+      .notNull()
+      .references(() => userCoach.userId),
+  },
+  (table) => [
+    index("club_coachs_club_idx").on(table.clubId),
+    index("club_coachs_coach_idx").on(table.coachUserId),
+  ]
+);
 
-export const roomActivities = pgTable("room_activities", {
-  roomId: text("room_id").notNull(),
-  activityId: text("activity_id").notNull(),
-});
+export const roomActivities = pgTable(
+  "RoomActivities",
+  {
+    id: text("id").primaryKey().$defaultFn(createId),
+    roomId: text("room_id")
+      .notNull()
+      .references(() => room.id),
+    activityId: text("activity_id")
+      .notNull()
+      .references(() => activity.id),
+  },
+  (table) => [
+    index("room_activities_room_idx").on(table.roomId),
+    index("room_activities_activity_idx").on(table.activityId),
+  ]
+);
+
+// Relations for many-to-many intermediate tables
+export const clubMembersRelations = relations(clubMembers, ({ one }) => ({
+  club: one(club, {
+    fields: [clubMembers.clubId],
+    references: [club.id],
+  }),
+  member: one(userMember, {
+    fields: [clubMembers.memberUserId],
+    references: [userMember.userId],
+  }),
+}));
+
+export const clubCoachsRelations = relations(clubCoachs, ({ one }) => ({
+  club: one(club, {
+    fields: [clubCoachs.clubId],
+    references: [club.id],
+  }),
+  coach: one(userCoach, {
+    fields: [clubCoachs.coachUserId],
+    references: [userCoach.userId],
+  }),
+}));
+
+export const roomActivitiesRelations = relations(roomActivities, ({ one }) => ({
+  room: one(room, {
+    fields: [roomActivities.roomId],
+    references: [room.id],
+  }),
+  activity: one(activity, {
+    fields: [roomActivities.activityId],
+    references: [activity.id],
+  }),
+}));

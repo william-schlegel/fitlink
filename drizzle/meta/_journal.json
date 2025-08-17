@@ -8,6 +8,13 @@
       "when": 1755358683833,
       "tag": "0000_cold_korath",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1755443065358,
+      "tag": "0001_many_black_widow",
+      "breakpoints": true
     }
   ]
 }

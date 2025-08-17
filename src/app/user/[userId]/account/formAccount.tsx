@@ -125,7 +125,7 @@ export default function FormAccount({
     );
   }
 
-  const newPricing = trpc.pricing.getPricingById.useQuery(
+  const newPricing = trpc.pricings.getPricingById.useQuery(
     fields?.pricingId ?? "",
     {
       enabled: isCUID(fields.pricingId),

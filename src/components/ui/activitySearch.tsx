@@ -32,7 +32,7 @@ const ActivitySearch = ({
 }: Props) => {
   const [activity, setActivity] = useState("");
   const debouncedActivity = useDebounce<string>(activity, 500);
-  const { t } = useTranslation("common");
+  const t = useTranslations("common");
   const [showList, setShowList] = useState(false);
 
   const activities = trpc.coachs.getOfferActivityByName.useQuery(

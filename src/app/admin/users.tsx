@@ -41,7 +41,7 @@ function UserManagement() {
     take: PER_PAGE,
   });
   const [userId, setUserId] = useState("");
-  const { t } = useTranslation("admin");
+  const t = useTranslations("admin");
   const {
     register,
     formState: { errors },
@@ -174,7 +174,7 @@ type UserContentProps = {
 
 export function UserContent({ userId }: UserContentProps) {
   const userQuery = trpc.users.getUserFullById.useQuery(userId);
-  const { t } = useTranslation("admin");
+  const t = useTranslations("admin");
   const periodicityMutation = trpc.users.updatePaymentPeriod.useMutation({
     onSuccess() {
       utils.users.getUserFullById.invalidate(userId);

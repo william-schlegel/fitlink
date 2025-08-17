@@ -54,7 +54,7 @@ const ManageNotifications = ({
       },
     }
   );
-  const { t } = useTranslation("auth");
+  const t = useTranslations("auth");
 
   return (
     <Layout
@@ -184,7 +184,7 @@ export function NotificationContent({
     { notificationId, updateViewDate: true },
     { enabled: isCUID(notificationId) }
   );
-  const { t } = useTranslation("auth");
+  const t = useTranslations("auth");
 
   return (
     <div className="space-y-4">
@@ -256,7 +256,7 @@ function NotificationMessage({
   fromTo,
 }: NotificationMessageProps) {
   const utils = trpc.useContext();
-  const { t } = useTranslation("auth");
+  const t = useTranslations("auth");
   const { getName } = useNotificationType();
   if (!notification) return null;
 
@@ -396,7 +396,7 @@ function SubscriptionInfo({ data }: SubscriptionInfoProps) {
     data.subscriptionId,
     { enabled: isCUID(data.subscriptionId) }
   );
-  const { t } = useTranslation("auth");
+  const t = useTranslations("auth");
 
   if (sub.isLoading) return <Spinner />;
   const nextPayment = data.monthly
@@ -479,7 +479,7 @@ const NOTIFICATION_TYPES: readonly {
 ];
 
 function useNotificationType() {
-  const { t } = useTranslation("auth");
+  const t = useTranslations("auth");
   function getName(type: NotificationType | undefined) {
     if (!type) return "?";
     const nt = NOTIFICATION_TYPES.find((t) => t.value === type);

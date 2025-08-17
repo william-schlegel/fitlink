@@ -10,7 +10,14 @@ import {
 import { relations } from "drizzle-orm";
 import { user } from "./auth";
 import { notificationTypeEnum, userDocumentTypeEnum } from "./enums";
-import { activityGroup, club, coachingActivity, event } from "./club";
+import {
+  activityGroup,
+  club,
+  clubCoachs,
+  clubMembers,
+  coachingActivity,
+  event,
+} from "./club";
 import { certification, coachingPrice, coachMarketPlace } from "./coach";
 import { page, pageSectionElement } from "./page";
 import { planning, planningActivity } from "./planning";
@@ -52,7 +59,7 @@ export const userCoachRelations = relations(userCoach, ({ one, many }) => ({
   planningActivities: many(planningActivity),
   plannings: many(planning),
   marketPlaceOffers: many(coachMarketPlace),
-  clubs: many(club),
+  clubs: many(clubCoachs),
 }));
 
 export const userMember = pgTable("UserMember", {
@@ -69,6 +76,7 @@ export const userMemberRelations = relations(userMember, ({ one, many }) => ({
     references: [user.id],
   }),
   subscriptions: many(userMemberToSubscription),
+  clubs: many(clubMembers),
 }));
 
 export const userMemberToSubscription = pgTable(

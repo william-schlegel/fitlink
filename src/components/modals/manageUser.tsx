@@ -177,7 +177,7 @@ export function SubscriptionForm({
   onNewPlan,
 }: SubscriptionFormProps) {
   const t = useTranslations("auth");
-  const pricingQuery = trpc.pricing.getPricingForRole.useQuery(
+  const pricingQuery = trpc.pricings.getPricingForRole.useQuery(
     internalRole ?? "MEMBER"
   );
   const [closeModal, setCloseModal] = useState(false);

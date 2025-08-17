@@ -2,7 +2,7 @@ import { useTranslation } from "next-i18next";
 
 type Props = { label: string; limited?: boolean };
 function LockedButton({ label, limited }: Props) {
-  const { t } = useTranslation("common");
+  const t = useTranslations("common");
 
   return (
     <span

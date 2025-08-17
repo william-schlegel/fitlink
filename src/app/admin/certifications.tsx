@@ -24,7 +24,7 @@ function CertificationsManagement() {
     },
   });
   const [cgId, setCgId] = useState("");
-  const { t } = useTranslation("admin");
+  const t = useTranslations("admin");
 
   if (sessionData && sessionData.user?.internalRole !== Role.ADMIN)
     return <div>{t("admin-only")}</div>;
@@ -74,7 +74,7 @@ type CGContentProps = {
 
 export function CGContent({ cgId }: CGContentProps) {
   const cgQuery = trpc.coachs.getCertificationGroupById.useQuery(cgId);
-  const { t } = useTranslation("admin");
+  const t = useTranslations("admin");
 
   return (
     <div className="flex w-full flex-col gap-4">

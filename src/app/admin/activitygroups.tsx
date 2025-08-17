@@ -21,7 +21,7 @@ function ActivityGroupManagement() {
     },
   });
   const [agId, setAgId] = useState("");
-  const { t } = useTranslation("admin");
+  const t = useTranslations("admin");
 
   if (sessionData && sessionData.user?.internalRole !== Role.ADMIN)
     return <div>{t("admin-only")}</div>;
@@ -108,7 +108,7 @@ export function AGContent({ agId }: AGContentProps) {
     }
   );
   const [clubs, setClubs] = useState<ClubGroup[]>([]);
-  const { t } = useTranslation("admin");
+  const t = useTranslations("admin");
 
   return (
     <div className="flex w-full flex-col gap-4">

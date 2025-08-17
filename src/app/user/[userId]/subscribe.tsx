@@ -48,7 +48,7 @@ export default function Profile() {
       toast.error(error.message);
     },
   });
-  const { t } = useTranslation("club");
+  const t = useTranslations("club");
 
   function handleSubscribe() {
     if (!sessionData?.user?.id || !myOfferId) return;

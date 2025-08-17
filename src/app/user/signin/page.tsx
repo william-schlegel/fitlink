@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth/server";
 import Providers from "./providers";
 import FormEmail from "./formEmail";
 import CreateAccount from "./createAccount";
+import Title from "@/components/title";
 
 export default async function SignIn({
   searchParams,
@@ -21,10 +22,9 @@ export default async function SignIn({
     await searchParams;
   if (signInEmail)
     return (
-      <div className="flex min-h-screen items-center justify-center bg-base-200">
-        <Head>
-          <title>Videoach - Magic link</title>
-        </Head>
+      <div className="flex min-h-screen items-center justify-center bg-base-200 mx-8">
+        <Title title="Magic link" />
+
         <div className="rounded border border-primary bg-base-100 p-12 text-center">
           <h1>{t("signin.continue-with-link")}</h1>
           <p className="text-lg font-semibold">
@@ -46,19 +46,25 @@ export default async function SignIn({
       <div className="card w-full max-w-md bg-base-100 shadow-xl">
         <div className="card-body">
           <h2 className="card-title">{t("signin.connect")}</h2>
-          {signInCredentials ? (
+          {/* {signInCredentials ? (
             <div className="alert alert-error">
               {t("signin.wrong-credentials")}
             </div>
-          ) : null}
-          <Providers
-            providers={providers.map((p) => ({ id: p.id, name: p.name }))}
-          />
-          <div className="divider">{t("signin.or")}</div>
-          <FormEmail />
+          ) : null} */}
+          <div className="flex gap-4">
+            <Providers
+              providers={providers.map((p) => ({ id: p.id, name: p.name }))}
+            />
+            <div className="divider divider-horizontal divider-primary">
+              {t("signin.or")}
+            </div>
+            <FormEmail />
 
-          <div className="divider"></div>
-          <CreateAccount />
+            <div className="divider divider-horizontal divider-primary">
+              {t("signin.or")}
+            </div>
+            <CreateAccount />
+          </div>
         </div>
       </div>
     </div>

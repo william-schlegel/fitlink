@@ -48,7 +48,7 @@ export default async function Account({
   //     toast.error(error.message);
   //   },
   // });
-  // const { t } = useTranslation("auth");
+  // const  t  = useTranslations("auth");
 
   return (
     <div

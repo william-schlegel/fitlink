@@ -101,7 +101,7 @@ export default async function MemberDashboard({
 // };
 
 // function MyReservation({ reservation, memberId, day }: MyReservationProps) {
-//   const { t } = useTranslation("dashboard");
+//   const  t  = useTranslations("dashboard");
 //   const utils = trpc.useContext();
 //   const deleteReservation = trpc.plannings.deleteReservation.useMutation({
 //     onSuccess() {
@@ -181,7 +181,7 @@ export default async function MemberDashboard({
 // };
 
 // function DailyPlanning({ memberId, day }: DailyPlanningProps) {
-//   const { t } = useTranslation("dashboard");
+//   const  t  = useTranslations("dashboard");
 //   const planning = trpc.plannings.getMemberDailyPlanning.useQuery({
 //     date: day,
 //     memberId,
@@ -255,7 +255,7 @@ export default async function MemberDashboard({
 //   memberId,
 //   day,
 // }: MakeReservationProps) {
-//   const { t } = useTranslation("dashboard");
+//   const  t  = useTranslations("dashboard");
 //   const utils = trpc.useContext();
 //   const createReservation =
 //     trpc.plannings.createPlanningReservation.useMutation({
@@ -339,7 +339,7 @@ export default async function MemberDashboard({
 //   | null;
 
 // function Wnc({ activity, day, memberId, reservations }: WncProps) {
-//   const { t } = useTranslation("dashboard");
+//   const  t  = useTranslations("dashboard");
 //   const { getDayForDate } = useDayName();
 //   const dayName = getDayForDate(day);
 //   const calClub = trpc.calendars.getCalendarForClub.useQuery(
@@ -406,7 +406,7 @@ export default async function MemberDashboard({
 //   memberId,
 //   workingHours,
 // }: ReserveDurationProps) {
-//   const { t } = useTranslation("dashboard");
+//   const  t  = useTranslations("dashboard");
 //   const utils = trpc.useContext();
 //   const createReservation =
 //     trpc.plannings.createActivityReservation.useMutation({
@@ -523,7 +523,7 @@ export default async function MemberDashboard({
 //   onSelect,
 //   day,
 // }: AvailableSlotsProps) {
-//   const { t } = useTranslation("dashboard");
+//   const  t  = useTranslations("dashboard");
 //   const slots: Array<TSlot> = [];
 //   if (!workingHours) return <span>{t("club:activity.no-slot")}</span>;
 //   const [hs, ms] = getHour(workingHours.workingHours[0]?.opening);
