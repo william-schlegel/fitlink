@@ -1,6 +1,8 @@
-import { formatDateLocalized } from "@lib/formatDate";
-import { useDayName } from "@lib/useDayName";
-import { type DayName } from "@prisma/client";
+"use client";
+
+import { DayName } from "@/lib/dates/data";
+import { useDayName } from "@/lib/dates/useDayName";
+import { formatDateLocalized } from "@/lib/formatDate";
 import { addDays, startOfToday, subDays } from "date-fns";
 
 type SelectDayProps = {

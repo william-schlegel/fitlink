@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
@@ -67,7 +69,7 @@ export function SortableList<T extends BaseItem>({
       <SortableContext items={items}>
         <ul
           className={`flex list-none flex-col gap-2 p-0 ${className ?? ""}`}
-          internalRole="application"
+          role="application"
         >
           {items.map((item) => (
             <React.Fragment key={item.id}>{renderItem(item)}</React.Fragment>

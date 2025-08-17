@@ -256,6 +256,8 @@
     "select-club": "Sélectionner le club",
     "name-mandatory": "Le nom est obligatoire",
     "address-mandatory": "L'adresse est obligatoire",
+    "image-size-error": "L'image sélectionnée est trop grande (maximum autorisé: {size})",
+
     "club": {
       "manage-my-club": "{count, plural, =0 {Je n'ai encore aucun club} =1 {Gérer mon club} other {Gérer mes clubs}}",
       "create-new": "Créer un nouveau club",

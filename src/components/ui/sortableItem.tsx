@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useMemo } from "react";
 import type { CSSProperties, PropsWithChildren } from "react";
 import type {
@@ -22,7 +24,7 @@ interface Context {
 const SortableItemContext = createContext<Context>({
   attributes: {},
   listeners: undefined,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+
   ref() {},
 });
 

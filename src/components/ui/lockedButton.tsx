@@ -1,4 +1,6 @@
-import { useTranslation } from "next-i18next";
+"use client";
+
+import { useTranslations } from "next-intl";
 
 type Props = { label: string; limited?: boolean };
 function LockedButton({ label, limited }: Props) {

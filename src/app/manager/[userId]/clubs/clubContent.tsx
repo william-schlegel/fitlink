@@ -1,105 +1,28 @@
-import { type ActivityGroup, Role } from "@prisma/client";
-import { useSession } from "next-auth/react";
-import { type ReactNode, useState } from "react";
-import { trpc } from "@trpcclient/trpc";
-import { CreateClub, DeleteClub, UpdateClub } from "@modals/manageClub";
-import Spinner from "@ui/spinner";
+"use client";
+
+import { activityGroup } from "@/db/schema/club";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import { useState, useEffect, ReactNode } from "react";
 import {
-  type InferGetServerSidePropsType,
-  type GetServerSidePropsContext,
-} from "next";
-import { unstable_getServerSession } from "next-auth";
-import { authOptions } from "@auth/[...nextauth]";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import nextI18nConfig from "@root/next-i18next.config.mjs";
-import { useTranslation } from "next-i18next";
-import AddActivity from "@modals/manageActivity";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { CreateClubCalendar } from "@modals/manageCalendar";
-import CalendarWeek from "@root/src/components/calendarWeek";
-import {
-  useDroppable,
-  useDraggable,
+  Data,
   DndContext,
-  type DragEndEvent,
-  type Data,
-  useSensor,
+  DragEndEvent,
   PointerSensor,
+  useDraggable,
+  useDroppable,
+  useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import CollapsableGroup from "@ui/collapsableGroup";
-import Layout from "@root/src/components/layout";
+import { useTranslations } from "next-intl";
+import useUserInfo from "@/lib/useUserInfo";
+import Spinner from "@/components/ui/spinner";
 import Image from "next/image";
-import ButtonIcon from "@ui/buttonIcon";
-import { isCUID } from "@lib/checkValidity";
-import createLink from "@lib/createLink";
-import useUserInfo from "@lib/useUserInfo";
-import LockedButton from "@ui/lockedButton";
-
-const ManageClubs = ({
-  userId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const { data: sessionData } = useSession();
-  const router = useRouter();
-  const clubId = router.query.clubId as string;
-  const clubQuery = trpc.clubs.getClubsForManager.useQuery(userId, {
-    onSuccess(data) {
-      if (!clubId) router.push(createLink({ clubId: data[0]?.id }));
-    },
-  });
-  const { features } = useUserInfo(userId);
-  const t = useTranslations("club");
-
-  if (
-    sessionData &&
-    ![Role.MANAGER, Role.MANAGER_COACH, Role.ADMIN].includes(
-      sessionData.user?.role
-    )
-  )
-    return <div>{t("manager-only")}</div>;
-
-  return (
-    <Layout
-      title={t("club.manage-my-club", { count: clubQuery.data?.length ?? 0 })}
-      className="container mx-auto my-2 space-y-2 p-2"
-    >
-      <div className="mb-4 flex flex-row items-center gap-4">
-        <h1>
-          {t("club.manage-my-club", { count: clubQuery.data?.length ?? 0 })}
-        </h1>
-        {features.includes("MANAGER_MULTI_CLUB") || !clubQuery.data?.length ? (
-          <CreateClub />
-        ) : (
-          <LockedButton label={t("club.create-new")} limited />
-        )}
-      </div>
-      <div className="flex gap-4">
-        {clubQuery.isLoading ? (
-          <Spinner />
-        ) : (
-          <ul className="menu w-1/4 overflow-hidden rounded bg-base-100">
-            {clubQuery.data?.map((club) => (
-              <li key={club.id}>
-                <Link
-                  href={createLink({ clubId: club.id })}
-                  className={`w-full text-center ${
-                    clubId === club.id ? "active" : ""
-                  }`}
-                >
-                  {club.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-        {clubId === "" ? null : <ClubContent userId={userId} clubId={clubId} />}
-      </div>
-    </Layout>
-  );
-};
-
-export default ManageClubs;
+import Link from "next/link";
+import ButtonIcon from "@/components/ui/buttonIcon";
+import LockedButton from "@/components/ui/lockedButton";
+import CollapsableGroup from "@/components/ui/collapsableGroup";
+import { DeleteClub, UpdateClub } from "@/components/modals/manageClub";
 
 type ClubContentProps = {
   userId: string;
@@ -108,17 +31,18 @@ type ClubContentProps = {
 
 export function ClubContent({ userId, clubId }: ClubContentProps) {
   const clubQuery = trpc.clubs.getClubById.useQuery(clubId, {
-    onSuccess(data) {
-      const groups = new Map();
-      for (const act of data?.activities || [])
-        groups.set(act.group.id, act.group);
-      setGroups(Array.from(groups.values()));
-    },
     enabled: isCUID(clubId),
   });
-  const calendarQuery = trpc.calendars.getCalendarForClub.useQuery(clubId, {
-    enabled: isCUID(clubId),
-  });
+  useEffect(() => {
+    const groups = new Map();
+    for (const act of clubQuery.data?.activities || [])
+      groups.set(act.group.id, act.group);
+    setGroups(Array.from(groups.values()));
+  }, [clubQuery.data]);
+
+  // const calendarQuery = trpc.calendars.getCalendarForClub.useQuery(clubId, {
+  //   enabled: isCUID(clubId),
+  // });
   const addActivity = trpc.activities.affectToRoom.useMutation({
     onSuccess() {
       utils.clubs.getClubById.invalidate(clubId);
@@ -129,8 +53,10 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
       utils.clubs.getClubById.invalidate(clubId);
     },
   });
-  const [groups, setGroups] = useState<ActivityGroup[]>([]);
-  const utils = trpc.useContext();
+  const [groups, setGroups] = useState<(typeof activityGroup.$inferSelect)[]>(
+    []
+  );
+  const utils = trpc.useUtils();
   const t = useTranslations("club");
   const { features } = useUserInfo(userId);
 
@@ -177,7 +103,7 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
         </div>
         <div className="flex items-center gap-2">
           <UpdateClub clubId={clubId} />
-          <CreateClubCalendar clubId={clubId} />
+          {/* <CreateClubCalendar clubId={clubId} /> */}
           <DeleteClub clubId={clubId} />
         </div>
       </div>
@@ -205,10 +131,10 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
           />
         </Link>
       </div>
-      <CalendarWeek
+      {/* <CalendarWeek
         calendar={calendarQuery.data}
         isLoading={calendarQuery.isLoading}
-      />
+      /> */}
       <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 rounded border border-primary p-4 ">
@@ -246,7 +172,7 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
                   count: clubQuery?.data?.activities?.length ?? 0,
                 })}
               </h3>
-              <AddActivity
+              {/* <AddActivity
                 clubId={clubId}
                 userId={userId}
                 onSuccess={() => {
@@ -254,7 +180,7 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
                 }}
                 withAdd
                 withUpdate
-              />
+              /> */}
             </div>
             <div className="flex flex-1 flex-wrap gap-2">
               {groups.map((gp) => (
@@ -306,8 +232,8 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
                           elementId={`${a.id} ${room.id}`}
                           data={{ activityId: a.id, roomId: room.id }}
                         >
-                          {a.name}
-                          {a.noCalendar ? (
+                          {a.activity.name}
+                          {a.activity.noCalendar ? (
                             <i className="bx bx-calendar-x bx-xs text-primary" />
                           ) : null}
                           <div
@@ -395,36 +321,3 @@ function DraggableElement({
     </div>
   );
 }
-
-export const getServerSideProps = async ({
-  locale,
-  req,
-  res,
-}: GetServerSidePropsContext) => {
-  const session = await unstable_getServerSession(req, res, authOptions);
-  if (
-    session?.user?.role !== Role.MANAGER &&
-    session?.user?.role !== Role.MANAGER_COACH &&
-    session?.user?.role !== Role.ADMIN
-  )
-    return {
-      redirect: {
-        permanent: false,
-        destination: "/",
-      },
-      props: {
-        userId: "",
-      },
-    };
-
-  return {
-    props: {
-      ...(await serverSideTranslations(
-        locale ?? "fr",
-        ["common", "club", "calendar"],
-        nextI18nConfig
-      )),
-      userId: session?.user?.id || "",
-    },
-  };
-};

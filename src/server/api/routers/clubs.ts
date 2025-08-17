@@ -14,6 +14,29 @@ import { TRPCError } from "@trpc/server";
 import { userCoach, userDocument } from "@/db/schema/user";
 import { openingCalendarClubs } from "@/db/schema/planning";
 
+export async function getClubsForManager(userId: string) {
+  const userData = await db.query.user.findFirst({
+    where: eq(user.id, userId),
+    with: {
+      pricing: {
+        with: {
+          features: true,
+        },
+      },
+    },
+  });
+  const take = userData?.pricing?.features.find(
+    (f) => f.feature === "MANAGER_MULTI_CLUB"
+  )
+    ? undefined
+    : 1;
+  return db.query.club.findMany({
+    where: eq(club.managerId, userId),
+    orderBy: asc(club.name),
+    limit: take,
+  });
+}
+
 export const clubRouter = createTRPCRouter({
   getClubById: protectedProcedure
     .input(z.cuid2())
@@ -41,11 +64,16 @@ export const clubRouter = createTRPCRouter({
             with: {
               rooms: {
                 with: {
-                  activities: true,
+                  activities: {
+                    with: {
+                      activity: true,
+                    },
+                  },
                 },
               },
             },
           },
+
           activities: { with: { group: true } },
           logo: true,
         },
@@ -91,28 +119,7 @@ export const clubRouter = createTRPCRouter({
     }),
   getClubsForManager: protectedProcedure
     .input(z.string())
-    .query(async ({ input }) => {
-      const userData = await db.query.user.findFirst({
-        where: eq(user.id, input),
-        with: {
-          pricing: {
-            with: {
-              features: true,
-            },
-          },
-        },
-      });
-      const take = userData?.pricing?.features.find(
-        (f) => f.feature === "MANAGER_MULTI_CLUB"
-      )
-        ? undefined
-        : 1;
-      return db.query.club.findMany({
-        where: eq(club.managerId, input),
-        orderBy: asc(club.name),
-        limit: take,
-      });
-    }),
+    .query(({ input }) => getClubsForManager(input)),
   getAllClubs: publicProcedure.query(async () =>
     db.query.club.findMany({
       orderBy: asc(club.name),
