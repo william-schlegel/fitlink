@@ -32,7 +32,6 @@ export default function CreateAccount() {
   });
 
   const onSubmit: SubmitHandler<AccountFormValues> = (data) => {
-    console.log("data", data);
     createUser.mutate(data);
   };
 

@@ -22,8 +22,6 @@ export function PricingComponent({
 
   const hl = forceHighlight ?? data?.highlighted;
 
-  console.log("data >>>>", data);
-
   return (
     <div
       className={twMerge(

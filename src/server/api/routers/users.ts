@@ -271,7 +271,6 @@ export async function getAllUsers(input: {
   take: number;
 }) {
   await isAdmin(true);
-  console.log("input", input);
   const filter: SQL[] = [];
   if (input.filter?.name)
     filter.push(ilike(user.name, `%${input.filter.name}%`));
@@ -282,7 +281,6 @@ export async function getAllUsers(input: {
   if (input.filter?.dueDate)
     filter.push(eq(user.cancelationDate, input.filter.dueDate));
 
-  console.log("filter", filter);
   return db.transaction(async (tx) => {
     const userCount = await tx
       .select({ count: count() })
@@ -548,9 +546,7 @@ export const userRouter = createTRPCRouter({
         where: eq(subscription.id, input.subscriptionId),
         with: { club: true },
       });
-      console.log("sub", sub);
       const managerId = sub?.club.managerId;
-      console.log("managerId", managerId);
       if (managerId) {
         await db.insert(userNotification).values({
           userFromId: input.userId,

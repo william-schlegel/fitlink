@@ -8,6 +8,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { ClubContent } from "./clubContent";
 import { getClubsForManager } from "@/server/api/routers/clubs";
+import { headers } from "next/headers";
 
 export default async function ManageClubs({
   params,
@@ -31,6 +32,8 @@ export default async function ManageClubs({
 
   const clubQuery = await getClubsForManager(userId);
   const { features } = await getUserById(userId, { withFeatures: true });
+  const headerList = await headers();
+  const href = headerList.get("x-current-href");
 
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">
@@ -50,7 +53,7 @@ export default async function ManageClubs({
           {clubQuery?.map((club) => (
             <li key={club.id}>
               <Link
-                href={createLink({ clubId: club.id })}
+                href={createLink({ clubId: club.id }, href)}
                 className={`w-full text-center ${
                   clubId === club.id ? "active" : ""
                 }`}

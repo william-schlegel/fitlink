@@ -37,13 +37,9 @@ export default async function ManagerClubs({
 
   const userId = (await params).userId;
 
-  console.log(userId);
-
   const managerQuery = await getManagerDataForUserId(userId);
-  console.log(managerQuery);
   const t = await getTranslations();
   const { features } = await getUserById(userId, { withFeatures: true });
-  console.log(features);
 
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">

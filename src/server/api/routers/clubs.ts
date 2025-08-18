@@ -131,7 +131,7 @@ export const clubRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         address: z.string(),
-        userId: z.cuid2(),
+        userId: z.string(),
         searchAddress: z.string(),
         longitude: z.number(),
         latitude: z.number(),

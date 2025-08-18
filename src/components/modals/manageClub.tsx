@@ -28,6 +28,7 @@ import CollapsableGroup from "../ui/collapsableGroup";
 import Rating from "../ui/rating";
 import Link from "next/link";
 import Spinner from "../ui/spinner";
+import { useRouter } from "next/router";
 
 const MAX_SIZE_LOGO = 1024 * 1024;
 
@@ -36,10 +37,12 @@ export const CreateClub = () => {
   const utils = trpc.useUtils();
   const t = useTranslations("club");
   const [closeModal, setCloseModal] = useState(false);
+  const router = useRouter();
 
   const createClub = trpc.clubs.createClub.useMutation({
     onSuccess: () => {
       utils.clubs.getClubsForManager.invalidate(user?.id ?? "");
+      router.reload();
       toast.success(t("club.created"));
     },
     onError(error) {
@@ -49,8 +52,10 @@ export const CreateClub = () => {
   const saveLogo = useWriteFile(user?.id ?? "", "IMAGE", MAX_SIZE_LOGO);
 
   const onSubmit = async (data: ClubFormValues) => {
-    let logoId: string | undefined = "";
+    let logoId: string | undefined = undefined;
     if (data.logo?.[0]) logoId = await saveLogo(data.logo[0]);
+    console.log("logoId", logoId);
+    console.log("data", data);
     createClub.mutate({
       userId: user?.id ?? "",
       name: data.name,
