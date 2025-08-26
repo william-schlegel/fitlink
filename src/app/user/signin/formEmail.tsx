@@ -8,18 +8,30 @@ export default function FormEmail() {
   const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   return (
     <>
+      {error && <div className="alert alert-error">{error}</div>}
       <form
         onSubmit={() =>
-          authClient.signIn.magicLink({ email, callbackURL: "/videoach" })
+          authClient.signIn.magicLink(
+            { email, callbackURL: "/videoach" },
+            {
+              onError: (ctx) => setError(ctx.error.message),
+            }
+          )
         }
         className="grid grid-cols-[auto,1fr] gap-2"
       >
-        <label htmlFor="email" className="required">
-          {t("signin.my-email")}
-        </label>
+        <div className="flex gap-4 items-center">
+          <label htmlFor="email" className="required">
+            {t("signin.my-email")}
+          </label>
+          <div className="tooltip" data-tip={t("signin.magic-link")}>
+            <i className="bx bx-info-circle bx-sm" />
+          </div>
+        </div>
         <input
           id="email"
           type="email"
@@ -29,23 +41,30 @@ export default function FormEmail() {
           onChange={(e) => setEmail(e.target.value)}
           className="input-bordered input w-full"
         />
-        <div className="col-span-full flex flex-col gap-4">
-          <p>{t("signin.magic-link")}</p>
-          <button type="submit" className="btn-outline btn w-full">
-            {t("signin.connect-with-account")} {"Email"}
-          </button>
-        </div>
+        <button type="submit" className="btn-outline btn w-full">
+          {t("signin.connect-with-magic-link")}
+        </button>
       </form>
-      <div className="divider">{t("signin.or")}</div>
+      <div className="divider divider-primary">{t("signin.or")}</div>
       <form
         onSubmit={() =>
-          authClient.signIn.email({ email, password, callbackURL: "/videoach" })
+          authClient.signIn.email(
+            { email, password, callbackURL: "/videoach" },
+            {
+              onError: (ctx) => setError(ctx.error.message),
+            }
+          )
         }
         className="grid grid-cols-[auto,1fr] gap-2"
       >
-        <label htmlFor="password" className="required">
-          {t("signin.password")}
-        </label>
+        <div className="flex gap-4 items-center">
+          <label htmlFor="password" className="required">
+            {t("signin.password")}
+          </label>
+          <div className="tooltip" data-tip={t("signin.credentials")}>
+            <i className="bx bx-info-circle bx-sm" />
+          </div>
+        </div>
         <input
           id="password"
           type="password"
@@ -55,12 +74,9 @@ export default function FormEmail() {
           onChange={(e) => setPassword(e.target.value)}
           className="input-bordered input w-full"
         />
-        <div className="col-span-full flex flex-col gap-4">
-          <p>{t("signin.credentials")}</p>
-          <button type="submit" className="btn btn-outline w-full">
-            {t("signin.connect-with-account")} {t("signin.local")}
-          </button>
-        </div>
+        <button type="submit" className="btn btn-outline w-full">
+          {t("signin.connect-with-account")} {t("signin.local")}
+        </button>
       </form>
     </>
   );

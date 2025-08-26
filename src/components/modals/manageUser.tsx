@@ -176,6 +176,8 @@ export function SubscriptionForm({
   subscriptionId = "",
   onNewPlan,
 }: SubscriptionFormProps) {
+  console.log("internalRole", internalRole);
+  console.log("subscriptionId", subscriptionId);
   const t = useTranslations("auth");
   const pricingQuery = trpc.pricings.getPricingForRole.useQuery(
     internalRole ?? "MEMBER"

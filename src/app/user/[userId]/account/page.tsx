@@ -13,6 +13,7 @@ export default async function Account({
   const userData = await getUserById(myUserId, {
     withImage: false,
     withMemberData: false,
+    withPricing: true,
   });
   const t = await getTranslations("auth");
 

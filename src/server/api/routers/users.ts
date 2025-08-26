@@ -105,7 +105,7 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
 
   if (options?.withPricing) {
     pricingData = await db.query.pricing.findFirst({
-      where: eq(pricing.id, id),
+      where: eq(pricing.id, u.pricingId!),
       with: {
         features: true,
       },
@@ -115,7 +115,7 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
   let features: (typeof featureEnum.enumValues)[number][] = [];
   if (options?.withFeatures) {
     const featuresData = await db.query.pricing.findFirst({
-      where: eq(pricing.id, id),
+      where: eq(pricing.id, u.pricingId!),
       with: {
         features: true,
       },

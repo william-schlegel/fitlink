@@ -203,6 +203,7 @@
       "name": "Nom",
       "connect": "Se connecter",
       "connect-with-account": "Se connecter avec mon compte",
+      "connect-with-magic-link": "Se connecter avec un lien magique",
       "or": "Ou",
       "my-email": "Mon email",
       "check-code": "Un code a été envoyé sur votre email, merci de le saisir ici",

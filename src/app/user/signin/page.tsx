@@ -51,18 +51,14 @@ export default async function SignIn({
               {t("signin.wrong-credentials")}
             </div>
           ) : null} */}
-          <div className="flex gap-4">
-            <Providers
-              providers={providers.map((p) => ({ id: p.id, name: p.name }))}
-            />
-            <div className="divider divider-horizontal divider-primary">
-              {t("signin.or")}
-            </div>
-            <FormEmail />
+          <Providers
+            providers={providers.map((p) => ({ id: p.id, name: p.name }))}
+          />
+          <div className="divider  divider-primary">{t("signin.or")}</div>
+          <FormEmail />
 
-            <div className="divider divider-horizontal divider-primary">
-              {t("signin.or")}
-            </div>
+          <div className="divider  divider-primary">{t("signin.or")}</div>
+          <div className="flex justify-center">
             <CreateAccount />
           </div>
         </div>

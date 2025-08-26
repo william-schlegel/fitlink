@@ -37,53 +37,55 @@ export async function getClubsForManager(userId: string) {
   });
 }
 
-export const clubRouter = createTRPCRouter({
-  getClubById: protectedProcedure
-    .input(z.cuid2())
-    .query(async ({ ctx, input }) => {
-      const userData = await db.query.user.findFirst({
-        where: eq(user.id, ctx.user.id),
+export async function getClubById(clubId: string, userId: string) {
+  const userData = await db.query.user.findFirst({
+    where: eq(user.id, userId),
+    with: {
+      pricing: {
         with: {
-          pricing: {
-            with: {
-              features: true,
-            },
-          },
+          features: true,
         },
-      });
-      const take: number | undefined = userData?.pricing?.features.find(
-        (f) => f.feature === "MANAGER_MULTI_SITE"
-      )
-        ? undefined
-        : 1;
-      const myClub = await db.query.club.findFirst({
-        where: eq(club.id, input),
+      },
+    },
+  });
+  const take: number | undefined = userData?.pricing?.features.find(
+    (f) => f.feature === "MANAGER_MULTI_SITE"
+  )
+    ? undefined
+    : 1;
+  const myClub = await db.query.club.findFirst({
+    where: eq(club.id, clubId),
+    with: {
+      sites: {
+        limit: take,
         with: {
-          sites: {
-            limit: take,
+          rooms: {
             with: {
-              rooms: {
+              activities: {
                 with: {
-                  activities: {
-                    with: {
-                      activity: true,
-                    },
-                  },
+                  activity: true,
                 },
               },
             },
           },
-
-          activities: { with: { group: true } },
-          logo: true,
         },
-      });
-      let logoUrl = "";
-      if (myClub?.logoId) {
-        logoUrl = await getDocUrl(myClub.managerId, myClub.logoId);
-      }
-      return { ...myClub, logoUrl };
-    }),
+      },
+
+      activities: { with: { group: true } },
+      logo: true,
+    },
+  });
+  let logoUrl = "";
+  if (myClub?.logoId) {
+    logoUrl = await getDocUrl(myClub.managerId, myClub.logoId);
+  }
+  return { ...myClub, logoUrl };
+}
+
+export const clubRouter = createTRPCRouter({
+  getClubById: protectedProcedure
+    .input(z.cuid2())
+    .query(async ({ ctx, input }) => await getClubById(input, ctx.user.id)),
   getClubPagesForNavByClubId: publicProcedure
     .input(z.string())
     .query(async ({ input }) => {

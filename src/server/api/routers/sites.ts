@@ -34,68 +34,99 @@ const RoomObject = z.object({
   openWithSite: z.boolean().default(true),
 });
 
+export async function getSitesForClub(clubId: string, userId: string) {
+  const u = await db.query.user.findFirst({
+    where: eq(user.id, userId),
+    with: {
+      pricing: {
+        with: {
+          features: true,
+        },
+      },
+    },
+  });
+
+  const limit = u?.pricing?.features.find(
+    (f) => f.feature === "MANAGER_MULTI_SITE"
+  )
+    ? undefined
+    : 1;
+
+  return db.query.site.findMany({
+    where: eq(site.clubId, clubId),
+    with: { rooms: true },
+    orderBy: [asc(site.name)],
+    limit,
+  });
+}
+
+export async function getSiteById(id: string) {
+  return db.query.site.findFirst({
+    where: eq(site.id, id),
+    with: { rooms: true },
+  });
+}
+
+export async function getRoomsForSite(siteId: string, userId: string) {
+  // check user rights
+  const u = await db.query.user.findFirst({
+    where: eq(user.id, userId),
+    with: {
+      pricing: {
+        with: {
+          features: true,
+        },
+      },
+    },
+  });
+  if (!u?.pricing?.features.find((f) => f.feature === "MANAGER_ROOM"))
+    return [];
+
+  return db.query.room.findMany({
+    where: eq(room.siteId, siteId),
+    orderBy: [asc(room.name)],
+  });
+}
+
+export async function getRoomById(roomId: string) {
+  return db.query.room.findFirst({
+    where: eq(room.id, roomId),
+  });
+}
+
 export const siteRouter = createTRPCRouter({
   getSiteById: protectedProcedure.input(z.cuid2()).query(({ input }) => {
-    return db.query.site.findFirst({
-      where: eq(site.id, input),
-      with: { rooms: true },
-    });
+    return getSiteById(input);
   }),
   getSitesForClub: protectedProcedure
     .input(z.string())
-    .query(async ({ ctx, input }) => {
-      const u = await db.query.user.findFirst({
-        where: eq(user.id, ctx.user.id),
-        with: {
-          pricing: {
-            with: {
-              features: true,
-            },
-          },
-        },
-      });
-
-      const limit = u?.pricing?.features.find(
-        (f) => f.feature === "MANAGER_MULTI_SITE"
-      )
-        ? undefined
-        : 1;
-
-      return db.query.site.findMany({
-        where: eq(site.clubId, input),
-        with: { rooms: true },
-        orderBy: [asc(site.name)],
-        limit,
-      });
+    .query(async ({ ctx, input }) => await getSitesForClub(input, ctx.user.id)),
+  createSite: protectedProcedure
+    .input(SiteObject.omit({ id: true }))
+    .mutation(({ input }) =>
+      db.insert(site).values({
+        clubId: input.clubId,
+        name: input.name,
+        address: input.address,
+        searchAddress: input.searchAddress,
+        longitude: input.longitude,
+        latitude: input.latitude,
+      })
+    ),
+  updateSite: protectedProcedure
+    .input(SiteObject.partial())
+    .mutation(({ input }) => {
+      return db
+        .update(site)
+        .set({
+          name: input.name,
+          address: input.address,
+          searchAddress: input.searchAddress,
+          longitude: input.longitude,
+          latitude: input.latitude,
+        })
+        .where(eq(site.id, input.id!));
     }),
-  // createSite: protectedProcedure
-  //   .input(SiteObject.omit({ id: true }))
-  //   .mutation(({ ctx, input }) =>
-  //     ctx.prisma.site.create({
-  //       data: {
-  //         clubId: input.clubId,
-  //         name: input.name,
-  //         address: input.address,
-  //         searchAddress: input.searchAddress,
-  //         longitude: input.longitude,
-  //         latitude: input.latitude,
-  //       },
-  //     })
-  //   ),
-  // updateSite: protectedProcedure
-  //   .input(SiteObject.partial())
-  //   .mutation(({ ctx, input }) => {
-  //     return ctx.prisma.site.update({
-  //       where: { id: input.id },
-  //       data: {
-  //         name: input.name,
-  //         address: input.address,
-  //         searchAddress: input.searchAddress,
-  //         longitude: input.longitude,
-  //         latitude: input.latitude,
-  //       },
-  //     });
-  //   }),
   // updateSiteCalendar: protectedProcedure
   //   .input(
   //     z.object({
@@ -111,60 +142,37 @@ export const siteRouter = createTRPCRouter({
   //       },
   //     })
   //   ),
-  // deleteSite: protectedProcedure
-  //   .input(z.string().cuid2())
-  //   .mutation(({ ctx, input }) =>
-  //     ctx.prisma.site.delete({ where: { id: input } })
-  //   ),
+  deleteSite: protectedProcedure
+    .input(z.cuid2())
+    .mutation(({ input }) => db.delete(site).where(eq(site.id, input))),
   /**  ------------------- ROOMS -------------------- **/
-  getRoomById: protectedProcedure.input(z.cuid2()).query(({ input }) => {
-    return db.query.room.findFirst({
-      where: eq(room.id, input),
-    });
-  }),
+  getRoomById: protectedProcedure
+    .input(z.cuid2())
+    .query(async ({ input }) => await getRoomById(input)),
   getRoomsForSite: protectedProcedure
     .input(z.string())
-    .query(async ({ ctx, input }) => {
-      // check user rights
-      const u = await db.query.user.findFirst({
-        where: eq(user.id, ctx.user.id),
-        with: {
-          pricing: {
-            with: {
-              features: true,
-            },
-          },
-        },
-      });
-      if (!u?.pricing?.features.find((f) => f.feature === "MANAGER_ROOM"))
-        return [];
+    .query(async ({ ctx, input }) => await getRoomsForSite(input, ctx.user.id)),
 
-      return db.query.room.findMany({
-        where: eq(room.siteId, input),
-        orderBy: [asc(room.name)],
-      });
+  createRoom: protectedProcedure
+    .input(RoomObject.omit({ id: true }))
+    .mutation(({ input }) =>
+      db
+        .insert(room)
+        .values({ ...input })
+        .returning()
+    ),
+  updateRoom: protectedProcedure
+    .input(RoomObject.partial())
+    .mutation(({ input }) => {
+      return db
+        .update(room)
+        .set(input)
+        .where(eq(room.id, input.id!))
+        .returning();
     }),
-
-  // createRoom: protectedProcedure
-  //   .input(RoomObject.omit({ id: true }))
-  //   .mutation(({ ctx, input }) =>
-  //     ctx.prisma.room.create({
-  //       data: { ...input },
-  //     })
-  //   ),
-  // updateRoom: protectedProcedure
-  //   .input(RoomObject.partial())
-  //   .mutation(({ ctx, input }) => {
-  //     return ctx.prisma.room.update({
-  //       where: { id: input.id },
-  //       data: input,
-  //     });
-  //   }),
-  // deleteRoom: protectedProcedure
-  //   .input(z.string().cuid2())
-  //   .mutation(({ ctx, input }) =>
-  //     ctx.prisma.room.delete({ where: { id: input } })
-  //   ),
+  deleteRoom: protectedProcedure
+    .input(z.cuid2())
+    .mutation(({ input }) => db.delete(room).where(eq(room.id, input))),
   // updateRoomCalendar: protectedProcedure
   //   .input(
   //     z.object({

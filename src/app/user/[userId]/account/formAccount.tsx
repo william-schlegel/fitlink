@@ -61,7 +61,7 @@ export default function FormAccount({
   const fields = useWatch({
     control,
     defaultValue: {
-      internalRole: "MEMBER",
+      internalRole: userData?.internalRole ?? "MEMBER",
       coachingActivities: [],
     },
   });
@@ -131,6 +131,9 @@ export default function FormAccount({
       enabled: isCUID(fields.pricingId),
     }
   );
+
+  console.log("userData", userData);
+  console.log("fields", fields);
 
   return (
     <form
