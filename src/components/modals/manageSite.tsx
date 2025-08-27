@@ -18,6 +18,8 @@ import MapComponent, { Marker } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { env } from "@/env";
 import { useUser } from "@/lib/auth/client";
+import { useRouter } from "next/navigation";
+import createLink from "@/lib/createLink";
 
 type SiteFormValues = {
   name: string;
@@ -34,14 +36,16 @@ type CreateSiteProps = {
 export const CreateSite = ({ clubId }: CreateSiteProps) => {
   const utils = trpc.useUtils();
   const t = useTranslations("club");
+  const router = useRouter();
 
   const [closeModal, setCloseModal] = useState(false);
 
   const createSite = trpc.sites.createSite.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       utils.clubs.getClubById.invalidate(clubId);
       utils.sites.getSitesForClub.invalidate(clubId);
       toast.success(t("site.created"));
+      router.push(createLink({ siteId: data[0].id }));
     },
     onError(error) {
       toast.error(error.message);

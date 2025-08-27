@@ -104,14 +104,17 @@ export const siteRouter = createTRPCRouter({
   createSite: protectedProcedure
     .input(SiteObject.omit({ id: true }))
     .mutation(({ input }) =>
-      db.insert(site).values({
-        clubId: input.clubId,
-        name: input.name,
-        address: input.address,
-        searchAddress: input.searchAddress,
-        longitude: input.longitude,
-        latitude: input.latitude,
-      })
+      db
+        .insert(site)
+        .values({
+          clubId: input.clubId,
+          name: input.name,
+          address: input.address,
+          searchAddress: input.searchAddress,
+          longitude: input.longitude,
+          latitude: input.latitude,
+        })
+        .returning()
     ),
   updateSite: protectedProcedure
     .input(SiteObject.partial())

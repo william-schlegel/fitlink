@@ -28,7 +28,7 @@ export default async function ManageClubs({
     return <div>{t("manager-only")}</div>;
 
   const userId = (await params).userId;
-  const clubId = (await searchParams).clubId;
+  const clubId = (await searchParams)?.clubId ?? "";
 
   const clubQuery = await getClubsForManager(userId);
   const { features } = await getUserById(userId, { withFeatures: true });

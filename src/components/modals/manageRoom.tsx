@@ -16,6 +16,7 @@ import Spinner from "../ui/spinner";
 import Confirmation from "../ui/confirmation";
 import SimpleForm from "../ui/simpleform";
 import { useEffect } from "react";
+import { RESERVATIONS } from "@/lib/data";
 
 type RoomFormValues = {
   name: string;
@@ -28,12 +29,6 @@ type CreateRoomProps = {
   siteId?: string;
   variant?: TModalVariant;
 };
-
-export const RESERVATIONS = [
-  { value: "NONE", label: "room.no-reservation" },
-  { value: "POSSIBLE", label: "room.reservation-possible" },
-  { value: "MANDATORY", label: "room.reservation-mandatory" },
-] as const;
 
 export const CreateRoom = ({
   siteId,

@@ -7,3 +7,9 @@ export const ROLE_LIST: Array<{ label: string; value: RoleEnum }> = [
   { label: "manager-coach", value: "MANAGER_COACH" },
   { label: "admin", value: "ADMIN" },
 ] as const;
+
+export const RESERVATIONS = [
+  { value: "NONE", label: "room.no-reservation" },
+  { value: "POSSIBLE", label: "room.reservation-possible" },
+  { value: "MANDATORY", label: "room.reservation-mandatory" },
+] as const;

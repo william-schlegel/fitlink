@@ -1,11 +1,11 @@
 import {
   CreateRoom,
   DeleteRoom,
-  RESERVATIONS,
   UpdateRoom,
 } from "@/components/modals/manageRoom";
 import Title from "@/components/title";
-import createLink from "@/lib/createLink";
+import createLink, { createHref } from "@/lib/createLink";
+import { RESERVATIONS } from "@/lib/data";
 import { isCUID } from "@/lib/utils";
 import {
   getRoomById,
@@ -22,11 +22,11 @@ export default async function ManageRooms({
   params,
   searchParams,
 }: {
-  params: { userId: string; clubId: string; siteId: string };
-  searchParams: { roomId: string };
+  params: Promise<{ userId: string; clubId: string; siteId: string }>;
+  searchParams: Promise<{ roomId: string }>;
 }) {
   const { clubId, userId, siteId } = await params;
-  const { roomId } = await searchParams;
+  const { roomId } = (await searchParams) ?? {};
   const user = await getUserById(userId, { withFeatures: true });
   if (!user) redirect("/", RedirectType.replace);
   const t = await getTranslations();
@@ -41,7 +41,8 @@ export default async function ManageRooms({
 
   const siteQuery = await getSiteById(siteId);
   const roomQuery = await getRoomsForSite(siteId, userId);
-  if (!roomId) redirect(createLink({ roomId: roomQuery[0]?.id }, href));
+  if (!roomId && roomQuery.length > 0)
+    redirect(createLink({ roomId: roomQuery[0]?.id }, href));
 
   if (!user.features.includes("MANAGER_ROOM"))
     return (
@@ -73,7 +74,9 @@ export default async function ManageRooms({
           //   const path = `/manager/${sessionData?.user?.id}/${clubId}/sites?siteId=${siteId}`;
           //   router.push(path);
           // }}
-          href={createLink({ siteId: siteId }, href)}
+          href={createHref(href, ["manager", userId, clubId, "sites"], {
+            siteId: siteId,
+          })}
         >
           {t("club.room.back-to-sites")}
         </Link>
@@ -83,7 +86,7 @@ export default async function ManageRooms({
           {roomQuery?.map((room) => (
             <li key={room.id}>
               <Link
-                href={createLink({ roomId: room.id })}
+                href={createLink({ roomId: room.id }, href)}
                 className={`flex items-center justify-between ${
                   roomId === room.id ? "active" : ""
                 }`}
@@ -125,8 +128,7 @@ export async function RoomContent({
   siteId,
   roomId,
 }: RoomContentProps) {
-  if (!isCUID(roomId) || !isCUID(siteId) || !isCUID(clubId))
-    return <div>Invalid roomId, siteId or clubId</div>;
+  if (!isCUID(roomId) || !isCUID(siteId) || !isCUID(clubId)) return null;
   const roomQuery = await getRoomById(roomId);
   // const calendarQuery = trpc.calendars.getCalendarForRoom.useQuery(
   //   {

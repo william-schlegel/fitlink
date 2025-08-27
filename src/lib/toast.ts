@@ -69,6 +69,7 @@ class Toast {
   }
   public async error(message: string, title?: string) {
     await newToast(title ?? "", message, "error");
+    console.error(`[toast] ${title} - ${message}`);
   }
   public async info(message: string, title?: string) {
     await newToast(title ?? "", message, "info");

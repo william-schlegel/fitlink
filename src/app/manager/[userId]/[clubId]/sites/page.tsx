@@ -1,7 +1,7 @@
 import { CreateSite } from "@/components/modals/manageSite";
 import Title from "@/components/title";
 import LockedButton from "@/components/ui/lockedButton";
-import createLink from "@/lib/createLink";
+import createLink, { createHref } from "@/lib/createLink";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect, RedirectType } from "next/navigation";
@@ -59,7 +59,9 @@ export default async function ManageSites({
         </div>
         <Link
           className="btn-outline btn btn-primary ml-4"
-          href={createLink({ clubId: clubId }, href)}
+          href={createHref(href, ["manager", userId, "clubs"], {
+            clubId: clubId,
+          })}
         >
           {t("site.back-to-clubs")}
         </Link>
