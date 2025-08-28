@@ -4,7 +4,7 @@ import { getClubsForManager } from "@/server/api/routers/clubs";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
-import SelectClub from "./selectClub";
+import SelectClub from "../../../components/selectClub";
 import { getActualUser } from "@/lib/auth/server";
 import Link from "next/link";
 import { getCoachById, getCoachsForClub } from "@/server/api/routers/coachs";

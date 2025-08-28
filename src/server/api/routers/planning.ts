@@ -63,35 +63,45 @@ export async function getClubDailyPlanning(
   return clubPlanning;
 }
 
-export const planningRouter = createTRPCRouter({
-  getPlanningsForClub: protectedProcedure.input(z.string()).query(({ input }) =>
-    db.query.planning.findMany({
-      where: eq(planning.clubId, input),
-      orderBy: asc(planning.startDate),
-    })
-  ),
+export async function getPlanningsForClub(clubId: string) {
+  if (!isCUID(clubId)) return [];
+  return await db.query.planning.findMany({
+    where: eq(planning.clubId, clubId),
+    orderBy: asc(planning.startDate),
+  });
+}
 
-  getPlanningById: protectedProcedure.input(z.cuid2()).query(({ input }) =>
-    db.query.planning.findFirst({
-      where: eq(planning.id, input),
-      with: {
-        planningActivities: {
-          with: {
-            activity: true,
-            site: true,
-            room: true,
-            coach: true,
-          },
-        },
-        site: {
-          columns: { name: true },
-        },
-        room: {
-          columns: { name: true },
+export async function getPlanningById(planningId: string) {
+  if (!isCUID(planningId)) return null;
+  return await db.query.planning.findFirst({
+    where: eq(planning.id, planningId),
+    with: {
+      planningActivities: {
+        with: {
+          activity: true,
+          site: true,
+          room: true,
+          coach: true,
         },
       },
-    })
-  ),
+      site: {
+        columns: { name: true },
+      },
+      room: {
+        columns: { name: true },
+      },
+    },
+  });
+}
+
+export const planningRouter = createTRPCRouter({
+  getPlanningsForClub: protectedProcedure
+    .input(z.string())
+    .query(({ input }) => getPlanningsForClub(input)),
+
+  getPlanningById: protectedProcedure
+    .input(z.cuid2())
+    .query(async ({ input }) => await getPlanningById(input)),
   getPlanningActivityById: protectedProcedure
     .input(z.cuid2().nullable())
     .query(({ input }) => {
@@ -175,7 +185,10 @@ export const planningRouter = createTRPCRouter({
   deletePlanningActivity: protectedProcedure
     .input(z.string())
     .mutation(({ input }) =>
-      db.delete(planningActivity).where(eq(planningActivity.id, input))
+      db
+        .delete(planningActivity)
+        .where(eq(planningActivity.id, input))
+        .returning()
     ),
   getClubDailyPlanning: publicProcedure
     .input(

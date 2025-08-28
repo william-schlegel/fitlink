@@ -17,9 +17,7 @@ export default function SelectClub({ clubId, clubs }: SelectClubProps) {
         className="w-48 min-w-fit"
         value={clubId}
         onChange={(e) => {
-          router.push(
-            createLink({ clubId: e.target.value, coachId: undefined })
-          );
+          router.push(createLink({ clubId: e.target.value }));
         }}
       >
         {clubs.map((club) => (

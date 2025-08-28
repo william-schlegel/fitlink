@@ -1,0 +1,21 @@
+import { getActualUser } from "@/lib/auth/server";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { redirect, RedirectType } from "next/navigation";
+
+export default async function PlanningManagement() {
+  const user = await getActualUser();
+  const t = await getTranslations("planning");
+  if (user?.internalRole === "MANAGER_COACH" || user?.internalRole === "ADMIN")
+    return (
+      <div>
+        <Link href={"/planning-management/coach"}>{t("coach")}</Link>
+        <Link href={"/planning-management/club"}>{t("club")}</Link>
+      </div>
+    );
+  if (user?.internalRole === "MANAGER")
+    redirect("/planning-management/club", RedirectType.replace);
+  if (user?.internalRole === "COACH")
+    redirect("/planning-management/coach", RedirectType.replace);
+  return <div>You are not allowed to use this page</div>;
+}

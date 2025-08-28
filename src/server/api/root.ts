@@ -9,6 +9,7 @@ import { fileRouter } from "./routers/files";
 import { clubRouter } from "./routers/clubs";
 import { calendarRouter } from "./routers/calendar";
 import { activityRouter } from "./routers/activities";
+import { planningRouter } from "./routers/planning";
 
 /**
  * This is the primary router for your server.
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   clubs: clubRouter,
   calendars: calendarRouter,
   activities: activityRouter,
+  plannings: planningRouter,
 });
 
 // export type definition of API
