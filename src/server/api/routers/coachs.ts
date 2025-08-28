@@ -1,5 +1,4 @@
 import { LATITUDE, LONGITUDE, DEFAULT_RANGE } from "@/lib/defaultValues";
-import { RoomReservation } from "@prisma/client";
 import { z } from "zod";
 import {
   createTRPCRouter,
@@ -60,60 +59,80 @@ const OfferData = z.object({
   ),
 });
 
+export async function getCoachsForClub(clubId: string) {
+  const clb = await db.query.club.findFirst({
+    where: eq(club.id, clubId),
+    with: {
+      coaches: {
+        with: {
+          coach: { with: { user: { columns: { id: true, name: true } } } },
+        },
+      },
+    },
+  });
+  return (
+    clb?.coaches.map(
+      (c: { coach: { user: { id: string; name: string } } }) => c.coach.user
+    ) ?? []
+  );
+}
+
+export async function getCoachById(coachId: string) {
+  const coach = await db.query.user.findFirst({
+    where: eq(user.id, coachId),
+    with: {
+      coachData: {
+        with: {
+          activityGroups: {
+            with: {
+              activities: true,
+            },
+          },
+          certifications: {
+            with: {
+              modules: true,
+              document: true,
+            },
+          },
+          clubs: true,
+          page: { columns: { id: true } },
+        },
+      },
+    },
+  });
+
+  // Find the first page for the coach with target "HOME"
+  const pages = await db.query.page.findMany({
+    where: and(eq(page.coachId, coach?.id ?? ""), eq(page.target, "HOME")),
+    with: {
+      sections: {
+        with: {
+          elements: {
+            with: {
+              images: true,
+            },
+            where: eq(pageSectionElement.elementType, "HERO_CONTENT"),
+          },
+        },
+        where: eq(pageSection.model, "HERO"),
+      },
+    },
+    limit: 1,
+  });
+
+  const imageData = pages[0];
+  const imgData = imageData?.sections?.[0]?.elements?.[0]?.images?.[0];
+  let imageUrl = coach?.image;
+  if (imgData) {
+    imageUrl = await getDocUrl(imgData.userId, imgData.id);
+  }
+  return { ...coach, imageUrl: imageUrl ?? "/images/dummy.jpg" };
+}
+
 export const coachRouter = createTRPCRouter({
   getCoachById: protectedProcedure
     .input(z.cuid2())
-    .query(async ({ ctx, input }) => {
-      const coach = await db.query.user.findFirst({
-        where: eq(user.id, input),
-        with: {
-          coachData: {
-            with: {
-              activityGroups: {
-                with: {
-                  activities: true,
-                },
-              },
-              certifications: {
-                with: {
-                  modules: true,
-                  document: true,
-                },
-              },
-              clubs: true,
-              page: { columns: { id: true } },
-            },
-          },
-        },
-      });
-
-      // Find the first page for the coach with target "HOME"
-      const pages = await db.query.page.findMany({
-        where: and(eq(page.coachId, coach?.id ?? ""), eq(page.target, "HOME")),
-        with: {
-          sections: {
-            with: {
-              elements: {
-                with: {
-                  images: true,
-                },
-                where: eq(pageSectionElement.elementType, "HERO_CONTENT"),
-              },
-            },
-            where: eq(pageSection.model, "HERO"),
-          },
-        },
-        limit: 1,
-      });
-
-      const imageData = pages[0];
-      const imgData = imageData?.sections?.[0]?.elements?.[0]?.images?.[0];
-      let imageUrl = coach?.image;
-      if (imgData) {
-        imageUrl = await getDocUrl(imgData.userId, imgData.id);
-      }
-      return { ...coach, imageUrl: imageUrl ?? "/images/dummy.jpg" };
-    }),
+    .query(async ({ input }) => await getCoachById(input)),
   getCoachsFromDistance: publicProcedure
     .input(
       z.object({
@@ -236,19 +255,7 @@ export const coachRouter = createTRPCRouter({
   ),
   getCoachsForClub: publicProcedure
     .input(z.cuid2())
-    .query(async ({ input }) => {
-      const clb = await db.query.club.findFirst({
-        where: eq(club.id, input),
-        with: {
-          coachs: { with: { user: { columns: { id: true, name: true } } } },
-        },
-      });
-      return (
-        clb?.coachs.map(
-          (c: { user: { id: string; name: string } }) => c.user
-        ) ?? []
-      );
-    }),
+    .query(async ({ input }) => await getCoachsForClub(input)),
 
   getCertificationsForCoach: protectedProcedure
     .input(z.string())

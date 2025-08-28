@@ -598,6 +598,7 @@
     },
     "language": "Langue",
     "navigation": {
+      "coach-management": "Gestion des coachs",
       "home": "Accueil",
       "dashboard": "Mon tableau de bord",
       "find-club": "Trouver un club",
