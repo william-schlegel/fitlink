@@ -19,7 +19,7 @@ import {
   event,
 } from "./club";
 import { certification, coachingPrice, coachMarketPlace } from "./coach";
-import { page, pageSectionElement } from "./page";
+import { page, pageSectionElementDocuments } from "./page";
 import { planning, planningActivity } from "./planning";
 import { subscription } from "./subscription";
 import { createId } from "@paralleldrive/cuid2";
@@ -144,7 +144,7 @@ export const userDocumentRelations = relations(
       references: [user.id],
     }),
     certification: one(certification),
-    pageSectionElements: many(pageSectionElement),
+    pageSectionElements: many(pageSectionElementDocuments),
     club: one(club),
     event: one(event),
   })

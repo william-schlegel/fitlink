@@ -1,121 +1,24 @@
-import { authOptions } from "@auth/[...nextauth]";
-import { isCUID } from "@lib/checkValidity";
-import createLink from "@lib/createLink";
-import { formatDateLocalized } from "@lib/formatDate";
-import { formatMoney } from "@lib/formatNumber";
+"use client";
+
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { trpc } from "@/lib/trpc/client";
+import { toast } from "@/lib/toast";
+import { isCUID } from "@/lib/utils";
+import { formatDateLocalized } from "@/lib/formatDate";
+import { formatMoney } from "@/lib/formatNumber";
+import Spinner from "@/components/ui/spinner";
 import {
-  CreateSubscription,
   DeleteSubscription,
   UpdateSubscription,
   useSubscriptionMode,
   useSubscriptionRestriction,
-} from "@modals/manageSubscription";
-import type { SubscriptionMode, SubscriptionRestriction } from "@prisma/client";
-import { Role } from "@prisma/client";
-import nextI18nConfig from "@root/next-i18next.config.mjs";
-import Layout from "@root/src/components/layout";
-import { trpc } from "@trpcclient/trpc";
-import Spinner from "@ui/spinner";
+} from "@/components/modals/manageSubscription";
+import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
 import {
-  type GetServerSidePropsContext,
-  type InferGetServerSidePropsType,
-} from "next";
-import { unstable_getServerSession } from "next-auth";
-import { useSession } from "next-auth/react";
-import { useTranslation, i18n } from "next-i18next";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { useState } from "react";
-import { toast } from "react-toastify";
-
-const ManageSubscriptions = ({
-  clubId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const { data: sessionData } = useSession();
-  const router = useRouter();
-  const subscriptionId = router.query.subscriptionId as string;
-  const clubQuery = trpc.clubs.getClubById.useQuery(clubId, {
-    enabled: isCUID(clubId),
-  });
-  const siteQuery = trpc.subscriptions.getSubscriptionsForClub.useQuery(
-    clubId,
-    {
-      enabled: isCUID(clubId),
-      onSuccess(data) {
-        if (!subscriptionId)
-          router.push(createLink({ subscriptionId: data[0]?.id }));
-      },
-    }
-  );
-  const t = useTranslations("club");
-
-  if (
-    sessionData &&
-    ![Role.MANAGER, Role.MANAGER_COACH, Role.ADMIN].includes(
-      sessionData.user?.role
-    )
-  )
-    return <div>{t("manager-only")}</div>;
-
-  return (
-    <Layout
-      title={t("subscription.manage-my-subscriptions", {
-        count: siteQuery.data?.length ?? 0,
-      })}
-      className="container mx-auto my-2 space-y-2 p-2"
-    >
-      <div className="mb-4 flex flex-row items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="flex items-center gap-4">
-            {t("subscription.manage-my-subscriptions", {
-              count: siteQuery.data?.length ?? 0,
-            })}
-            <span className="text-secondary">{clubQuery.data?.name}</span>
-          </h1>
-          <CreateSubscription clubId={clubId} />
-        </div>
-        <button
-          className="btn-outline btn btn-primary"
-          onClick={() => {
-            const path = `/manager/${sessionData?.user?.id}/clubs?clubId=${clubId}`;
-            router.push(path);
-          }}
-        >
-          {t("subscription.back-to-clubs")}
-        </button>
-      </div>
-      <div className="flex gap-4">
-        {siteQuery.isLoading ? (
-          <Spinner />
-        ) : (
-          <ul className="menu w-1/4 overflow-hidden rounded bg-base-100">
-            {siteQuery.data?.map((site) => (
-              <li key={site.id}>
-                <Link
-                  href={createLink({ subscriptionId: site.id })}
-                  className={`w-full text-center ${
-                    subscriptionId === site.id ? "active" : ""
-                  }`}
-                >
-                  {site.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-        {subscriptionId === "" ? null : (
-          <SubscriptionContent
-            clubId={clubId}
-            subscriptionId={subscriptionId}
-          />
-        )}
-      </div>
-    </Layout>
-  );
-};
-
-export default ManageSubscriptions;
+  SubscriptionModeEnum,
+  SubscriptionRestrictionEnum,
+} from "@/db/schema/enums";
 
 type SubscriptionContentProps = {
   clubId: string;
@@ -139,15 +42,21 @@ export function SubscriptionContent({
   const subQuery = trpc.subscriptions.getSubscriptionById.useQuery(
     subscriptionId,
     {
-      onSuccess(data) {
-        setSelectedSites(data?.sites.map((s) => s.id) ?? []);
-        setSelectedRooms(data?.rooms.map((s) => s.id) ?? []);
-        setSelectedActivityGroups(data?.activitieGroups.map((s) => s.id) ?? []);
-        setSelectedActivities(data?.activities.map((s) => s.id) ?? []);
-      },
       enabled: isCUID(subscriptionId),
     }
   );
+  useEffect(() => {
+    if (subQuery.data) {
+      setSelectedSites(subQuery.data?.sites.map((s) => s.siteId) ?? []);
+      setSelectedRooms(subQuery.data?.rooms.map((s) => s.roomId) ?? []);
+      setSelectedActivityGroups(
+        subQuery.data?.activitieGroups.map((s) => s.activityGroupId) ?? []
+      );
+      setSelectedActivities(
+        subQuery.data?.activities.map((s) => s.activityId) ?? []
+      );
+    }
+  }, [subQuery.data]);
 
   const { info } = useDisplaySubscriptionInfo(
     subQuery.data?.mode ?? "ALL_INCLUSIVE",
@@ -304,7 +213,7 @@ export function SubscriptionContent({
 
 type SelectRestrictionProps = {
   clubId: string;
-  restriction: SubscriptionRestriction;
+  restriction: SubscriptionRestrictionEnum;
   siteIds: string[];
   roomIds: string[];
   onSelectSite: (siteId: string) => void;
@@ -386,8 +295,8 @@ type SelectDataForModeProps = {
   roomIds: string[];
   activityGroupIds: string[];
   activityIds: string[];
-  restriction: SubscriptionRestriction;
-  mode: SubscriptionMode;
+  restriction: SubscriptionRestrictionEnum;
+  mode: SubscriptionModeEnum;
   onSelectActivityGroup: (id: string) => void;
   onSelectActivity: (id: string) => void;
 };
@@ -447,95 +356,6 @@ function SelectDataForMode({
   );
 }
 
-export function useDisplaySubscriptionInfo(
-  mode: SubscriptionMode | undefined,
-  restriction: SubscriptionRestriction | undefined,
-  activityGroupIds: string[],
-  activityIds: string[],
-  siteIds: string[],
-  roomIds: string[]
-) {
-  const t = useTranslations("club");
-
-  const { data } = trpc.subscriptions.getDataNames.useQuery(
-    {
-      siteIds,
-      roomIds,
-      activityGroupIds,
-      activityIds,
-    },
-    { enabled: mode != undefined && restriction != undefined }
-  );
-  let info = "";
-  let shortInfo = "";
-
-  if (!data)
-    return {
-      info: "",
-      sites: [],
-      rooms: [],
-      activityGroups: [],
-      activities: [],
-    };
-
-  const sites = data.sites.map((s) => s.name);
-  const rooms = data.rooms.map((s) => s.name);
-  const activityGroups = data.activityGroups.map((s) => s.name);
-  const activities = data.activities.map((s) => s.name);
-
-  const listFormatter = new Intl.ListFormat(i18n?.language);
-
-  switch (mode) {
-    case "ALL_INCLUSIVE":
-      shortInfo = t("subscription.mode.all-inclusive-select");
-      break;
-    case "ACTIVITY_GROUP":
-      info = t("subscription.mode.activity-group-select", {
-        count: data.activityGroups.length,
-      });
-      info = info.concat(listFormatter.format(activityGroups));
-      break;
-    case "ACTIVITY":
-      info = t("subscription.mode.activity-select", {
-        count: data.activities.length,
-      });
-      info = info.concat(listFormatter.format(activities));
-      break;
-    case "DAY":
-      shortInfo = t("subscription.mode.day-select");
-      break;
-    default:
-  }
-  info = info.concat(" ");
-  switch (restriction) {
-    case "CLUB":
-      info = info.concat(t("subscription.restriction.club-select"));
-      break;
-    case "SITE":
-      info = info.concat(
-        t("subscription.restriction.site-select", { count: data.sites.length })
-      );
-      info = info.concat(listFormatter.format(sites));
-      break;
-    case "ROOM":
-      info = info.concat(
-        t("subscription.restriction.room-select", { count: data.rooms.length })
-      );
-      info = info.concat(listFormatter.format(rooms));
-      break;
-    default:
-  }
-
-  return {
-    shortInfo,
-    info: shortInfo.concat(info),
-    sites,
-    rooms,
-    activityGroups,
-    activities,
-  };
-}
-
 function DataCell({
   label,
   value,
@@ -550,39 +370,3 @@ function DataCell({
     </div>
   );
 }
-
-export const getServerSideProps = async ({
-  locale,
-  req,
-  res,
-  params,
-}: GetServerSidePropsContext) => {
-  const session = await unstable_getServerSession(req, res, authOptions);
-  if (
-    session?.user?.role !== Role.MANAGER &&
-    session?.user?.role !== Role.MANAGER_COACH &&
-    session?.user?.role !== Role.ADMIN
-  )
-    return {
-      redirect: {
-        permanent: false,
-        destination: "/",
-      },
-      props: {
-        userId: "",
-        clubId: "",
-      },
-    };
-
-  return {
-    props: {
-      ...(await serverSideTranslations(
-        locale ?? "fr",
-        ["common", "club"],
-        nextI18nConfig
-      )),
-      userId: session?.user?.id || "",
-      clubId: params?.clubId as string,
-    },
-  };
-};

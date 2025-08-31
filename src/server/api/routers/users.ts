@@ -8,7 +8,7 @@ import { db } from "@/db";
 import { and, asc, count, eq, gte, ilike, SQL } from "drizzle-orm";
 import { featureEnum, roleEnum } from "@/db/schema/enums";
 import { user } from "@/db/schema/auth";
-import { getDocUrl } from "./files";
+import { getDocUrl } from "../../../../files";
 import { reservation } from "@/db/schema/planning";
 import { TRPCError } from "@trpc/server";
 import {

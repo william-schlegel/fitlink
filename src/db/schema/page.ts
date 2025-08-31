@@ -26,10 +26,41 @@ export const pageSectionElement = pgTable(
   (table) => [index("page_section_element_section_idx").on(table.sectionId)]
 );
 
+export const pageSectionElementDocuments = pgTable(
+  "PageSectionElementDocuments",
+  {
+    id: text("id").primaryKey().$defaultFn(createId),
+    elementId: text("element_id")
+      .notNull()
+      .references(() => pageSectionElement.id),
+    documentId: text("document_id")
+      .notNull()
+      .references(() => userDocument.id),
+  },
+  (table) => [
+    index("pse_documents_element_idx").on(table.elementId),
+    index("pse_documents_document_idx").on(table.documentId),
+  ]
+);
+
+export const pageSectionElementDocumentsRelations = relations(
+  pageSectionElementDocuments,
+  ({ one }) => ({
+    element: one(pageSectionElement, {
+      fields: [pageSectionElementDocuments.elementId],
+      references: [pageSectionElement.id],
+    }),
+    document: one(userDocument, {
+      fields: [pageSectionElementDocuments.documentId],
+      references: [userDocument.id],
+    }),
+  })
+);
+
 export const pageSectionElementRelations = relations(
   pageSectionElement,
   ({ one, many }) => ({
-    images: many(userDocument),
+    images: many(pageSectionElementDocuments),
     section: one(pageSection, {
       fields: [pageSectionElement.sectionId],
       references: [pageSection.id],

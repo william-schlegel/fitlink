@@ -51,11 +51,17 @@ export const subscriptionModeEnum = pgEnum("SubscriptionMode", [
   "COURSE",
 ]);
 
+export type SubscriptionModeEnum =
+  (typeof subscriptionModeEnum.enumValues)[number];
+
 export const subscriptionRestrictionEnum = pgEnum("SubscriptionRestriction", [
   "CLUB",
   "SITE",
   "ROOM",
 ]);
+
+export type SubscriptionRestrictionEnum =
+  (typeof subscriptionRestrictionEnum.enumValues)[number];
 
 export const coachingLevelListEnum = pgEnum("CoachingLevelList", [
   "ALL",
@@ -128,6 +134,9 @@ export const pageSectionModelEnum = pgEnum("PageSectionModel", [
   "FOOTER",
 ]);
 
+export type PageSectionModelEnum =
+  (typeof pageSectionModelEnum.enumValues)[number];
+
 export const pageSectionElementTypeEnum = pgEnum("PageSectionElementType", [
   "HERO_CONTENT",
   "CTA",
@@ -139,6 +148,9 @@ export const pageSectionElementTypeEnum = pgEnum("PageSectionElementType", [
   "NEWSLETTER",
   "OPTION",
 ]);
+
+export type PageSectionElementTypeEnum =
+  (typeof pageSectionElementTypeEnum.enumValues)[number];
 
 export const coachMarketPlaceTypeEnum = pgEnum("CoachMarketPlaceType", [
   "SEARCH",

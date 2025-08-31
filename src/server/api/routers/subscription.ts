@@ -13,20 +13,22 @@ import {
 } from "@/lib/trpc/server";
 import { z } from "zod";
 import { asc, eq, inArray } from "drizzle-orm";
+import { isCUID } from "@/lib/utils";
+import { TRPCError } from "@trpc/server";
 
-// const subscriptionObject = z.object({
-//   id: z.cuid2(),
-//   name: z.string(),
-//   highlight: z.string(),
-//   description: z.string(),
-//   startDate: z.date(),
-//   monthly: z.number(),
-//   yearly: z.number(),
-//   cancelationFee: z.number(),
-//   clubId: z.cuid2(),
-//   mode: z.enum(subscriptionModeEnum.enumValues),
-//   restriction: z.enum(subscriptionRestrictionEnum.enumValues),
-// });
+const subscriptionObject = z.object({
+  id: z.cuid2(),
+  name: z.string(),
+  highlight: z.string(),
+  description: z.string(),
+  startDate: z.date(),
+  monthly: z.number(),
+  yearly: z.number(),
+  cancelationFee: z.number(),
+  clubId: z.cuid2(),
+  mode: z.enum(subscriptionModeEnum.enumValues),
+  restriction: z.enum(subscriptionRestrictionEnum.enumValues),
+});
 
 export async function getDataNames(
   siteIds: string[],
@@ -53,6 +55,14 @@ export async function getDataNames(
   return { sites, rooms, activityGroups, activities };
 }
 
+export async function getSubscriptionsForClub(clubId: string) {
+  if (!isCUID(clubId)) return [];
+  return db.query.subscription.findMany({
+    where: eq(subscription.clubId, clubId),
+    orderBy: asc(subscription.startDate),
+  });
+}
+
 export const subscriptionRouter = createTRPCRouter({
   getSubscriptionById: publicProcedure.input(z.cuid2()).query(({ input }) => {
     return db.query.subscription.findFirst({
@@ -68,73 +78,70 @@ export const subscriptionRouter = createTRPCRouter({
   }),
   getSubscriptionsForClub: protectedProcedure
     .input(z.cuid2())
-    .query(({ input }) => {
-      return db.query.subscription.findMany({
-        where: eq(subscription.clubId, input),
-        orderBy: asc(subscription.startDate),
+    .query(({ input }) => getSubscriptionsForClub(input)),
+  createSubscription: protectedProcedure
+    .input(subscriptionObject.omit({ id: true }))
+    .mutation(({ input }) => db.insert(subscription).values(input).returning()),
+
+  updateSubscription: protectedProcedure
+    .input(subscriptionObject.partial())
+    .mutation(({ input }) =>
+      db
+        .update(subscription)
+        .set(input)
+        .where(eq(subscription.id, input.id))
+        .returning()
+    ),
+  updateSubscriptionSelection: protectedProcedure
+    .input(
+      z.object({
+        subscriptionId: z.cuid2(),
+        sites: z.array(z.cuid2()),
+        rooms: z.array(z.cuid2()),
+        activityGroups: z.array(z.cuid2()),
+        activities: z.array(z.cuid2()),
+      })
+    )
+    .mutation(({ input }) => {
+      return db.query.subscription.update({
+        where: eq(subscription.id, input.subscriptionId),
+        data: {
+          sites: { connect: input.sites.map((id) => ({ id })) },
+          rooms: { connect: input.rooms.map((id) => ({ id })) },
+          activitieGroups: {
+            connect: input.activityGroups.map((id) => ({ id })),
+          },
+          activities: { connect: input.activities.map((id) => ({ id })) },
+        },
       });
     }),
-  // createSubscription: protectedProcedure
-  //   .input(subscriptionObject.omit({ id: true }))
-  //   .mutation(({ input }) =>
-  //     db.query.subscription.create({
-  //       data: input,
-  //     })
-  //   ),
-  // updateSubscription: protectedProcedure
-  //   .input(subscriptionObject.partial())
-  //   .mutation(({ input }) => {
-  //     return db.query.subscription.update({
-  //       where: eq(subscription.id, input.id),
-  //       data: input,
-  //     });
-  //   }),
-  // updateSubscriptionSelection: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       subscriptionId: z.cuid2(),
-  //       sites: z.array(z.cuid2()),
-  //       rooms: z.array(z.cuid2()),
-  //       activityGroups: z.array(z.cuid2()),
-  //       activities: z.array(z.cuid2()),
-  //     })
-  //   )
-  //   .mutation(({ input }) => {
-  //     return db.query.subscription.update({
-  //       where: eq(subscription.id, input.subscriptionId),
-  //       data: {
-  //         sites: { connect: input.sites.map((id) => ({ id })) },
-  //         rooms: { connect: input.rooms.map((id) => ({ id })) },
-  //         activitieGroups: {
-  //           connect: input.activityGroups.map((id) => ({ id })),
-  //         },
-  //         activities: { connect: input.activities.map((id) => ({ id })) },
-  //       },
-  //     });
-  //   }),
-  // deleteSubscription: protectedProcedure
-  //   .input(z.cuid2())
-  //   .mutation(async ({ input }) => {
-  //     const sub = await db.query.subscription.findFirst({
-  //       where: eq(subscription.id, input),
-  //       with: { users: { select: { id: true } } },
-  //     });
-  //     if (!sub)
-  //       throw new TRPCError({
-  //         code: "BAD_REQUEST",
-  //         message: `unknown subscription ${input}`,
-  //       });
-  //     if (sub.users.length > 0) {
-  //       return db.query.subscription.update({
-  //         where: eq(subscription.id, input),
-  //         data: {
-  //           deletionDate: new Date(Date.now()),
-  //         },
-  //       });
-  //     } else {
-  //       return db.query.subscription.delete({ where: eq(subscription.id, input) });
-  //     }
-  //   }),
+  deleteSubscription: protectedProcedure
+    .input(z.cuid2())
+    .mutation(async ({ input }) => {
+      const sub = await db.query.subscription.findFirst({
+        where: eq(subscription.id, input),
+        with: { users: { columns: { userId: true } } },
+      });
+      if (!sub)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `unknown subscription ${input}`,
+        });
+      if (sub.users.length > 0) {
+        return db
+          .update(subscription)
+          .set({
+            deletionDate: new Date(Date.now()),
+          })
+          .where(eq(subscription.id, input))
+          .returning();
+      } else {
+        return db
+          .delete(subscription)
+          .where(eq(subscription.id, input))
+          .returning();
+      }
+    }),
   getPossibleChoice: protectedProcedure
     .input(
       z.object({
@@ -175,7 +182,11 @@ export const subscriptionRouter = createTRPCRouter({
                 with: {
                   activities: {
                     with: {
-                      group: true,
+                      activity: {
+                        with: {
+                          group: true,
+                        },
+                      },
                     },
                   },
                 },
@@ -189,7 +200,10 @@ export const subscriptionRouter = createTRPCRouter({
           for (const site of sites)
             for (const room of site.rooms)
               for (const activity of room.activities)
-                activityGroups.set(activity.groupId, activity.group);
+                activityGroups.set(
+                  activity.activity.groupId,
+                  activity.activity.group
+                );
 
           return { activityGroups: Array.from(activityGroups.values()) };
         }
@@ -200,7 +214,11 @@ export const subscriptionRouter = createTRPCRouter({
             with: {
               activities: {
                 with: {
-                  group: true,
+                  activity: {
+                    with: {
+                      group: true,
+                    },
+                  },
                 },
               },
             },
@@ -211,7 +229,10 @@ export const subscriptionRouter = createTRPCRouter({
           >();
           for (const room of rooms)
             for (const activity of room.activities)
-              activityGroups.set(activity.groupId, activity.group);
+              activityGroups.set(
+                activity.activity.groupId,
+                activity.activity.group
+              );
 
           return { activityGroups: Array.from(activityGroups.values()) };
         }

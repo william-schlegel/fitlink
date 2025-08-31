@@ -8,11 +8,12 @@ import {
 } from "@/lib/trpc/server";
 import { asc, eq, inArray } from "drizzle-orm";
 import z from "zod";
-import { getDocUrl } from "./files";
+import { getDocUrl } from "../../../../files";
 import { page } from "@/db/schema/page";
 import { TRPCError } from "@trpc/server";
 import { userCoach, userDocument } from "@/db/schema/user";
 import { openingCalendarClubs } from "@/db/schema/planning";
+import { isCUID } from "@/lib/utils";
 
 export async function getClubsForManager(userId: string) {
   const userData = await db.query.user.findFirst({
@@ -38,6 +39,7 @@ export async function getClubsForManager(userId: string) {
 }
 
 export async function getClubById(clubId: string, userId: string) {
+  if (!isCUID(clubId) || !isCUID(userId)) return null;
   const userData = await db.query.user.findFirst({
     where: eq(user.id, userId),
     with: {

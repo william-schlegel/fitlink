@@ -15,6 +15,13 @@
       "when": 1755443065358,
       "tag": "0001_many_black_widow",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756644902824,
+      "tag": "0002_windy_sharon_carter",
+      "breakpoints": true
     }
   ]
 }

@@ -403,6 +403,7 @@
       "select-mode": "Mode de facturation",
       "selected-mode": "Facturé",
       "validate-selection": "Valider cette sélection",
+      "selection-success": "Sélection validée avec succès",
       "mode": {
         "all-inclusive": "Tout compris",
         "activity-group": "Par groupe d'activité",

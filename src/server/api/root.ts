@@ -5,11 +5,13 @@ import { coachRouter } from "./routers/coachs";
 import { pricingRouter } from "./routers/pricing";
 import { eventRouter } from "./routers/event";
 import { dashboardRouter } from "./routers/dashboard";
-import { fileRouter } from "./routers/files";
+import { fileRouter } from "../../../files";
 import { clubRouter } from "./routers/clubs";
 import { calendarRouter } from "./routers/calendar";
 import { activityRouter } from "./routers/activities";
 import { planningRouter } from "./routers/planning";
+import { pageRouter } from "./routers/page";
+import { subscriptionRouter } from "./routers/subscription";
 
 /**
  * This is the primary router for your server.
@@ -28,6 +30,8 @@ export const appRouter = createTRPCRouter({
   calendars: calendarRouter,
   activities: activityRouter,
   plannings: planningRouter,
+  pages: pageRouter,
+  subscriptions: subscriptionRouter,
 });
 
 // export type definition of API

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getDocUrl } from "./files";
+import { getDocUrl } from "../../../../files";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 import { db } from "@/db";
 import { desc, eq } from "drizzle-orm";

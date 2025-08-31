@@ -8,7 +8,7 @@ import {
 import { db } from "@/db";
 import { and, asc, eq, gte, ilike, lte, or } from "drizzle-orm";
 import { calculateBBox, calculateDistance } from "@/lib/distance";
-import { getDocUrl } from "./files";
+import { getDocUrl } from "../../../../files";
 import {
   certification,
   certificationGroup,
