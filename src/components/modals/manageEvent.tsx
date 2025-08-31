@@ -228,13 +228,13 @@ export const DeleteEvent = ({
   buttonSize = "sm",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
-  const { data: user } = useUser();
+  const user = useUser();
   const t = useTranslations("club");
 
   const deleteEvent = trpc.events.deleteEvent.useMutation({
     onSuccess: () => {
-      // utils.clubs.getClubsForManager.invalidate(user?.id ?? "");
-      // utils.clubs.getClubById.invalidate(clubId);
+      utils.clubs.getClubsForManager.invalidate(user.data?.id ?? "");
+      utils.clubs.getClubById.invalidate(clubId);
       toast.success(t("event.deleted"));
     },
     onError(error) {
@@ -289,6 +289,7 @@ function EventForm({
   onCancel,
   initialImageUrl,
 }: EventFormProps) {
+  const tCommon = useTranslations("common");
   const t = useTranslations("club");
   const {
     handleSubmit,
@@ -359,6 +360,7 @@ function EventForm({
         </div>
         {imagePreview ? (
           <div className="relative col-span-full flex gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imagePreview}
               alt=""
@@ -513,10 +515,10 @@ function EventForm({
             onCancel();
           }}
         >
-          {t("common:cancel")}
+          {tCommon("cancel")}
         </button>
         <button className="btn btn-primary" type="submit">
-          {t("common:save")}
+          {tCommon("save")}
         </button>
       </div>
     </form>

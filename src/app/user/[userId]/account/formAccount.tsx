@@ -56,7 +56,14 @@ export default function FormAccount({
     setValue,
     setError,
     clearErrors,
-  } = useForm<FormValues>();
+  } = useForm<FormValues>({
+    defaultValues: {
+      longitude: LONGITUDE,
+      latitude: LATITUDE,
+      internalRole: userData?.internalRole ?? "MEMBER",
+      coachingActivities: [],
+    },
+  });
 
   const fields = useWatch({
     control,

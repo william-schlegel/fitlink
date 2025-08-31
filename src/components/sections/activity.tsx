@@ -334,6 +334,7 @@ function ActivityForm({
   initialImageUrl,
   pageId,
 }: ActivityFormProps) {
+  const tCommon = useTranslations("common");
   const t = useTranslations("pages");
   const {
     handleSubmit,
@@ -386,7 +387,7 @@ function ActivityForm({
       const image = fields.images[0];
       if (!image) return;
       if (image.size > MAX_SIZE) {
-        toast.error(t("page:image-size-error", { size: formatSize(MAX_SIZE) }));
+        toast.error(t("image-size-error", { size: formatSize(MAX_SIZE) }));
         setValue("images", undefined);
         return;
       }
@@ -501,10 +502,10 @@ function ActivityForm({
             onCancel();
           }}
         >
-          {t("common:cancel")}
+          {tCommon("cancel")}
         </button>
         <button className="btn btn-primary" type="submit">
-          {t("common:save")}
+          {tCommon("save")}
         </button>
       </div>
     </form>

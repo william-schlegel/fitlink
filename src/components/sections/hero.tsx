@@ -45,7 +45,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
     enabled: isCUID(clubId),
   });
   const fields = useWatch({ control });
-  const utils = trpc.useContext();
+  const utils = trpc.useUtils();
   const [updating, setUpdating] = useState(false);
   const [previewTheme, setPreviewTheme] = useState<TThemes>("cupcake");
   const { getSectionName, getSections } = usePageSection();
@@ -224,12 +224,12 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
   };
 
   useEffect(() => {
-    if (isCUID(fields.linkedPage)) {
-      const page = queryPages?.data?.find((p) => p.id === fields.linkedPage);
-      if (page) {
-        setSections(getSections(page.target ?? "HOME"));
-      } else setSections([]);
-    } else setSections([]);
+    setSections([]);
+    if (!isCUID(fields.linkedPage)) return;
+    const page = queryPages?.data?.find((p) => p.id === fields.linkedPage);
+    if (page) {
+      setSections(getSections(page.target ?? "HOME"));
+    }
   }, [fields.linkedPage, queryPages?.data, getSections]);
 
   useEffect(() => {

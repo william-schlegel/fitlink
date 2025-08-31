@@ -34,6 +34,7 @@ export default function PageContent({ pageId, clubId }: PageContentProps) {
 
   useEffect(() => {
     if (!queryPage.data) return;
+    console.log("queryPage.data", queryPage.data);
     if (queryPage.data?.target) {
       setSections(getSections(queryPage.data.target));
       setSection(defaultSection(queryPage.data.target));
@@ -54,6 +55,8 @@ export default function PageContent({ pageId, clubId }: PageContentProps) {
       );
     },
   });
+
+  console.log("section", section);
 
   if (queryPage.isLoading) return <Spinner />;
   return (

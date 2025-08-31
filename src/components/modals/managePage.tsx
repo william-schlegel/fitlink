@@ -16,7 +16,7 @@ import SimpleForm from "../ui/simpleform";
 import { ButtonSize } from "../ui/buttonIcon";
 import Spinner from "../ui/spinner";
 import Confirmation from "../ui/confirmation";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { isCUID } from "@/lib/utils";
 
 type CreatePageProps = {
@@ -80,31 +80,39 @@ const TARGET_SECTIONS: {
 
 export function usePageSection() {
   const t = useTranslations("pages");
-  function getTargetName(
-    target: (typeof pageTargetEnum.enumValues)[number] | undefined
-  ) {
-    if (!target) return "?";
-    const tg = PAGE_TARGET_LIST.find((t) => t.value === target);
-    if (tg) return t(tg.label);
-    return "?";
-  }
-  function getSectionName(section: PageSectionModel | undefined) {
-    if (!section) return "?";
-    const sc = PAGE_SECTION_LIST.find((s) => s.value === section);
-    if (sc) return t(sc.label);
-    return "?";
-  }
+  const getTargetName = useCallback(
+    (target: (typeof pageTargetEnum.enumValues)[number] | undefined) => {
+      if (!target) return "?";
+      const tg = PAGE_TARGET_LIST.find((t) => t.value === target);
+      if (tg) return t(tg.label);
+      return "?";
+    },
+    [t]
+  );
 
-  function defaultSection(target: PageTarget | undefined): PageSectionModel {
-    if (!target) return "HERO";
-    const ts = TARGET_SECTIONS.find((ts) => ts.target === target);
-    return ts?.sections?.[0] ?? "HERO";
-  }
+  const getSectionName = useCallback(
+    (section: PageSectionModel | undefined) => {
+      if (!section) return "?";
+      const sc = PAGE_SECTION_LIST.find((s) => s.value === section);
+      if (sc) return t(sc.label);
+      return "?";
+    },
+    [t]
+  );
 
-  function getSections(target: PageTarget): PageSectionModel[] {
+  const defaultSection = useCallback(
+    (target: PageTarget | undefined): PageSectionModel => {
+      if (!target) return "HERO";
+      const ts = TARGET_SECTIONS.find((ts) => ts.target === target);
+      return ts?.sections?.[0] ?? "HERO";
+    },
+    []
+  );
+
+  const getSections = useCallback((target: PageTarget): PageSectionModel[] => {
     const ts = TARGET_SECTIONS.find((ts) => ts.target === target);
     return ts?.sections ?? [];
-  }
+  }, []);
 
   return { getTargetName, getSectionName, defaultSection, getSections };
 }

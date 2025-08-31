@@ -471,6 +471,7 @@
       "no-event": "Aucun évènement à afficher",
       "update": "Modifier l'évènement",
       "updated": "Evènement modifié avec succès",
+      "deleted": "Evènement supprimé avec succès",
       "deletion": "Suppression de l'évènement",
       "deletion-message": "Etes-vous sûr de vouloir supprimer cet évènement?|Cette suppression est définitive"
     }
@@ -906,6 +907,7 @@
       "activity-group": "Groupes d'activité liés",
       "new-activity": "Nouvelle activité",
       "update-activity": "Modifier l'activité",
+      "deleted": "Activité supprimée",
       "deletion": "Supprimer cette activité",
       "deletion-message": "La suppression de cette activité est irréversible|Confirmez-vous ?",
       "deletion-confirm": "Supprimer",
