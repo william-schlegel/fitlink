@@ -4,6 +4,7 @@ import { activity, club, room, site } from "@/db/schema/club";
 import { dayNameEnum } from "@/db/schema/enums";
 import { planning, planningActivity, reservation } from "@/db/schema/planning";
 import { userCoach } from "@/db/schema/user";
+import { DayName } from "@/lib/dates/data";
 import { getDayName } from "@/lib/dates/days";
 import {
   createTRPCRouter,
@@ -92,6 +93,35 @@ export async function getPlanningById(planningId: string) {
       },
     },
   });
+}
+
+export async function getCoachDailyPlanning(coachId: string, day: DayName) {
+  if (!isCUID(coachId)) return [];
+  const coachPlanning = await db.query.planning.findMany({
+    where: and(
+      eq(planning.clubId, coachId),
+      lte(planning.startDate, new Date(Date.now())),
+      eq(planningActivity.coachId, coachId)
+    ),
+    with: {
+      club: true,
+      planningActivities: {
+        where: and(
+          eq(planningActivity.day, day),
+          eq(planningActivity.coachId, coachId)
+        ),
+
+        with: {
+          activity: true,
+          coach: true,
+          room: true,
+          site: true,
+        },
+      },
+    },
+  });
+  // TODO: manage exception days
+  return coachPlanning;
 }
 
 export const planningRouter = createTRPCRouter({
@@ -205,33 +235,9 @@ export const planningRouter = createTRPCRouter({
         day: z.enum(dayNameEnum.enumValues),
       })
     )
-    .query(async ({ input }) => {
-      const coachPlanning = await db.query.planning.findMany({
-        where: and(
-          eq(planning.clubId, input.coachId),
-          lte(planning.startDate, new Date(Date.now())),
-          eq(planningActivity.coachId, input.coachId)
-        ),
-        with: {
-          club: true,
-          planningActivities: {
-            where: and(
-              eq(planningActivity.day, input.day),
-              eq(planningActivity.coachId, input.coachId)
-            ),
-
-            with: {
-              activity: true,
-              coach: true,
-              room: true,
-              site: true,
-            },
-          },
-        },
-      });
-      // TODO: manage exception days
-      return coachPlanning;
-    }),
+    .query(
+      async ({ input }) => await getCoachDailyPlanning(input.coachId, input.day)
+    ),
   getCoachPlanningForClub: protectedProcedure
     .input(
       z.object({

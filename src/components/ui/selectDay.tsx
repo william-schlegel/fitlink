@@ -4,30 +4,51 @@ import { DayName } from "@/lib/dates/data";
 import { useDayName } from "@/lib/dates/useDayName";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { addDays, startOfToday, subDays } from "date-fns";
+import { useRouter } from "next/navigation";
 
 type SelectDayProps = {
   day: DayName;
-  onNewDay: (newDay: DayName) => void;
+  onNewDay?: (newDay: DayName) => void;
+  redirectTo?: string;
 };
 
-export default function SelectDay({ day, onNewDay }: SelectDayProps) {
+export default function SelectDay({
+  day,
+  onNewDay,
+  redirectTo,
+}: SelectDayProps) {
   const { getName, getNextDay, getPreviousDay, getToday } = useDayName();
+  const router = useRouter();
+  console.log("day", day);
+
+  const handleClick = (newDay: DayName) => {
+    console.log("handleClick", newDay);
+
+    if (redirectTo) {
+      router.push(`${redirectTo}?day=${newDay}`);
+    } else {
+      onNewDay?.(newDay);
+    }
+  };
 
   return (
     <div className="btn-group">
       <button
         className="btn btn-primary"
-        onClick={() => onNewDay(getPreviousDay(day))}
+        onClick={() => handleClick(getPreviousDay(day))}
       >
         <i className="bx bx-chevron-left bx-sm" />
       </button>
       <span className="btn btn-primary w-32 text-center">{getName(day)}</span>
-      <button className="btn btn-primary" onClick={() => onNewDay(getToday())}>
+      <button
+        className="btn btn-primary"
+        onClick={() => handleClick(getToday())}
+      >
         <i className="bx bx-calendar-event bx-sm" />
       </button>
       <button
         className="btn btn-primary"
-        onClick={() => onNewDay(getNextDay(day))}
+        onClick={() => handleClick(getNextDay(day))}
       >
         <i className="bx bx-chevron-right bx-sm" />
       </button>

@@ -6,12 +6,16 @@ import {
   publicProcedure,
 } from "@/lib/trpc/server";
 import { db } from "@/db";
-import { and, asc, eq, gte, ilike, lte, or } from "drizzle-orm";
+import { and, eq, gte, ilike, lte, or } from "drizzle-orm";
 import { calculateBBox, calculateDistance } from "@/lib/distance";
 import { getDocUrl } from "../../../../files";
 import {
   certification,
+  certificationActivityGroups,
+  certificationCertificationModules,
   certificationGroup,
+  certificationModule,
+  certificationModuleActivityGroups,
   coachingPrice,
 } from "@/db/schema/coach";
 import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
@@ -19,6 +23,9 @@ import { user } from "@/db/schema/auth";
 import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { userCoach } from "@/db/schema/user";
 import { club, coachingActivity } from "@/db/schema/club";
+import { isCUID } from "@/lib/utils";
+import { TRPCError } from "@trpc/server";
+import { isAdmin } from "@/server/lib/userTools";
 
 const CertificationData = z.object({
   id: z.cuid2(),
@@ -60,6 +67,7 @@ const OfferData = z.object({
 });
 
 export async function getCoachsForClub(clubId: string) {
+  if (!isCUID(clubId)) return [];
   const clb = await db.query.club.findFirst({
     where: eq(club.id, clubId),
     with: {
@@ -78,6 +86,7 @@ export async function getCoachsForClub(clubId: string) {
 }
 
 export async function getCoachById(coachId: string) {
+  if (!isCUID(coachId)) return null;
   const coach = await db.query.user.findFirst({
     where: eq(user.id, coachId),
     with: {
@@ -100,6 +109,7 @@ export async function getCoachById(coachId: string) {
       },
     },
   });
+  if (!coach) return null;
 
   // Find the first page for the coach with target "HOME"
   const pages = await db.query.page.findMany({
@@ -122,11 +132,26 @@ export async function getCoachById(coachId: string) {
 
   const imageData = pages[0];
   const imgData = imageData?.sections?.[0]?.elements?.[0]?.images?.[0];
-  let imageUrl = coach?.image;
+  let imageUrl = coach.image;
   if (imgData) {
-    imageUrl = await getDocUrl(imgData.userId, imgData.id);
+    imageUrl = await getDocUrl(coachId, imgData.id);
   }
   return { ...coach, imageUrl: imageUrl ?? "/images/dummy.jpg" };
+}
+
+export async function getCertificationsForCoach(coachId: string) {
+  if (!isCUID(coachId)) return null;
+  return await db.query.userCoach.findFirst({
+    where: eq(userCoach.userId, coachId),
+    with: {
+      certifications: {
+        with: {
+          modules: true,
+          activityGroups: true,
+        },
+      },
+    },
+  });
 }
 
 export const coachRouter = createTRPCRouter({
@@ -176,67 +201,119 @@ export const coachRouter = createTRPCRouter({
             c.distance <= (c.range ?? DEFAULT_RANGE)
         );
     }),
-  // createCertification: protectedProcedure
-  //   .input(CertificationData.omit({ id: true }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     const certif = await db.query.certification.create({
-  //       data: {
-  //         name: input.name,
-  //         obtainedIn: input.obtainedIn,
-  //         coach: {
-  //           connect: {
-  //             userId: input.userId,
-  //           },
-  //         },
-  //         modules: {
-  //           connect: input.modules.map((m) => ({ id: m })),
-  //         },
-  //         activityGroups: {
-  //           connect: input.activityGroups.map((a) => ({ id: a })),
-  //         },
-  //       },
-  //     });
-  //     if (input.documentId) {
-  //       await db.query.certification.update({
-  //         where: { id: certif.id },
-  //         data: {
-  //           document: {
-  //             connect: {
-  //               id: input.documentId,
-  //             },
-  //           },
-  //         },
-  //       });
-  //     }
-  //     return certif;
-  //   }),
-  // updateCertification: protectedProcedure
-  //   .input(CertificationData.partial())
-  //   .mutation(({ ctx, input }) =>
-  //     db.query.certification.update({
-  //       where: { id: input.id },
-  //       data: {
-  //         name: input.name,
-  //         obtainedIn: input.obtainedIn,
-  //         coachId: input.userId,
-  //         modules: input.modules
-  //           ? {
-  //               connect: input.modules.map((m) => ({ id: m })),
-  //             }
-  //           : undefined,
-  //         activityGroups: input.activityGroups
-  //           ? {
-  //               connect: input.activityGroups.map((a) => ({ id: a })),
-  //             }
-  //           : undefined,
-  //       },
-  //     })
-  //   ),
-  // deleteCertification: protectedProcedure
-  //   .input(z.string())
-  //   .mutation(({ ctx, input }) =>
-  //     db.query.certification.delete({ where: { id: input } })
-  //   ),
+  createCertification: protectedProcedure
+    .input(CertificationData.omit({ id: true }))
+    .mutation(async ({ input }) => {
+      return await db.transaction(async (tx) => {
+        const certif = await tx
+          .insert(certification)
+          .values({
+            name: input.name,
+            obtainedIn: input.obtainedIn,
+            coachId: input.userId,
+          })
+          .returning();
+
+        const certifId = certif[0].id;
+        await tx.insert(certificationCertificationModules).values(
+          input.modules.map((m) => ({
+            certificationId: certifId,
+            certificationModuleId: m,
+          }))
+        );
+        await tx.insert(certificationActivityGroups).values(
+          input.activityGroups.map((a) => ({
+            certificationId: certifId,
+            activityGroupId: a,
+          }))
+        );
+
+        await tx.insert(certificationActivityGroups).values(
+          input.activityGroups.map((a) => ({
+            certificationId: certifId,
+            activityGroupId: a,
+          }))
+        );
+
+        // coach: {
+        //   connect: {
+        //     userId: input.userId,
+        //   },
+        // },
+
+        if (input.documentId) {
+          await tx
+            .update(certification)
+            .set({
+              documentId: input.documentId,
+            })
+            .where(eq(certification.id, certifId));
+        }
+        return certif;
+      });
+    }),
+  updateCertification: protectedProcedure
+    .input(CertificationData.partial())
+    .mutation(({ input }) =>
+      db.transaction(async (tx) => {
+        const certifId = input.id;
+        if (!certifId || !isCUID(certifId))
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid certification id",
+          });
+        const certif = await tx
+          .update(certification)
+          .set({
+            name: input.name,
+            obtainedIn: input.obtainedIn,
+            coachId: input.userId ?? undefined,
+            // modules: input.modules
+            //   ? {
+            //       connect: input.modules.map((m) => ({ id: m })),
+            //     }
+            //   : undefined,
+            // activityGroups: input.activityGroups
+            //   ? {
+            //       connect: input.activityGroups.map((a) => ({ id: a })),
+            //     }
+            //   : undefined,
+          })
+          .where(eq(certification.id, certifId))
+          .returning();
+        await tx
+          .delete(certificationCertificationModules)
+          .where(
+            eq(certificationCertificationModules.certificationId, certifId)
+          );
+        await tx
+          .delete(certificationActivityGroups)
+          .where(eq(certificationActivityGroups.certificationId, certifId));
+        if (input.modules?.length) {
+          await tx.insert(certificationCertificationModules).values(
+            input.modules.map((m) => ({
+              certificationId: certifId,
+              certificationModuleId: m,
+            }))
+          );
+        }
+        if (input.activityGroups?.length) {
+          await tx.insert(certificationActivityGroups).values(
+            input.activityGroups.map((a) => ({
+              certificationId: certifId,
+              activityGroupId: a,
+            }))
+          );
+        }
+
+        return certif;
+      })
+    ),
+  deleteCertification: protectedProcedure
+    .input(z.cuid2())
+    .mutation(({ input }) =>
+      db.delete(certification).where(eq(certification.id, input))
+    ),
   getAllCoachs: publicProcedure.query(() =>
     db.query.user.findMany({
       where: or(
@@ -259,19 +336,8 @@ export const coachRouter = createTRPCRouter({
 
   getCertificationsForCoach: protectedProcedure
     .input(z.string())
-    .query(({ input }) =>
-      db.query.userCoach.findFirst({
-        where: eq(userCoach.userId, input),
-        with: {
-          certifications: {
-            with: {
-              modules: true,
-              activityGroups: true,
-            },
-          },
-        },
-      })
-    ),
+    .query(async ({ input }) => await getCertificationsForCoach(input)),
+
   getCertificationById: protectedProcedure.input(z.cuid2()).query(({ input }) =>
     db.query.certification.findFirst({
       where: eq(certification.id, input),
@@ -294,130 +360,138 @@ export const coachRouter = createTRPCRouter({
         with: { modules: { with: { activityGroups: true } } },
       })
     ),
-  // createGroup: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       name: z.string(),
-  //       modules: z.array(
-  //         z.object({
-  //           name: z.string(),
-  //           activityIds: z.array(z.cuid2()),
-  //         })
-  //       ),
-  //     })
-  //   )
-  //   .mutation(({ input }) =>
-  //     db.query.$transaction(async (tx) => {
-  //       const group = await tx.certificationGroup.create({
-  //         data: {
-  //           name: input.name,
-  //         },
-  //       });
-  //       for (const mod of input.modules) {
-  //         await tx.certificationModule.create({
-  //           data: {
-  //             name: mod.name,
-  //             certificationGroupId: group.id,
-  //             activityGroups: {
-  //               connect: mod.activityIds.map((id) => ({ id })),
-  //             },
-  //           },
-  //         });
-  //       }
-  //       return group;
-  //     })
-  //   ),
-  // updateGroup: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       id: z.cuid2(),
-  //       name: z.string(),
-  //     })
-  //   )
-  //   .mutation(({ ctx, input }) =>
-  //     db.query.certificationGroup.update({
-  //       where: { id: input.id },
-  //       data: {
-  //         name: input.name,
-  //       },
-  //     })
-  //   ),
-  // updateActivitiesForModule: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       moduleId: z.cuid2(),
-  //       activityIds: z.array(z.cuid2()),
-  //     })
-  //   )
-  //   .mutation(({ ctx, input }) =>
-  //     db.query.certificationModule.update({
-  //       where: { id: input.moduleId },
-  //       data: {
-  //         activityGroups: {
-  //           connect: input.activityIds.map((a) => ({ id: a })),
-  //         },
-  //       },
-  //     })
-  //   ),
+  createGroup: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        modules: z.array(
+          z.object({
+            name: z.string(),
+            activityIds: z.array(z.cuid2()),
+          })
+        ),
+      })
+    )
+    .mutation(({ input }) =>
+      db.transaction(async (tx) => {
+        const group = await tx
+          .insert(certificationGroup)
+          .values({
+            name: input.name,
+          })
+          .returning();
+        input.modules.forEach(async (mod) => {
+          const newModule = await tx
+            .insert(certificationModule)
+            .values({
+              name: mod.name,
+              certificationGroupId: group[0].id,
+            })
+            .returning();
+          await tx.insert(certificationModuleActivityGroups).values(
+            mod.activityIds.map((id) => ({
+              certificationModuleId: newModule[0].id,
+              activityGroupId: id,
+            }))
+          );
+        });
+        return group;
+      })
+    ),
+  updateGroup: protectedProcedure
+    .input(
+      z.object({
+        id: z.cuid2(),
+        name: z.string(),
+      })
+    )
+    .mutation(({ input }) =>
+      db
+        .update(certificationGroup)
+        .set({
+          name: input.name,
+        })
+        .where(eq(certificationGroup.id, input.id))
+        .returning()
+    ),
 
-  // deleteGroup: protectedProcedure
-  //   .input(z.cuid2())
-  //   .mutation(async ({ ctx, input }) => {
-  //     if (ctx.session.user.internalRole !== Role.ADMIN)
-  //       throw new TRPCError({
-  //         code: "UNAUTHORIZED",
-  //         message: "You are not authorized to delete this group",
-  //       });
+  updateActivitiesForModule: protectedProcedure
+    .input(
+      z.object({
+        moduleId: z.cuid2(),
+        activityIds: z.array(z.cuid2()),
+      })
+    )
+    .mutation(({ input }) =>
+      db
+        .update(certificationModule)
+        .set({
+          // activityGroups: {
+          //   connect: input.activityIds.map((a) => ({ id: a })),
+          // },
+        })
+        .where(eq(certificationModule.id, input.moduleId))
+        .returning()
+    ),
 
-  //     return db.query.certificationGroup.delete({
-  //       where: { id: input },
-  //     });
-  //   }),
-  // createModule: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       name: z.string(),
-  //       groupId: z.cuid2(),
-  //       activityIds: z.array(z.cuid2()),
-  //     })
-  //   )
-  //   .mutation(({ ctx, input }) =>
-  //     db.query.certificationModule.create({
-  //       data: {
-  //         name: input.name,
-  //         certificationGroupId: input.groupId,
-  //         activityGroups: {
-  //           connect: input.activityIds.map((id) => ({ id })),
-  //         },
-  //       },
-  //     })
-  //   ),
-  // updateModule: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       id: z.cuid2(),
-  //       name: z.string(),
-  //       activityIds: z.array(z.cuid2()),
-  //     })
-  //   )
-  //   .mutation(({ ctx, input }) =>
-  //     db.query.certificationModule.update({
-  //       where: { id: input.id },
-  //       data: {
-  //         name: input.name,
-  //         activityGroups: {
-  //           connect: input.activityIds.map((id) => ({ id })),
-  //         },
-  //       },
-  //     })
-  //   ),
-  // deleteModule: protectedProcedure
-  //   .input(z.cuid2())
-  //   .mutation(async ({ ctx, input }) => {
-  //     return db.query.certificationModule.delete({
-  //       where: { id: input },
-  //     });
-  //   }),
+  deleteGroup: protectedProcedure
+    .input(z.cuid2())
+    .mutation(async ({ input }) => {
+      await isAdmin(true);
+      return db
+        .delete(certificationGroup)
+        .where(eq(certificationGroup.id, input))
+        .returning();
+    }),
+  createModule: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        groupId: z.cuid2(),
+        activityIds: z.array(z.cuid2()),
+      })
+    )
+    .mutation(({ input }) =>
+      db
+        .insert(certificationModule)
+        .values({
+          name: input.name,
+          certificationGroupId: input.groupId,
+          // activityGroups: {
+          //   connect: input.activityIds.map((id) => ({ id })),
+          // },
+        })
+        .returning()
+    ),
+  updateModule: protectedProcedure
+    .input(
+      z.object({
+        id: z.cuid2(),
+        name: z.string(),
+        activityIds: z.array(z.cuid2()),
+      })
+    )
+    .mutation(({ input }) =>
+      db
+        .update(certificationModule)
+        .set({
+          name: input.name,
+          // activityGroups: {
+          //   connect: input.activityIds.map((id) => ({ id })),
+          // },
+        })
+        .where(eq(certificationModule.id, input.id))
+        .returning()
+    ),
+
+  deleteModule: protectedProcedure
+    .input(z.cuid2())
+    .mutation(async ({ input }) => {
+      return db
+        .delete(certificationModule)
+        .where(eq(certificationModule.id, input))
+        .returning();
+    }),
   getCoachData: protectedProcedure.input(z.cuid2()).query(({ input }) =>
     db.query.userCoach.findFirst({
       where: eq(userCoach.userId, input),

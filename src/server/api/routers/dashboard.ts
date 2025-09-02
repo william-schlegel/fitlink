@@ -104,37 +104,32 @@ export async function getManagerDataForUserId(userId: string) {
   };
 }
 
+export async function getCoachDataForUserId(userId: string) {
+  await hasRole(["COACH", "MANAGER_COACH", "ADMIN"], true);
+
+  const coachData = await db.query.user.findFirst({
+    where: eq(user.id, userId),
+    with: {
+      coachData: {
+        with: {
+          clubs: true,
+          certifications: true,
+          activityGroups: true,
+          page: true,
+          coachingPrices: true,
+        },
+      },
+    },
+  });
+  return coachData;
+}
+
 export const dashboardRouter = createTRPCRouter({
   getManagerDataForUserId: protectedProcedure
     .input(z.string())
     .query(({ input }) => getManagerDataForUserId(input)),
   getCoachDataForUserId: protectedProcedure
     .input(z.string())
-    .query(async ({ ctx, input }) => {
-      if (
-        ctx.user.internalRole !== "ADMIN" &&
-        ctx.user.internalRole !== "COACH" &&
-        ctx.user.internalRole !== "MANAGER_COACH"
-      )
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You cannot read coach data",
-        });
-      const clubData = await db.query.user.findFirst({
-        where: eq(user.id, input),
-        with: {
-          coachData: {
-            with: {
-              clubs: true,
-              certifications: true,
-              activityGroups: true,
-              page: true,
-              coachingPrices: true,
-            },
-          },
-        },
-      });
-      return clubData;
-    }),
+    .query(async ({ ctx, input }) => {}),
   getAdminData: protectedProcedure.query(async () => getAdminData()),
 });
