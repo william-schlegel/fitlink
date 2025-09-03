@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="2000" dy="2000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3300" pageHeight="2550" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Users/Auth cluster -->
+    <mxCell id="user" value="&lt;div&gt;&lt;b&gt;user&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: pricingId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf" vertex="1" parent="1">
+      <mxGeometry x="60" y="60" width="220" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="session" value="&lt;div&gt;&lt;b&gt;session&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: userId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf" vertex="1" parent="1">
+      <mxGeometry x="60" y="170" width="220" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="account" value="&lt;div&gt;&lt;b&gt;account&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: userId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf" vertex="1" parent="1">
+      <mxGeometry x="60" y="260" width="220" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="verification" value="&lt;div&gt;&lt;b&gt;verification&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf" vertex="1" parent="1">
+      <mxGeometry x="60" y="350" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="verificationToken" value="&lt;div&gt;&lt;b&gt;VerificationToken&lt;/b&gt;&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf" vertex="1" parent="1">
+      <mxGeometry x="60" y="430" width="220" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- User derivatives -->
+    <mxCell id="userCoach" value="&lt;div&gt;&lt;b&gt;UserCoach&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: userId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+      <mxGeometry x="340" y="60" width="230" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="userMember" value="&lt;div&gt;&lt;b&gt;UserMember&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: userId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+      <mxGeometry x="340" y="160" width="230" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="userManager" value="&lt;div&gt;&lt;b&gt;UserManager&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: userId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+      <mxGeometry x="340" y="250" width="230" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="userDocument" value="&lt;div&gt;&lt;b&gt;UserDocument&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: userId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+      <mxGeometry x="340" y="340" width="230" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="userNotification" value="&lt;div&gt;&lt;b&gt;UserNotification&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: userToId, userFromId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+      <mxGeometry x="340" y="430" width="230" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="userMemberToSubscription" value="&lt;div&gt;&lt;b&gt;user_member_to_subscription&lt;/b&gt;&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: userId, subscriptionId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+      <mxGeometry x="340" y="530" width="260" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- Page cluster -->
+    <mxCell id="page" value="&lt;div&gt;&lt;b&gt;Page&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: clubId, coachId, eventId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+      <mxGeometry x="650" y="60" width="260" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="pageSection" value="&lt;div&gt;&lt;b&gt;PageSection&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: pageId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+      <mxGeometry x="650" y="170" width="240" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="pageSectionElement" value="&lt;div&gt;&lt;b&gt;PageSectionElement&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: sectionId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+      <mxGeometry x="650" y="260" width="260" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="pageSectionElementDocuments" value="&lt;div&gt;&lt;b&gt;PageSectionElementDocuments&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: elementId, documentId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+      <mxGeometry x="650" y="350" width="300" height="90" as="geometry"/>
+    </mxCell>
+
+    <!-- Club cluster -->
+    <mxCell id="club" value="&lt;div&gt;&lt;b&gt;Club&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: managerId, logoId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366" vertex="1" parent="1">
+      <mxGeometry x="1020" y="60" width="260" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="site" value="&lt;div&gt;&lt;b&gt;Site&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: clubId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366" vertex="1" parent="1">
+      <mxGeometry x="1020" y="170" width="220" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="room" value="&lt;div&gt;&lt;b&gt;Room&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: siteId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366" vertex="1" parent="1">
+      <mxGeometry x="1020" y="260" width="220" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="event" value="&lt;div&gt;&lt;b&gt;Event&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: clubId, pageId, documentId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366" vertex="1" parent="1">
+      <mxGeometry x="1020" y="350" width="280" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="activityGroup" value="&lt;div&gt;&lt;b&gt;ActivityGroup&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: coachId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366" vertex="1" parent="1">
+      <mxGeometry x="1320" y="60" width="240" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="activity" value="&lt;div&gt;&lt;b&gt;Activity&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: groupId, clubId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366" vertex="1" parent="1">
+      <mxGeometry x="1320" y="150" width="240" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="coachingActivity" value="&lt;div&gt;&lt;b&gt;CoachingActivity&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: coachId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366" vertex="1" parent="1">
+      <mxGeometry x="1320" y="250" width="260" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="clubMembers" value="&lt;div&gt;&lt;b&gt;ClubMembers&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: clubId, memberUserId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366" vertex="1" parent="1">
+      <mxGeometry x="1320" y="340" width="260" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="clubCoachs" value="&lt;div&gt;&lt;b&gt;ClubCoachs&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: clubId, coachUserId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366" vertex="1" parent="1">
+      <mxGeometry x="1320" y="430" width="260" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="roomActivities" value="&lt;div&gt;&lt;b&gt;RoomActivities&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: roomId, activityId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366" vertex="1" parent="1">
+      <mxGeometry x="1320" y="520" width="260" height="90" as="geometry"/>
+    </mxCell>
+
+    <!-- Planning cluster -->
+    <mxCell id="planning" value="&lt;div&gt;&lt;b&gt;Planning&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: clubId, siteId, roomId, coachId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+      <mxGeometry x="1700" y="60" width="300" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="planningActivity" value="&lt;div&gt;&lt;b&gt;PlanningActivity&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: planningId, activityId, siteId, roomId, coachId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+      <mxGeometry x="1700" y="180" width="380" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="reservation" value="&lt;div&gt;&lt;b&gt;Reservation&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: planningActivityId, activityId, roomId, userId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+      <mxGeometry x="1700" y="300" width="360" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="openingCalendar" value="&lt;div&gt;&lt;b&gt;OpeningCalendar&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+      <mxGeometry x="1700" y="420" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="dayOpeningTime" value="&lt;div&gt;&lt;b&gt;DayOpeningTime&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+      <mxGeometry x="1700" y="500" width="240" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="openingTime" value="&lt;div&gt;&lt;b&gt;OpeningTime&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+      <mxGeometry x="1700" y="580" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="openingCalendarClubs" value="&lt;div&gt;&lt;b&gt;OpeningCalendarClubs&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: openingCalendarId, clubId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+      <mxGeometry x="2020" y="420" width="320" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="openingCalendarSites" value="&lt;div&gt;&lt;b&gt;OpeningCalendarSites&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: openingCalendarId, siteId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+      <mxGeometry x="2020" y="510" width="320" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="openingCalendarRooms" value="&lt;div&gt;&lt;b&gt;OpeningCalendarRooms&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: openingCalendarId, roomId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+      <mxGeometry x="2020" y="600" width="320" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="openingCalendarPlannings" value="&lt;div&gt;&lt;b&gt;OpeningCalendarPlannings&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: openingCalendarId, planningId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+      <mxGeometry x="2020" y="690" width="340" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="dayOpeningTimeCalendars" value="&lt;div&gt;&lt;b&gt;DayOpeningTimeCalendars&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: dayOpeningTimeId, openingCalendarId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+      <mxGeometry x="2020" y="780" width="360" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="openingTimeDays" value="&lt;div&gt;&lt;b&gt;OpeningTimeDays&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: openingTimeId, dayOpeningTimeId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+      <mxGeometry x="2020" y="870" width="340" height="90" as="geometry"/>
+    </mxCell>
+
+    <!-- Subscription cluster -->
+    <mxCell id="subscription" value="&lt;div&gt;&lt;b&gt;Subscription&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: clubId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00" vertex="1" parent="1">
+      <mxGeometry x="60" y="600" width="240" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="paiement" value="&lt;div&gt;&lt;b&gt;Paiement&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: userId, subscriptionId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00" vertex="1" parent="1">
+      <mxGeometry x="60" y="690" width="260" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="pricing" value="&lt;div&gt;&lt;b&gt;Pricing&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00" vertex="1" parent="1">
+      <mxGeometry x="340" y="600" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="pricingOption" value="&lt;div&gt;&lt;b&gt;PricingOption&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: pricingId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00" vertex="1" parent="1">
+      <mxGeometry x="340" y="680" width="240" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="pricingFeature" value="&lt;div&gt;&lt;b&gt;PricingFeature&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: pricingId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00" vertex="1" parent="1">
+      <mxGeometry x="340" y="770" width="240" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="subscriptionToActivityGroup" value="&lt;div&gt;&lt;b&gt;subscription_to_activity_group&lt;/b&gt;&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: subscriptionId, activityGroupId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00" vertex="1" parent="1">
+      <mxGeometry x="60" y="790" width="320" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="subscriptionToActivity" value="&lt;div&gt;&lt;b&gt;subscription_to_activity&lt;/b&gt;&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: subscriptionId, activityId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00" vertex="1" parent="1">
+      <mxGeometry x="60" y="880" width="300" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="subscriptionToSite" value="&lt;div&gt;&lt;b&gt;subscription_to_site&lt;/b&gt;&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: subscriptionId, siteId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00" vertex="1" parent="1">
+      <mxGeometry x="60" y="970" width="300" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="subscriptionToRoom" value="&lt;div&gt;&lt;b&gt;subscription_to_room&lt;/b&gt;&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: subscriptionId, roomId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00" vertex="1" parent="1">
+      <mxGeometry x="60" y="1060" width="300" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- Coach/Certification cluster -->
+    <mxCell id="coachingPrice" value="&lt;div&gt;&lt;b&gt;CoachingPrice&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: coachId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#666666" vertex="1" parent="1">
+      <mxGeometry x="1020" y="520" width="240" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="coachingLevel" value="&lt;div&gt;&lt;b&gt;CoachingLevel&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: offerId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#666666" vertex="1" parent="1">
+      <mxGeometry x="1020" y="610" width="240" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="coachingPricePack" value="&lt;div&gt;&lt;b&gt;CoachingPricePack&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: coachingPriceId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#666666" vertex="1" parent="1">
+      <mxGeometry x="1020" y="700" width="280" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="certificationGroup" value="&lt;div&gt;&lt;b&gt;CertificationGroup&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#666666" vertex="1" parent="1">
+      <mxGeometry x="1320" y="610" width="240" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="certificationModule" value="&lt;div&gt;&lt;b&gt;CertificationModule&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: certificationGroupId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#666666" vertex="1" parent="1">
+      <mxGeometry x="1320" y="690" width="300" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="certification" value="&lt;div&gt;&lt;b&gt;Certification&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: documentId, coachId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#666666" vertex="1" parent="1">
+      <mxGeometry x="1320" y="780" width="280" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="coachMarketPlace" value="&lt;div&gt;&lt;b&gt;CoachMarketPlace&lt;/b&gt;&lt;br/&gt;&lt;i&gt;PK&lt;/i&gt;: id&lt;br/&gt;&lt;i&gt;FK&lt;/i&gt;: clubId, coachId&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#666666" vertex="1" parent="1">
+      <mxGeometry x="1320" y="870" width="300" height="90" as="geometry"/>
+    </mxCell>
+
+    <!-- Coach misc join tables without explicit FKs/PKs in schema -->
+    <mxCell id="certification_module_activity_groups" value="&lt;div&gt;&lt;b&gt;certification_module_activity_groups&lt;/b&gt;&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#999999" vertex="1" parent="1">
+      <mxGeometry x="1660" y="780" width="340" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="certification_certification_modules" value="&lt;div&gt;&lt;b&gt;certification_certification_modules&lt;/b&gt;&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#999999" vertex="1" parent="1">
+      <mxGeometry x="1660" y="850" width="360" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="certification_activity_groups" value="&lt;div&gt;&lt;b&gt;certification_activity_groups&lt;/b&gt;&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#999999" vertex="1" parent="1">
+      <mxGeometry x="1660" y="920" width="320" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="coach_market_place_sites" value="&lt;div&gt;&lt;b&gt;coach_market_place_sites&lt;/b&gt;&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#999999" vertex="1" parent="1">
+      <mxGeometry x="1660" y="990" width="300" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="coach_market_place_certifications" value="&lt;div&gt;&lt;b&gt;coach_market_place_certifications&lt;/b&gt;&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#999999" vertex="1" parent="1">
+      <mxGeometry x="1660" y="1060" width="360" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="coach_market_place_activity_groups" value="&lt;div&gt;&lt;b&gt;coach_market_place_activity_groups&lt;/b&gt;&lt;/div&gt;" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=1;fillColor=#f5f5f5;strokeColor=#999999" vertex="1" parent="1">
+      <mxGeometry x="1660" y="1130" width="380" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Edges: Users/Auth -->
+    <mxCell id="e_user_session" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#6c8ebf" edge="1" parent="1" source="session" target="user">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_user_account" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#6c8ebf" edge="1" parent="1" source="account" target="user">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_user_userCoach" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#9673a6" edge="1" parent="1" source="userCoach" target="user">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_user_userMember" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#9673a6" edge="1" parent="1" source="userMember" target="user">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_user_userManager" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#9673a6" edge="1" parent="1" source="userManager" target="user">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_user_userDocument" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#9673a6" edge="1" parent="1" source="userDocument" target="user">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_user_userNotification_to" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#9673a6" edge="1" parent="1" source="userNotification" target="user">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edges: Page -->
+    <mxCell id="e_page_pageSection" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d6b656" edge="1" parent="1" source="pageSection" target="page">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_pageSection_pageSectionElement" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d6b656" edge="1" parent="1" source="pageSectionElement" target="pageSection">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_pse_docs_element" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d6b656" edge="1" parent="1" source="pageSectionElementDocuments" target="pageSectionElement">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_pse_docs_document" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#d6b656" edge="1" parent="1" source="pageSectionElementDocuments" target="userDocument">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edges: Club -->
+    <mxCell id="e_club_site" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#82b366" edge="1" parent="1" source="site" target="club">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_site_room" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#82b366" edge="1" parent="1" source="room" target="site">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_event_club" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#82b366" edge="1" parent="1" source="event" target="club">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_event_page" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#82b366" edge="1" parent="1" source="event" target="page">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_club_logo_document" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#82b366" edge="1" parent="1" source="club" target="userDocument">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_club_manager" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#82b366" edge="1" parent="1" source="club" target="userManager">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_activity_group" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#82b366" edge="1" parent="1" source="activity" target="activityGroup">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_activity_club" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#82b366" edge="1" parent="1" source="activity" target="club">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_activityGroup_coach" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#82b366" edge="1" parent="1" source="activityGroup" target="userCoach">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_coachingActivity_coach" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#82b366" edge="1" parent="1" source="coachingActivity" target="userCoach">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_clubMembers_club" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#82b366" edge="1" parent="1" source="clubMembers" target="club">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_clubMembers_member" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#82b366" edge="1" parent="1" source="clubMembers" target="userMember">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_clubCoachs_club" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#82b366" edge="1" parent="1" source="clubCoachs" target="club">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_clubCoachs_coach" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#82b366" edge="1" parent="1" source="clubCoachs" target="userCoach">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_roomActivities_room" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#82b366" edge="1" parent="1" source="roomActivities" target="room">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_roomActivities_activity" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#82b366" edge="1" parent="1" source="roomActivities" target="activity">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edges: Planning -->
+    <mxCell id="e_planning_club" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="planning" target="club">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_planning_site" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="planning" target="site">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_planning_room" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="planning" target="room">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_planning_coach" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#b85450" edge="1" parent="1" source="planning" target="userCoach">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_planningActivity_planning" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="planningActivity" target="planning">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_planningActivity_activity" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="planningActivity" target="activity">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_planningActivity_site" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="planningActivity" target="site">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_planningActivity_room" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="planningActivity" target="room">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_planningActivity_coach" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#b85450" edge="1" parent="1" source="planningActivity" target="userCoach">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_reservation_planningActivity" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="reservation" target="planningActivity">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_reservation_activity" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="reservation" target="activity">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_reservation_room" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="reservation" target="room">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_reservation_user" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#b85450" edge="1" parent="1" source="reservation" target="user">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edges: Opening calendar helpers -->
+    <mxCell id="e_openingCalendarClubs_calendar" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="openingCalendarClubs" target="openingCalendar">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_openingCalendarClubs_club" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="openingCalendarClubs" target="club">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_openingCalendarSites_calendar" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="openingCalendarSites" target="openingCalendar">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_openingCalendarSites_site" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="openingCalendarSites" target="site">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_openingCalendarRooms_calendar" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="openingCalendarRooms" target="openingCalendar">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_openingCalendarRooms_room" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="openingCalendarRooms" target="room">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_openingCalendarPlannings_calendar" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="openingCalendarPlannings" target="openingCalendar">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_openingCalendarPlannings_planning" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="openingCalendarPlannings" target="planning">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_dayOpeningTimeCalendars_day" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="dayOpeningTimeCalendars" target="dayOpeningTime">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_dayOpeningTimeCalendars_calendar" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="dayOpeningTimeCalendars" target="openingCalendar">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_openingTimeDays_time" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="openingTimeDays" target="openingTime">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_openingTimeDays_day" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#b85450" edge="1" parent="1" source="openingTimeDays" target="dayOpeningTime">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edges: Subscription -->
+    <mxCell id="e_subscription_paiement" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d79b00" edge="1" parent="1" source="paiement" target="subscription">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_user_paiement" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#d79b00" edge="1" parent="1" source="paiement" target="user">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_club_subscription" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d79b00" edge="1" parent="1" source="subscription" target="club">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_subscription_subToActivityGroup" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d79b00" edge="1" parent="1" source="subscriptionToActivityGroup" target="subscription">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_activityGroup_subToActivityGroup" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d79b00" edge="1" parent="1" source="subscriptionToActivityGroup" target="activityGroup">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_subscription_subToActivity" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d79b00" edge="1" parent="1" source="subscriptionToActivity" target="subscription">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_activity_subToActivity" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d79b00" edge="1" parent="1" source="subscriptionToActivity" target="activity">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_subscription_subToSite" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d79b00" edge="1" parent="1" source="subscriptionToSite" target="subscription">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_site_subToSite" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d79b00" edge="1" parent="1" source="subscriptionToSite" target="site">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_subscription_subToRoom" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d79b00" edge="1" parent="1" source="subscriptionToRoom" target="subscription">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_room_subToRoom" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d79b00" edge="1" parent="1" source="subscriptionToRoom" target="room">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_subscription_userMemberToSubscription" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d79b00" edge="1" parent="1" source="userMemberToSubscription" target="subscription">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_userMember_userMemberToSubscription" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#d79b00" edge="1" parent="1" source="userMemberToSubscription" target="userMember">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edges: Coach/Certification -->
+    <mxCell id="e_userCoach_coachingPrice" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#666666" edge="1" parent="1" source="coachingPrice" target="userCoach">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_coachingPrice_coachingLevel" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#666666" edge="1" parent="1" source="coachingLevel" target="coachingPrice">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_coachingPrice_coachingPricePack" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#666666" edge="1" parent="1" source="coachingPricePack" target="coachingPrice">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_certificationGroup_certificationModule" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#666666" edge="1" parent="1" source="certificationModule" target="certificationGroup">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_certification_document" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#666666" edge="1" parent="1" source="certification" target="userDocument">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_certification_coach" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#666666" edge="1" parent="1" source="certification" target="userCoach">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_coachMarketPlace_club" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#666666" edge="1" parent="1" source="coachMarketPlace" target="club">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_coachMarketPlace_coach" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#666666" edge="1" parent="1" source="coachMarketPlace" target="userCoach">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Cross cluster edges -->
+    <mxCell id="e_user_pricing" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d79b00" edge="1" parent="1" source="user" target="pricing">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_page_club" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d6b656" edge="1" parent="1" source="page" target="club">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_page_coach" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;dashed=1;strokeColor=#d6b656" edge="1" parent="1" source="page" target="userCoach">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_page_event" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d6b656" edge="1" parent="1" source="event" target="page">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+  </mxGraphModel>
+
+

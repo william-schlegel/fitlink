@@ -81,7 +81,9 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
 
   for (const a of selectedGroup?.modules
     .filter((m) => moduleIds.get(m.id)?.selected)
-    .flatMap((m) => m.activityGroups) ?? []) {
+    .flatMap((m) =>
+      m.certificationModuleActivityGroups.map((a) => a.activityGroup)
+    ) ?? []) {
     selectedActivities.set(a.id, a);
   }
 
@@ -122,8 +124,9 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
         selectedGroup?.modules.filter((m) => mods.get(m.id)?.selected) ?? [];
       const activities = Array.from(
         new Set(
-          selectedModules.flatMap((m) => m.activityGroups.map((a) => a.id)) ??
-            []
+          selectedModules.flatMap((m) =>
+            m.certificationModuleActivityGroups.map((a) => a.activityGroup.id)
+          ) ?? []
         )
       );
       const aIds = new Map<string, OptionItem>();
@@ -424,7 +427,10 @@ export function UpdateCertificationGroup({
           queryGroup.data?.modules.map((m) => ({
             dbId: m.id,
             name: m.name,
-            activityIds: m.activityGroups.map((g) => g.id),
+            activityIds: [],
+            // m.activityGroups.flatMap((g) =>
+            //   g.activities.map((a) => a.id)
+            // ),
           })) ?? [],
       });
     }
@@ -622,8 +628,9 @@ function CertificationGroupForm({
   return (
     <div className="flex flex-col gap-2">
       <form className={`grid grid-cols-[auto_1fr] gap-2`}>
-        <label>{t("certification.group-name")}</label>
+        <label htmlFor="name">{t("certification.group-name")}</label>
         <input
+          id="name"
           value={data.name}
           onChange={(e) => setData({ ...data, name: e.currentTarget.value })}
           type={"text"}
@@ -638,14 +645,14 @@ function CertificationGroupForm({
       <label>{t("certification.modules")}</label>
       <ul className="menu overflow-hidden rounded border border-base-300">
         {data.modules.map((mod, idx) => (
-          <li key={mod.dbId}>
+          <li key={mod.dbId ?? mod.name}>
             <div
               className={`flex w-full items-center justify-between text-center ${
                 moduleId === mod.dbId ? "active" : ""
               }`}
               onClick={() => selectModule(mod.dbId)}
             >
-              <div className="flex flex-grow items-center justify-between">
+              <div className="flex flex-grow items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <span>{mod.name}</span>
                   {mod.activityIds.map((id) => (

@@ -18,6 +18,8 @@ import { userCoach, userDocument } from "./user";
 import { activityGroup, club, site } from "./club";
 import { createId } from "@paralleldrive/cuid2";
 
+/* Coaching prices */
+
 export const coachingLevel = pgTable(
   "CoachingLevel",
   {
@@ -96,6 +98,8 @@ export const coachingPricePackRelations = relations(
   })
 );
 
+/* Certifications */
+
 export const certificationGroup = pgTable("CertificationGroup", {
   id: text("id").primaryKey().$defaultFn(createId),
   name: text("name").notNull(),
@@ -130,6 +134,8 @@ export const certificationModuleRelations = relations(
     }),
     activityGroups: many(activityGroup),
     certifications: many(certification),
+    certificationModuleActivityGroups: many(certificationModuleActivityGroups),
+    certificationCertificationModules: many(certificationCertificationModules),
   })
 );
 
@@ -159,8 +165,90 @@ export const certificationRelations = relations(
     modules: many(certificationModule),
     activityGroups: many(activityGroup),
     marketPlaceSearchs: many(coachMarketPlace),
+    certificationCertificationModules: many(certificationCertificationModules),
+    certificationActivityGroups: many(certificationActivityGroups),
   })
 );
+
+export const certificationCertificationModules = pgTable(
+  "certification_certification_modules",
+  {
+    certificationId: text("certification_id")
+      .notNull()
+      .references(() => certification.id),
+    certificationModuleId: text("certification_module_id")
+      .notNull()
+      .references(() => certificationModule.id),
+  }
+);
+
+export const certificationCertificationModulesRelations = relations(
+  certificationCertificationModules,
+  ({ one }) => ({
+    certification: one(certification, {
+      fields: [certificationCertificationModules.certificationId],
+      references: [certification.id],
+    }),
+    certificationModule: one(certificationModule, {
+      fields: [certificationCertificationModules.certificationModuleId],
+      references: [certificationModule.id],
+    }),
+  })
+);
+
+export const certificationActivityGroups = pgTable(
+  "certification_activity_groups",
+  {
+    certificationId: text("certification_id")
+      .notNull()
+      .references(() => certification.id),
+    activityGroupId: text("activity_group_id")
+      .notNull()
+      .references(() => activityGroup.id),
+  }
+);
+
+export const certificationActivityGroupsRelations = relations(
+  certificationActivityGroups,
+  ({ one }) => ({
+    certification: one(certification, {
+      fields: [certificationActivityGroups.certificationId],
+      references: [certification.id],
+    }),
+    activityGroup: one(activityGroup, {
+      fields: [certificationActivityGroups.activityGroupId],
+      references: [activityGroup.id],
+    }),
+  })
+);
+
+export const certificationModuleActivityGroups = pgTable(
+  "certification_module_activity_groups",
+  {
+    certificationModuleId: text("certification_module_id")
+      .notNull()
+      .references(() => certificationModule.id),
+    activityGroupId: text("activity_group_id")
+      .notNull()
+      .references(() => activityGroup.id),
+  }
+);
+
+export const certificationModuleActivityGroupsRelations = relations(
+  certificationModuleActivityGroups,
+  ({ one }) => ({
+    certificationModule: one(certificationModule, {
+      fields: [certificationModuleActivityGroups.certificationModuleId],
+      references: [certificationModule.id],
+    }),
+    activityGroup: one(activityGroup, {
+      fields: [certificationModuleActivityGroups.activityGroupId],
+      references: [activityGroup.id],
+    }),
+  })
+);
+
+/* Coach market place */
 
 export const coachMarketPlace = pgTable(
   "CoachMarketPlace",
@@ -195,50 +283,83 @@ export const coachMarketPlaceRelations = relations(
     sites: many(site),
     certifications: many(certification),
     activities: many(activityGroup),
+    coachMarketPlaceSites: many(coachMarketPlaceSites),
+    coachMarketPlaceCertifications: many(coachMarketPlaceCertifications),
+    coachMarketPlaceActivityGroups: many(coachMarketPlaceActivityGroups),
   })
 );
 
-export const certificationModuleActivityGroups = pgTable(
-  "certification_module_activity_groups",
-  {
-    certificationModuleId: text("certification_module_id").notNull(),
-    activityGroupId: text("activity_group_id").notNull(),
-  }
-);
-
-export const certificationCertificationModules = pgTable(
-  "certification_certification_modules",
-  {
-    certificationId: text("certification_id").notNull(),
-    certificationModuleId: text("certification_module_id").notNull(),
-  }
-);
-
-export const certificationActivityGroups = pgTable(
-  "certification_activity_groups",
-  {
-    certificationId: text("certification_id").notNull(),
-    activityGroupId: text("activity_group_id").notNull(),
-  }
-);
-
 export const coachMarketPlaceSites = pgTable("coach_market_place_sites", {
-  coachMarketPlaceId: text("coach_market_place_id").notNull(),
-  siteId: text("site_id").notNull(),
+  coachMarketPlaceId: text("coach_market_place_id")
+    .notNull()
+    .references(() => coachMarketPlace.id),
+  siteId: text("site_id")
+    .notNull()
+    .references(() => site.id),
 });
+
+export const coachMarketPlaceSitesRelations = relations(
+  coachMarketPlaceSites,
+  ({ one }) => ({
+    coachMarketPlace: one(coachMarketPlace, {
+      fields: [coachMarketPlaceSites.coachMarketPlaceId],
+      references: [coachMarketPlace.id],
+    }),
+    site: one(site, {
+      fields: [coachMarketPlaceSites.siteId],
+      references: [site.id],
+    }),
+  })
+);
 
 export const coachMarketPlaceCertifications = pgTable(
   "coach_market_place_certifications",
   {
-    coachMarketPlaceId: text("coach_market_place_id").notNull(),
-    certificationId: text("certification_id").notNull(),
+    coachMarketPlaceId: text("coach_market_place_id")
+      .notNull()
+      .references(() => coachMarketPlace.id),
+    certificationId: text("certification_id")
+      .notNull()
+      .references(() => certification.id),
   }
+);
+
+export const coachMarketPlaceCertificationsRelations = relations(
+  coachMarketPlaceCertifications,
+  ({ one }) => ({
+    coachMarketPlace: one(coachMarketPlace, {
+      fields: [coachMarketPlaceCertifications.coachMarketPlaceId],
+      references: [coachMarketPlace.id],
+    }),
+    certification: one(certification, {
+      fields: [coachMarketPlaceCertifications.certificationId],
+      references: [certification.id],
+    }),
+  })
 );
 
 export const coachMarketPlaceActivityGroups = pgTable(
   "coach_market_place_activity_groups",
   {
-    coachMarketPlaceId: text("coach_market_place_id").notNull(),
-    activityGroupId: text("activity_group_id").notNull(),
+    coachMarketPlaceId: text("coach_market_place_id")
+      .notNull()
+      .references(() => coachMarketPlace.id),
+    activityGroupId: text("activity_group_id")
+      .notNull()
+      .references(() => activityGroup.id),
   }
+);
+
+export const coachMarketPlaceActivityGroupsRelations = relations(
+  coachMarketPlaceActivityGroups,
+  ({ one }) => ({
+    coachMarketPlace: one(coachMarketPlace, {
+      fields: [coachMarketPlaceActivityGroups.coachMarketPlaceId],
+      references: [coachMarketPlace.id],
+    }),
+    activityGroup: one(activityGroup, {
+      fields: [coachMarketPlaceActivityGroups.activityGroupId],
+      references: [activityGroup.id],
+    }),
+  })
 );

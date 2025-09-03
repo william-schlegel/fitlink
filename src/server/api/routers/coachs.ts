@@ -147,9 +147,31 @@ export async function getCertificationsForCoach(coachId: string) {
       certifications: {
         with: {
           modules: true,
-          activityGroups: true,
+          certificationActivityGroups: { with: { activityGroup: true } },
         },
       },
+    },
+  });
+}
+
+export async function getCertificationGroups() {
+  return await db.query.certificationGroup.findMany({
+    with: {
+      modules: {
+        with: {
+          certificationModuleActivityGroups: { with: { activityGroup: true } },
+        },
+      },
+    },
+  });
+}
+
+export async function getCertificationGroupById(id: string) {
+  if (!isCUID(id)) return null;
+  return await db.query.certificationGroup.findFirst({
+    where: eq(certificationGroup.id, id),
+    with: {
+      modules: true,
     },
   });
 }
@@ -342,24 +364,17 @@ export const coachRouter = createTRPCRouter({
     db.query.certification.findFirst({
       where: eq(certification.id, input),
       with: {
-        activityGroups: true,
+        certificationActivityGroups: { with: { activityGroup: true } },
         modules: true,
       },
     })
   ),
-  getCertificationGroups: protectedProcedure.query(({}) =>
-    db.query.certificationGroup.findMany({
-      with: { modules: { with: { activityGroups: true } } },
-    })
+  getCertificationGroups: protectedProcedure.query(
+    async ({}) => await getCertificationGroups()
   ),
   getCertificationGroupById: protectedProcedure
     .input(z.cuid2())
-    .query(({ input }) =>
-      db.query.certificationGroup.findFirst({
-        where: eq(certificationGroup.id, input),
-        with: { modules: { with: { activityGroups: true } } },
-      })
-    ),
+    .query(async ({ input }) => await getCertificationGroupById(input)),
   createGroup: protectedProcedure
     .input(
       z.object({
@@ -388,12 +403,14 @@ export const coachRouter = createTRPCRouter({
               certificationGroupId: group[0].id,
             })
             .returning();
-          await tx.insert(certificationModuleActivityGroups).values(
-            mod.activityIds.map((id) => ({
-              certificationModuleId: newModule[0].id,
-              activityGroupId: id,
-            }))
-          );
+          if (mod.activityIds.length > 0) {
+            await tx.insert(certificationModuleActivityGroups).values(
+              mod.activityIds.map((id) => ({
+                certificationModuleId: newModule[0].id,
+                activityGroupId: id,
+              }))
+            );
+          }
         });
         return group;
       })

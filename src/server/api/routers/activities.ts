@@ -23,6 +23,12 @@ const activityObject = z.object({
   groupId: z.cuid2(),
 });
 
+export async function getAllActivityGroups() {
+  return db.query.activityGroup.findMany({
+    with: { coach: { with: { user: true } } },
+    orderBy: asc(activityGroup.name),
+  });
+}
 export const activityRouter = createTRPCRouter({
   getActivityById: protectedProcedure.input(z.cuid2()).query(({ input }) => {
     return db.query.activity.findFirst({
@@ -55,12 +61,7 @@ export const activityRouter = createTRPCRouter({
         orderBy: asc(activityGroup.name),
       });
     }),
-  getAllActivityGroups: protectedProcedure.query(() => {
-    return db.query.activityGroup.findMany({
-      with: { coach: { with: { user: true } } },
-      orderBy: asc(activityGroup.name),
-    });
-  }),
+  getAllActivityGroups: protectedProcedure.query(() => getAllActivityGroups()),
   getActivitiesForClub: protectedProcedure
     .input(z.object({ clubId: z.cuid2(), userId: z.cuid2() }))
     .query(({ ctx, input }) => {

@@ -25,7 +25,14 @@ import {
   subscriptionToRoom,
   subscriptionToSite,
 } from "./subscription";
-import { certification, certificationModule, coachMarketPlace } from "./coach";
+import {
+  certification,
+  certificationModule,
+  coachMarketPlace,
+  certificationActivityGroups,
+  certificationModuleActivityGroups,
+  coachMarketPlaceActivityGroups,
+} from "./coach";
 import { roomReservationEnum } from "./enums";
 import { createId } from "@paralleldrive/cuid2";
 
@@ -187,8 +194,11 @@ export const activityGroupRelations = relations(
     }),
     certifications: many(certification),
     certificationModules: many(certificationModule),
+    certificationActivityGroups: many(certificationActivityGroups),
+    certificationModuleActivityGroups: many(certificationModuleActivityGroups),
     subscriptions: many(subscriptionToActivityGroup),
     marketPlaceSearchs: many(coachMarketPlace),
+    coachMarketPlaceActivityGroups: many(coachMarketPlaceActivityGroups),
   })
 );
 
