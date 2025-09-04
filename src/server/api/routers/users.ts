@@ -11,20 +11,8 @@ import { user } from "@/db/schema/auth";
 import { getDocUrl } from "../../../../files";
 import { reservation } from "@/db/schema/planning";
 import { TRPCError } from "@trpc/server";
-import {
-  userCoach,
-  userManager,
-  userMember,
-  userNotification,
-} from "@/db/schema/user";
-import {
-  activity,
-  activityGroup,
-  club,
-  coachingActivity,
-  room,
-  site,
-} from "@/db/schema/club";
+import { userCoach, userMember, userNotification } from "@/db/schema/user";
+import { activity, activityGroup, club, room, site } from "@/db/schema/club";
 import { pricing, subscription } from "@/db/schema/subscription";
 import { isAdmin } from "@/server/lib/userTools";
 import { TUserFilter } from "@/app/admin/users/userFilter";

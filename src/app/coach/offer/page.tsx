@@ -3,10 +3,10 @@ import {
   DeleteOffer,
   UpdateOffer,
 } from "@/components/modals/manageCoach";
+import { CoachOfferPage } from "@/components/sections/coachOffer";
 import Title from "@/components/title";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
-import { isCUID } from "@/lib/utils";
 import { getOfferName } from "@/lib/offers/serverOffer";
 import { getCoachOffers, getOfferById } from "@/server/api/routers/coachs";
 import { getTranslations } from "next-intl/server";
@@ -51,7 +51,7 @@ export default async function CoachOffer({
           {offerQuery?.map((offer) => (
             <li key={offer.id}>
               <Link
-                href={createLink({ offerId: offer.id })}
+                href={createLink({ offerId: offer.id }, href)}
                 className={twMerge(
                   "flex w-full justify-between",
                   offerId === offer.id && "badge badge-primary"
@@ -103,7 +103,7 @@ async function OfferContent({ userId, offerId }: OfferContentProps) {
         </div>
       </div>
       {/* <CoachOfferDisplay offerId={offerId} /> */}
-      {/* <CoachOfferPage offerId={offerId} condensed /> */}
+      <CoachOfferPage offerId={offerId} condensed />
     </div>
   );
 }

@@ -179,7 +179,7 @@ export async function getCertificationGroupById(id: string) {
 }
 
 export async function getCoachOffers(coachId: string) {
-  if (!isCUID(coachId)) return [];
+  if (!coachId) return [];
   return await db.query.coachingPrice.findMany({
     where: eq(coachingPrice.coachId, coachId),
     with: {
@@ -561,7 +561,7 @@ export const coachRouter = createTRPCRouter({
         priceMax: z.number().max(1000).default(1000),
       })
     )
-    .query(({ input }) => {
+    .query(async ({ input }) => {
       const bbox = calculateBBox(
         input.locationLng,
         input.locationLat,
@@ -579,7 +579,7 @@ export const coachRouter = createTRPCRouter({
           )
         )
         .as("user_coaches");
-      return db
+      const cp = await db
         .select()
         .from(coachingPrice)
         .where(
@@ -590,23 +590,7 @@ export const coachRouter = createTRPCRouter({
           )
         )
         .leftJoin(uc, eq(coachingPrice.coachId, uc.userId));
-      // userCoach: {
-      //   coachingActivities: input?.activityName
-      //     ? {
-      //         some: { name: { contains: input.activityName } },
-      //       }
-      //     : undefined,
-      //   AND: [
-      //     { longitude: { gte: bbox?.[0]?.[0] ?? LONGITUDE } },
-      //     { longitude: { lte: bbox?.[1]?.[0] ?? LONGITUDE } },
-      //     { latitude: { gte: bbox?.[1]?.[1] ?? LATITUDE } },
-      //     { latitude: { lte: bbox?.[0]?.[1] ?? LATITUDE } },
-      //   ],
-      // },
-      // AND: [
-
-      // ],
-      // },
+      return cp;
     }),
   getOfferWithDetails: publicProcedure
     .input(z.cuid2())
