@@ -83,11 +83,7 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
   if (options?.withImage && u.profileImageId) {
     profileImageUrl = await getDocUrl(u.id, u.profileImageId);
   }
-  let coachData:
-    | (typeof userCoach.$inferSelect & {
-        coachingActivities?: (typeof coachingActivity.$inferSelect)[];
-      })
-    | undefined = undefined;
+  let coachData: unknown = null;
 
   if (
     options?.withMemberData &&
@@ -101,7 +97,7 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
     });
   }
 
-  let pricingData: typeof pricing.$inferSelect | undefined = undefined;
+  let pricingData: unknown = null;
 
   if (options?.withPricing) {
     pricingData = await db.query.pricing.findFirst({
@@ -127,7 +123,7 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
     | (typeof userMember.$inferSelect & {
         subscriptions?: FullSubscription[];
       })
-    | undefined = undefined;
+    | null = null;
 
   return {
     id: u.id,

@@ -40,7 +40,7 @@ const CertificationData = z.object({
 });
 
 const OfferData = z.object({
-  coachId: z.cuid2(),
+  coachId: z.string(),
   id: z.cuid2(),
   name: z.string(),
   target: z.enum(coachingTargetEnum.enumValues),
@@ -692,19 +692,21 @@ export const coachRouter = createTRPCRouter({
             travelLimit: input.travelLimit,
           })
           .returning();
-        await tx.insert(coachingPricePack).values(
-          input.packs.map((pack) => ({
-            coachingPriceId: cp.id,
-            nbHours: pack.nbHours,
-            packPrice: pack.packPrice,
-          }))
-        );
-        await tx.insert(coachingLevel).values(
-          input.levels.map((level) => ({
-            level,
-            offerId: cp.id,
-          }))
-        );
+        if (input.packs.length)
+          await tx.insert(coachingPricePack).values(
+            input.packs.map((pack) => ({
+              coachingPriceId: cp.id,
+              nbHours: pack.nbHours,
+              packPrice: pack.packPrice,
+            }))
+          );
+        if (input.levels.length)
+          await tx.insert(coachingLevel).values(
+            input.levels.map((level) => ({
+              level,
+              offerId: cp.id,
+            }))
+          );
         return coachingPrice;
       });
     }),
@@ -757,19 +759,21 @@ export const coachRouter = createTRPCRouter({
           })
           .where(eq(coachingPrice.id, input.id ?? ""))
           .returning();
-        await tx.insert(coachingPricePack).values(
-          input.packs?.map((pack) => ({
-            coachingPriceId: cp.id,
-            nbHours: pack.nbHours,
-            packPrice: pack.packPrice,
-          })) ?? []
-        );
-        await tx.insert(coachingLevel).values(
-          input.levels?.map((level) => ({
-            level,
-            offerId: cp.id,
-          })) ?? []
-        );
+        if (input.packs?.length)
+          await tx.insert(coachingPricePack).values(
+            input.packs?.map((pack) => ({
+              coachingPriceId: cp.id,
+              nbHours: pack.nbHours,
+              packPrice: pack.packPrice,
+            })) ?? []
+          );
+        if (input.levels?.length)
+          await tx.insert(coachingLevel).values(
+            input.levels?.map((level) => ({
+              level,
+              offerId: cp.id,
+            })) ?? []
+          );
         return cp;
       });
     }),

@@ -563,7 +563,9 @@
       "home": "Chez {name}",
       "in-limit": "Dans la limite de {limit} km autour de {address}",
       "back-to-my-page": "Retour à ma page",
-      "created": "Offre enregistrée"
+      "created": "Offre enregistrée",
+      "deleted": "Offre supprimée",
+      "update-offer": "Modifier l'offre"
     },
     "target": {
       "individual": "Particulier",

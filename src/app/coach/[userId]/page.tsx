@@ -30,6 +30,7 @@ export default async function CoachDashboard({
   const certificationCount = coachQuery?.coachData?.certifications?.length ?? 0;
   const activityCount = coachQuery?.coachData?.activityGroups?.length ?? 0;
   const offerCount = coachQuery?.coachData?.coachingPrices?.length ?? 0;
+
   const { features } = await getUserById(userId, {
     withFeatures: true,
   });

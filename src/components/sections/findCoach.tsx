@@ -37,7 +37,7 @@ function FindCoach({
   });
   const [range, setRange] = useState(10);
   const [hoveredId, setHoveredId] = useState("");
-  const coachSearch = trpc.coach.getCoachsFromDistance.useQuery(
+  const coachSearch = trpc.coachs.getCoachsFromDistance.useQuery(
     {
       locationLat: myAddress.lat,
       locationLng: myAddress.lng,

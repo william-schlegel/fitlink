@@ -16,16 +16,13 @@ import { redirect } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 
 export default async function CoachOffer({
-  params,
   searchParams,
 }: {
-  params: Promise<{ userId: string }>;
   searchParams: Promise<{ offerId: string }>;
 }) {
-  const userId = (await params).userId;
-  if (!isCUID(userId)) redirect("/");
   const user = await getActualUser();
   if (!user) redirect("/");
+  const userId = user.id;
   const t = await getTranslations("coach");
   if (
     user.internalRole !== "COACH" &&

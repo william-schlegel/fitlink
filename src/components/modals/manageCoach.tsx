@@ -1,4 +1,5 @@
-import { CoachingLevelListEnum, CoachingTargetEnum } from "@/db/schema/enums";
+"use client";
+import { CoachingTargetEnum } from "@/db/schema/enums";
 import { toast } from "@/lib/toast";
 import { trpc } from "@/lib/trpc/client";
 import { useTranslations } from "next-intl";
@@ -16,6 +17,8 @@ import {
 } from "react-hook-form";
 import { useUser } from "@/lib/auth/client";
 import { formatMoney } from "@/lib/formatNumber";
+import { COACHING_LEVEL, COACHING_TARGET } from "@/lib/offers/data";
+import { useCoachingLevel, useCoachingTarget } from "@/lib/offers/useOffers";
 
 type OfferFormValues = {
   name: string;
@@ -226,6 +229,7 @@ type OfferFormProps = {
 };
 
 function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
+  const t2 = useTranslations("common");
   const t = useTranslations("coach");
 
   const [pack, setPack] = useState<TPack>({ nbHours: 0, packPrice: 0 });
@@ -364,7 +368,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
                 {t(getLabel("INDIVIDUAL"))}
                 <span
                   className="tooltip tooltip-error"
-                  data-tip={t("common:navigation.limited-plan")}
+                  data-tip={t2("navigation.limited-plan")}
                 >
                   <i className="bx bx-lock bx-xs ml-2" />
                 </span>
@@ -624,7 +628,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
             onCancel();
           }}
         >
-          {t("common:cancel")}
+          {t2("cancel")}
         </button>
         <button className="btn-primary btn" type="submit">
           {t("offer.save")}
