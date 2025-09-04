@@ -6,6 +6,7 @@ import { AGContent } from "./agContent";
 import Link from "next/link";
 import { getAllActivityGroups } from "@/server/api/routers/activities";
 import { NewGroup } from "@/components/modals/manageActivity";
+import { twMerge } from "tailwind-merge";
 
 export default async function ActivityGroupManagement({
   searchParams,
@@ -40,9 +41,10 @@ export default async function ActivityGroupManagement({
             {agQuery?.map((ag) => (
               <li key={ag.id}>
                 <Link
-                  className={`flex w-full items-center justify-between text-center ${
-                    agId === ag.id ? "active" : ""
-                  }`}
+                  className={twMerge(
+                    "flex w-full items-center justify-between text-center",
+                    agId === ag.id && "badge badge-primary"
+                  )}
                   href={`/admin/activitygroups?agId=${ag.id}`}
                 >
                   <span>{ag.name}</span>

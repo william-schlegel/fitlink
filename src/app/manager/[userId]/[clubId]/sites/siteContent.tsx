@@ -10,6 +10,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { twMerge } from "tailwind-merge";
 
 type SiteContentProps = {
   userId: string;
@@ -88,9 +89,10 @@ export default function SiteContent({ clubId, siteId }: SiteContentProps) {
                 {siteQuery?.data?.rooms?.map((room) => (
                   <li key={room.id}>
                     <button
-                      className={`flex w-full items-center justify-between text-center ${
-                        roomId === room.id ? "active" : ""
-                      }`}
+                      className={twMerge(
+                        "flex w-full items-center justify-between text-center",
+                        roomId === room.id && "badge badge-primary"
+                      )}
                       onClick={() => setRoomId(room.id)}
                     >
                       <span>{room.name}</span>

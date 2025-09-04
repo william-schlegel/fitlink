@@ -23,10 +23,12 @@ import {
 type SubscriptionContentProps = {
   clubId: string;
   subscriptionId: string;
+  userId: string;
 };
 
 export function SubscriptionContent({
   clubId,
+  userId,
   subscriptionId,
 }: SubscriptionContentProps) {
   const t = useTranslations("club");
@@ -174,6 +176,7 @@ export function SubscriptionContent({
           <div className="rounded border border-secondary pb-2">
             <SelectRestriction
               clubId={clubId}
+              userId={userId}
               restriction={subQuery.data?.restriction ?? "CLUB"}
               siteIds={selectedSites}
               roomIds={selectedRooms}
@@ -213,6 +216,7 @@ export function SubscriptionContent({
 
 type SelectRestrictionProps = {
   clubId: string;
+  userId: string;
   restriction: SubscriptionRestrictionEnum;
   siteIds: string[];
   roomIds: string[];
@@ -221,16 +225,19 @@ type SelectRestrictionProps = {
 };
 function SelectRestriction({
   clubId,
+  userId,
   restriction,
   siteIds,
   roomIds,
   onSelectSite,
   onSelectRoom,
 }: SelectRestrictionProps) {
-  const club = trpc.clubs.getClubById.useQuery(clubId);
+  const club = trpc.clubs.getClubById.useQuery({ clubId, userId });
   const t = useTranslations("club");
 
   if (club.isLoading) return <Spinner />;
+  console.log("clubId :>> ", clubId);
+  console.log("club?.data :>> ", club?.data);
   return (
     <div className="flex flex-col gap-1">
       <span className="bg-secondary p-2 text-center text-secondary-content">

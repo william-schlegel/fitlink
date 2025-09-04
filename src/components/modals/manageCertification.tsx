@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 import SimpleForm from "../ui/simpleform";
 import Confirmation from "../ui/confirmation";
 import Spinner from "../ui/spinner";
+import { twMerge } from "tailwind-merge";
 
 type CertificationFormValues = {
   name: string;
@@ -164,7 +165,12 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
           <ul className="menu overflow-hidden rounded border border-secondary bg-base-100">
             {queryGroups.data?.map((group) => (
               <li key={group.id}>
-                <div className={`flex ${groupId === group.id ? "active" : ""}`}>
+                <div
+                  className={twMerge(
+                    "flex",
+                    groupId === group.id && "badge badge-primary"
+                  )}
+                >
                   <button
                     className="flex w-full items-center justify-between"
                     onClick={() => selectGroup(group.id)}
@@ -647,9 +653,10 @@ function CertificationGroupForm({
         {data.modules.map((mod, idx) => (
           <li key={mod.dbId ?? mod.name}>
             <div
-              className={`flex w-full items-center justify-between text-center ${
-                moduleId === mod.dbId ? "active" : ""
-              }`}
+              className={twMerge(
+                "flex w-full items-center justify-between text-center",
+                moduleId === mod.dbId && "badge badge-primary"
+              )}
               onClick={() => selectModule(mod.dbId)}
             >
               <div className="flex flex-grow items-center justify-between gap-4">

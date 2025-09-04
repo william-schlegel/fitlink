@@ -13,6 +13,7 @@ import {
   AddCoachToClub,
   CoachDataPresentation,
 } from "@/components/modals/manageClub";
+import { twMerge } from "tailwind-merge";
 
 export default async function CoachManagementForClub({
   searchParams,
@@ -76,9 +77,10 @@ export default async function CoachManagementForClub({
               <li key={coach.id}>
                 <Link
                   href={createLink({ clubId, coachId: coach.id }, href)}
-                  className={`w-full text-center ${
-                    coachId === coach.id ? "active" : ""
-                  }`}
+                  className={twMerge(
+                    "w-full text-center",
+                    coachId === coach.id && "badge badge-primary"
+                  )}
                 >
                   {coach.name}
                 </Link>

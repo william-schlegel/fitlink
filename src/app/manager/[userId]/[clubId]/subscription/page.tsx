@@ -9,6 +9,7 @@ import Link from "next/link";
 import { SubscriptionContent } from "./pageContent";
 import { getSubscriptionsForClub } from "@/server/api/routers/subscription";
 import { CreateSubscription } from "@/components/modals/manageSubscription";
+import { twMerge } from "tailwind-merge";
 
 export default async function ManageSubscriptions({
   params,
@@ -72,9 +73,10 @@ export default async function ManageSubscriptions({
             <li key={site.id}>
               <Link
                 href={createLink({ subscriptionId: site.id }, href)}
-                className={`w-full text-center ${
-                  subscriptionId === site.id ? "active" : ""
-                }`}
+                className={twMerge(
+                  "w-full text-center",
+                  subscriptionId === site.id && "badge badge-primary"
+                )}
               >
                 {site.name}
               </Link>
@@ -84,6 +86,7 @@ export default async function ManageSubscriptions({
 
         {subscriptionId === "" ? null : (
           <SubscriptionContent
+            userId={userId}
             clubId={clubId}
             subscriptionId={subscriptionId}
           />

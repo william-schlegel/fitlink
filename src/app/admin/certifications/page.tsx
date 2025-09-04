@@ -12,6 +12,7 @@ import {
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { twMerge } from "tailwind-merge";
 
 export default async function CertificationsManagement({
   searchParams,
@@ -44,9 +45,10 @@ export default async function CertificationsManagement({
             {cgQuery?.map((cg) => (
               <li key={cg.id}>
                 <Link
-                  className={`flex w-full items-center justify-between text-center ${
-                    cgId === cg.id ? "active" : ""
-                  }`}
+                  className={twMerge(
+                    "flex w-full items-center justify-between text-center",
+                    cgId === cg.id && "badge badge-primary"
+                  )}
                   href={`/admin/certifications?cgId=${cg.id}`}
                 >
                   <span>{cg.name}</span>

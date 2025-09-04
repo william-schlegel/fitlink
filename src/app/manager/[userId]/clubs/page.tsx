@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ClubContent } from "./clubContent";
 import { getClubsForManager } from "@/server/api/routers/clubs";
 import { headers } from "next/headers";
+import { twMerge } from "tailwind-merge";
 
 export default async function ManageClubs({
   params,
@@ -54,9 +55,10 @@ export default async function ManageClubs({
             <li key={club.id}>
               <Link
                 href={createLink({ clubId: club.id }, href)}
-                className={`w-full text-center ${
-                  clubId === club.id ? "active" : ""
-                }`}
+                className={twMerge(
+                  "w-full text-center",
+                  clubId === club.id && "badge badge-primary"
+                )}
               >
                 {club.name}
               </Link>

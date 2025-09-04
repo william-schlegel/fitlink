@@ -10,6 +10,7 @@ import { getClubById } from "@/server/api/routers/clubs";
 import { getUserById } from "@/server/api/routers/users";
 import { getSitesForClub } from "@/server/api/routers/sites";
 import { headers } from "next/headers";
+import { twMerge } from "tailwind-merge";
 
 export default async function ManageSites({
   params,
@@ -72,9 +73,10 @@ export default async function ManageSites({
             <li key={site.id}>
               <Link
                 href={createLink({ siteId: site.id }, href)}
-                className={`w-full text-center ${
-                  siteId === site.id ? "active" : ""
-                }`}
+                className={twMerge(
+                  "w-full text-center",
+                  siteId === site.id && "badge badge-primary"
+                )}
               >
                 {site.name}
               </Link>

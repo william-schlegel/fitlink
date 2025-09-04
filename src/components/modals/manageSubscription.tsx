@@ -52,10 +52,11 @@ export const CreateSubscription = ({ clubId }: CreateSubscriptionProps) => {
   });
   const utils = trpc.useUtils();
   const t = useTranslations("club");
-
+  const { data: user } = useUser();
+  const userId = user?.id ?? "";
   const createSubscription = trpc.subscriptions.createSubscription.useMutation({
     onSuccess: () => {
-      utils.clubs.getClubById.invalidate(clubId);
+      utils.clubs.getClubById.invalidate({ clubId, userId });
       utils.subscriptions.getSubscriptionsForClub.invalidate(clubId);
       toast.success(t("subscription.created"));
     },
@@ -194,7 +195,10 @@ export const DeleteSubscription = ({
   const deleteSubscription = trpc.subscriptions.deleteSubscription.useMutation({
     onSuccess: () => {
       utils.clubs.getClubsForManager.invalidate(user?.data?.id ?? "");
-      utils.clubs.getClubById.invalidate(clubId);
+      utils.clubs.getClubById.invalidate({
+        clubId,
+        userId: user.data?.id ?? "",
+      });
       toast.success(t("subscription.deleted"));
     },
     onError(error) {

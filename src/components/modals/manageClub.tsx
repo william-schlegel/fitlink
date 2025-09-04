@@ -91,13 +91,17 @@ type PropsUpdateDelete = {
 
 export const UpdateClub = ({ clubId }: PropsUpdateDelete) => {
   const { data: user } = useUser();
+  const userId = user?.id ?? "";
   const utils = trpc.useUtils();
   const t = useTranslations("club");
   const [initialData, setInitialData] = useState<ClubFormValues | undefined>();
   const [closeModal, setCloseModal] = useState(false);
-  const queryClub = trpc.clubs.getClubById.useQuery(clubId, {
-    enabled: isCUID(clubId),
-  });
+  const queryClub = trpc.clubs.getClubById.useQuery(
+    { clubId, userId },
+    {
+      enabled: isCUID(clubId) && userId !== "",
+    }
+  );
   useEffect(() => {
     if (queryClub.data) {
       setInitialData({
@@ -117,7 +121,7 @@ export const UpdateClub = ({ clubId }: PropsUpdateDelete) => {
   const updateClub = trpc.clubs.updateClub.useMutation({
     onSuccess: () => {
       utils.clubs.getClubsForManager.invalidate(user?.id ?? "");
-      utils.clubs.getClubById.invalidate(clubId);
+      utils.clubs.getClubById.invalidate({ clubId, userId });
       toast.success(t("club.updated"));
     },
     onError(error) {
@@ -377,7 +381,7 @@ export const DeleteClub = ({ clubId }: PropsUpdateDelete) => {
   const deleteClub = trpc.clubs.deleteClub.useMutation({
     onSuccess: () => {
       utils.clubs.getClubsForManager.invalidate(user?.id ?? "");
-      utils.clubs.getClubById.invalidate(clubId);
+      utils.clubs.getClubById.invalidate({ clubId, userId: user?.id ?? "" });
       toast.success(t2("deleted"));
     },
     onError(error) {

@@ -16,7 +16,9 @@ import {
   certificationGroup,
   certificationModule,
   certificationModuleActivityGroups,
+  coachingLevel,
   coachingPrice,
+  coachingPricePack,
 } from "@/db/schema/coach";
 import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
 import { user } from "@/db/schema/auth";
@@ -147,7 +149,7 @@ export async function getCertificationsForCoach(coachId: string) {
       certifications: {
         with: {
           modules: true,
-          certificationActivityGroups: { with: { activityGroup: true } },
+          activityGroups: true,
         },
       },
     },
@@ -172,6 +174,27 @@ export async function getCertificationGroupById(id: string) {
     where: eq(certificationGroup.id, id),
     with: {
       modules: true,
+    },
+  });
+}
+
+export async function getCoachOffers(coachId: string) {
+  if (!isCUID(coachId)) return [];
+  return await db.query.coachingPrice.findMany({
+    where: eq(coachingPrice.coachId, coachId),
+    with: {
+      coachingLevel: true,
+    },
+  });
+}
+
+export async function getOfferById(offerId: string) {
+  if (!isCUID(offerId)) return null;
+  return await db.query.coachingPrice.findFirst({
+    where: eq(coachingPrice.id, offerId),
+    with: {
+      packs: true,
+      coachingLevel: true,
     },
   });
 }
@@ -523,15 +546,10 @@ export const coachRouter = createTRPCRouter({
       },
     })
   ),
-  getOfferById: protectedProcedure.input(z.cuid2()).query(({ input }) =>
-    db.query.coachingPrice.findFirst({
-      where: eq(coachingPrice.id, input),
-      with: {
-        packs: true,
-        coachingLevel: true,
-      },
-    })
-  ),
+  getOfferById: protectedProcedure
+    .input(z.cuid2())
+    .query(({ input }) => getOfferById(input)),
+
   getOffersForCompanies: publicProcedure
     .input(
       z.object({
@@ -629,148 +647,138 @@ export const coachRouter = createTRPCRouter({
       }
       return { ...offer, imageUrl };
     }),
-  getCoachOffers: protectedProcedure.input(z.cuid2()).query(({ input }) =>
-    db.query.coachingPrice.findMany({
-      where: eq(coachingPrice.coachId, input),
-      with: {
-        coachingLevel: true,
-      },
-    })
-  ),
-  // createCoachOffer: protectedProcedure
-  //   .input(OfferData.omit({ id: true }))
-  //   .mutation(async ({ input }) => {
-  //     const pricing = await db.query.pricing.findFirst({
-  //       where: {
-  //         users: {
-  //           some: {
-  //             id: input.coachId,
-  //           },
-  //         },
-  //       },
-  //       with: {
-  //         features: true,
-  //       },
-  //     });
-  //     const target = pricing?.features.find(
-  //       (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY"
-  //     )
-  //       ? input.target
-  //       : "INDIVIDUAL";
-  //     return db.query.coachingPrice.create({
-  //       data: {
-  //         name: input.name,
-  //         description: input.description,
-  //         target,
-  //         excludingTaxes: input.excludingTaxes,
-  //         coachId: input.coachId,
-  //         inHouse: input.inHouse,
-  //         physical: input.physical,
-  //         myPlace: input.myPlace,
-  //         publicPlace: input.publicPlace,
-  //         startDate: input.startDate,
-  //         webcam: input.webcam,
-  //         freeHours: input.freeHours,
-  //         perDayPhysical: input.perDayPhysical,
-  //         perDayWebcam: input.perDayWebcam,
-  //         perHourPhysical: input.perHourPhysical,
-  //         perHourWebcam: input.perHourWebcam,
-  //         travelFee: input.travelFee,
-  //         travelLimit: input.travelLimit,
-  //         packs: {
-  //           createMany: {
-  //             data: input.packs.map((pack) => ({
-  //               nbHours: pack.nbHours,
-  //               packPrice: pack.packPrice,
-  //             })),
-  //           },
-  //         },
-  //         coachingLevel: {
-  //           createMany: {
-  //             data: input.levels.map((level) => ({
-  //               level,
-  //             })),
-  //           },
-  //         },
-  //       },
-  //     });
-  //   }),
-  // updateCoachOffer: protectedProcedure
-  //   .input(OfferData.partial())
-  //   .mutation(async ({ input }) => {
-  //     const pricing = await db.query.pricing.findFirst({
-  //       where: {
-  //         users: {
-  //           some: {
-  //             id: input.coachId,
-  //           },
-  //         },
-  //       },
-  //       with: {
-  //         features: true,
-  //       },
-  //     });
-  //     const target = pricing?.features.find(
-  //       (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY"
-  //     )
-  //       ? input.target ?? "INDIVIDUAL"
-  //       : "INDIVIDUAL";
-  //     await db.query.coachingPricePack.deleteMany({
-  //       where: {
-  //         coachingPriceId: input.id,
-  //       },
-  //     });
-  //     await db.query.coachingLevel.deleteMany({
-  //       where: {
-  //         offerId: input.id,
-  //       },
-  //     });
-  //     return db.query.coachingPrice.update({
-  //       where: { id: input.id },
-  //       data: {
-  //         name: input.name,
-  //         description: input.description,
-  //         target,
-  //         excludingTaxes: input.excludingTaxes,
-  //         coachId: input.coachId,
-  //         inHouse: input.inHouse,
-  //         physical: input.physical,
-  //         myPlace: input.myPlace,
-  //         publicPlace: input.publicPlace,
-  //         startDate: input.startDate,
-  //         webcam: input.webcam,
-  //         freeHours: input.freeHours,
-  //         perDayPhysical: input.perDayPhysical,
-  //         perDayWebcam: input.perDayWebcam,
-  //         perHourPhysical: input.perHourPhysical,
-  //         perHourWebcam: input.perHourWebcam,
-  //         travelFee: input.travelFee,
-  //         travelLimit: input.travelLimit,
-  //         packs: {
-  //           createMany: {
-  //             data:
-  //               input?.packs?.map((pack) => ({
-  //                 nbHours: pack.nbHours,
-  //                 packPrice: pack.packPrice,
-  //               })) ?? [],
-  //           },
-  //         },
-  //         coachingLevel: {
-  //           createMany: {
-  //             data:
-  //               input?.levels?.map((level) => ({
-  //                 level,
-  //               })) ?? [],
-  //           },
-  //         },
-  //       },
-  //     });
-  //   }),
-  // deleteCoachOffer: protectedProcedure
-  //   .input(z.cuid2())
-  //   .mutation(({ input }) =>
-  //     db.query.coachingPrice.delete({ where: { id: input } })
-  //   ),
+  getCoachOffers: protectedProcedure
+    .input(z.cuid2())
+    .query(({ input }) => getCoachOffers(input)),
+  createCoachOffer: protectedProcedure
+    .input(OfferData.omit({ id: true }))
+    .mutation(async ({ input }) => {
+      const u = await db.query.user.findFirst({
+        where: eq(user.id, input.coachId),
+        with: {
+          pricing: {
+            with: { features: true },
+          },
+        },
+      });
+
+      const pricingData = u?.pricing;
+      const target = pricingData?.features.find(
+        (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY"
+      )
+        ? input.target
+        : "INDIVIDUAL";
+      return db.transaction(async (tx) => {
+        const [cp] = await tx
+          .insert(coachingPrice)
+          .values({
+            name: input.name,
+            description: input.description,
+            target,
+            excludingTaxes: input.excludingTaxes,
+            coachId: input.coachId,
+            inHouse: input.inHouse,
+            physical: input.physical,
+            myPlace: input.myPlace,
+            publicPlace: input.publicPlace,
+            startDate: input.startDate,
+            webcam: input.webcam,
+            freeHours: input.freeHours,
+            perDayPhysical: input.perDayPhysical,
+            perDayWebcam: input.perDayWebcam,
+            perHourPhysical: input.perHourPhysical,
+            perHourWebcam: input.perHourWebcam,
+            travelFee: input.travelFee,
+            travelLimit: input.travelLimit,
+          })
+          .returning();
+        await tx.insert(coachingPricePack).values(
+          input.packs.map((pack) => ({
+            coachingPriceId: cp.id,
+            nbHours: pack.nbHours,
+            packPrice: pack.packPrice,
+          }))
+        );
+        await tx.insert(coachingLevel).values(
+          input.levels.map((level) => ({
+            level,
+            offerId: cp.id,
+          }))
+        );
+        return coachingPrice;
+      });
+    }),
+  updateCoachOffer: protectedProcedure
+    .input(OfferData.partial())
+    .mutation(async ({ input }) => {
+      const u = await db.query.user.findFirst({
+        where: eq(user.id, input.coachId ?? ""),
+        with: {
+          pricing: {
+            with: { features: true },
+          },
+        },
+      });
+
+      const pricingData = u?.pricing;
+      const target = pricingData?.features.find(
+        (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY"
+      )
+        ? input.target ?? "INDIVIDUAL"
+        : "INDIVIDUAL";
+      return db.transaction(async (tx) => {
+        await tx
+          .delete(coachingPricePack)
+          .where(eq(coachingPricePack.coachingPriceId, input.id ?? ""));
+        await tx
+          .delete(coachingLevel)
+          .where(eq(coachingLevel.offerId, input.id ?? ""));
+        const [cp] = await tx
+          .update(coachingPrice)
+          .set({
+            name: input.name,
+            description: input.description,
+            target,
+            excludingTaxes: input.excludingTaxes,
+            coachId: input.coachId,
+            inHouse: input.inHouse,
+            physical: input.physical,
+            myPlace: input.myPlace,
+            publicPlace: input.publicPlace,
+            startDate: input.startDate,
+            webcam: input.webcam,
+            freeHours: input.freeHours,
+            perDayPhysical: input.perDayPhysical,
+            perDayWebcam: input.perDayWebcam,
+            perHourPhysical: input.perHourPhysical,
+            perHourWebcam: input.perHourWebcam,
+            travelFee: input.travelFee,
+            travelLimit: input.travelLimit,
+          })
+          .where(eq(coachingPrice.id, input.id ?? ""))
+          .returning();
+        await tx.insert(coachingPricePack).values(
+          input.packs?.map((pack) => ({
+            coachingPriceId: cp.id,
+            nbHours: pack.nbHours,
+            packPrice: pack.packPrice,
+          })) ?? []
+        );
+        await tx.insert(coachingLevel).values(
+          input.levels?.map((level) => ({
+            level,
+            offerId: cp.id,
+          })) ?? []
+        );
+        return cp;
+      });
+    }),
+
+  deleteCoachOffer: protectedProcedure
+    .input(z.cuid2())
+    .mutation(({ input }) =>
+      db.delete(coachingPrice).where(eq(coachingPrice.id, input))
+    ),
   getOfferActivityByName: publicProcedure.input(z.string()).query(({ input }) =>
     db
       .selectDistinctOn([coachingActivity.name])

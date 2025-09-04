@@ -17,6 +17,7 @@ import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect, RedirectType } from "next/navigation";
+import { twMerge } from "tailwind-merge";
 
 export default async function ManageRooms({
   params,
@@ -87,9 +88,10 @@ export default async function ManageRooms({
             <li key={room.id}>
               <Link
                 href={createLink({ roomId: room.id }, href)}
-                className={`flex items-center justify-between ${
-                  roomId === room.id ? "active" : ""
-                }`}
+                className={twMerge(
+                  "flex items-center justify-between",
+                  roomId === room.id && "badge badge-primary"
+                )}
               >
                 <span>{room.name}</span>
                 <span>

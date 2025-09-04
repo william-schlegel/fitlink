@@ -16,6 +16,7 @@ import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { useEffect, useState } from "react";
 import Spinner from "../ui/spinner";
 import Confirmation from "../ui/confirmation";
+import { useUser } from "@/lib/auth/client";
 
 type CreatePlanningProps = {
   clubId: string;
@@ -38,7 +39,8 @@ export const CreatePlanning = ({
 }: CreatePlanningProps) => {
   const utils = trpc.useUtils();
   const t = useTranslations("planning");
-
+  const { data: user } = useUser();
+  const userId = user?.id ?? "";
   const createPlanning = trpc.plannings.createPlanningForClub.useMutation({
     onSuccess: () => {
       utils.plannings.getPlanningsForClub.invalidate(clubId);
@@ -48,9 +50,12 @@ export const CreatePlanning = ({
       toast.error(error.message);
     },
   });
-  const queryClub = trpc.clubs.getClubById.useQuery(clubId, {
-    enabled: isCUID(clubId),
-  });
+  const queryClub = trpc.clubs.getClubById.useQuery(
+    { clubId, userId },
+    {
+      enabled: isCUID(clubId),
+    }
+  );
   const {
     register,
     handleSubmit,

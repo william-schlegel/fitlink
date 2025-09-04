@@ -16,6 +16,7 @@ import ButtonIcon from "../ui/buttonIcon";
 import { PageSectionModelEnum } from "@/db/schema/enums";
 import { usePageSection } from "../modals/managePage";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/lib/auth/client";
 
 type HeroCreationProps = {
   clubId: string;
@@ -41,9 +42,14 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
   const { register, handleSubmit, getValues, control, setValue, reset } =
     useForm<HeroCreationForm>();
   const [imagePreview, setImagePreview] = useState("");
-  const clubQuery = trpc.clubs.getClubById.useQuery(clubId, {
-    enabled: isCUID(clubId),
-  });
+  const { data: user } = useUser();
+  const userId = user?.id ?? "";
+  const clubQuery = trpc.clubs.getClubById.useQuery(
+    { clubId, userId },
+    {
+      enabled: isCUID(clubId),
+    }
+  );
   const fields = useWatch({ control });
   const utils = trpc.useUtils();
   const [updating, setUpdating] = useState(false);

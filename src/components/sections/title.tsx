@@ -13,6 +13,7 @@ import { useWriteFile } from "@/lib/useManageFile";
 import { isCUID } from "@/lib/utils";
 import { formatSize } from "@/lib/formatNumber";
 import ButtonIcon from "../ui/buttonIcon";
+import { useUser } from "@/lib/auth/client";
 
 type TitleCreationProps = {
   clubId: string;
@@ -33,10 +34,15 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
   const { register, handleSubmit, control, setValue, reset } =
     useForm<TitleCreationForm>();
   const [imagePreview, setImagePreview] = useState("");
-  const clubQuery = trpc.clubs.getClubById.useQuery(clubId, {
-    enabled: isCUID(clubId),
-    refetchOnWindowFocus: false,
-  });
+  const { data: user } = useUser();
+  const userId = user?.id ?? "";
+  const clubQuery = trpc.clubs.getClubById.useQuery(
+    { clubId, userId },
+    {
+      enabled: isCUID(clubId),
+      refetchOnWindowFocus: false,
+    }
+  );
   const fields = useWatch({ control });
   const utils = trpc.useContext();
   const [updating, setUpdating] = useState(false);

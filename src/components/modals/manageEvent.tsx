@@ -234,7 +234,10 @@ export const DeleteEvent = ({
   const deleteEvent = trpc.events.deleteEvent.useMutation({
     onSuccess: () => {
       utils.clubs.getClubsForManager.invalidate(user.data?.id ?? "");
-      utils.clubs.getClubById.invalidate(clubId);
+      utils.clubs.getClubById.invalidate({
+        clubId,
+        userId: user.data?.id ?? "",
+      });
       toast.success(t("event.deleted"));
     },
     onError(error) {

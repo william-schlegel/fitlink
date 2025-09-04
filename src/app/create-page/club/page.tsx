@@ -63,7 +63,9 @@ export default async function ClubPage({
           <ul className="menu overflow-hidden rounded border border-secondary bg-base-100">
             {queryPages?.map((page) => (
               <li key={page.id}>
-                <div className={pageId === page.id ? "active" : ""}>
+                <div
+                  className={pageId === page.id ? "badge badge-primary" : ""}
+                >
                   <Link
                     href={createHref(href, ["create-page", "club"], {
                       clubId,

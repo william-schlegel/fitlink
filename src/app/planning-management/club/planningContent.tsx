@@ -71,7 +71,7 @@ export function PlanningContent({
 }: PlanningContentProps) {
   const queryPlanning = trpc.plannings.getPlanningById.useQuery(planningId);
   const t = useTranslations("planning");
-  const queryClub = trpc.clubs.getClubById.useQuery(clubId);
+  const queryClub = trpc.clubs.getClubById.useQuery({ clubId, userId });
   const queryActivities = trpc.activities.getActivitiesForClub.useQuery(
     {
       clubId,

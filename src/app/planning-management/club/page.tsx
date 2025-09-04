@@ -11,6 +11,7 @@ import Link from "next/link";
 import { redirect, RedirectType } from "next/navigation";
 import { PlanningContent } from "./planningContent";
 import { CreatePlanning } from "@/components/modals/managePlanning";
+import { twMerge } from "tailwind-merge";
 
 export default async function ClubPlanning({
   searchParams,
@@ -65,9 +66,10 @@ export default async function ClubPlanning({
             {queryPlannings?.map((planning) => (
               <li key={planning.id}>
                 <div
-                  className={`flex ${
-                    planningId === planning.id ? "active" : ""
-                  }`}
+                  className={twMerge(
+                    "flex gap-4 items-center justify-between",
+                    planningId === planning.id && "badge badge-primary"
+                  )}
                 >
                   <Link
                     href={createLink({ clubId, planningId: planning.id }, href)}

@@ -37,6 +37,9 @@ export const notificationTypeEnum = pgEnum("NotificationType", [
   "REQUEST_REJECTED",
 ]);
 
+export type NotificationTypeEnum =
+  (typeof notificationTypeEnum.enumValues)[number];
+
 export const roomReservationEnum = pgEnum("RoomReservation", [
   "NONE",
   "POSSIBLE",
@@ -73,10 +76,15 @@ export const coachingLevelListEnum = pgEnum("CoachingLevelList", [
   "PROFESSIONAL",
 ]);
 
+export type CoachingLevelListEnum =
+  (typeof coachingLevelListEnum.enumValues)[number];
+
 export const coachingTargetEnum = pgEnum("CoachingTarget", [
   "INDIVIDUAL",
   "COMPANY",
 ]);
+
+export type CoachingTargetEnum = (typeof coachingTargetEnum.enumValues)[number];
 
 export const packModeEnum = pgEnum("PackMode", ["PHYSICAL", "WEBCAM"]);
 

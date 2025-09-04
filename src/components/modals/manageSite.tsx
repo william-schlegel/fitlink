@@ -37,12 +37,13 @@ export const CreateSite = ({ clubId }: CreateSiteProps) => {
   const utils = trpc.useUtils();
   const t = useTranslations("club");
   const router = useRouter();
-
+  const { data: user } = useUser();
+  const userId = user?.id ?? "";
   const [closeModal, setCloseModal] = useState(false);
 
   const createSite = trpc.sites.createSite.useMutation({
     onSuccess: (data) => {
-      utils.clubs.getClubById.invalidate(clubId);
+      utils.clubs.getClubById.invalidate({ clubId, userId });
       utils.sites.getSitesForClub.invalidate(clubId);
       toast.success(t("site.created"));
       router.push(createLink({ siteId: data[0].id }));
@@ -153,7 +154,10 @@ export const DeleteSite = ({
   const deleteSite = trpc.sites.deleteSite.useMutation({
     onSuccess: () => {
       utils.clubs.getClubsForManager.invalidate(user?.data?.id ?? "");
-      utils.clubs.getClubById.invalidate(clubId);
+      utils.clubs.getClubById.invalidate({
+        clubId,
+        userId: user.data?.id ?? "",
+      });
       toast.success(t("site.deleted"));
     },
     onError(error) {

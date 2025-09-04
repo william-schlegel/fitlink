@@ -9,6 +9,7 @@ import Pagination from "@/components/ui/pagination";
 import UserContent from "./userContent";
 import Link from "next/link";
 import Title from "@/components/title";
+import { twMerge } from "tailwind-merge";
 
 const PER_PAGE = 20;
 
@@ -61,9 +62,10 @@ export default async function UserManagement({
               {userQuery.users.map((user) => (
                 <li key={user.id}>
                   <Link
-                    className={`flex w-full items-center justify-between text-center ${
-                      userId === user.id ? "active" : ""
-                    }`}
+                    className={twMerge(
+                      "flex w-full items-center justify-between text-center",
+                      userId === user.id && "badge badge-primary"
+                    )}
                     href={`/admin/users?userId=${user.id}`}
                   >
                     <span>{user.name}</span>

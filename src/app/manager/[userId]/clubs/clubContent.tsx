@@ -30,9 +30,12 @@ type ClubContentProps = {
 };
 
 export function ClubContent({ userId, clubId }: ClubContentProps) {
-  const clubQuery = trpc.clubs.getClubById.useQuery(clubId, {
-    enabled: isCUID(clubId),
-  });
+  const clubQuery = trpc.clubs.getClubById.useQuery(
+    { clubId, userId },
+    {
+      enabled: isCUID(clubId),
+    }
+  );
   useEffect(() => {
     const groups = new Map();
     for (const act of clubQuery.data?.activities || [])
@@ -45,12 +48,12 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
   // });
   const addActivity = trpc.activities.affectToRoom.useMutation({
     onSuccess() {
-      utils.clubs.getClubById.invalidate(clubId);
+      utils.clubs.getClubById.invalidate({ clubId, userId });
     },
   });
   const removeActivity = trpc.activities.removeFromRoom.useMutation({
     onSuccess() {
-      utils.clubs.getClubById.invalidate(clubId);
+      utils.clubs.getClubById.invalidate({ clubId, userId });
     },
   });
   const [groups, setGroups] = useState<(typeof activityGroup.$inferSelect)[]>(

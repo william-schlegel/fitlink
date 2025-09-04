@@ -39,7 +39,7 @@ export async function getClubsForManager(userId: string) {
 }
 
 export async function getClubById(clubId: string, userId: string) {
-  if (!isCUID(clubId) || !isCUID(userId)) return null;
+  if (!isCUID(clubId) || !userId) return null;
   const userData = await db.query.user.findFirst({
     where: eq(user.id, userId),
     with: {
@@ -86,8 +86,8 @@ export async function getClubById(clubId: string, userId: string) {
 
 export const clubRouter = createTRPCRouter({
   getClubById: protectedProcedure
-    .input(z.cuid2())
-    .query(async ({ ctx, input }) => await getClubById(input, ctx.user.id)),
+    .input(z.object({ clubId: z.cuid2(), userId: z.string() }))
+    .query(async ({ input }) => await getClubById(input.clubId, input.userId)),
   getClubPagesForNavByClubId: publicProcedure
     .input(z.string())
     .query(async ({ input }) => {
