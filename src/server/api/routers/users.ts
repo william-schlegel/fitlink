@@ -11,21 +11,16 @@ import { user } from "@/db/schema/auth";
 import { getDocUrl } from "../../../../files";
 import { reservation } from "@/db/schema/planning";
 import { TRPCError } from "@trpc/server";
-import { userCoach, userMember, userNotification } from "@/db/schema/user";
-import { activity, activityGroup, club, room, site } from "@/db/schema/club";
+import {
+  userCoach,
+  userManager,
+  userMember,
+  userNotification,
+} from "@/db/schema/user";
 import { pricing, subscription } from "@/db/schema/subscription";
 import { isAdmin } from "@/server/lib/userTools";
 import { TUserFilter } from "@/app/admin/users/userFilter";
 import { auth } from "@/lib/auth/server";
-// import bcrypt from "bcrypt";
-
-type FullSubscription = typeof subscription.$inferSelect & {
-  activitieGroups: (typeof activityGroup.$inferSelect)[];
-  activities: (typeof activity.$inferSelect)[];
-  sites: (typeof site.$inferSelect)[];
-  rooms: (typeof room.$inferSelect)[];
-  club: typeof club.$inferSelect;
-};
 
 const UserFilter = z
   .object({
@@ -37,22 +32,73 @@ const UserFilter = z
   })
   .partial();
 
-type GetUserByIdFn = typeof getUserById;
-type MemberSubscriptions = NonNullable<
-  Awaited<ReturnType<GetUserByIdFn>>["memberData"]
->["subscriptions"];
-export type MemberSubscription = MemberSubscriptions extends
-  | (infer A)[]
-  | undefined
-  ? A
-  : never;
-
 export type GetUserByIdOptions = {
   withImage?: boolean;
   withMemberData?: boolean;
   withFeatures?: boolean;
   withPricing?: boolean;
 };
+
+async function getMemberData(memberId: string) {
+  const md = await db.query.userMember.findFirst({
+    where: eq(userMember.userId, memberId),
+    with: {
+      subscriptions: {
+        with: {
+          subscription: {
+            with: {
+              activitieGroups: { with: { activityGroup: true } },
+              activities: { with: { activity: true } },
+              sites: { with: { site: true } },
+              rooms: { with: { room: true } },
+              club: true,
+            },
+          },
+        },
+      },
+      clubs: true,
+    },
+  });
+  const cd = await db.query.userCoach.findFirst({
+    where: eq(userCoach.userId, memberId),
+    with: {
+      coachingActivities: true,
+      coachingPrices: true,
+      certifications: true,
+      activityGroups: true,
+      page: true,
+      clubs: true,
+    },
+  });
+  const mnd = db.query.userManager.findFirst({
+    where: eq(userManager.userId, memberId),
+    with: {
+      managedClubs: true,
+    },
+  });
+  return {
+    memberData: md,
+    coachData: cd,
+    managerData: mnd,
+  };
+}
+
+export type CoachDataOfferType = NonNullable<
+  Awaited<ReturnType<typeof getMemberData>>["coachData"]
+>["coachingPrices"][number];
+
+export type MemberSubscriptionType = NonNullable<
+  Awaited<ReturnType<typeof getMemberData>>["memberData"]
+>["subscriptions"][number]["subscription"];
+
+async function getPricingData(pricingId: string) {
+  return await db.query.pricing.findFirst({
+    where: eq(pricing.id, pricingId!),
+    with: {
+      features: true,
+    },
+  });
+}
 
 export async function getUserById(id: string, options?: GetUserByIdOptions) {
   const u = await db.query.user.findFirst({
@@ -71,30 +117,13 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
   if (options?.withImage && u.profileImageId) {
     profileImageUrl = await getDocUrl(u.id, u.profileImageId);
   }
-  let coachData: unknown = null;
+  let extraData: Awaited<ReturnType<typeof getMemberData>> | null = null;
 
-  if (
-    options?.withMemberData &&
-    (u?.internalRole === "COACH" || u?.internalRole === "MANAGER_COACH")
-  ) {
-    coachData = await db.query.userCoach.findFirst({
-      where: eq(userCoach.userId, id),
-      with: {
-        coachingActivities: true,
-      },
-    });
-  }
+  if (options?.withMemberData) extraData = await getMemberData(u.id);
 
-  let pricingData: unknown = null;
+  let pricingData: Awaited<ReturnType<typeof getPricingData>> | null = null;
 
-  if (options?.withPricing) {
-    pricingData = await db.query.pricing.findFirst({
-      where: eq(pricing.id, u.pricingId!),
-      with: {
-        features: true,
-      },
-    });
-  }
+  if (options?.withPricing) pricingData = await getPricingData(u.pricingId!);
 
   let features: (typeof featureEnum.enumValues)[number][] = [];
   if (options?.withFeatures) {
@@ -106,12 +135,6 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
     });
     features = featuresData?.features.map((f) => f.feature) ?? [];
   }
-
-  const memberData:
-    | (typeof userMember.$inferSelect & {
-        subscriptions?: FullSubscription[];
-      })
-    | null = null;
 
   return {
     id: u.id,
@@ -129,8 +152,10 @@ export async function getUserById(id: string, options?: GetUserByIdOptions) {
       id: a.id,
       provider: a.providerId,
     })),
-    coachData,
-    memberData,
+
+    memberData: extraData?.memberData ?? null,
+    coachData: extraData?.coachData ?? null,
+    managerData: extraData?.managerData ?? null,
     pricing: pricingData,
     features,
   };

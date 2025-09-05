@@ -26,7 +26,7 @@ export default async function MemberDashboard({
   }
   const t = await getTranslations("dashboard");
 
-  const queryUser = await getUserById(userId);
+  const queryUser = await getUserById(userId, { withMemberData: true });
   // const [day, setDay] = useState(startOfToday());
 
   // const queryReservations = trpc.users.getReservationsByUserId.useQuery({
@@ -55,7 +55,10 @@ export default async function MemberDashboard({
       </h2>
       <section className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(20rem,30rem))] justify-center gap-4">
         {queryUser?.memberData?.subscriptions?.map((sub) => (
-          <Subscription key={sub.id} subscription={sub} />
+          <Subscription
+            key={sub.subscriptionId}
+            subscription={sub.subscription}
+          />
         ))}
       </section>
       <section className="grid auto-rows-auto gap-2 lg:grid-cols-2">

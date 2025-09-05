@@ -353,8 +353,8 @@ function SelectDataForMode({
         ? choices.data.activities.map((ag) => (
             <SelectableItem
               key={ag.id}
-              state={activityIds.includes(ag.id)}
-              item={{ id: ag.id, name: ag.name }}
+              state={activityIds.includes(ag.id!)}
+              item={{ id: ag.id!, name: ag.name! }}
               onClick={(id) => onSelectActivity(id)}
             />
           ))

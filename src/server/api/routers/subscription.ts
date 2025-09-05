@@ -89,7 +89,7 @@ export const subscriptionRouter = createTRPCRouter({
       db
         .update(subscription)
         .set(input)
-        .where(eq(subscription.id, input.id))
+        .where(eq(subscription.id, input.id!))
         .returning()
     ),
   updateSubscriptionSelection: protectedProcedure
@@ -103,17 +103,18 @@ export const subscriptionRouter = createTRPCRouter({
       })
     )
     .mutation(({ input }) => {
-      return db.query.subscription.update({
-        where: eq(subscription.id, input.subscriptionId),
-        data: {
-          sites: { connect: input.sites.map((id) => ({ id })) },
-          rooms: { connect: input.rooms.map((id) => ({ id })) },
-          activitieGroups: {
-            connect: input.activityGroups.map((id) => ({ id })),
-          },
-          activities: { connect: input.activities.map((id) => ({ id })) },
-        },
-      });
+      return null;
+      // return db.query.subscription.update({
+      //   where: eq(subscription.id, input.subscriptionId),
+      //   data: {
+      //     sites: { connect: input.sites.map((id) => ({ id })) },
+      //     rooms: { connect: input.rooms.map((id) => ({ id })) },
+      //     activitieGroups: {
+      //       connect: input.activityGroups.map((id) => ({ id })),
+      //     },
+      //     activities: { connect: input.activities.map((id) => ({ id })) },
+      //   },
+      // });
     }),
   deleteSubscription: protectedProcedure
     .input(z.cuid2())
@@ -255,7 +256,10 @@ export const subscriptionRouter = createTRPCRouter({
               },
             },
           });
-          const activities = new Map<string, typeof activity.$inferSelect>();
+          const activities = new Map<
+            string,
+            Partial<typeof activity.$inferSelect>
+          >();
           for (const site of sites)
             for (const room of site.rooms)
               for (const activity of room.activities)
@@ -269,7 +273,10 @@ export const subscriptionRouter = createTRPCRouter({
               activities: true,
             },
           });
-          const activities = new Map<string, typeof activity.$inferSelect>();
+          const activities = new Map<
+            string,
+            Partial<typeof activity.$inferSelect>
+          >();
           for (const room of rooms)
             for (const activity of room.activities)
               activities.set(activity.id, activity);

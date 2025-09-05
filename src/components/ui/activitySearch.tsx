@@ -1,17 +1,18 @@
-import useDebounce from "@lib/useDebounce";
-import { trpc } from "@trpcclient/trpc";
-import { useTranslation } from "next-i18next";
+"use client";
+
+import { trpc } from "@/lib/trpc/client";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { type DefaultTFuncReturn } from "i18next";
+import { useDebounceValue } from "usehooks-ts";
 
 type Props = {
-  label?: DefaultTFuncReturn;
+  label?: string;
   initialActivity?: string;
   onSearch: (activity: ActivityData) => void;
   onActivityChange: (value: string) => void;
   required?: boolean;
   iconActivity?: boolean;
-  error?: DefaultTFuncReturn;
+  error?: string;
   className?: string;
 };
 
@@ -31,7 +32,7 @@ const ActivitySearch = ({
   className,
 }: Props) => {
   const [activity, setActivity] = useState("");
-  const debouncedActivity = useDebounce<string>(activity, 500);
+  const [debouncedActivity] = useDebounceValue<string>(activity, 500);
   const t = useTranslations("common");
   const [showList, setShowList] = useState(false);
 

@@ -1,9 +1,10 @@
 import { getDescription } from "@/lib/subscriptions";
 import { getDataNames } from "@/server/api/routers/subscription";
-import { MemberSubscription } from "@/server/api/routers/users";
-import { useTranslations } from "next-intl";
+import { MemberSubscriptionType } from "@/server/api/routers/users";
+import { List } from "./list";
+
 type SubscriptionProps = {
-  subscription: MemberSubscription;
+  subscription: MemberSubscriptionType;
 };
 
 export default async function Subscription({
@@ -12,17 +13,17 @@ export default async function Subscription({
   const { shortInfo } = await getDescription(
     subscription.mode,
     subscription.restriction,
-    subscription.activitieGroups.map((ag: { id: string }) => ag.id),
-    subscription.activities.map((ag: { id: string }) => ag.id),
-    subscription.sites.map((ag: { id: string }) => ag.id),
-    subscription.rooms.map((ag: { id: string }) => ag.id)
+    subscription.activitieGroups.map((ag) => ag.activityGroup.id),
+    subscription.activities.map((ag) => ag.activity.id),
+    subscription.sites.map((ag) => ag.site.id),
+    subscription.rooms.map((ag) => ag.room.id)
   );
 
   const { sites, rooms, activityGroups, activities } = await getDataNames(
-    subscription.sites.map((ag: { id: string }) => ag.id),
-    subscription.rooms.map((ag: { id: string }) => ag.id),
-    subscription.activitieGroups.map((ag: { id: string }) => ag.id),
-    subscription.activities.map((ag: { id: string }) => ag.id)
+    subscription.sites.map((ag) => ag.site.id),
+    subscription.rooms.map((ag) => ag.room.id),
+    subscription.activitieGroups.map((ag) => ag.activityGroup.id),
+    subscription.activities.map((ag) => ag.activity.id)
   );
 
   return (
