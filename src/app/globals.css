@@ -41,7 +41,10 @@ select {
 }
 
 .input-group {
-  @apply flex items-center gap-2;
+  @apply flex gap-2 w-full items-start;
+  & > input {
+    @apply w-fit;
+  }
 }
 
 html {

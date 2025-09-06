@@ -412,7 +412,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-2 @xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 @4xl:grid-cols-3">
         <fieldset className="rounded border border-primary p-4">
           <div>
             <div className="form-control">
@@ -428,7 +428,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
             </div>
             {fields.physical ? (
               <>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <div className="form-control">
                     <label className="label cursor-pointer justify-start gap-2">
                       <input

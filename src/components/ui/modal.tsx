@@ -4,6 +4,7 @@ import { type ReactNode, useRef, useId, useEffect, useCallback } from "react";
 import { type FieldErrors } from "react-hook-form";
 import { type ButtonSize, type TIconButtonVariant } from "./buttonIcon";
 import { useTranslations } from "next-intl";
+import { twMerge } from "tailwind-merge";
 
 export type TModalVariant =
   | TIconButtonVariant
@@ -118,9 +119,12 @@ export default function Modal({
             onOpenModal();
         }}
       />
-      <div className={`modal`}>
+      <div className="modal ">
         <div
-          className={`modal-box relative overflow-hidden ${className ?? ""}`}
+          className={twMerge(
+            "modal-box relative overflow-y-auto overflow-x-hidden",
+            className
+          )}
         >
           <label
             htmlFor={modalId}

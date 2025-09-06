@@ -22,7 +22,7 @@ export default async function CoachPage({
   )
     redirect("/", RedirectType.replace);
   const t = await getTranslations("pages");
-  const queryPage = await getPageForCoach(userId);
+  const queryPage = await getPageForCoach(userId ?? user.id);
 
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">

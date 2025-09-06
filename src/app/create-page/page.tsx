@@ -15,5 +15,7 @@ export default async function PageCreation() {
     );
   if (user?.internalRole === "MANAGER")
     redirect("/create-page/club", RedirectType.replace);
+  if (user?.internalRole === "COACH")
+    redirect("/create-page/coach", RedirectType.replace);
   return <div>You are not allowed to use this page</div>;
 }
