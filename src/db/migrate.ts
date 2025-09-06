@@ -1,4 +1,4 @@
-import { migrate } from "drizzle-orm/neon-http/migrator";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { db } from "./index";
 
 const main = async () => {
@@ -6,7 +6,7 @@ const main = async () => {
   console.log(`[${new Date().toISOString()}] Starting database migration...`);
 
   try {
-    await migrate(db, { migrationsFolder: "drizzle/migrations" });
+    await migrate(db, { migrationsFolder: "drizzle" });
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(

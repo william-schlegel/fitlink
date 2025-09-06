@@ -9,6 +9,10 @@ import { redirect } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import { FromTo } from "./types";
 import { NotificationMessage } from "./notificationMessage";
+import {
+  getNotificationById,
+  getNotificationToUser,
+} from "@/server/api/routers/notification";
 
 const PER_PAGE = 20;
 
@@ -26,12 +30,12 @@ export default async function ManageNotifications({
   const { userId } = await params;
   const { fromTo, notificationId, page } = await searchParams;
 
-  const notificationQuery = await getNotificationToUser({
-    userToId: fromTo === "to" ? userId : undefined,
-    userFromId: fromTo === "from" ? userId : undefined,
-    skip: parseInt(page, 10) * PER_PAGE,
-    take: PER_PAGE,
-  });
+  const notificationQuery = await getNotificationToUser(
+    fromTo === "to" ? userId : undefined,
+    fromTo === "from" ? userId : undefined,
+    parseInt(page, 10) * PER_PAGE,
+    PER_PAGE
+  );
 
   const headerList = await headers();
   const href = headerList.get("x-current-href");
@@ -149,7 +153,7 @@ export default async function ManageNotifications({
           </ul>
           <Pagination
             actualPage={parseInt(page, 10)}
-            count={notificationQuery.data?.total ?? 0}
+            count={notificationQuery?.total ?? 0}
             onPageClick={(page) =>
               redirect(
                 createLink(
@@ -186,10 +190,7 @@ export async function NotificationContent({
   notificationId,
   fromTo,
 }: NotificationContentProps) {
-  const notification = getNotificationById({
-    notificationId,
-    updateViewDate: true,
-  });
+  const notification = await getNotificationById(notificationId, true);
   const t = await getTranslations("auth");
 
   return (
@@ -206,35 +207,35 @@ export async function NotificationContent({
             <img
               src={
                 (fromTo === "to"
-                  ? notification.data?.userFrom.imageUrl
-                  : notification.data?.userTo.imageUrl) ?? "/images/dummy.jpg"
+                  ? notification?.userFrom.imageUrl
+                  : notification?.userTo.imageUrl) ?? "/images/dummy.jpg"
               }
               alt={
                 (fromTo === "to"
-                  ? notification.data?.userFrom.name
-                  : notification.data?.userTo.name) ?? ""
+                  ? notification?.userFrom.name
+                  : notification?.userTo.name) ?? ""
               }
             />
           </div>
         </div>
         <span className="text-lg font-bold text-secondary">
           {(fromTo === "to"
-            ? notification.data?.userFrom.name
-            : notification.data?.userTo.name) ?? ""}
+            ? notification?.userFrom.name
+            : notification?.userTo.name) ?? ""}
         </span>
       </div>
       <div className="flex items-center gap-4">
         <h2>
-          {formatDateLocalized(notification.data?.date, {
+          {formatDateLocalized(notification?.date, {
             dateFormat: "long",
             withDay: true,
             withTime: true,
           })}
         </h2>
-        {notification.data?.viewDate ? (
+        {notification?.viewDate ? (
           <span>
             {t("notification.viewed", {
-              date: formatDateLocalized(notification.data?.viewDate, {
+              date: formatDateLocalized(notification?.viewDate, {
                 dateFormat: "long",
                 withTime: true,
               }),
@@ -243,11 +244,8 @@ export async function NotificationContent({
         ) : null}
       </div>
       <div className="space-y-4 rounded border border-primary p-4">
-        {notification.data ? (
-          <NotificationMessage
-            notification={notification.data}
-            fromTo={fromTo}
-          />
+        {notification ? (
+          <NotificationMessage notification={notification} fromTo={fromTo} />
         ) : null}
       </div>
     </div>

@@ -12,6 +12,7 @@ import { activityRouter } from "./routers/activities";
 import { planningRouter } from "./routers/planning";
 import { pageRouter } from "./routers/page";
 import { subscriptionRouter } from "./routers/subscription";
+import { notificationRouter } from "./routers/notification";
 
 /**
  * This is the primary router for your server.
@@ -32,6 +33,7 @@ export const appRouter = createTRPCRouter({
   plannings: planningRouter,
   pages: pageRouter,
   subscriptions: subscriptionRouter,
+  notifications: notificationRouter,
 });
 
 // export type definition of API

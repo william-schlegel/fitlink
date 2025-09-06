@@ -11,6 +11,7 @@ import { isCUID } from "@/lib/utils";
 import Spinner from "@/components/ui/spinner";
 import { formatMoney } from "@/lib/formatNumber";
 import { NotificationTypeEnum } from "@/db/schema/enums";
+import { GetNotificationByIdReturn } from "@/server/api/routers/notification";
 
 type NotificationMessageProps = {
   fromTo: FromTo;
