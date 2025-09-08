@@ -44,6 +44,7 @@ export default function UserButton() {
                 fetchOptions: {
                   onSuccess: () => {
                     router.push("/");
+                    router.refresh();
                   },
                 },
               });

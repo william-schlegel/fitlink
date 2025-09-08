@@ -5,6 +5,9 @@ import ThemeButton from "./themeButton";
 import { getTranslations } from "next-intl/server";
 import Menu from "./menu";
 import UserButton from "./userButton";
+import { getNotificationToUser } from "@/server/api/routers/notification";
+import { getUserById } from "@/server/api/routers/users";
+import { formatMessage } from "@/lib/getNotifications";
 
 const BETA = env.NEXT_PUBLIC_BETA === "true";
 
@@ -15,13 +18,13 @@ export default async function Navbar({
   userId: string | undefined;
   internalRole: RoleEnum | undefined | null;
 }) {
-  const t = await getTranslations("common");
-  const tAuth = await getTranslations("auth");
+  const t = await getTranslations();
 
-  // const { notifications, unread, formatMessage } = useNotifications(userId);
-  // const user = trpc.users.getUserById.useQuery(userId ?? "", {
-  //   enabled: isCUID(userId),
-  // });
+  const notificationsQuery = await getNotificationToUser(userId);
+  const unread = notificationsQuery.unread;
+  const notifications = notificationsQuery.notifications;
+
+  const user = userId ? await getUserById(userId) : undefined;
 
   return (
     <div className="navbar bg-base-100">
@@ -59,7 +62,7 @@ export default async function Navbar({
         <ThemeButton />
         {userId ? (
           <>
-            {/* {notifications.length ? (
+            {notifications.length ? (
               <div className="dropdown dropdown-end">
                 <label tabIndex={0} className="btn-ghost btn-circle btn">
                   <div className="w-10 rounded-full">
@@ -79,7 +82,7 @@ export default async function Navbar({
                   tabIndex={0}
                   className="dropdown-content menu rounded-box menu-compact mt-3 w-52 bg-base-100 p-2 shadow"
                 >
-                  {notifications.map((notification) => (
+                  {notifications.map(async (notification) => (
                     <li
                       key={notification.id}
                       className={`max-w-full overflow-hidden truncate text-ellipsis ${
@@ -89,36 +92,36 @@ export default async function Navbar({
                       <Link
                         href={`/user/${notification.userToId}/notification?notificationId=${notification.id}`}
                       >
-                        <span>{formatMessage(notification)}</span>
+                        <span>{await formatMessage(notification)}</span>
                       </Link>
                     </li>
                   ))}
                   <div className="divider my-1"></div>
                   <li>
-                    <Link href={`/user/${sessionData.user.id}/notification`}>
-                      <span>{t("navigation.my-notifications")}</span>
+                    <Link href={`/user/${user?.id}/notification`}>
+                      <span>{t("common.navigation.my-notifications")}</span>
                     </Link>
                   </li>
                 </ul>
               </div>
-            ) : ( */}
-            <i className="bx bx-bell bx-md text-base-300" />
-            {/* )}{" "} */}
+            ) : (
+              <i className="bx bx-bell bx-md text-base-300" />
+            )}{" "}
             {userId ? (
               <>
                 <span className="badge badge-primary">
-                  {t(`roles.${internalRole}`)}
+                  {t(`common.roles.${internalRole}`)}
                 </span>
                 <UserButton />
               </>
             ) : (
-              <Link href="/user/signin">{tAuth("signin.connect")}</Link>
+              <Link href="/user/signin">{t("auth.signin.connect")}</Link>
             )}
           </>
         ) : (
           <ul className="menu menu-horizontal p-0">
             <li>
-              <Link href="/user/signin">{tAuth("signin.connect")}</Link>{" "}
+              <Link href="/user/signin">{t("auth.signin.connect")}</Link>{" "}
             </li>
           </ul>
         )}
@@ -129,7 +132,7 @@ export default async function Navbar({
 
 const Logo = () => {
   return (
-    <div className="flex-1">
+    <div className="flex flex-1 items-center">
       <Link href={"/videoach"} className="btn btn-ghost text-2xl capitalize">
         Videoach
       </Link>

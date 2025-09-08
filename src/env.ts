@@ -35,6 +35,7 @@ export const env = createEnv({
     NEXT_PUBLIC_BETA: z.enum(["true", "false"]).default("false"),
     NEXT_PUBLIC_MAPBOX_TOKEN: z.string(),
     NEXT_PUBLIC_MAPQUEST_KEY: z.string(),
+    NEXT_PUBLIC_STREAMCHAT_API_KEY: z.string(),
   },
 
   /**
@@ -56,7 +57,7 @@ export const env = createEnv({
     NEXT_PUBLIC_BETA: process.env.NEXT_PUBLIC_BETA,
     NEXT_PUBLIC_MAPBOX_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
     NEXT_PUBLIC_MAPQUEST_KEY: process.env.NEXT_PUBLIC_MAPQUEST_KEY,
-
+    NEXT_PUBLIC_STREAMCHAT_API_KEY: process.env.NEXT_PUBLIC_STREAMCHAT_API_KEY,
     // SMTP Email Configuration
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_PORT: process.env.SMTP_PORT,
