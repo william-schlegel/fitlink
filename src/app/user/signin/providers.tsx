@@ -1,7 +1,8 @@
 "use client";
 
-import { authClient } from "@/lib/auth/client";
 import { useTranslations } from "next-intl";
+
+import { authClient } from "@/lib/auth/client";
 
 export default function Providers({
   providers,

@@ -1,8 +1,9 @@
-import { getActualUser } from "@/lib/auth/server";
-import { getUserById } from "@/server/api/routers/users";
+import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { redirect, RedirectType } from "next/navigation";
+
+import { getUserById } from "@/server/api/routers/users";
+import { getActualUser } from "@/lib/auth/server";
 import Subscription from "./subscription";
 
 /***

@@ -1,9 +1,10 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Locale, locales } from "@/i18n";
 import { startTransition } from "react";
+
 import { setUserLocale } from "@/lib/locale";
+import { Locale, locales } from "@/i18n";
 
 export default function LanguageSwitcher() {
   const t = useTranslations("common");

@@ -1,30 +1,31 @@
 "use client";
 
-import { useUser } from "@/lib/auth/client";
-import { toast } from "@/lib/toast";
-import { trpc } from "@/lib/trpc/client";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import MapComponent, { Marker } from "react-map-gl/mapbox";
+import { isDate, startOfToday } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
-import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import { isCUID } from "@/lib/utils";
-import ButtonIcon, { ButtonSize } from "../ui/buttonIcon";
-import Confirmation from "../ui/confirmation";
-import { isDate, startOfToday } from "date-fns";
-import { format } from "date-fns";
-import { isSameDay } from "date-fns";
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
-import { TextError } from "../ui/simpleform";
-import { useWriteFile } from "@/lib/useManageFile";
-import Spinner from "../ui/spinner";
-import { formatMoney, formatSize } from "@/lib/formatNumber";
-import AddressSearch, { AddressData } from "../ui/addressSearch";
-import Ribbon from "../ui/ribbon";
-import MapComponent, { Marker } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { env } from "@/env";
+import { isSameDay } from "date-fns";
+import { format } from "date-fns";
+
+import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
+import AddressSearch, { AddressData } from "../ui/addressSearch";
+import { formatMoney, formatSize } from "@/lib/formatNumber";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import ButtonIcon, { ButtonSize } from "../ui/buttonIcon";
+import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { formatDateLocalized } from "@/lib/formatDate";
+import { useWriteFile } from "@/lib/useManageFile";
+import Confirmation from "../ui/confirmation";
+import { TextError } from "../ui/simpleform";
+import { useUser } from "@/lib/auth/client";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
+import Ribbon from "../ui/ribbon";
+import { env } from "@/env";
 
 type EventFormValues = {
   name: string;
@@ -567,10 +568,10 @@ function DisplayEventCard({ imageUrl, fields }: DisplayEventCard) {
           {fields.free
             ? t("event.free")
             : fields.price
-            ? t("event.participation-price", {
-                price: formatMoney(fields.price),
-              })
-            : ""}
+              ? t("event.participation-price", {
+                  price: formatMoney(fields.price),
+                })
+              : ""}
         </p>
         <p className="space-x-4 text-right text-xl font-bold">
           <span>{fields.address}</span>

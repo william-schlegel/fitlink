@@ -1,22 +1,23 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/client";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+
 import ThemeSelector, { TThemes } from "../themeSelector";
-import { toast } from "@/lib/toast";
-import Spinner from "../ui/spinner";
-import Confirmation from "../ui/confirmation";
-import { getButtonSize } from "../ui/modal";
-import { useWriteFile } from "@/lib/useManageFile";
-import { isCUID } from "@/lib/utils";
-import { formatSize } from "@/lib/formatNumber";
-import ButtonIcon from "../ui/buttonIcon";
 import { PageSectionModelEnum } from "@/db/schema/enums";
 import { usePageSection } from "../modals/managePage";
-import { useRouter } from "next/navigation";
+import { useWriteFile } from "@/lib/useManageFile";
+import { formatSize } from "@/lib/formatNumber";
+import Confirmation from "../ui/confirmation";
 import { useUser } from "@/lib/auth/client";
+import { getButtonSize } from "../ui/modal";
+import ButtonIcon from "../ui/buttonIcon";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
 
 type HeroCreationProps = {
   clubId: string;
@@ -48,7 +49,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
     { clubId, userId },
     {
       enabled: isCUID(clubId),
-    }
+    },
   );
   const fields = useWatch({ control });
   const utils = trpc.useUtils();
@@ -60,7 +61,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
     { pageId, section: "HERO" },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   useEffect(() => {
@@ -69,10 +70,10 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
       return;
     }
     const hc = querySection.data?.elements.find(
-      (e) => e.elementType === "HERO_CONTENT"
+      (e) => e.elementType === "HERO_CONTENT",
     );
     const cta = querySection.data?.elements.find(
-      (e) => e.elementType === "CTA"
+      (e) => e.elementType === "CTA",
     );
     setImagePreview(hc?.images?.[0]?.url ?? "");
 
@@ -100,7 +101,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
   const writeFile = useWriteFile(
     clubQuery.data?.managerId ?? "",
     "PAGE_IMAGE",
-    MAX_SIZE
+    MAX_SIZE,
   );
   const createSection = trpc.pages.createPageSection.useMutation({
     onSuccess() {
@@ -151,10 +152,10 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
   const onSubmit: SubmitHandler<HeroCreationForm> = async (data) => {
     if (updating) {
       const hc = querySection?.data?.elements.find(
-        (e) => e.elementType === "HERO_CONTENT"
+        (e) => e.elementType === "HERO_CONTENT",
       );
       const cta = querySection?.data?.elements.find(
-        (e) => e.elementType === "CTA"
+        (e) => e.elementType === "CTA",
       );
       let docId: string | undefined;
       if (data.images?.[0]) {
@@ -426,7 +427,7 @@ export const HeroDisplay = ({ clubId, pageId }: HeroDisplayProps) => {
     section: "HERO",
   });
   const heroContent = querySection.data?.elements.find(
-    (e) => e.elementType === "HERO_CONTENT"
+    (e) => e.elementType === "HERO_CONTENT",
   );
   const cta = querySection.data?.elements.find((e) => e.elementType === "CTA");
 

@@ -1,14 +1,16 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { TRPCProvider } from "@/lib/trpc/provider";
-import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+
+import { TRPCProvider } from "@/lib/trpc/provider";
+import { getActualUser } from "@/lib/auth/server";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import { getActualUser } from "@/lib/auth/server";
+import "./globals.css";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "VideoAch - Coaching Platform",
+  title: "Fitlink - Coaching Platform",
   description: "A modern coaching and sports management platform",
 };
 

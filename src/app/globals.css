@@ -48,9 +48,21 @@ select {
 }
 
 html {
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
-    Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    Segoe UI,
+    Roboto,
+    Helvetica Neue,
+    Arial,
+    Noto Sans,
+    sans-serif,
+    Apple Color Emoji,
+    Segoe UI Emoji,
+    Segoe UI Symbol,
+    Noto Color Emoji;
 }
 
 .btn {
@@ -63,7 +75,8 @@ html {
 .bg-gradient-home-hero {
   --hero-bg-opacity: 0.3;
   object-fit: fill;
-  background: linear-gradient(
+  background:
+    linear-gradient(
         oklab(from var(--color-base-100) l a b / 30%),
         oklab(from var(--color-base-100) l a b / 30%)
       )
@@ -73,7 +86,8 @@ html {
         var(--color-secondary) 0%,
         rgba(0, 0, 0, 0) 65%,
         rgba(0, 0, 0, 0) 100%
-      ) -35% -65% / 100% 150% no-repeat no-repeat,
+      ) -35% -65% /
+      100% 150% no-repeat no-repeat,
     radial-gradient(
         ellipse at 50% 50%,
         var(--color-accent) 0%,

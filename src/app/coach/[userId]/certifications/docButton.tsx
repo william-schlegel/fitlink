@@ -1,11 +1,12 @@
 "use client";
 
-import ButtonIcon from "@/components/ui/buttonIcon";
-import { toast } from "@/lib/toast";
-import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+
+import ButtonIcon from "@/components/ui/buttonIcon";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import { toast } from "@/lib/toast";
 
 export default function DocButton({ documentId }: { documentId: string }) {
   const t = useTranslations("coach");

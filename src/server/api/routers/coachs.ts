@@ -1,14 +1,7 @@
-import { LATITUDE, LONGITUDE, DEFAULT_RANGE } from "@/lib/defaultValues";
-import { z } from "zod";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/lib/trpc/server";
-import { db } from "@/db";
 import { and, eq, gte, ilike, lte, or } from "drizzle-orm";
-import { calculateBBox, calculateDistance } from "@/lib/distance";
-import { getDocUrl } from "../../../../files";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+
 import {
   certification,
   certificationActivityGroups,
@@ -20,21 +13,29 @@ import {
   coachingPrice,
   coachingPricePack,
 } from "@/db/schema/coach";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/lib/trpc/server";
 import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
-import { user } from "@/db/schema/auth";
+import { LATITUDE, LONGITUDE, DEFAULT_RANGE } from "@/lib/defaultValues";
 import { page, pageSection, pageSectionElement } from "@/db/schema/page";
-import { userCoach } from "@/db/schema/user";
+import { calculateBBox, calculateDistance } from "@/lib/distance";
 import { club, coachingActivity } from "@/db/schema/club";
-import { isCUID } from "@/lib/utils";
-import { TRPCError } from "@trpc/server";
 import { isAdmin } from "@/server/lib/userTools";
+import { userCoach } from "@/db/schema/user";
+import { user } from "@/db/schema/auth";
+import { isCUID } from "@/lib/utils";
+import { getDocUrl } from "./files";
+import { db } from "@/db";
 
 const CertificationData = z.object({
   id: z.cuid2(),
   name: z.string(),
   obtainedIn: z.date(),
   documentId: z.cuid2().optional(),
-  userId: z.cuid2(),
+  userId: z.string(),
   modules: z.array(z.cuid2()),
   activityGroups: z.array(z.cuid2()),
 });
@@ -64,165 +65,83 @@ const OfferData = z.object({
     z.object({
       nbHours: z.number().min(0),
       packPrice: z.number().min(0),
-    })
+    }),
   ),
 });
 
-export async function getCoachsForClub(clubId: string) {
-  if (!isCUID(clubId)) return [];
-  const clb = await db.query.club.findFirst({
-    where: eq(club.id, clubId),
-    with: {
-      coaches: {
-        with: {
-          coach: { with: { user: { columns: { id: true, name: true } } } },
-        },
-      },
-    },
-  });
-  return (
-    clb?.coaches.map(
-      (c: { coach: { user: { id: string; name: string } } }) => c.coach.user
-    ) ?? []
-  );
-}
-
-export async function getCoachById(coachId: string) {
-  if (!isCUID(coachId)) return null;
-  const coach = await db.query.user.findFirst({
-    where: eq(user.id, coachId),
-    with: {
-      coachData: {
-        with: {
-          activityGroups: {
-            with: {
-              activities: true,
-            },
-          },
-          certifications: {
-            with: {
-              modules: true,
-              document: true,
-            },
-          },
-          clubs: true,
-          page: { columns: { id: true } },
-        },
-      },
-    },
-  });
-  if (!coach) return null;
-
-  // Find the first page for the coach with target "HOME"
-  const pages = await db.query.page.findMany({
-    where: and(eq(page.coachId, coach?.id ?? ""), eq(page.target, "HOME")),
-    with: {
-      sections: {
-        with: {
-          elements: {
-            with: {
-              images: true,
-            },
-            where: eq(pageSectionElement.elementType, "HERO_CONTENT"),
-          },
-        },
-        where: eq(pageSection.model, "HERO"),
-      },
-    },
-    limit: 1,
-  });
-
-  const imageData = pages[0];
-  const imgData = imageData?.sections?.[0]?.elements?.[0]?.images?.[0];
-  let imageUrl = coach.image;
-  if (imgData) {
-    imageUrl = await getDocUrl(coachId, imgData.id);
-  }
-  return { ...coach, imageUrl: imageUrl ?? "/images/dummy.jpg" };
-}
-
-export async function getCertificationsForCoach(coachId: string) {
-  if (!isCUID(coachId)) return null;
-  return await db.query.userCoach.findFirst({
-    where: eq(userCoach.userId, coachId),
-    with: {
-      certifications: {
-        with: {
-          modules: true,
-          activityGroups: true,
-        },
-      },
-    },
-  });
-}
-
-export async function getCertificationGroups() {
-  return await db.query.certificationGroup.findMany({
-    with: {
-      modules: {
-        with: {
-          certificationModuleActivityGroups: { with: { activityGroup: true } },
-        },
-      },
-    },
-  });
-}
-
-export async function getCertificationGroupById(id: string) {
-  if (!isCUID(id)) return null;
-  return await db.query.certificationGroup.findFirst({
-    where: eq(certificationGroup.id, id),
-    with: {
-      modules: true,
-    },
-  });
-}
-
-export async function getCoachOffers(coachId: string) {
-  if (!coachId) return [];
-  return await db.query.coachingPrice.findMany({
-    where: eq(coachingPrice.coachId, coachId),
-    with: {
-      coachingLevel: true,
-    },
-  });
-}
-
-export async function getOfferById(offerId: string) {
-  if (!isCUID(offerId)) return null;
-  return await db.query.coachingPrice.findFirst({
-    where: eq(coachingPrice.id, offerId),
-    with: {
-      packs: true,
-      coachingLevel: true,
-    },
-  });
-}
-
 export const coachRouter = createTRPCRouter({
-  getCoachById: protectedProcedure
-    .input(z.cuid2())
-    .query(async ({ input }) => await getCoachById(input)),
+  getCoachById: protectedProcedure.input(z.cuid2()).query(async ({ input }) => {
+    const coach = await db.query.user.findFirst({
+      where: eq(user.id, input),
+      with: {
+        coachData: {
+          with: {
+            activityGroups: {
+              with: {
+                activities: true,
+              },
+            },
+            certifications: {
+              with: {
+                modules: true,
+                document: true,
+              },
+            },
+            clubs: true,
+            page: { columns: { id: true } },
+          },
+        },
+      },
+    });
+    if (!coach) return null;
+
+    // Find the first page for the coach with target "HOME"
+    const pages = await db.query.page.findMany({
+      where: and(eq(page.coachId, coach?.id ?? ""), eq(page.target, "HOME")),
+      with: {
+        sections: {
+          with: {
+            elements: {
+              with: {
+                images: true,
+              },
+              where: eq(pageSectionElement.elementType, "HERO_CONTENT"),
+            },
+          },
+          where: eq(pageSection.model, "HERO"),
+        },
+      },
+      limit: 1,
+    });
+
+    const imageData = pages[0];
+    const imgData = imageData?.sections?.[0]?.elements?.[0]?.images?.[0];
+    let imageUrl = coach.image;
+    if (imgData) {
+      imageUrl = await getDocUrl(input, imgData.id);
+    }
+    return { ...coach, imageUrl: imageUrl ?? "/images/dummy.jpg" };
+  }),
   getCoachsFromDistance: publicProcedure
     .input(
       z.object({
         locationLng: z.number().default(LONGITUDE),
         locationLat: z.number().default(LATITUDE),
         range: z.number().max(100).default(DEFAULT_RANGE),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const bbox = calculateBBox(
         input.locationLng,
         input.locationLat,
-        input.range
+        input.range,
       );
       const coachs = await db.query.userCoach.findMany({
         where: and(
           gte(userCoach.longitude, bbox?.[0]?.[0] ?? LONGITUDE),
           lte(userCoach.longitude, bbox?.[1]?.[0] ?? LONGITUDE),
           gte(userCoach.latitude, bbox?.[1]?.[1] ?? LATITUDE),
-          lte(userCoach.latitude, bbox?.[0]?.[1] ?? LATITUDE)
+          lte(userCoach.latitude, bbox?.[0]?.[1] ?? LATITUDE),
         ),
         with: {
           page: true,
@@ -237,13 +156,13 @@ export const coachRouter = createTRPCRouter({
             input.locationLng,
             input.locationLat,
             c.longitude ?? 0,
-            c.latitude ?? 0
+            c.latitude ?? 0,
           ),
         }))
         .filter(
           (c) =>
             c.distance <= input.range &&
-            c.distance <= (c.range ?? DEFAULT_RANGE)
+            c.distance <= (c.range ?? DEFAULT_RANGE),
         );
     }),
   createCertification: protectedProcedure
@@ -260,25 +179,28 @@ export const coachRouter = createTRPCRouter({
           .returning();
 
         const certifId = certif[0].id;
-        await tx.insert(certificationCertificationModules).values(
-          input.modules.map((m) => ({
-            certificationId: certifId,
-            certificationModuleId: m,
-          }))
-        );
-        await tx.insert(certificationActivityGroups).values(
-          input.activityGroups.map((a) => ({
-            certificationId: certifId,
-            activityGroupId: a,
-          }))
-        );
+        if (input.modules.length)
+          await tx.insert(certificationCertificationModules).values(
+            input.modules.map((m) => ({
+              certificationId: certifId,
+              certificationModuleId: m,
+            })),
+          );
+        if (input.activityGroups.length)
+          await tx.insert(certificationActivityGroups).values(
+            input.activityGroups.map((a) => ({
+              certificationId: certifId,
+              activityGroupId: a,
+            })),
+          );
 
-        await tx.insert(certificationActivityGroups).values(
-          input.activityGroups.map((a) => ({
-            certificationId: certifId,
-            activityGroupId: a,
-          }))
-        );
+        if (input.activityGroups.length)
+          await tx.insert(certificationActivityGroups).values(
+            input.activityGroups.map((a) => ({
+              certificationId: certifId,
+              activityGroupId: a,
+            })),
+          );
 
         // coach: {
         //   connect: {
@@ -329,7 +251,7 @@ export const coachRouter = createTRPCRouter({
         await tx
           .delete(certificationCertificationModules)
           .where(
-            eq(certificationCertificationModules.certificationId, certifId)
+            eq(certificationCertificationModules.certificationId, certifId),
           );
         await tx
           .delete(certificationActivityGroups)
@@ -339,7 +261,7 @@ export const coachRouter = createTRPCRouter({
             input.modules.map((m) => ({
               certificationId: certifId,
               certificationModuleId: m,
-            }))
+            })),
           );
         }
         if (input.activityGroups?.length) {
@@ -347,23 +269,23 @@ export const coachRouter = createTRPCRouter({
             input.activityGroups.map((a) => ({
               certificationId: certifId,
               activityGroupId: a,
-            }))
+            })),
           );
         }
 
         return certif;
-      })
+      }),
     ),
   deleteCertification: protectedProcedure
     .input(z.cuid2())
     .mutation(({ input }) =>
-      db.delete(certification).where(eq(certification.id, input))
+      db.delete(certification).where(eq(certification.id, input)),
     ),
   getAllCoachs: publicProcedure.query(() =>
     db.query.user.findMany({
       where: or(
         eq(user.internalRole, "COACH"),
-        eq(user.internalRole, "MANAGER_COACH")
+        eq(user.internalRole, "MANAGER_COACH"),
       ),
       with: {
         coachData: {
@@ -373,15 +295,43 @@ export const coachRouter = createTRPCRouter({
           },
         },
       },
-    })
+    }),
   ),
   getCoachsForClub: publicProcedure
     .input(z.cuid2())
-    .query(async ({ input }) => await getCoachsForClub(input)),
+    .query(async ({ input }) => {
+      const clb = await db.query.club.findFirst({
+        where: eq(club.id, input),
+        with: {
+          coaches: {
+            with: {
+              coach: { with: { user: { columns: { id: true, name: true } } } },
+            },
+          },
+        },
+      });
+      return (
+        clb?.coaches.map(
+          (c: { coach: { user: { id: string; name: string } } }) =>
+            c.coach.user,
+        ) ?? []
+      );
+    }),
 
-  getCertificationsForCoach: protectedProcedure
-    .input(z.string())
-    .query(async ({ input }) => await getCertificationsForCoach(input)),
+  getCertificationsForCoach: protectedProcedure.input(z.string()).query(
+    async ({ input }) =>
+      await db.query.userCoach.findFirst({
+        where: eq(userCoach.userId, input),
+        with: {
+          certifications: {
+            with: {
+              modules: true,
+              activityGroups: true,
+            },
+          },
+        },
+      }),
+  ),
 
   getCertificationById: protectedProcedure.input(z.cuid2()).query(({ input }) =>
     db.query.certification.findFirst({
@@ -390,14 +340,31 @@ export const coachRouter = createTRPCRouter({
         certificationActivityGroups: { with: { activityGroup: true } },
         modules: true,
       },
-    })
+    }),
   ),
-  getCertificationGroups: protectedProcedure.query(
-    async ({}) => await getCertificationGroups()
+  getCertificationGroups: protectedProcedure.query(() =>
+    db.query.certificationGroup.findMany({
+      with: {
+        modules: {
+          with: {
+            certificationModuleActivityGroups: {
+              with: { activityGroup: true },
+            },
+          },
+        },
+      },
+    }),
   ),
   getCertificationGroupById: protectedProcedure
     .input(z.cuid2())
-    .query(async ({ input }) => await getCertificationGroupById(input)),
+    .query(({ input }) =>
+      db.query.certificationGroup.findFirst({
+        where: eq(certificationGroup.id, input),
+        with: {
+          modules: true,
+        },
+      }),
+    ),
   createGroup: protectedProcedure
     .input(
       z.object({
@@ -406,9 +373,9 @@ export const coachRouter = createTRPCRouter({
           z.object({
             name: z.string(),
             activityIds: z.array(z.cuid2()),
-          })
+          }),
         ),
-      })
+      }),
     )
     .mutation(({ input }) =>
       db.transaction(async (tx) => {
@@ -431,19 +398,19 @@ export const coachRouter = createTRPCRouter({
               mod.activityIds.map((id) => ({
                 certificationModuleId: newModule[0].id,
                 activityGroupId: id,
-              }))
+              })),
             );
           }
         });
         return group;
-      })
+      }),
     ),
   updateGroup: protectedProcedure
     .input(
       z.object({
         id: z.cuid2(),
         name: z.string(),
-      })
+      }),
     )
     .mutation(({ input }) =>
       db
@@ -452,7 +419,7 @@ export const coachRouter = createTRPCRouter({
           name: input.name,
         })
         .where(eq(certificationGroup.id, input.id))
-        .returning()
+        .returning(),
     ),
 
   updateActivitiesForModule: protectedProcedure
@@ -460,7 +427,7 @@ export const coachRouter = createTRPCRouter({
       z.object({
         moduleId: z.cuid2(),
         activityIds: z.array(z.cuid2()),
-      })
+      }),
     )
     .mutation(({ input }) =>
       db
@@ -471,7 +438,7 @@ export const coachRouter = createTRPCRouter({
           // },
         })
         .where(eq(certificationModule.id, input.moduleId))
-        .returning()
+        .returning(),
     ),
 
   deleteGroup: protectedProcedure
@@ -489,7 +456,7 @@ export const coachRouter = createTRPCRouter({
         name: z.string(),
         groupId: z.cuid2(),
         activityIds: z.array(z.cuid2()),
-      })
+      }),
     )
     .mutation(({ input }) =>
       db
@@ -501,7 +468,7 @@ export const coachRouter = createTRPCRouter({
           //   connect: input.activityIds.map((id) => ({ id })),
           // },
         })
-        .returning()
+        .returning(),
     ),
   updateModule: protectedProcedure
     .input(
@@ -509,7 +476,7 @@ export const coachRouter = createTRPCRouter({
         id: z.cuid2(),
         name: z.string(),
         activityIds: z.array(z.cuid2()),
-      })
+      }),
     )
     .mutation(({ input }) =>
       db
@@ -521,7 +488,7 @@ export const coachRouter = createTRPCRouter({
           // },
         })
         .where(eq(certificationModule.id, input.id))
-        .returning()
+        .returning(),
     ),
 
   deleteModule: protectedProcedure
@@ -544,11 +511,17 @@ export const coachRouter = createTRPCRouter({
           },
         },
       },
-    })
+    }),
   ),
-  getOfferById: protectedProcedure
-    .input(z.cuid2())
-    .query(({ input }) => getOfferById(input)),
+  getOfferById: protectedProcedure.input(z.cuid2()).query(({ input }) =>
+    db.query.coachingPrice.findFirst({
+      where: eq(coachingPrice.id, input),
+      with: {
+        packs: true,
+        coachingLevel: true,
+      },
+    }),
+  ),
 
   getOffersForCompanies: publicProcedure
     .input(
@@ -559,13 +532,13 @@ export const coachRouter = createTRPCRouter({
         range: z.number().max(100).default(25),
         priceMin: z.number().min(0).default(0),
         priceMax: z.number().max(1000).default(1000),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const bbox = calculateBBox(
         input.locationLng,
         input.locationLat,
-        input.range
+        input.range,
       );
       const uc = db
         .select()
@@ -575,8 +548,8 @@ export const coachRouter = createTRPCRouter({
             gte(userCoach.longitude, bbox?.[0]?.[0] ?? LONGITUDE),
             lte(userCoach.longitude, bbox?.[1]?.[0] ?? LONGITUDE),
             gte(userCoach.latitude, bbox?.[1]?.[1] ?? LATITUDE),
-            lte(userCoach.latitude, bbox?.[0]?.[1] ?? LATITUDE)
-          )
+            lte(userCoach.latitude, bbox?.[0]?.[1] ?? LATITUDE),
+          ),
         )
         .as("user_coaches");
       const cp = await db
@@ -586,8 +559,8 @@ export const coachRouter = createTRPCRouter({
           and(
             eq(coachingPrice.target, "COMPANY"),
             eq(coachingPrice.perHourPhysical, input.priceMin),
-            eq(coachingPrice.perHourPhysical, input.priceMax)
-          )
+            eq(coachingPrice.perHourPhysical, input.priceMax),
+          ),
         )
         .leftJoin(uc, eq(coachingPrice.coachId, uc.userId));
       return cp;
@@ -631,9 +604,14 @@ export const coachRouter = createTRPCRouter({
       }
       return { ...offer, imageUrl };
     }),
-  getCoachOffers: protectedProcedure
-    .input(z.cuid2())
-    .query(({ input }) => getCoachOffers(input)),
+  getCoachOffers: protectedProcedure.input(z.cuid2()).query(({ input }) =>
+    db.query.coachingPrice.findMany({
+      where: eq(coachingPrice.coachId, input),
+      with: {
+        coachingLevel: true,
+      },
+    }),
+  ),
   createCoachOffer: protectedProcedure
     .input(OfferData.omit({ id: true }))
     .mutation(async ({ input }) => {
@@ -648,7 +626,7 @@ export const coachRouter = createTRPCRouter({
 
       const pricingData = u?.pricing;
       const target = pricingData?.features.find(
-        (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY"
+        (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY",
       )
         ? input.target
         : "INDIVIDUAL";
@@ -682,14 +660,14 @@ export const coachRouter = createTRPCRouter({
               coachingPriceId: cp.id,
               nbHours: pack.nbHours,
               packPrice: pack.packPrice,
-            }))
+            })),
           );
         if (input.levels.length)
           await tx.insert(coachingLevel).values(
             input.levels.map((level) => ({
               level,
               offerId: cp.id,
-            }))
+            })),
           );
         return coachingPrice;
       });
@@ -708,9 +686,9 @@ export const coachRouter = createTRPCRouter({
 
       const pricingData = u?.pricing;
       const target = pricingData?.features.find(
-        (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY"
+        (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY",
       )
-        ? input.target ?? "INDIVIDUAL"
+        ? (input.target ?? "INDIVIDUAL")
         : "INDIVIDUAL";
       return db.transaction(async (tx) => {
         await tx
@@ -749,14 +727,14 @@ export const coachRouter = createTRPCRouter({
               coachingPriceId: cp.id,
               nbHours: pack.nbHours,
               packPrice: pack.packPrice,
-            })) ?? []
+            })) ?? [],
           );
         if (input.levels?.length)
           await tx.insert(coachingLevel).values(
             input.levels?.map((level) => ({
               level,
               offerId: cp.id,
-            })) ?? []
+            })) ?? [],
           );
         return cp;
       });
@@ -765,13 +743,13 @@ export const coachRouter = createTRPCRouter({
   deleteCoachOffer: protectedProcedure
     .input(z.cuid2())
     .mutation(({ input }) =>
-      db.delete(coachingPrice).where(eq(coachingPrice.id, input))
+      db.delete(coachingPrice).where(eq(coachingPrice.id, input)),
     ),
   getOfferActivityByName: publicProcedure.input(z.string()).query(({ input }) =>
     db
       .selectDistinctOn([coachingActivity.name])
       .from(coachingActivity)
       .where(ilike(coachingActivity.name, `%${input}%`))
-      .limit(25)
+      .limit(25),
   ),
 });

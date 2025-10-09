@@ -1,15 +1,16 @@
-import { getClubById } from "@/server/api/routers/clubs";
-import { redirect } from "next/navigation";
-import createLink, { createHref } from "@/lib/createLink";
-import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
+import { twMerge } from "tailwind-merge";
+import { headers } from "next/headers";
+import Link from "next/link";
+
+import { CreateSubscription } from "@/components/modals/manageSubscription";
+import { getSubscriptionsForClub } from "@/server/api/routers/subscription";
+import createLink, { createHref } from "@/lib/createLink";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { SubscriptionContent } from "./pageContent";
 import { getActualUser } from "@/lib/auth/server";
 import Title from "@/components/title";
-import Link from "next/link";
-import { SubscriptionContent } from "./pageContent";
-import { getSubscriptionsForClub } from "@/server/api/routers/subscription";
-import { CreateSubscription } from "@/components/modals/manageSubscription";
-import { twMerge } from "tailwind-merge";
 
 export default async function ManageSubscriptions({
   params,
@@ -34,7 +35,9 @@ export default async function ManageSubscriptions({
   )
     return <div>{t("manager-only")}</div>;
   const { subscriptionId } = await searchParams;
-  const clubQuery = await getClubById(clubId, userId);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const clubQuery = await caller.clubs.getClubById({ clubId, userId });
   const siteQuery = await getSubscriptionsForClub(clubId);
   const headerList = await headers();
   const href = headerList.get("x-current-href");
@@ -75,7 +78,7 @@ export default async function ManageSubscriptions({
                 href={createLink({ subscriptionId: site.id }, href)}
                 className={twMerge(
                   "w-full text-center",
-                  subscriptionId === site.id && "badge badge-primary"
+                  subscriptionId === site.id && "badge badge-primary",
                 )}
               >
                 {site.name}

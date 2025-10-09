@@ -1,27 +1,20 @@
-"use client";
+import { getTranslations } from "next-intl/server";
 
-import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { authClient } from "@/lib/auth/client";
+import { signInAction, signInMagicLinkAction } from "@/actions/auth";
 
-export default function FormEmail() {
-  const t = useTranslations("auth");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+export default async function FormEmail({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const t = await getTranslations("auth");
+  const error = (await searchParams)?.error;
 
   return (
     <>
       {error && <div className="alert alert-error">{error}</div>}
       <form
-        onSubmit={() =>
-          authClient.signIn.magicLink(
-            { email, callbackURL: "/videoach" },
-            {
-              onError: (ctx) => setError(ctx.error.message),
-            }
-          )
-        }
+        action={signInMagicLinkAction}
         className="grid grid-cols-[auto,1fr] gap-2"
       >
         <div className="flex gap-4 items-center">
@@ -37,8 +30,6 @@ export default function FormEmail() {
           type="email"
           required
           name="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
           className="input-bordered input w-full"
         />
         <button type="submit" className="btn-outline btn w-full">
@@ -46,17 +37,7 @@ export default function FormEmail() {
         </button>
       </form>
       <div className="divider divider-primary">{t("signin.or")}</div>
-      <form
-        onSubmit={() =>
-          authClient.signIn.email(
-            { email, password, callbackURL: "/videoach" },
-            {
-              onError: (ctx) => setError(ctx.error.message),
-            }
-          )
-        }
-        className="grid grid-cols-[auto,1fr] gap-2"
-      >
+      <form action={signInAction} className="grid grid-cols-[auto,1fr] gap-2">
         <div className="flex gap-4 items-center">
           <label htmlFor="password" className="required">
             {t("signin.password")}
@@ -66,12 +47,17 @@ export default function FormEmail() {
           </div>
         </div>
         <input
+          id="email"
+          type="email"
+          required
+          name="email"
+          className="input-bordered input w-full"
+        />
+        <input
           id="password"
           type="password"
           required
           name="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
           className="input-bordered input w-full"
         />
         <button type="submit" className="btn btn-outline w-full">

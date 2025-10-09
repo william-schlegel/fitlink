@@ -2,9 +2,10 @@
 
 import { type ReactNode, useRef, useId, useEffect, useCallback } from "react";
 import { type FieldErrors } from "react-hook-form";
-import { type ButtonSize, type TIconButtonVariant } from "./buttonIcon";
 import { useTranslations } from "next-intl";
 import { twMerge } from "tailwind-merge";
+
+import { type ButtonSize, type TIconButtonVariant } from "./buttonIcon";
 
 export type TModalVariant =
   | TIconButtonVariant
@@ -94,8 +95,8 @@ export default function Modal({
         primary ? "text-primary" : "text-secondary"
       }`
     : primary
-    ? "btn btn-primary"
-    : "btn btn-secondary";
+      ? "btn btn-primary"
+      : "btn btn-secondary";
 
   return (
     <>
@@ -123,7 +124,7 @@ export default function Modal({
         <div
           className={twMerge(
             "modal-box relative overflow-y-auto overflow-x-hidden",
-            className
+            className,
           )}
         >
           <label

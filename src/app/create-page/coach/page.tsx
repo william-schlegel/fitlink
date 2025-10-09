@@ -1,11 +1,12 @@
-import { getTranslations } from "next-intl/server";
-import PublishPageButton from "./publisPageButton";
-import Link from "next/link";
-import Title from "@/components/title";
-import { getActualUser } from "@/lib/auth/server";
 import { redirect, RedirectType } from "next/navigation";
-import { getPageForCoach } from "@/server/api/routers/page";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+
 import { CoachCreation } from "@/components/sections/coach";
+import { getPageForCoach } from "@/server/api/routers/page";
+import PublishPageButton from "./publisPageButton";
+import { getActualUser } from "@/lib/auth/server";
+import Title from "@/components/title";
 
 export default async function CoachPage({
   params,

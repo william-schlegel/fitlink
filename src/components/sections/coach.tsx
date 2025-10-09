@@ -1,27 +1,28 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import MapComponent, { Layer, Source } from "react-map-gl/mapbox";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import "mapbox-gl/dist/mapbox-gl.css";
+import Image from "next/image";
+import Link from "next/link";
+
+import { CoachDataOfferType } from "@/server/api/routers/users";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import ThemeSelector, { TThemes } from "../themeSelector";
-import { toast } from "@/lib/toast";
 import { useWriteFile } from "@/lib/useManageFile";
 import { formatSize } from "@/lib/formatNumber";
-import Spinner from "../ui/spinner";
 import ButtonIcon from "../ui/buttonIcon";
-import Title from "../title";
-import Image from "next/image";
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { OfferBadge } from "./coachOffer";
-import Link from "next/link";
-import generateCircle from "./utils";
-import MapComponent, { Layer, Source } from "react-map-gl/mapbox";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { trpc } from "@/lib/trpc/client";
 import hslToHex from "@/lib/hslToHex";
+import { isCUID } from "@/lib/utils";
+import generateCircle from "./utils";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
+import Title from "../title";
 import { env } from "@/env";
-import { CoachDataOfferType } from "@/server/api/routers/users";
 
 type CoachCreationProps = {
   userId: string;
@@ -47,7 +48,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
     {
       enabled: isCUID(userId),
       refetchOnWindowFocus: false,
-    }
+    },
   );
   const queryCoachData = trpc.pages.getCoachDataForPage.useQuery(userId, {
     enabled: isCUID(userId),
@@ -68,16 +69,16 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
     {
       enabled: isCUID(pageId),
       refetchOnWindowFocus: false,
-    }
+    },
   );
   useEffect(() => {
     if (!querySection.data) return;
 
     const hc = querySection.data?.elements.find(
-      (e) => e.elementType === "HERO_CONTENT"
+      (e) => e.elementType === "HERO_CONTENT",
     );
     const options = querySection.data?.elements.filter(
-      (e) => e.elementType === "OPTION"
+      (e) => e.elementType === "OPTION",
     );
 
     if (hc?.images?.[0]) setImagePreview(hc.images[0].url);
@@ -95,7 +96,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
   const writeFile = useWriteFile(
     queryCoach.data?.id ?? "",
     "PAGE_IMAGE",
-    MAX_SIZE
+    MAX_SIZE,
   );
   const createSectionElement =
     trpc.pages.createPageSectionElement.useMutation();
@@ -111,17 +112,17 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
 
   const onSubmit: SubmitHandler<CoachCreationForm> = async (data) => {
     const hc = querySection?.data?.elements.find(
-      (e) => e.elementType === "HERO_CONTENT"
+      (e) => e.elementType === "HERO_CONTENT",
     );
     if (!hc || !querySection.data) {
       toast.error("error hc");
       return;
     }
     const optionActivities = querySection?.data?.elements.find(
-      (e) => e.elementType === "OPTION" && e.title === "activities"
+      (e) => e.elementType === "OPTION" && e.title === "activities",
     );
     const optionCertifications = querySection?.data?.elements.find(
-      (e) => e.elementType === "OPTION" && e.title === "certifications"
+      (e) => e.elementType === "OPTION" && e.title === "certifications",
     );
     let docId: string | undefined;
     if (data.images?.[0]) {
@@ -349,7 +350,7 @@ export const CoachDisplay = ({ pageId }: CoachDisplayProps) => {
   const hero = queryPage.data?.hero;
   const queryImage = trpc.files.getDocumentUrlById.useQuery(
     hero?.images?.[0]?.id ?? "",
-    { enabled: isCUID(hero?.images?.[0]?.id) }
+    { enabled: isCUID(hero?.images?.[0]?.id) },
   );
 
   if (queryPage.isLoading) return <Spinner />;

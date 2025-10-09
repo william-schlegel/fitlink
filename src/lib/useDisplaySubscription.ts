@@ -1,11 +1,12 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { trpc } from "./trpc/client";
+
 import {
   SubscriptionModeEnum,
   SubscriptionRestrictionEnum,
 } from "@/db/schema/enums";
+import { trpc } from "./trpc/client";
 
 export function useDisplaySubscriptionInfo(
   mode: SubscriptionModeEnum | undefined,
@@ -13,7 +14,7 @@ export function useDisplaySubscriptionInfo(
   activityGroupIds: string[],
   activityIds: string[],
   siteIds: string[],
-  roomIds: string[]
+  roomIds: string[],
 ) {
   const t = useTranslations("club");
   const locale = useLocale();
@@ -25,7 +26,7 @@ export function useDisplaySubscriptionInfo(
       activityGroupIds,
       activityIds,
     },
-    { enabled: mode != undefined && restriction != undefined }
+    { enabled: mode != undefined && restriction != undefined },
   );
   let info = "";
   let shortInfo = "";
@@ -74,13 +75,13 @@ export function useDisplaySubscriptionInfo(
       break;
     case "SITE":
       info = info.concat(
-        t("subscription.restriction.site-select", { count: data.sites.length })
+        t("subscription.restriction.site-select", { count: data.sites.length }),
       );
       info = info.concat(listFormatter.format(sites));
       break;
     case "ROOM":
       info = info.concat(
-        t("subscription.restriction.room-select", { count: data.rooms.length })
+        t("subscription.restriction.room-select", { count: data.rooms.length }),
       );
       info = info.concat(listFormatter.format(rooms));
       break;

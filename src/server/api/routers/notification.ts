@@ -1,10 +1,11 @@
-import { db } from "@/db";
-import { userNotification } from "@/db/schema/user";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 import { and, count, desc, eq, isNull } from "drizzle-orm";
 import z from "zod";
-import { getDocUrl } from "../../../../files";
+
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 import { notificationTypeEnum } from "@/db/schema/enums";
+import { userNotification } from "@/db/schema/user";
+import { getDocUrl } from "./files";
+import { db } from "@/db";
 
 export type GetNotificationByIdReturn =
   | (Omit<typeof userNotification.$inferSelect, "userTo" | "userFrom"> & {
@@ -24,7 +25,7 @@ export async function getNotificationToUser(
   userFromId?: string,
   take?: number,
   skip?: number,
-  unreadOnly?: boolean
+  unreadOnly?: boolean,
 ) {
   const total = await db
     .select({ count: count() })
@@ -32,8 +33,8 @@ export async function getNotificationToUser(
     .where(
       and(
         userToId ? eq(userNotification.userToId, userToId) : undefined,
-        userFromId ? eq(userNotification.userFromId, userFromId) : undefined
-      )
+        userFromId ? eq(userNotification.userFromId, userFromId) : undefined,
+      ),
     );
   const unread = await db
     .select({ count: count() })
@@ -42,15 +43,15 @@ export async function getNotificationToUser(
       and(
         userToId ? eq(userNotification.userToId, userToId) : undefined,
         userFromId ? eq(userNotification.userFromId, userFromId) : undefined,
-        unreadOnly ? isNull(userNotification.viewDate) : undefined
-      )
+        unreadOnly ? isNull(userNotification.viewDate) : undefined,
+      ),
     );
 
   const notifications = await db.query.userNotification.findMany({
     where: and(
       userToId ? eq(userNotification.userToId, userToId) : undefined,
       userFromId ? eq(userNotification.userFromId, userFromId) : undefined,
-      unreadOnly ? isNull(userNotification.viewDate) : undefined
+      unreadOnly ? isNull(userNotification.viewDate) : undefined,
     ),
     limit: take,
     offset: skip,
@@ -61,7 +62,7 @@ export async function getNotificationToUser(
 
 export async function getNotificationById(
   notificationId: string,
-  updateViewDate?: boolean
+  updateViewDate?: boolean,
 ) {
   const notification = await db.query.userNotification.findFirst({
     where: eq(userNotification.id, notificationId),
@@ -99,13 +100,13 @@ export async function getNotificationById(
   if (notification?.userFrom && notification.userFrom.profileImageId)
     urlFrom = await getDocUrl(
       notification.userFrom.id,
-      notification.userFrom.profileImageId
+      notification.userFrom.profileImageId,
     );
   let urlTo = notification?.userTo?.image;
   if (notification?.userTo && notification.userTo.profileImageId)
     urlTo = await getDocUrl(
       notification.userTo.id,
-      notification.userTo.profileImageId
+      notification.userTo.profileImageId,
     );
 
   if (!notification) return null;
@@ -138,10 +139,10 @@ export const notificationRouter = createTRPCRouter({
       z.object({
         notificationId: z.cuid2(),
         updateViewDate: z.boolean().default(true).optional(),
-      })
+      }),
     )
     .query<GetNotificationByIdReturn>(async ({ input }) =>
-      getNotificationById(input.notificationId, input.updateViewDate)
+      getNotificationById(input.notificationId, input.updateViewDate),
     ),
   updateNotification: protectedProcedure
     .input(
@@ -150,7 +151,7 @@ export const notificationRouter = createTRPCRouter({
         answered: z.date(),
         answer: z.string(),
         linkedNotification: z.string().optional(),
-      })
+      }),
     )
     .mutation(({ input }) =>
       db
@@ -161,7 +162,7 @@ export const notificationRouter = createTRPCRouter({
           linkedNotification: input.linkedNotification,
         })
         .where(eq(userNotification.id, input.id))
-        .returning()
+        .returning(),
     ),
 
   getNotificationFromUser: protectedProcedure
@@ -171,14 +172,14 @@ export const notificationRouter = createTRPCRouter({
         take: z.number().default(10),
         skip: z.number().default(0),
         unreadOnly: z.boolean().default(false),
-      })
+      }),
     )
     .query(({ input }) =>
       db.query.userNotification.findMany({
         where: eq(userNotification.userFromId, input.userFromId),
         limit: input.take,
         offset: input.skip,
-      })
+      }),
     ),
   getNotificationToUser: protectedProcedure
     .input(
@@ -188,7 +189,7 @@ export const notificationRouter = createTRPCRouter({
         take: z.number().default(10).optional(),
         skip: z.number().default(0).optional(),
         unreadOnly: z.boolean().default(false).optional(),
-      })
+      }),
     )
     .query(async ({ input }) =>
       getNotificationToUser(
@@ -196,8 +197,8 @@ export const notificationRouter = createTRPCRouter({
         input.userFromId,
         input.take,
         input.skip,
-        input.unreadOnly
-      )
+        input.unreadOnly,
+      ),
     ),
   createNotificationToUsers: protectedProcedure
     .input(
@@ -208,7 +209,7 @@ export const notificationRouter = createTRPCRouter({
         message: z.string(),
         data: z.string().optional(),
         linkedNotification: z.string().optional(),
-      })
+      }),
     )
     .mutation(({ input }) => {
       const data = input.data ? JSON.parse(input.data) : {};
@@ -222,7 +223,7 @@ export const notificationRouter = createTRPCRouter({
             message: input.message,
             data,
             linkedNotification: input.linkedNotification,
-          }))
+          })),
         )
         .returning();
     }),
@@ -235,7 +236,7 @@ export const notificationRouter = createTRPCRouter({
         message: z.string(),
         data: z.string().optional(),
         linkedNotification: z.string().optional(),
-      })
+      }),
     )
     .mutation(({ input }) => {
       const data = input.data ? JSON.parse(input.data) : {};

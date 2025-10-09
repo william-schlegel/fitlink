@@ -1,8 +1,9 @@
 "use client";
 import { type ReactNode, useState } from "react";
 import { useTranslations } from "next-intl";
-import { GetPricingById } from "@/server/api/routers/pricing";
 import { twMerge } from "tailwind-merge";
+
+import { GetPricingById } from "@/server/api/routers/pricing";
 
 type Props = Readonly<{
   data: GetPricingById;
@@ -28,13 +29,13 @@ export function PricingComponent({
         "card  w-96 bg-base-100 shadow-xl",
         compact && "w-fit",
         hl && "border-4 border-primary",
-        data?.deleted && "border-4 border-red-600"
+        data?.deleted && "border-4 border-red-600",
       )}
     >
       <div
         className={twMerge(
           "card-body items-center text-center",
-          compact && "p-2"
+          compact && "p-2",
         )}
       >
         {data?.deleted ? (
@@ -60,7 +61,7 @@ export function PricingComponent({
           <p
             className={twMerge(
               "py-4 text-xl font-bold text-accent",
-              compact && "py-1"
+              compact && "py-1",
             )}
           >
             {t("pricing.free")}
@@ -71,7 +72,7 @@ export function PricingComponent({
               <button
                 className={twMerge(
                   "btn btn-primary btn-sm",
-                  !monthlyPrice && "btn-outline"
+                  !monthlyPrice && "btn-outline",
                 )}
                 onClick={() => setMonthlyPrice(true)}
                 type="button"
@@ -81,7 +82,7 @@ export function PricingComponent({
               <button
                 className={twMerge(
                   "btn btn-primary btn-sm",
-                  monthlyPrice && "btn-outline"
+                  monthlyPrice && "btn-outline",
                 )}
                 onClick={() => setMonthlyPrice(false)}
                 type="button"
@@ -92,7 +93,7 @@ export function PricingComponent({
             <p
               className={twMerge(
                 "py-4 text-xl font-bold text-accent",
-                compact && "py-1"
+                compact && "py-1",
               )}
             >
               {monthlyPrice
@@ -134,7 +135,7 @@ export function PricingContainer({
     <div
       className={twMerge(
         "flex flex-wrap items-stretch gap-4 justify-center py-12",
-        compact && "justify-start"
+        compact && "justify-start",
       )}
     >
       {children}

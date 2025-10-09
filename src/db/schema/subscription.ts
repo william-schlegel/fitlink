@@ -7,8 +7,9 @@ import {
   real,
   integer,
 } from "drizzle-orm/pg-core";
+import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
-import { user } from "./auth";
+
 import {
   dayNameEnum,
   featureEnum,
@@ -18,7 +19,7 @@ import {
 } from "./enums";
 import { activity, activityGroup, club, room, site } from "./club";
 import { userMemberToSubscription } from "./user";
-import { createId } from "@paralleldrive/cuid2";
+import { user } from "./auth";
 
 export const paiement = pgTable(
   "Paiement",
@@ -32,7 +33,7 @@ export const paiement = pgTable(
   (table) => [
     index("paiement_user_idx").on(table.userId),
     index("paiement_subscription_idx").on(table.subscriptionId),
-  ]
+  ],
 );
 
 export const paiementRelations = relations(paiement, ({ one }) => ({
@@ -64,7 +65,7 @@ export const subscription = pgTable(
     day: dayNameEnum("day"),
     clubId: text("club_id").notNull(),
   },
-  (table) => [index("subscription_club_idx").on(table.clubId)]
+  (table) => [index("subscription_club_idx").on(table.clubId)],
 );
 
 export const subscriptionRelations = relations(
@@ -80,7 +81,7 @@ export const subscriptionRelations = relations(
     users: many(userMemberToSubscription),
     sites: many(subscriptionToSite),
     rooms: many(subscriptionToRoom),
-  })
+  }),
 );
 
 export const pricing = pgTable("Pricing", {
@@ -110,7 +111,7 @@ export const pricingOption = pgTable(
     weight: integer("weight").notNull(), // for sorting
     pricingId: text("pricing_id").notNull(),
   },
-  (table) => [index("pricing_option_pricing_idx").on(table.pricingId)]
+  (table) => [index("pricing_option_pricing_idx").on(table.pricingId)],
 );
 export const pricingOptionRelations = relations(pricingOption, ({ one }) => ({
   pricing: one(pricing, {
@@ -125,7 +126,7 @@ export const pricingFeature = pgTable(
     feature: featureEnum("feature").notNull(),
     pricingId: text("pricing_id").notNull(),
   },
-  (table) => [index("pricing_feature_pricing_idx").on(table.pricingId)]
+  (table) => [index("pricing_feature_pricing_idx").on(table.pricingId)],
 );
 
 export const pricingFeatureRelations = relations(pricingFeature, ({ one }) => ({
@@ -148,9 +149,9 @@ export const subscriptionToActivityGroup = pgTable(
   (table) => [
     index("subscription_to_activity_group_idx").on(
       table.subscriptionId,
-      table.activityGroupId
+      table.activityGroupId,
     ),
-  ]
+  ],
 );
 
 export const subscriptionToActivityGroupRelations = relations(
@@ -164,7 +165,7 @@ export const subscriptionToActivityGroupRelations = relations(
       fields: [subscriptionToActivityGroup.activityGroupId],
       references: [activityGroup.id],
     }),
-  })
+  }),
 );
 
 export const subscriptionToActivity = pgTable(
@@ -180,9 +181,9 @@ export const subscriptionToActivity = pgTable(
   (table) => [
     index("subscription_to_activity_idx").on(
       table.subscriptionId,
-      table.activityId
+      table.activityId,
     ),
-  ]
+  ],
 );
 
 export const subscriptionToActivityRelations = relations(
@@ -196,7 +197,7 @@ export const subscriptionToActivityRelations = relations(
       fields: [subscriptionToActivity.activityId],
       references: [activity.id],
     }),
-  })
+  }),
 );
 
 export const subscriptionToSite = pgTable(
@@ -211,7 +212,7 @@ export const subscriptionToSite = pgTable(
   },
   (table) => [
     index("subscription_to_site_idx").on(table.subscriptionId, table.siteId),
-  ]
+  ],
 );
 
 export const subscriptionToSiteRelations = relations(
@@ -225,7 +226,7 @@ export const subscriptionToSiteRelations = relations(
       fields: [subscriptionToSite.siteId],
       references: [site.id],
     }),
-  })
+  }),
 );
 
 export const subscriptionToRoom = pgTable(
@@ -240,7 +241,7 @@ export const subscriptionToRoom = pgTable(
   },
   (table) => [
     index("subscription_to_room_idx").on(table.subscriptionId, table.roomId),
-  ]
+  ],
 );
 
 export const subscriptionToRoomRelations = relations(
@@ -254,5 +255,5 @@ export const subscriptionToRoomRelations = relations(
       fields: [subscriptionToRoom.roomId],
       references: [room.id],
     }),
-  })
+  }),
 );

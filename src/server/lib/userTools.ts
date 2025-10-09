@@ -1,7 +1,8 @@
-import { RoleEnum } from "@/db/schema/enums";
-import { getActualUser } from "@/lib/auth/server";
-import { ROLE_LIST } from "@/lib/data";
 import { TRPCError } from "@trpc/server";
+
+import { getActualUser } from "@/lib/auth/server";
+import { RoleEnum } from "@/db/schema/enums";
+import { ROLE_LIST } from "@/lib/data";
 
 export async function isAdmin(throwError: boolean = true) {
   const user = await getActualUser();

@@ -1,5 +1,6 @@
 import { intervalToDuration, startOfToday, format } from "date-fns";
 import { fr, enUS } from "date-fns/locale";
+
 import { Locale } from "@/i18n";
 
 /**
@@ -9,7 +10,7 @@ import { Locale } from "@/i18n";
  */
 export const formatDateAsYYYYMMDD = (
   dt: Date = startOfToday(),
-  withTime?: boolean
+  withTime?: boolean,
 ) => {
   let d = format(dt, "yyyy-MM-dd");
   if (withTime) d = d.concat("T").concat(format(dt, "HH:mm:ss"));
@@ -40,7 +41,7 @@ export const formatDateLocalized = (
     withTime: false,
     dateFormat: "number",
   },
-  locale: Locale = "fr"
+  locale: Locale = "fr",
 ) => {
   const { withTime, withDay, dateFormat } = options;
   let frmt = "";

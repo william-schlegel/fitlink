@@ -4,7 +4,7 @@ import { trpc } from "./trpc/client";
 export const useWriteFile = (
   userId: string,
   documentType: (typeof userDocumentTypeEnum.enumValues)[number],
-  maxSize: number = 1024 * 1024
+  maxSize: number = 1024 * 1024,
 ) => {
   const createPresignedUrl =
     trpc.files.createPresignedUrl.useMutation().mutateAsync;
@@ -36,7 +36,7 @@ export const useWriteFile = (
 
 export const useWriteFileDirect = (
   userId: string,
-  maxSize: number = 1024 * 1024
+  maxSize: number = 1024 * 1024,
 ) => {
   const createPresignedUrl =
     trpc.files.createPresignedUrlDirect.useMutation().mutateAsync;

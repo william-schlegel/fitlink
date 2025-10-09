@@ -1,9 +1,10 @@
 "use client";
 
-import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
-import { useUser } from "@/lib/auth/client";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+
+import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
+import { useUser } from "@/lib/auth/client";
 
 type MenuDefinitionType = {
   label: string;
@@ -20,7 +21,7 @@ const MENUS: MenuDefinitionType[] = [
   },
   {
     label: "navigation.find-club",
-    page: "/videoach/#find-club",
+    page: "/fitlink/#find-club",
     access: ["VISITOR"],
   },
   {
@@ -31,7 +32,7 @@ const MENUS: MenuDefinitionType[] = [
 
   {
     label: "navigation.find-coach",
-    page: "/videoach/#find-coach",
+    page: "/fitlink/#find-coach",
     access: ["VISITOR"],
   },
   { label: "navigation.manager-offer", page: "/manager", access: ["VISITOR"] },

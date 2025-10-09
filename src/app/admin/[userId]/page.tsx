@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+
 import { getAdminData } from "@/server/api/routers/dashboard";
 
 export default async function AdminDashboard() {
@@ -10,7 +11,7 @@ export default async function AdminDashboard() {
       acc.rooms += c.sites.reduce((ss, s) => (ss += s.rooms.length), 0);
       return acc;
     },
-    { sites: 0, rooms: 0 }
+    { sites: 0, rooms: 0 },
   ) ?? { sites: 0, rooms: 0 };
 
   const memberCount = adminData?.members?.length;

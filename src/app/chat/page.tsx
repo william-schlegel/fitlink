@@ -1,9 +1,10 @@
+import { redirect, RedirectType } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { StreamChat } from "stream-chat";
+
+import { getActualUser } from "@/lib/auth/server";
 import Title from "@/components/title";
 import { env } from "@/env";
-import { getActualUser } from "@/lib/auth/server";
-import { getTranslations } from "next-intl/server";
-import { redirect, RedirectType } from "next/navigation";
-import { StreamChat } from "stream-chat";
 
 const client = StreamChat.getInstance(env.NEXT_PUBLIC_STREAMCHAT_API_KEY);
 
@@ -19,7 +20,7 @@ export default async function Chat() {
         name: user.name ?? "",
         image: user.image ?? "",
       },
-      token
+      token,
     );
   }
 

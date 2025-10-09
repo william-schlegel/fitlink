@@ -6,9 +6,9 @@ import {
   timestamp,
   unique,
 } from "drizzle-orm/pg-core";
-import { roleEnum } from "./enums";
+import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
-import { paiement, pricing } from "./subscription";
+
 import {
   userCoach,
   userDocument,
@@ -16,8 +16,9 @@ import {
   userMember,
   userNotification,
 } from "./user";
+import { paiement, pricing } from "./subscription";
 import { reservation } from "./planning";
-import { createId } from "@paralleldrive/cuid2";
+import { roleEnum } from "./enums";
 
 export const user = pgTable(
   "user",
@@ -44,7 +45,7 @@ export const user = pgTable(
     banReason: text("ban_reason"),
     banExpires: timestamp("ban_expires"),
   },
-  (table) => [index("user_pricing_idx").on(table.pricingId)]
+  (table) => [index("user_pricing_idx").on(table.pricingId)],
 );
 
 export const userRelations = relations(user, ({ one, many }) => ({
@@ -135,5 +136,5 @@ export const verificationToken = pgTable(
     token: text("token").notNull().unique(),
     expires: timestamp("expires").notNull(),
   },
-  (table) => [unique().on(table.identifier, table.token)]
+  (table) => [unique().on(table.identifier, table.token)],
 );

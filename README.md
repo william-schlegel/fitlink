@@ -1,4 +1,4 @@
-# VideoAch - Coaching Platform
+# Fitlink - Coaching Platform
 
 A modern Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRPC for type-safe APIs, and next-intl for internationalization.
 

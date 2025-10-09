@@ -1,16 +1,12 @@
+import { and, asc, count, eq, gte, ilike, SQL } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { db } from "@/db";
-import { and, asc, count, eq, gte, ilike, SQL } from "drizzle-orm";
-import { featureEnum, roleEnum } from "@/db/schema/enums";
-import { user } from "@/db/schema/auth";
-import { getDocUrl } from "../../../../files";
-import { reservation } from "@/db/schema/planning";
-import { TRPCError } from "@trpc/server";
 import {
   userCoach,
   userManager,
@@ -18,9 +14,14 @@ import {
   userNotification,
 } from "@/db/schema/user";
 import { pricing, subscription } from "@/db/schema/subscription";
-import { isAdmin } from "@/server/lib/userTools";
 import { TUserFilter } from "@/app/admin/users/userFilter";
+import { featureEnum, roleEnum } from "@/db/schema/enums";
+import { reservation } from "@/db/schema/planning";
+import { isAdmin } from "@/server/lib/userTools";
 import { auth } from "@/lib/auth/server";
+import { user } from "@/db/schema/auth";
+import { getDocUrl } from "./files";
+import { db } from "@/db";
 
 const UserFilter = z
   .object({
@@ -349,7 +350,7 @@ export const userRouter = createTRPCRouter({
             withFeatures: z.boolean().optional().default(false),
           })
           .optional(),
-      })
+      }),
     )
     .query(({ input }) => getUserById(input.id, input.options)),
   getUserSubscriptionsById: protectedProcedure
@@ -393,7 +394,7 @@ export const userRouter = createTRPCRouter({
       return db.query.reservation.findMany({
         where: and(
           eq(reservation.userId, input.userId),
-          gte(reservation.date, input.after)
+          gte(reservation.date, input.after),
         ),
         orderBy: [asc(reservation.date)],
         with: {
@@ -418,7 +419,7 @@ export const userRouter = createTRPCRouter({
         filter: UserFilter,
         skip: z.number(),
         take: z.number(),
-      })
+      }),
     )
     .query(({ input }) => getAllUsers(input)),
 
@@ -444,7 +445,7 @@ export const userRouter = createTRPCRouter({
         publicName: z.string().optional(),
         aboutMe: z.string().optional(),
         coachingActivities: z.array(z.string()).optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       if (input.internalRole === "ADMIN" && ctx.user?.internalRole !== "ADMIN")
@@ -547,7 +548,7 @@ export const userRouter = createTRPCRouter({
         subscriptionId: z.string(),
         monthly: z.boolean().default(true),
         online: z.boolean().default(false),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       // notify the club manager
@@ -613,7 +614,7 @@ export const userRouter = createTRPCRouter({
         name: z.string(),
         email: z.string().email(),
         password: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       // check if user exist with email

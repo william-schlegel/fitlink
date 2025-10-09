@@ -1,13 +1,15 @@
-import { db } from "@/db";
-import { env } from "@/env";
-import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { nextCookies } from "better-auth/next-js";
+import { magicLink } from "better-auth/plugins";
+import { admin } from "better-auth/plugins";
+import { betterAuth } from "better-auth";
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
+
 import { user } from "@/db/schema/auth";
-import { magicLink } from "better-auth/plugins";
 import { sendEmail } from "../email";
-import { admin } from "better-auth/plugins";
+import { env } from "@/env";
+import { db } from "@/db";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -37,6 +39,7 @@ export const auth = betterAuth({
     admin({
       defaultRole: "regular",
     }),
+    nextCookies(),
   ],
 });
 
@@ -44,9 +47,9 @@ export async function getActualUser() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  if (!session) return null;
+  if (!session) return undefined;
   const { id } = session.user;
-  if (!id) return null;
+  if (!id) return undefined;
   const actualUser = db.query.user.findFirst({
     where: eq(user.id, id),
   });

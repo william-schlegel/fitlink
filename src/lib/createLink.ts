@@ -1,6 +1,6 @@
 export default function createLink(
   searchParams: Record<string, string | undefined>,
-  location?: string | null
+  location?: string | null,
 ) {
   const url = new URL(location ?? window.location.href);
 
@@ -14,7 +14,7 @@ export default function createLink(
 export function createHref(
   href: string | null,
   params: string[],
-  searchParams: Record<string, string | undefined>
+  searchParams: Record<string, string | undefined>,
 ) {
   let newUrl = "/";
   if (href) {

@@ -1,20 +1,21 @@
+import { redirect, RedirectType } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { startOfToday } from "date-fns";
+import Link from "next/link";
+
 import {
   CreateEvent,
   DeleteEvent,
   ShowEventCard,
   UpdateEvent,
 } from "@/components/modals/manageEvent";
-import Title from "@/components/title";
-import { getActualUser } from "@/lib/auth/server";
-import { getToday } from "@/lib/dates/serverDayName";
-import { formatDateLocalized } from "@/lib/formatDate";
 import { getManagerDataForUserId } from "@/server/api/routers/dashboard";
 import { getClubDailyPlanning } from "@/server/api/routers/planning";
 import { getUserById } from "@/server/api/routers/users";
-import { startOfToday } from "date-fns";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-import { redirect, RedirectType } from "next/navigation";
+import { formatDateLocalized } from "@/lib/formatDate";
+import { getToday } from "@/lib/dates/serverDayName";
+import { getActualUser } from "@/lib/auth/server";
+import Title from "@/components/title";
 /***
  *
  *  Manager dashboard

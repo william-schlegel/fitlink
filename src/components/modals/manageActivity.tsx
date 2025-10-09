@@ -1,15 +1,16 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
-import { useEffect, useState } from "react";
-import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { toast } from "@/lib/toast";
+import { useEffect, useState } from "react";
+
+import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { ButtonSize } from "../ui/buttonIcon";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
 
 type AddActivityProps = {
   userId: string;
@@ -29,7 +30,7 @@ const AddActivity = ({
   const [groupId, setGroupId] = useState("");
   const queryGroups = trpc.activities.getActivityGroupsForUser.useQuery(
     userId,
-    { enabled: isCUID(userId) }
+    { enabled: isCUID(userId) },
   );
 
   useEffect(() => {
@@ -44,7 +45,7 @@ const AddActivity = ({
     },
     {
       enabled: isCUID(clubId) && isCUID(userId),
-    }
+    },
   );
   const updateClubActivities = trpc.clubs.updateClubActivities.useMutation({
     onSuccess() {
@@ -458,7 +459,7 @@ export function UpdateGroup({
     updateGroup.mutate({
       id: groupId,
       name,
-      default: userId ? false : defaultGroup ?? false,
+      default: userId ? false : (defaultGroup ?? false),
     });
   }
 

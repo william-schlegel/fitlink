@@ -1,7 +1,5 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import type { ReactNode } from "react";
 import {
   DndContext,
   KeyboardSensor,
@@ -9,14 +7,18 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import type { Active, UniqueIdentifier } from "@dnd-kit/core";
 import {
   SortableContext,
   arrayMove,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { SortableOverlay } from "./sortableOberlay";
+import React, { useMemo, useState } from "react";
+
 import { DragHandle, SortableItem } from "./sortableItem";
+import { SortableOverlay } from "./sortableOberlay";
+
+import type { Active, UniqueIdentifier } from "@dnd-kit/core";
+import type { ReactNode } from "react";
 
 interface BaseItem {
   id: UniqueIdentifier;
@@ -38,13 +40,13 @@ export function SortableList<T extends BaseItem>({
   const [active, setActive] = useState<Active | null>(null);
   const activeItem = useMemo(
     () => items.find((item) => item.id === active?.id),
-    [active, items]
+    [active, items],
   );
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   return (

@@ -1,21 +1,22 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/client";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
-import ThemeSelector, { TThemes } from "../themeSelector";
-import { toast } from "@/lib/toast";
-import Spinner from "../ui/spinner";
-import Confirmation from "../ui/confirmation";
-import Modal, { getButtonSize } from "../ui/modal";
-import { useWriteFile } from "@/lib/useManageFile";
-import { isCUID } from "@/lib/utils";
-import { formatSize } from "@/lib/formatNumber";
-import ButtonIcon from "../ui/buttonIcon";
+
 import { PageSectionElementTypeEnum } from "@/db/schema/enums";
-import { useUser } from "@/lib/auth/client";
+import ThemeSelector, { TThemes } from "../themeSelector";
+import { useWriteFile } from "@/lib/useManageFile";
+import Modal, { getButtonSize } from "../ui/modal";
+import { formatSize } from "@/lib/formatNumber";
+import Confirmation from "../ui/confirmation";
 import { TextError } from "../ui/simpleform";
+import { useUser } from "@/lib/auth/client";
+import ButtonIcon from "../ui/buttonIcon";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
 
 type PlanningCreationProps = {
   clubId: string;
@@ -42,7 +43,7 @@ export const PlanningCreation = ({ clubId, pageId }: PlanningCreationProps) => {
     { pageId, section: "PLANNINGS" },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
   useEffect(() => {
     if (!querySection.data) {
@@ -200,7 +201,7 @@ function UpdatePlanning({ clubId, pageId, planningId }: UpdatePlanningProps) {
     {
       enabled: isCUID(planningId),
       refetchOnWindowFocus: false,
-    }
+    },
   );
   useEffect(() => {
     if (!queryPlanning.data) return;
@@ -368,7 +369,7 @@ function PlanningForm({
       if (!image) return;
       if (image.size > MAX_SIZE) {
         toast.error(
-          t("pages.image-size-error", { size: formatSize(MAX_SIZE) })
+          t("pages.image-size-error", { size: formatSize(MAX_SIZE) }),
         );
         setValue("images", undefined);
         return;
@@ -505,7 +506,7 @@ export const PlanningDisplayCard = ({ pageId }: PlanningDisplayProps) => {
     },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   if (querySection.isLoading) return <Spinner />;

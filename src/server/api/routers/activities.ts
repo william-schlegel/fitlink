@@ -1,18 +1,19 @@
-import { db } from "@/db";
+import { and, asc, eq, ilike, or } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/lib/trpc/server";
 import {
   activity,
   activityGroup,
   club,
   roomActivities,
 } from "@/db/schema/club";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/lib/trpc/server";
-import { TRPCError } from "@trpc/server";
-import { and, asc, eq, ilike, or } from "drizzle-orm";
-import { z } from "zod";
+import { db } from "@/db";
 
 const activityObject = z.object({
   id: z.cuid2(),
@@ -23,12 +24,6 @@ const activityObject = z.object({
   groupId: z.cuid2(),
 });
 
-export async function getAllActivityGroups() {
-  return db.query.activityGroup.findMany({
-    with: { coach: { with: { user: true } } },
-    orderBy: asc(activityGroup.name),
-  });
-}
 export const activityRouter = createTRPCRouter({
   getActivityById: protectedProcedure.input(z.cuid2()).query(({ input }) => {
     return db.query.activity.findFirst({
@@ -40,7 +35,7 @@ export const activityRouter = createTRPCRouter({
       where: ilike(activity.name, `%${input}%`),
       limit: 25,
       with: { group: true },
-    })
+    }),
   ),
   getActivityGroupById: protectedProcedure
     .input(z.cuid2())
@@ -55,15 +50,20 @@ export const activityRouter = createTRPCRouter({
       return db.query.activityGroup.findMany({
         where: or(
           eq(activityGroup.default, true),
-          eq(activityGroup.coachId, input)
+          eq(activityGroup.coachId, input),
         ),
         with: { activities: true },
         orderBy: asc(activityGroup.name),
       });
     }),
-  getAllActivityGroups: protectedProcedure.query(() => getAllActivityGroups()),
+  getAllActivityGroups: protectedProcedure.query(() =>
+    db.query.activityGroup.findMany({
+      with: { coach: { with: { user: true } } },
+      orderBy: asc(activityGroup.name),
+    }),
+  ),
   getActivitiesForClub: protectedProcedure
-    .input(z.object({ clubId: z.cuid2(), userId: z.cuid2() }))
+    .input(z.object({ clubId: z.cuid2(), userId: z.string() }))
     .query(({ ctx, input }) => {
       if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId)
         throw new TRPCError({
@@ -113,17 +113,17 @@ export const activityRouter = createTRPCRouter({
       db
         .update(activity)
         .set(input)
-        .where(eq(activity.id, input.id ?? ""))
+        .where(eq(activity.id, input.id ?? "")),
     ),
   deleteActivity: protectedProcedure
     .input(
       z.object({
         activityId: z.cuid2(),
         clubId: z.cuid2(),
-      })
+      }),
     )
     .mutation(({ input }) =>
-      db.delete(activity).where(eq(activity.id, input.activityId))
+      db.delete(activity).where(eq(activity.id, input.activityId)),
     ),
   createGroup: protectedProcedure
     .input(
@@ -131,14 +131,14 @@ export const activityRouter = createTRPCRouter({
         name: z.string(),
         userId: z.cuid2().optional().nullable(),
         default: z.boolean().optional().default(false),
-      })
+      }),
     )
     .mutation(({ input }) =>
       db.insert(activityGroup).values({
         name: input.name,
         coachId: input.userId,
         default: input.default,
-      })
+      }),
     ),
   updateGroup: protectedProcedure
     .input(
@@ -146,7 +146,7 @@ export const activityRouter = createTRPCRouter({
         id: z.cuid2(),
         name: z.string(),
         default: z.boolean().optional().default(false),
-      })
+      }),
     )
     .mutation(({ input }) =>
       db
@@ -155,13 +155,13 @@ export const activityRouter = createTRPCRouter({
           name: input.name,
           default: input.default,
         })
-        .where(eq(activityGroup.id, input.id))
+        .where(eq(activityGroup.id, input.id)),
     ),
   deleteGroup: protectedProcedure
     .input(
       z.object({
         groupId: z.cuid2(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const group = await db.query.activityGroup.findFirst({
@@ -182,20 +182,20 @@ export const activityRouter = createTRPCRouter({
       z.object({
         roomId: z.cuid2(),
         activityId: z.cuid2(),
-      })
+      }),
     )
     .mutation(({ input }) =>
       db.insert(roomActivities).values({
         roomId: input.roomId,
         activityId: input.activityId,
-      })
+      }),
     ),
   removeFromRoom: protectedProcedure
     .input(
       z.object({
         roomId: z.cuid2(),
         activityId: z.cuid2(),
-      })
+      }),
     )
     .mutation(({ input }) =>
       db
@@ -203,8 +203,8 @@ export const activityRouter = createTRPCRouter({
         .where(
           and(
             eq(roomActivities.roomId, input.roomId),
-            eq(roomActivities.activityId, input.activityId)
-          )
-        )
+            eq(roomActivities.activityId, input.activityId),
+          ),
+        ),
     ),
 });

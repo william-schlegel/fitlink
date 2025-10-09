@@ -1,9 +1,5 @@
 "use client";
 
-import { RoleEnum } from "@/db/schema/enums";
-import Modal, { type TModalVariant } from "../ui/modal";
-import { trpc } from "@/lib/trpc/client";
-import { useEffect, useState } from "react";
 import {
   SubmitHandler,
   useForm,
@@ -12,15 +8,20 @@ import {
   useFormContext,
 } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { toast } from "@/lib/toast";
-import Spinner from "../ui/spinner";
-import Confirmation from "../ui/confirmation";
-import SimpleForm from "../ui/simpleform";
+import { useEffect, useState } from "react";
+
 import {
   PricingComponent as PricingCard,
   PricingContainer,
 } from "../ui/pricing";
+import Modal, { type TModalVariant } from "../ui/modal";
+import Confirmation from "../ui/confirmation";
+import { RoleEnum } from "@/db/schema/enums";
+import SimpleForm from "../ui/simpleform";
+import { trpc } from "@/lib/trpc/client";
 import { ROLE_LIST } from "@/lib/data";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
 
 type UserFormValues = {
   name: string;
@@ -180,7 +181,7 @@ export function SubscriptionForm({
   console.log("subscriptionId", subscriptionId);
   const t = useTranslations("auth");
   const pricingQuery = trpc.pricings.getPricingForRole.useQuery(
-    internalRole ?? "MEMBER"
+    internalRole ?? "MEMBER",
   );
   const [closeModal, setCloseModal] = useState(false);
 

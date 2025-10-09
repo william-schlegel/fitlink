@@ -1,6 +1,6 @@
-import { getDescription } from "@/lib/subscriptions";
-import { getDataNames } from "@/server/api/routers/subscription";
 import { MemberSubscriptionType } from "@/server/api/routers/users";
+import { getDataNames } from "@/server/api/routers/subscription";
+import { getDescription } from "@/lib/subscriptions";
 import { List } from "./list";
 
 type SubscriptionProps = {
@@ -16,14 +16,14 @@ export default async function Subscription({
     subscription.activitieGroups.map((ag) => ag.activityGroup.id),
     subscription.activities.map((ag) => ag.activity.id),
     subscription.sites.map((ag) => ag.site.id),
-    subscription.rooms.map((ag) => ag.room.id)
+    subscription.rooms.map((ag) => ag.room.id),
   );
 
   const { sites, rooms, activityGroups, activities } = await getDataNames(
     subscription.sites.map((ag) => ag.site.id),
     subscription.rooms.map((ag) => ag.room.id),
     subscription.activitieGroups.map((ag) => ag.activityGroup.id),
-    subscription.activities.map((ag) => ag.activity.id)
+    subscription.activities.map((ag) => ag.activity.id),
   );
 
   return (

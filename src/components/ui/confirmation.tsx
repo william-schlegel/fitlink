@@ -1,7 +1,8 @@
-import { type ReactNode } from "react";
-import { type ButtonSize } from "./buttonIcon";
-import Modal, { type TModalVariant } from "./modal";
 import { useTranslations } from "next-intl";
+import { type ReactNode } from "react";
+
+import Modal, { type TModalVariant } from "./modal";
+import { type ButtonSize } from "./buttonIcon";
 
 type Props = {
   title: string;

@@ -1,11 +1,12 @@
-import FindClub from "@/components/sections/findClub";
-import FindCoach from "@/components/sections/findCoach";
-import ButtonLink from "@/components/ui/buttonLink";
-import Title from "@/components/title";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 
-export default async function VideoachPage() {
+import FindCoach from "@/components/sections/findCoach";
+import FindClub from "@/components/sections/findClub";
+import ButtonLink from "@/components/ui/buttonLink";
+import Title from "@/components/title";
+
+export default async function FitlinkPage() {
   const t = await getTranslations("home");
 
   return (

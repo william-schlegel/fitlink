@@ -1,9 +1,10 @@
-import { z } from "zod";
-import { getDocUrl } from "../../../../files";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
-import { db } from "@/db";
 import { desc, eq } from "drizzle-orm";
+import { z } from "zod";
+
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 import { event } from "@/db/schema/club";
+import { getDocUrl } from "./files";
+import { db } from "@/db";
 
 const eventObject = z.object({
   id: z.cuid2(),
@@ -37,7 +38,7 @@ export const eventRouter = createTRPCRouter({
     if (eventData.documentId)
       imageUrl = await getDocUrl(
         eventData.club.managerId,
-        eventData.documentId
+        eventData.documentId,
       );
     return { ...eventData, imageUrl };
   }),
@@ -52,7 +53,7 @@ export const eventRouter = createTRPCRouter({
     .mutation(({ input }) =>
       db.insert(event).values({
         ...input,
-      })
+      }),
     ),
   updateEvent: protectedProcedure
     .input(eventObject.partial())

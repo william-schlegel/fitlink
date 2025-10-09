@@ -1,5 +1,6 @@
-import { getUserById } from "@/server/api/routers/users";
 import { getTranslations } from "next-intl/server";
+
+import { getUserById } from "@/server/api/routers/users";
 import FormAccount from "./formAccount";
 
 export default async function Account({

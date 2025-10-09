@@ -1,29 +1,31 @@
 "use client";
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import MapComponent, { Layer, Marker, Source } from "react-map-gl/mapbox";
 
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
-import { trpc } from "@/lib/trpc/client";
+import { isDate, startOfToday } from "date-fns";
+import { useLocalStorage } from "usehooks-ts";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { getUserById } from "@/server/api/routers/users";
-import { RoleEnum } from "@/db/schema/enums";
-import { isCUID } from "@/lib/utils";
+import { useMemo, useState } from "react";
+import "mapbox-gl/dist/mapbox-gl.css";
+
+import { SubscriptionForm } from "@/components/modals/manageUser";
 import AddressSearch from "@/components/ui/addressSearch";
 import generateCircle from "@/components/sections/utils";
-import hslToHex from "@/lib/hslToHex";
-import { useLocalStorage } from "usehooks-ts";
-import { TThemes } from "@/components/themeSelector";
-import { env } from "@/env";
-import PlanDetails from "./planDetails";
-import { remainingDays } from "@/lib/formatDate";
-import { isDate, startOfToday } from "date-fns";
+import { getUserById } from "@/server/api/routers/users";
 import Confirmation from "@/components/ui/confirmation";
-import { useMemo, useState } from "react";
-import { SubscriptionForm } from "@/components/modals/manageUser";
+import { TThemes } from "@/components/themeSelector";
+import { remainingDays } from "@/lib/formatDate";
+import { RoleEnum } from "@/db/schema/enums";
+import { trpc } from "@/lib/trpc/client";
+import PlanDetails from "./planDetails";
 import { ROLE_LIST } from "@/lib/data";
+import hslToHex from "@/lib/hslToHex";
+import { isCUID } from "@/lib/utils";
 import { toast } from "@/lib/toast";
-import { useRouter } from "next/navigation";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { env } from "@/env";
 
 type FormValues = {
   searchAddress: string;
@@ -113,7 +115,7 @@ export default function FormAccount({
     return generateCircle(
       fields.latitude ?? LATITUDE,
       fields.longitude ?? LONGITUDE,
-      fields.range ?? 10
+      fields.range ?? 10,
     );
   }, [fields.latitude, fields.longitude, fields.range]);
 
@@ -121,14 +123,14 @@ export default function FormAccount({
     if (newActivity)
       setValue(
         `coachingActivities.${fields.coachingActivities?.length ?? 0}`,
-        newActivity
+        newActivity,
       );
     setNewActivity("");
   }
   function handleDeleteActivity(idx: number) {
     setValue(
       `coachingActivities`,
-      fields.coachingActivities?.filter((_, i) => i !== idx) ?? []
+      fields.coachingActivities?.filter((_, i) => i !== idx) ?? [],
     );
   }
 
@@ -136,7 +138,7 @@ export default function FormAccount({
     fields?.pricingId ?? "",
     {
       enabled: isCUID(fields.pricingId),
-    }
+    },
   );
 
   console.log("userData", userData);

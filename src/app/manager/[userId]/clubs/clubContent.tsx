@@ -1,9 +1,5 @@
 "use client";
 
-import { activityGroup } from "@/db/schema/club";
-import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
-import { useState, useEffect, ReactNode } from "react";
 import {
   Data,
   DndContext,
@@ -14,15 +10,20 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { useState, useEffect, ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import useUserInfo from "@/lib/useUserInfo";
-import Spinner from "@/components/ui/spinner";
 import Image from "next/image";
 import Link from "next/link";
-import ButtonIcon from "@/components/ui/buttonIcon";
-import LockedButton from "@/components/ui/lockedButton";
-import CollapsableGroup from "@/components/ui/collapsableGroup";
+
 import { DeleteClub, UpdateClub } from "@/components/modals/manageClub";
+import CollapsableGroup from "@/components/ui/collapsableGroup";
+import LockedButton from "@/components/ui/lockedButton";
+import ButtonIcon from "@/components/ui/buttonIcon";
+import { activityGroup } from "@/db/schema/club";
+import Spinner from "@/components/ui/spinner";
+import useUserInfo from "@/lib/useUserInfo";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
 
 type ClubContentProps = {
   userId: string;
@@ -34,7 +35,7 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
     { clubId, userId },
     {
       enabled: isCUID(clubId),
-    }
+    },
   );
   useEffect(() => {
     const groups = new Map();
@@ -57,7 +58,7 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
     },
   });
   const [groups, setGroups] = useState<(typeof activityGroup.$inferSelect)[]>(
-    []
+    [],
   );
   const utils = trpc.useUtils();
   const t = useTranslations("club");
@@ -68,7 +69,7 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
       activationConstraint: {
         distance: 10,
       },
-    })
+    }),
   );
 
   function handleDragEnd(e: DragEndEvent) {

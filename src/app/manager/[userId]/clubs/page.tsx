@@ -1,15 +1,16 @@
-import CreateClub from "@/components/modals/manageClub";
-import Title from "@/components/title";
-import LockedButton from "@/components/ui/lockedButton";
-import { getActualUser } from "@/lib/auth/server";
-import createLink from "@/lib/createLink";
-import { getUserById } from "@/server/api/routers/users";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-import { ClubContent } from "./clubContent";
-import { getClubsForManager } from "@/server/api/routers/clubs";
-import { headers } from "next/headers";
 import { twMerge } from "tailwind-merge";
+import { headers } from "next/headers";
+import Link from "next/link";
+
+import { getUserById } from "@/server/api/routers/users";
+import CreateClub from "@/components/modals/manageClub";
+import LockedButton from "@/components/ui/lockedButton";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { getActualUser } from "@/lib/auth/server";
+import { ClubContent } from "./clubContent";
+import createLink from "@/lib/createLink";
+import Title from "@/components/title";
 
 export default async function ManageClubs({
   params,
@@ -31,7 +32,9 @@ export default async function ManageClubs({
   const userId = (await params).userId;
   const clubId = (await searchParams)?.clubId ?? "";
 
-  const clubQuery = await getClubsForManager(userId);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const clubQuery = await caller.clubs.getClubsForManager(userId);
   const { features } = await getUserById(userId, { withFeatures: true });
   const headerList = await headers();
   const href = headerList.get("x-current-href");
@@ -57,7 +60,7 @@ export default async function ManageClubs({
                 href={createLink({ clubId: club.id }, href)}
                 className={twMerge(
                   "w-full text-center",
-                  clubId === club.id && "badge badge-primary"
+                  clubId === club.id && "badge badge-primary",
                 )}
               >
                 {club.name}

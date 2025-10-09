@@ -1,5 +1,6 @@
-import { userNotification } from "@/db/schema/user";
 import { getTranslations } from "next-intl/server";
+
+import { userNotification } from "@/db/schema/user";
 
 type UserNotification = typeof userNotification.$inferSelect;
 

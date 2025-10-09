@@ -1,5 +1,6 @@
-import { getActualUser } from "@/lib/auth/server";
 import { redirect, RedirectType } from "next/navigation";
+
+import { getActualUser } from "@/lib/auth/server";
 
 export default async function HomePage() {
   const user = await getActualUser();
@@ -17,5 +18,5 @@ export default async function HomePage() {
       redirect(`/admin/${userId}`, RedirectType.replace);
   }
 
-  redirect("/videoach", RedirectType.replace);
+  redirect("/fitlink", RedirectType.replace);
 }

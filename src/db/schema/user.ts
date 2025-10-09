@@ -7,9 +7,9 @@ import {
   real,
   json,
 } from "drizzle-orm/pg-core";
+import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
-import { user } from "./auth";
-import { notificationTypeEnum, userDocumentTypeEnum } from "./enums";
+
 import {
   activityGroup,
   club,
@@ -19,10 +19,11 @@ import {
   event,
 } from "./club";
 import { certification, coachingPrice, coachMarketPlace } from "./coach";
+import { notificationTypeEnum, userDocumentTypeEnum } from "./enums";
 import { page, pageSectionElementDocuments } from "./page";
 import { planning, planningActivity } from "./planning";
 import { subscription } from "./subscription";
-import { createId } from "@paralleldrive/cuid2";
+import { user } from "./auth";
 
 export const userCoach = pgTable(
   "UserCoach",
@@ -43,7 +44,7 @@ export const userCoach = pgTable(
     rating: real("rating").default(0),
     pageStyle: text("page_style").default("light"),
   },
-  (table) => [index("user_coach_user_idx").on(table.userId)]
+  (table) => [index("user_coach_user_idx").on(table.userId)],
 );
 
 export const userCoachRelations = relations(userCoach, ({ one, many }) => ({
@@ -92,9 +93,9 @@ export const userMemberToSubscription = pgTable(
   (table) => [
     index("user_member_to_subscription_idx").on(
       table.userId,
-      table.subscriptionId
+      table.subscriptionId,
     ),
-  ]
+  ],
 );
 
 export const userMemberToSubscriptionRelations = relations(
@@ -108,7 +109,7 @@ export const userMemberToSubscriptionRelations = relations(
       fields: [userMemberToSubscription.userId],
       references: [userMember.id],
     }),
-  })
+  }),
 );
 
 export const userManager = pgTable("UserManager", {
@@ -133,7 +134,7 @@ export const userDocument = pgTable(
     fileType: text("file_type").notNull(),
     fileName: text("file_name"),
   },
-  (table) => [index("user_document_user_idx").on(table.userId)]
+  (table) => [index("user_document_user_idx").on(table.userId)],
 );
 
 export const userDocumentRelations = relations(
@@ -147,7 +148,7 @@ export const userDocumentRelations = relations(
     pageSectionElements: many(pageSectionElementDocuments),
     club: one(club),
     event: one(event),
-  })
+  }),
 );
 
 export const userNotification = pgTable(
@@ -168,7 +169,7 @@ export const userNotification = pgTable(
   (table) => [
     index("user_notification_user_to_idx").on(table.userToId),
     index("user_notification_user_from_idx").on(table.userFromId),
-  ]
+  ],
 );
 
 export const userNotificationRelations = relations(
@@ -184,5 +185,5 @@ export const userNotificationRelations = relations(
       references: [user.id],
       relationName: "user-from",
     }),
-  })
+  }),
 );

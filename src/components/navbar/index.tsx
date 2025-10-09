@@ -1,13 +1,15 @@
-import Link from "next/link";
-import { env } from "@/env";
-import { RoleEnum } from "@/db/schema/enums";
-import ThemeButton from "./themeButton";
 import { getTranslations } from "next-intl/server";
-import Menu from "./menu";
-import UserButton from "./userButton";
+import Image from "next/image";
+import Link from "next/link";
+
 import { getNotificationToUser } from "@/server/api/routers/notification";
 import { getUserById } from "@/server/api/routers/users";
 import { formatMessage } from "@/lib/getNotifications";
+import { RoleEnum } from "@/db/schema/enums";
+import ThemeButton from "./themeButton";
+import UserButton from "./userButton";
+import { env } from "@/env";
+import Menu from "./menu";
 
 const BETA = env.NEXT_PUBLIC_BETA === "true";
 
@@ -133,8 +135,12 @@ export default async function Navbar({
 const Logo = () => {
   return (
     <div className="flex flex-1 items-center">
-      <Link href={"/videoach"} className="btn btn-ghost text-2xl capitalize">
-        Videoach
+      <Link
+        href={"/fitlink"}
+        className="btn btn-ghost text-2xl capitalize flex items-center gap-2"
+      >
+        <Image src="/images/fitlink.svg" alt="Fitlink" width={24} height={24} />
+        <span>Fitlink</span>
       </Link>
       {BETA ? (
         <span className="badge badge-warning hidden lg:inline">BETA</span>

@@ -1,5 +1,6 @@
-import { CoachingLevelListEnum, CoachingTargetEnum } from "@/db/schema/enums";
 import { useTranslations } from "next-intl";
+
+import { CoachingLevelListEnum, CoachingTargetEnum } from "@/db/schema/enums";
 import { COACHING_LEVEL, COACHING_TARGET } from "./data";
 
 export function useCoachingLevel() {

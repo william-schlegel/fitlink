@@ -1,6 +1,7 @@
-import { subscriptionModeEnum } from "@/db/schema/enums";
-import { subscriptionRestrictionEnum } from "@/db/schema/enums";
 import { getLocale, getTranslations } from "next-intl/server";
+
+import { subscriptionRestrictionEnum } from "@/db/schema/enums";
+import { subscriptionModeEnum } from "@/db/schema/enums";
 
 export async function getDescription(
   mode: (typeof subscriptionModeEnum.enumValues)[number] | null | undefined,
@@ -11,7 +12,7 @@ export async function getDescription(
   activityGroups: string[],
   activities: string[],
   sites: string[],
-  rooms: string[]
+  rooms: string[],
 ) {
   const locale = await getLocale();
   const t = await getTranslations("club");
@@ -47,13 +48,13 @@ export async function getDescription(
       break;
     case "SITE":
       info = info.concat(
-        t("subscription.restriction.site-select", { count: sites.length })
+        t("subscription.restriction.site-select", { count: sites.length }),
       );
       info = info.concat(listFormatter.format(sites));
       break;
     case "ROOM":
       info = info.concat(
-        t("subscription.restriction.room-select", { count: rooms.length })
+        t("subscription.restriction.room-select", { count: rooms.length }),
       );
       info = info.concat(listFormatter.format(rooms));
       break;

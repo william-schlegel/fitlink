@@ -1,18 +1,16 @@
+import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
+import { twMerge } from "tailwind-merge";
+import Link from "next/link";
+
 import {
   CreateCertificationGroup,
   DeleteCertificationGroup,
   UpdateCertificationGroup,
 } from "@/components/modals/manageCertification";
-import Title from "@/components/title";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
-import {
-  getCertificationGroupById,
-  getCertificationGroups,
-} from "@/server/api/routers/coachs";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { twMerge } from "tailwind-merge";
+import Title from "@/components/title";
 
 export default async function CertificationsManagement({
   searchParams,
@@ -26,7 +24,9 @@ export default async function CertificationsManagement({
 
   const { cgId } = await searchParams;
 
-  const cgQuery = await getCertificationGroups();
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const cgQuery = await caller.coachs.getCertificationGroups();
 
   if (!cgId && cgQuery.length > 0)
     redirect(`/admin/certifications?cgId=${cgQuery[0]?.id}`);
@@ -47,7 +47,7 @@ export default async function CertificationsManagement({
                 <Link
                   className={twMerge(
                     "flex w-full items-center justify-between text-center",
-                    cgId === cg.id && "badge badge-primary"
+                    cgId === cg.id && "badge badge-primary",
                   )}
                   href={`/admin/certifications?cgId=${cg.id}`}
                 >
@@ -68,7 +68,9 @@ type CGContentProps = {
 };
 
 export async function CGContent({ cgId }: CGContentProps) {
-  const cgQuery = await getCertificationGroupById(cgId);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const cgQuery = await caller.coachs.getCertificationGroupById(cgId);
   console.log("cgQuery :>> ", cgQuery);
   const t = await getTranslations("admin");
 

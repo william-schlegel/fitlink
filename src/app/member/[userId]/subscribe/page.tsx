@@ -1,7 +1,8 @@
+import { getTranslations } from "next-intl/server";
+
+import { getUserById } from "@/server/api/routers/users";
 import FindClub from "@/components/sections/findClub";
 import Title from "@/components/title";
-import { getUserById } from "@/server/api/routers/users";
-import { getTranslations } from "next-intl/server";
 
 export default async function Subscribe({
   params,

@@ -1,11 +1,12 @@
 "use client";
-import { useCoachingLevel } from "@/lib/offers/useOffers";
-import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import Spinner from "../ui/spinner";
+
+import { useCoachingLevel } from "@/lib/offers/useOffers";
 import { formatMoney } from "@/lib/formatNumber";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import Spinner from "../ui/spinner";
 import Rating from "../ui/rating";
 
 type CoachOfferPageProps = {
@@ -87,8 +88,8 @@ export function CoachOfferPage({ offerId, condensed }: CoachOfferPageProps) {
             {" : "}
             {listFormatter.format(
               offerQuery.data?.coachingLevel?.map((l) =>
-                getNameLevel(l.level)
-              ) ?? []
+                getNameLevel(l.level),
+              ) ?? [],
             )}
           </div>
           <p className="my-4">{offerQuery.data?.coach?.aboutMe}</p>

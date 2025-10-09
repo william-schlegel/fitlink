@@ -1,14 +1,5 @@
 "use client";
 
-import { PlanningName } from "@/components/planningName";
-import Confirmation from "@/components/ui/confirmation";
-import Spinner from "@/components/ui/spinner";
-import { room } from "@/db/schema/club";
-import { planningActivity } from "@/db/schema/planning";
-import { DayName, DAYS } from "@/lib/dates/data";
-import { useDayName } from "@/lib/dates/useDayName";
-import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
 import {
   DndContext,
   DragEndEvent,
@@ -19,15 +10,25 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useTranslations } from "next-intl";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { CSS } from "@dnd-kit/utilities";
+import { useTranslations } from "next-intl";
+
 import {
   DeletePlanning,
   UpdatePlanning,
 } from "@/components/modals/managePlanning";
 import { getPlanningById } from "@/server/api/routers/planning";
+import { PlanningName } from "@/components/planningName";
+import Confirmation from "@/components/ui/confirmation";
+import { planningActivity } from "@/db/schema/planning";
+import { useDayName } from "@/lib/dates/useDayName";
+import { DayName, DAYS } from "@/lib/dates/data";
+import Spinner from "@/components/ui/spinner";
+import { CSS } from "@dnd-kit/utilities";
+import { trpc } from "@/lib/trpc/client";
+import { room } from "@/db/schema/club";
+import { isCUID } from "@/lib/utils";
 
 const HHOUR = "h-12"; // 3rem 48px
 const HHOUR_PX = 48;
@@ -79,7 +80,7 @@ export function PlanningContent({
     },
     {
       enabled: isCUID(clubId) && isCUID(userId),
-    }
+    },
   );
   const refModalDrop = useRef<HTMLInputElement>(null);
   const [dropData, setDropData] = useState<DropData>({
@@ -97,7 +98,7 @@ export function PlanningContent({
       activationConstraint: {
         distance: 10,
       },
-    })
+    }),
   );
   const utils = trpc.useUtils();
   const addActivity = trpc.plannings.addPlanningActivity.useMutation({
@@ -149,7 +150,7 @@ export function PlanningContent({
 
   function handleActivityIsActivated(
     activityId: string | null,
-    rect: DOMRectList
+    rect: DOMRectList,
   ) {
     setPopupData({ activityId, rect });
   }
@@ -223,7 +224,7 @@ export function PlanningContent({
                 <div className="flex w-10 shrink-0 flex-col border-r border-base-200 bg-base-100 text-center">
                   {Array.from(
                     { length: NB_HOUR },
-                    (_, k) => k + START_HOUR
+                    (_, k) => k + START_HOUR,
                   ).map((hour) => (
                     <p
                       key={hour}
@@ -263,7 +264,7 @@ export function PlanningContent({
                                 queryPlanning.data?.planningActivities.filter(
                                   (pa) =>
                                     pa.day === day.value &&
-                                    pa.siteId === site.id
+                                    pa.siteId === site.id,
                                 ) ?? []
                               }
                               onActivatePopup={handleActivityIsActivated}
@@ -403,7 +404,7 @@ function PopupActivityDetails({
 }: PopupActivityDetailsProps) {
   const queryPlanning = trpc.plannings.getPlanningActivityById.useQuery(
     popupData.activityId,
-    { enabled: popupData.activityId !== "" && popupData.activityId !== null }
+    { enabled: popupData.activityId !== "" && popupData.activityId !== null },
   );
   const utils = trpc.useUtils();
   const updatePlanning = trpc.plannings.updatePlanningActivity.useMutation({

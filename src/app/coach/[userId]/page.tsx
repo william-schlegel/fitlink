@@ -1,15 +1,16 @@
-import Title from "@/components/title";
-import LockedButton from "@/components/ui/lockedButton";
-import SelectDay from "@/components/ui/selectDay";
-import { getActualUser } from "@/lib/auth/server";
-import { DayName } from "@/lib/dates/data";
-import { getToday } from "@/lib/dates/serverDayName";
+import { redirect, RedirectType } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+
 import { getCoachDataForUserId } from "@/server/api/routers/dashboard";
 import { getCoachDailyPlanning } from "@/server/api/routers/planning";
 import { getUserById } from "@/server/api/routers/users";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-import { redirect, RedirectType } from "next/navigation";
+import LockedButton from "@/components/ui/lockedButton";
+import { getToday } from "@/lib/dates/serverDayName";
+import SelectDay from "@/components/ui/selectDay";
+import { getActualUser } from "@/lib/auth/server";
+import { DayName } from "@/lib/dates/data";
+import Title from "@/components/title";
 
 export default async function CoachDashboard({
   params,

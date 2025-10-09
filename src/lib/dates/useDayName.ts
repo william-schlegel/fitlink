@@ -1,5 +1,6 @@
 import { getDay, startOfToday } from "date-fns";
 import { useTranslations } from "next-intl";
+
 import { DayName, DAYS } from "./data";
 
 export function useDayName() {

@@ -1,4 +1,5 @@
 import { migrate } from "drizzle-orm/node-postgres/migrator";
+
 import { db } from "./index";
 
 const main = async () => {
@@ -10,12 +11,12 @@ const main = async () => {
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(
-      `[${new Date().toISOString()}] ✅ Migration completed successfully in ${duration}s`
+      `[${new Date().toISOString()}] ✅ Migration completed successfully in ${duration}s`,
     );
   } catch (error: unknown) {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.error(
-      `[${new Date().toISOString()}] ❌ Migration failed after ${duration}s`
+      `[${new Date().toISOString()}] ❌ Migration failed after ${duration}s`,
     );
 
     if (error instanceof Error) {

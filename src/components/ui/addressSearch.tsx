@@ -1,7 +1,8 @@
-import { env } from "@/env";
+import { useDebounceValue } from "usehooks-ts";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { useDebounceValue } from "usehooks-ts";
+
+import { env } from "@/env";
 
 type Props = {
   label?: string;
@@ -134,10 +135,10 @@ async function searchAddresses(address: string): Promise<AddressData[]> {
           lng: location.latLng.lng,
           address: chunks.reduce(
             (prev, chunk) => (prev ? `${prev}, ${chunk}` : chunk),
-            ""
+            "",
           ),
         };
-      }
+      },
     ) ?? [];
 
   return locations;

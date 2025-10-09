@@ -1,8 +1,9 @@
-import { DeleteUser, UpdateUser } from "@/components/modals/manageUser";
-import { formatMoney } from "@/lib/formatNumber";
-import { getUserFullById } from "@/server/api/routers/users";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+
+import { DeleteUser, UpdateUser } from "@/components/modals/manageUser";
+import { getUserFullById } from "@/server/api/routers/users";
+import { formatMoney } from "@/lib/formatNumber";
 import Periodicity from "./periodicity";
 
 type UserContentProps = {
@@ -25,7 +26,7 @@ export default async function UserContent({ userId }: UserContentProps) {
       acc.members += c.subscriptions.length;
       return acc;
     },
-    { sites: 0, activities: 0, members: 0 }
+    { sites: 0, activities: 0, members: 0 },
   ) ?? { sites: 0, activities: 0, members: 0 };
 
   return (
@@ -66,12 +67,12 @@ export default async function UserContent({ userId }: UserContentProps) {
               {userQuery?.pricing?.free
                 ? t("admin.pricing.free")
                 : userQuery?.monthlyPayment
-                ? `${formatMoney(userQuery?.pricing?.monthly)}${t(
-                    "admin.user.per-month"
-                  )}`
-                : `${formatMoney(userQuery?.pricing?.yearly)}${t(
-                    "admin.user.per-year"
-                  )}`}
+                  ? `${formatMoney(userQuery?.pricing?.monthly)}${t(
+                      "admin.user.per-month",
+                    )}`
+                  : `${formatMoney(userQuery?.pricing?.yearly)}${t(
+                      "admin.user.per-year",
+                    )}`}
             </span>
             <Periodicity
               userId={userId}

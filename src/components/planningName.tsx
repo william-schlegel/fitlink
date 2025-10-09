@@ -1,9 +1,10 @@
 "use client";
 
-import { planning } from "@/db/schema/planning";
-import { formatDateLocalized } from "@/lib/formatDate";
-import { isDate } from "date-fns";
 import { useTranslations } from "next-intl";
+import { isDate } from "date-fns";
+
+import { formatDateLocalized } from "@/lib/formatDate";
+import { planning } from "@/db/schema/planning";
 
 /**
  * compose a planning name from name and dates

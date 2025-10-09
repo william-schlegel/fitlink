@@ -1,16 +1,17 @@
-import { CreateSite } from "@/components/modals/manageSite";
-import Title from "@/components/title";
-import LockedButton from "@/components/ui/lockedButton";
-import createLink, { createHref } from "@/lib/createLink";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { redirect, RedirectType } from "next/navigation";
-import SiteContent from "./siteContent";
-import { getClubById } from "@/server/api/routers/clubs";
-import { getUserById } from "@/server/api/routers/users";
-import { getSitesForClub } from "@/server/api/routers/sites";
-import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 import { twMerge } from "tailwind-merge";
+import { headers } from "next/headers";
+import Link from "next/link";
+
+import { getSitesForClub } from "@/server/api/routers/sites";
+import { CreateSite } from "@/components/modals/manageSite";
+import createLink, { createHref } from "@/lib/createLink";
+import { getUserById } from "@/server/api/routers/users";
+import LockedButton from "@/components/ui/lockedButton";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import SiteContent from "./siteContent";
+import Title from "@/components/title";
 
 export default async function ManageSites({
   params,
@@ -33,7 +34,9 @@ export default async function ManageSites({
   )
     return <div>{t("manager-only")}</div>;
 
-  const clubQuery = await getClubById(clubId, user.id);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const clubQuery = await caller.clubs.getClubById({ clubId, userId: user.id });
   const siteQuery = await getSitesForClub(clubId, user.id);
   if (siteQuery.length && !siteId)
     redirect(createLink({ siteId: siteQuery[0]?.id }, href), RedirectType.push);
@@ -75,7 +78,7 @@ export default async function ManageSites({
                 href={createLink({ siteId: site.id }, href)}
                 className={twMerge(
                   "w-full text-center",
-                  siteId === site.id && "badge badge-primary"
+                  siteId === site.id && "badge badge-primary",
                 )}
               >
                 {site.name}

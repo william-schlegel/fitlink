@@ -1,19 +1,20 @@
 "use client";
 
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import { type TThemes } from "../themeSelector";
-import { useTranslations } from "next-intl";
-import AddressSearch, { AddressData } from "../ui/addressSearch";
-import { trpc } from "@/lib/trpc/client";
-import { useHover, useLocalStorage } from "usehooks-ts";
 import Map, { Layer, Marker, Source, useMap } from "react-map-gl/mapbox";
+import { useHover, useLocalStorage } from "usehooks-ts";
+import { useTranslations } from "next-intl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import Link from "next/link";
+
+import AddressSearch, { AddressData } from "../ui/addressSearch";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { type TThemes } from "../themeSelector";
 import ButtonIcon from "../ui/buttonIcon";
-import { env } from "@/env";
+import { trpc } from "@/lib/trpc/client";
 import hslToHex from "@/lib/hslToHex";
 import generateCircle from "./utils";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { env } from "@/env";
 
 type FindClubProps = {
   address?: string;
@@ -34,7 +35,7 @@ function FindClub({ address = "" }: FindClubProps) {
       locationLng: myAddress.lng,
       range,
     },
-    { enabled: false }
+    { enabled: false },
   );
   const [theme] = useLocalStorage<TThemes>("theme", "cupcake");
   const mapContainerRef = useRef<HTMLDivElement | null>(null);

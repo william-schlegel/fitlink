@@ -1,8 +1,9 @@
-import { userNotification } from "@/db/schema/user";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { isCUID } from "./utils";
+
+import { userNotification } from "@/db/schema/user";
 import { trpc } from "./trpc/client";
+import { isCUID } from "./utils";
 
 type UserNotification = typeof userNotification.$inferSelect;
 
@@ -16,7 +17,7 @@ function useNotifications(userId: string | undefined | null) {
     {
       enabled: isCUID(userId),
       refetchInterval: 1 * 60 * 1000, // 1'
-    }
+    },
   );
 
   useEffect(() => {

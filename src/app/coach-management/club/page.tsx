@@ -1,19 +1,21 @@
-import Title from "@/components/title";
-import createLink from "@/lib/createLink";
-import { getClubsForManager } from "@/server/api/routers/clubs";
-import { getTranslations } from "next-intl/server";
-import { headers } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
-import SelectClub from "../../../components/selectClub";
-import { getActualUser } from "@/lib/auth/server";
+import { inferProcedureOutput } from "@trpc/server";
+import { getTranslations } from "next-intl/server";
+import { twMerge } from "tailwind-merge";
+import { headers } from "next/headers";
 import Link from "next/link";
-import { getCoachById, getCoachsForClub } from "@/server/api/routers/coachs";
-import { isCUID } from "@/lib/utils";
+
 import {
   AddCoachToClub,
   CoachDataPresentation,
 } from "@/components/modals/manageClub";
-import { twMerge } from "tailwind-merge";
+import SelectClub from "../../../components/selectClub";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { getActualUser } from "@/lib/auth/server";
+import { AppRouter } from "@/server/api/root";
+import createLink from "@/lib/createLink";
+import Title from "@/components/title";
+import { isCUID } from "@/lib/utils";
 
 export default async function CoachManagementForClub({
   searchParams,
@@ -38,26 +40,31 @@ export default async function CoachManagementForClub({
   const headerList = await headers();
   const href = headerList.get("x-current-href");
 
-  const queryClubs = await getClubsForManager(userId ?? user.id);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const queryClubs = await caller.clubs.getClubsForManager(userId ?? user.id);
   if (queryClubs.length && !clubId)
     redirect(
       createLink({ clubId: queryClubs[0]?.id, coachId }, href),
-      RedirectType.replace
+      RedirectType.replace,
     );
 
-  let queryCoachs: Awaited<ReturnType<typeof getCoachsForClub>> = [];
+  let queryCoachs: inferProcedureOutput<
+    AppRouter["coachs"]["getCoachsForClub"]
+  > = [];
   if (isCUID(clubId)) {
-    queryCoachs = await getCoachsForClub(clubId);
+    queryCoachs = await caller.coachs.getCoachsForClub(clubId);
     if (queryCoachs.length && !coachId)
       redirect(
         createLink({ clubId, coachId: queryCoachs[0]?.id }, href),
-        RedirectType.replace
+        RedirectType.replace,
       );
   }
-  let queryCoach: Awaited<ReturnType<typeof getCoachById>> | undefined =
-    undefined;
+  let queryCoach:
+    | inferProcedureOutput<AppRouter["coachs"]["getCoachById"]>
+    | undefined = undefined;
   if (isCUID(coachId)) {
-    queryCoach = await getCoachById(coachId);
+    queryCoach = await caller.coachs.getCoachById(coachId);
   }
 
   return (
@@ -79,7 +86,7 @@ export default async function CoachManagementForClub({
                   href={createLink({ clubId, coachId: coach.id }, href)}
                   className={twMerge(
                     "w-full text-center",
-                    coachId === coach.id && "badge badge-primary"
+                    coachId === coach.id && "badge badge-primary",
                   )}
                 >
                   {coach.name}

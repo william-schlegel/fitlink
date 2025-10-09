@@ -1,16 +1,17 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { twMerge } from "tailwind-merge";
+import Link from "next/link";
+
 import { DeleteSite, UpdateSite } from "@/components/modals/manageSite";
 import LockedButton from "@/components/ui/lockedButton";
 import Spinner from "@/components/ui/spinner";
-import { trpc } from "@/lib/trpc/client";
 import useUserInfo from "@/lib/useUserInfo";
+import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { twMerge } from "tailwind-merge";
 
 type SiteContentProps = {
   userId: string;
@@ -91,7 +92,7 @@ export default function SiteContent({ clubId, siteId }: SiteContentProps) {
                     <button
                       className={twMerge(
                         "flex w-full items-center justify-between text-center",
-                        roomId === room.id && "badge badge-primary"
+                        roomId === room.id && "badge badge-primary",
                       )}
                       onClick={() => setRoomId(room.id)}
                     >

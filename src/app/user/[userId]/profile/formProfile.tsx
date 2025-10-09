@@ -7,14 +7,15 @@ import {
   useFormContext,
   useWatch,
 } from "react-hook-form";
-import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
 import { useTranslations } from "next-intl";
-import { formatSize } from "@/lib/formatNumber";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import ButtonIcon from "@/components/ui/buttonIcon";
+
 import { getUserById } from "@/server/api/routers/users";
+import ButtonIcon from "@/components/ui/buttonIcon";
+import { formatSize } from "@/lib/formatNumber";
+import { trpc } from "@/lib/trpc/client";
+import { toast } from "@/lib/toast";
 
 type FormValues = {
   name: string;
@@ -138,7 +139,7 @@ function ProfileImage({ imageUrl }: { imageUrl: string | null }) {
     if (fields.image?.[0]) {
       if (fields.image[0].size > MAX_SIZE_IMAGE) {
         toast.error(
-          t("image-size-error", { size: formatSize(MAX_SIZE_IMAGE) })
+          t("image-size-error", { size: formatSize(MAX_SIZE_IMAGE) }),
         );
         setValue("image", undefined);
         return;

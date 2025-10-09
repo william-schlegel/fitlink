@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+
 import { env } from "@/env";
 
 // Email configuration interface
@@ -38,7 +39,7 @@ const createTransporter = () => {
 
 // Send email function
 export const sendEmail = async (
-  config: EmailConfig
+  config: EmailConfig,
 ): Promise<EmailResponse> => {
   try {
     const transporter = createTransporter();
@@ -92,23 +93,23 @@ export const verifySMTPConnection = async (): Promise<boolean> => {
 // Utility function to send welcome email
 export const sendWelcomeEmail = async (
   to: string,
-  userName: string
+  userName: string,
 ): Promise<EmailResponse> => {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #333;">Welcome to VideoAch!</h1>
+      <h1 style="color: #333;">Welcome to Fitlink!</h1>
       <p>Hello ${userName},</p>
-      <p>Thank you for joining VideoAch! We're excited to have you on board.</p>
+      <p>Thank you for joining Fitlink! We're excited to have you on board.</p>
       <p>You can now start exploring our platform and connecting with coaches and clubs.</p>
-      <p>Best regards,<br>The VideoAch Team</p>
+      <p>Best regards,<br>The Fitlink Team</p>
     </div>
   `;
 
   return sendEmail({
     to,
-    subject: "Welcome to VideoAch!",
+    subject: "Welcome to Fitlink!",
     html,
-    text: `Welcome to VideoAch! Hello ${userName}, thank you for joining VideoAch! We're excited to have you on board.`,
+    text: `Welcome to Fitlink! Hello ${userName}, thank you for joining Fitlink! We're excited to have you on board.`,
   });
 };
 
@@ -116,7 +117,7 @@ export const sendWelcomeEmail = async (
 export const sendPasswordResetEmail = async (
   to: string,
   resetToken: string,
-  userName: string
+  userName: string,
 ): Promise<EmailResponse> => {
   const resetUrl = `${env.NEXT_PUBLIC_HOSTNAME}/reset-password?token=${resetToken}`;
 
@@ -128,13 +129,13 @@ export const sendPasswordResetEmail = async (
       <a href="${resetUrl}" style="display: inline-block; background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 20px 0;">Reset Password</a>
       <p>If you didn't request this, please ignore this email.</p>
       <p>This link will expire in 1 hour.</p>
-      <p>Best regards,<br>The VideoAch Team</p>
+      <p>Best regards,<br>The Fitlink Team</p>
     </div>
   `;
 
   return sendEmail({
     to,
-    subject: "Password Reset Request - VideoAch",
+    subject: "Password Reset Request - Fitlink",
     html,
     text: `Password Reset Request - Hello ${userName}, we received a request to reset your password. Visit ${resetUrl} to reset it. If you didn't request this, please ignore this email.`,
   });
@@ -145,7 +146,7 @@ export const sendNotificationEmail = async (
   to: string,
   subject: string,
   message: string,
-  userName: string
+  userName: string,
 ): Promise<EmailResponse> => {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -154,7 +155,7 @@ export const sendNotificationEmail = async (
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 4px; margin: 20px 0;">
         ${message}
       </div>
-      <p>Best regards,<br>The VideoAch Team</p>
+      <p>Best regards,<br>The Fitlink Team</p>
     </div>
   `;
 

@@ -87,7 +87,7 @@ const newToast = async (
   alertType: AlertType,
   duration = 10,
   position = "right",
-  zIndex = 10000
+  zIndex = 10000,
 ) => {
   // Check if we're in a browser environment
   if (typeof window === "undefined") return;
@@ -145,7 +145,7 @@ const newToast = async (
 function toastDefaultStyle(
   toastyContainer: HTMLElement,
   position: string,
-  zIndex = 10000
+  zIndex = 10000,
 ) {
   // Set the fixed positioning and other styles
   toastyContainer.style.position = "fixed";

@@ -1,18 +1,19 @@
-import Title from "@/components/title";
-import Pagination from "@/components/ui/pagination";
-import createLink from "@/lib/createLink";
-import { formatDateLocalized } from "@/lib/formatDate";
 import { getTranslations } from "next-intl/server";
-import { headers } from "next/headers";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { twMerge } from "tailwind-merge";
-import { FromTo } from "./types";
-import { NotificationMessage } from "./notificationMessage";
+import { headers } from "next/headers";
+import Link from "next/link";
+
 import {
   getNotificationById,
   getNotificationToUser,
 } from "@/server/api/routers/notification";
+import { NotificationMessage } from "./notificationMessage";
+import { formatDateLocalized } from "@/lib/formatDate";
+import Pagination from "@/components/ui/pagination";
+import createLink from "@/lib/createLink";
+import Title from "@/components/title";
+import { FromTo } from "./types";
 
 const PER_PAGE = 20;
 
@@ -34,7 +35,7 @@ export default async function ManageNotifications({
     fromTo === "to" ? userId : undefined,
     fromTo === "from" ? userId : undefined,
     parseInt(page, 10) * PER_PAGE,
-    PER_PAGE
+    PER_PAGE,
   );
 
   const headerList = await headers();
@@ -47,8 +48,8 @@ export default async function ManageNotifications({
           notificationId: notificationQuery.notifications[0]?.id,
           page: page.toString(),
         },
-        href
-      )
+        href,
+      ),
     );
   }
 
@@ -81,7 +82,7 @@ export default async function ManageNotifications({
                   page: "0",
                   fromTo: "to",
                 },
-                href
+                href,
               )}
             >
               {t("notification.to")}
@@ -96,7 +97,7 @@ export default async function ManageNotifications({
                   page: "0",
                   fromTo: "from",
                 },
-                href
+                href,
               )}
             >
               {t("notification.from")}
@@ -114,7 +115,7 @@ export default async function ManageNotifications({
                   className={twMerge(
                     "flex items-center justify-between",
                     notificationId === notification.id && "badge badge-primary",
-                    !notification.viewDate && "font-bold text-secondary"
+                    !notification.viewDate && "font-bold text-secondary",
                   )}
                 >
                   <div>
@@ -162,8 +163,8 @@ export default async function ManageNotifications({
                     page: page.toString(),
                     fromTo,
                   },
-                  href
-                )
+                  href,
+                ),
               )
             }
             perPage={PER_PAGE}

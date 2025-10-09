@@ -1,23 +1,24 @@
-import {
-  CreateRoom,
-  DeleteRoom,
-  UpdateRoom,
-} from "@/components/modals/manageRoom";
-import Title from "@/components/title";
-import createLink, { createHref } from "@/lib/createLink";
-import { RESERVATIONS } from "@/lib/data";
-import { isCUID } from "@/lib/utils";
+import { redirect, RedirectType } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { twMerge } from "tailwind-merge";
+import { headers } from "next/headers";
+import Link from "next/link";
+
 import {
   getRoomById,
   getRoomsForSite,
   getSiteById,
 } from "@/server/api/routers/sites";
+import {
+  CreateRoom,
+  DeleteRoom,
+  UpdateRoom,
+} from "@/components/modals/manageRoom";
+import createLink, { createHref } from "@/lib/createLink";
 import { getUserById } from "@/server/api/routers/users";
-import { getTranslations } from "next-intl/server";
-import { headers } from "next/headers";
-import Link from "next/link";
-import { redirect, RedirectType } from "next/navigation";
-import { twMerge } from "tailwind-merge";
+import { RESERVATIONS } from "@/lib/data";
+import Title from "@/components/title";
+import { isCUID } from "@/lib/utils";
 
 export default async function ManageRooms({
   params,
@@ -90,7 +91,7 @@ export default async function ManageRooms({
                 href={createLink({ roomId: room.id }, href)}
                 className={twMerge(
                   "flex items-center justify-between",
-                  roomId === room.id && "badge badge-primary"
+                  roomId === room.id && "badge badge-primary",
                 )}
               >
                 <span>{room.name}</span>
@@ -168,7 +169,7 @@ export async function RoomContent({
           <span>
             {t(
               RESERVATIONS.find((r) => r.value === roomQuery?.reservation)
-                ?.label || "?"
+                ?.label || "?",
             )}
           </span>
         </div>

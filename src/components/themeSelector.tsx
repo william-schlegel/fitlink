@@ -1,7 +1,7 @@
 "use client";
+import { useLocalStorage } from "usehooks-ts";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { useLocalStorage } from "usehooks-ts";
 
 export const Themes = [
   "light",

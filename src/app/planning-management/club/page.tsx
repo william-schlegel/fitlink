@@ -1,17 +1,18 @@
-import { PlanningName } from "@/components/planningName";
-import SelectClub from "@/components/selectClub";
-import Title from "@/components/title";
-import { getActualUser } from "@/lib/auth/server";
-import createLink from "@/lib/createLink";
-import { getClubsForManager } from "@/server/api/routers/clubs";
-import { getPlanningsForClub } from "@/server/api/routers/planning";
+import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { twMerge } from "tailwind-merge";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { redirect, RedirectType } from "next/navigation";
-import { PlanningContent } from "./planningContent";
+
 import { CreatePlanning } from "@/components/modals/managePlanning";
-import { twMerge } from "tailwind-merge";
+import { getPlanningsForClub } from "@/server/api/routers/planning";
+import { PlanningName } from "@/components/planningName";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { PlanningContent } from "./planningContent";
+import { getActualUser } from "@/lib/auth/server";
+import SelectClub from "@/components/selectClub";
+import createLink from "@/lib/createLink";
+import Title from "@/components/title";
 
 export default async function ClubPlanning({
   searchParams,
@@ -36,11 +37,13 @@ export default async function ClubPlanning({
 
   const headerList = await headers();
   const href = headerList.get("x-current-href");
-  const queryClubs = await getClubsForManager(userId ?? user.id);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const queryClubs = await caller.clubs.getClubsForManager(userId ?? user.id);
   if (queryClubs.length && !clubId)
     redirect(
       createLink({ clubId: queryClubs[0]?.id, planningId }, href),
-      RedirectType.replace
+      RedirectType.replace,
     );
 
   const queryPlannings = await getPlanningsForClub(clubId);
@@ -48,7 +51,7 @@ export default async function ClubPlanning({
   if (!planningId && queryPlannings.length)
     redirect(
       createLink({ clubId, planningId: queryPlannings[0]?.id }, href),
-      RedirectType.replace
+      RedirectType.replace,
     );
 
   return (
@@ -68,7 +71,7 @@ export default async function ClubPlanning({
                 <div
                   className={twMerge(
                     "flex gap-4 items-center justify-between",
-                    planningId === planning.id && "badge badge-primary"
+                    planningId === planning.id && "badge badge-primary",
                   )}
                 >
                   <Link

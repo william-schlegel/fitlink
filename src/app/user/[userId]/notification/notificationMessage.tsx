@@ -1,17 +1,18 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/client";
-import { FromTo } from "./types";
 import { useTranslations } from "next-intl";
-import { toast } from "@/lib/toast";
 import React, { Fragment } from "react";
 import { isDate } from "date-fns";
-import { formatDateLocalized } from "@/lib/formatDate";
-import { isCUID } from "@/lib/utils";
-import Spinner from "@/components/ui/spinner";
-import { formatMoney } from "@/lib/formatNumber";
-import { NotificationTypeEnum } from "@/db/schema/enums";
+
 import { GetNotificationByIdReturn } from "@/server/api/routers/notification";
+import { NotificationTypeEnum } from "@/db/schema/enums";
+import { formatDateLocalized } from "@/lib/formatDate";
+import { formatMoney } from "@/lib/formatNumber";
+import Spinner from "@/components/ui/spinner";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import { toast } from "@/lib/toast";
+import { FromTo } from "./types";
 
 type NotificationMessageProps = {
   fromTo: FromTo;
@@ -52,7 +53,7 @@ export function NotificationMessage({
       {t("notification.notification-type", {
         type: getName(notification.type),
       })}
-    </div>
+    </div>,
   );
   Elem.push(<p>{notification.message}</p>);
   if (isDate(notification.answered))
@@ -69,7 +70,7 @@ export function NotificationMessage({
         <span className="badge-primary badge">
           {t(notification.answer ?? "")}
         </span>
-      </div>
+      </div>,
     );
   if (
     (notification.type === "NEW_SUBSCRIPTION" ||
@@ -95,7 +96,7 @@ export function NotificationMessage({
             onClick={() =>
               handleClick(
                 "/api/notification/acceptSearchCoach",
-                notification.id
+                notification.id,
               )
             }
           >
@@ -107,13 +108,13 @@ export function NotificationMessage({
             onClick={() =>
               handleClick(
                 "/api/notification/refuseSearchCoach",
-                notification.id
+                notification.id,
               )
             }
           >
             {t("notification.refuse")}
           </button>
-        </div>
+        </div>,
       );
     if (notification.type === "NEW_SUBSCRIPTION")
       Elem.push(
@@ -124,7 +125,7 @@ export function NotificationMessage({
             onClick={() =>
               handleClick(
                 "/api/notification/validateSubscription",
-                notification.id
+                notification.id,
               )
             }
           >
@@ -136,13 +137,13 @@ export function NotificationMessage({
             onClick={() =>
               handleClick(
                 "/api/notification/cancelSubscription",
-                notification.id
+                notification.id,
               )
             }
           >
             {t("notification.cancel")}
           </button>
-        </div>
+        </div>,
       );
   }
   return (
@@ -161,14 +162,14 @@ type SubscriptionInfoProps = {
 function SubscriptionInfo({ data }: SubscriptionInfoProps) {
   const sub = trpc.subscriptions.getSubscriptionById.useQuery(
     data.subscriptionId,
-    { enabled: isCUID(data.subscriptionId) }
+    { enabled: isCUID(data.subscriptionId) },
   );
   const t = useTranslations("auth");
 
   if (sub.isLoading) return <Spinner />;
   const nextPayment = data.monthly
-    ? sub.data?.monthly ?? 0
-    : sub.data?.yearly ?? 0;
+    ? (sub.data?.monthly ?? 0)
+    : (sub.data?.yearly ?? 0);
   const firstPayment = (sub.data?.inscriptionFee ?? 0) + nextPayment;
 
   return (

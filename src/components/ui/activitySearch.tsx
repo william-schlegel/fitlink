@@ -1,9 +1,10 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/client";
+import { useDebounceValue } from "usehooks-ts";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { useDebounceValue } from "usehooks-ts";
+
+import { trpc } from "@/lib/trpc/client";
 
 type Props = {
   label?: string;
@@ -38,7 +39,7 @@ const ActivitySearch = ({
 
   const activities = trpc.coachs.getOfferActivityByName.useQuery(
     debouncedActivity,
-    { enabled: debouncedActivity !== "" }
+    { enabled: debouncedActivity !== "" },
   );
 
   useEffect(() => {

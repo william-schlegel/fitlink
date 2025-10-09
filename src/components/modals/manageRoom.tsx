@@ -1,10 +1,5 @@
 "use client";
 
-import { roomReservationEnum } from "@/db/schema/enums";
-import Modal, { TModalVariant } from "../ui/modal";
-import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
-import { useTranslations } from "next-intl";
 import {
   FormProvider,
   SubmitErrorHandler,
@@ -12,11 +7,17 @@ import {
   useForm,
   useFormContext,
 } from "react-hook-form";
-import Spinner from "../ui/spinner";
+import { useTranslations } from "next-intl";
+import { useEffect } from "react";
+
+import { roomReservationEnum } from "@/db/schema/enums";
+import Modal, { TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import SimpleForm from "../ui/simpleform";
-import { useEffect } from "react";
 import { RESERVATIONS } from "@/lib/data";
+import { trpc } from "@/lib/trpc/client";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
 
 type RoomFormValues = {
   name: string;

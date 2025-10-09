@@ -1,19 +1,20 @@
+import { and, asc, eq, isNull } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { featureEnum, RoleEnum, roleEnum } from "@/db/schema/enums";
+
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { db } from "@/db";
-import { and, asc, eq, isNull } from "drizzle-orm";
 import {
   pricing,
   pricingFeature,
   pricingOption,
 } from "@/db/schema/subscription";
+import { featureEnum, RoleEnum, roleEnum } from "@/db/schema/enums";
 import { isAdmin } from "@/server/lib/userTools";
+import { db } from "@/db";
 
 const PricingObject = z.object({
   id: z.cuid2(),
@@ -46,7 +47,7 @@ export async function getPricingForRole(internalRole: RoleEnum) {
   return db.query.pricing.findMany({
     where: and(
       eq(pricing.roleTarget, internalRole),
-      isNull(pricing.deletionDate)
+      isNull(pricing.deletionDate),
     ),
     with: { options: true, features: true },
     orderBy: [asc(pricing.monthly)],
@@ -67,7 +68,7 @@ export const pricingRouter = createTRPCRouter({
         base: PricingObject.omit({ id: true }),
         options: z.array(z.string()),
         features: z.array(z.enum(featureEnum.enumValues)),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       if (ctx.user.internalRole !== "ADMIN")
@@ -88,7 +89,7 @@ export const pricingRouter = createTRPCRouter({
               name: o,
               weight: i,
               pricingId: newPricing.id,
-            }))
+            })),
           );
         }
 
@@ -97,7 +98,7 @@ export const pricingRouter = createTRPCRouter({
             input.features.map((f) => ({
               feature: f,
               pricingId: newPricing.id,
-            }))
+            })),
           );
         }
 
@@ -110,7 +111,7 @@ export const pricingRouter = createTRPCRouter({
         base: PricingObject.partial(),
         options: z.array(z.string()),
         features: z.array(z.enum(featureEnum.enumValues)),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       if (ctx.user.internalRole !== "ADMIN")
@@ -147,7 +148,7 @@ export const pricingRouter = createTRPCRouter({
               name: o,
               weight: i,
               pricingId: pricingId,
-            }))
+            })),
           );
         }
 
@@ -156,7 +157,7 @@ export const pricingRouter = createTRPCRouter({
             input.features.map((f) => ({
               feature: f,
               pricingId: pricingId,
-            }))
+            })),
           );
         }
 

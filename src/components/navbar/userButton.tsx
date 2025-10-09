@@ -1,9 +1,10 @@
 "use client";
-import { authClient, useUser } from "@/lib/auth/client";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+
+import { authClient, useUser } from "@/lib/auth/client";
 
 export default function UserButton() {
   const t = useTranslations("common");

@@ -1,16 +1,17 @@
-import { CreatePage } from "@/components/modals/managePage";
-import SelectClub from "@/components/selectClub";
-import Title from "@/components/title";
-import { getActualUser } from "@/lib/auth/server";
-import createLink, { createHref } from "@/lib/createLink";
-import { getClubsForManager } from "@/server/api/routers/clubs";
+import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
-import { redirect, RedirectType } from "next/navigation";
-import TargetName from "./targetName";
-import PageContent from "./pageContent";
 import Link from "next/link";
+
+import { CreatePage } from "@/components/modals/managePage";
 import { getPagesForClub } from "@/server/api/routers/page";
+import createLink, { createHref } from "@/lib/createLink";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { getActualUser } from "@/lib/auth/server";
+import SelectClub from "@/components/selectClub";
+import PageContent from "./pageContent";
+import Title from "@/components/title";
+import TargetName from "./targetName";
 
 export default async function ClubPage({
   searchParams,
@@ -36,12 +37,14 @@ export default async function ClubPage({
   const headerList = await headers();
   const href = headerList.get("x-current-href");
 
-  const queryClubs = await getClubsForManager(userId ?? user.id);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const queryClubs = await caller.clubs.getClubsForManager(userId ?? user.id);
 
   if (queryClubs.length && !clubId)
     redirect(
       createLink({ clubId: queryClubs[0]?.id, pageId: pageId ?? "" }, href),
-      RedirectType.replace
+      RedirectType.replace,
     );
 
   const queryPages = await getPagesForClub(clubId);

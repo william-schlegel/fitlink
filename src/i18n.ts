@@ -1,4 +1,5 @@
 import { getRequestConfig } from "next-intl/server";
+
 import { getUserLocale } from "./lib/locale";
 
 // Can be imported from a shared config

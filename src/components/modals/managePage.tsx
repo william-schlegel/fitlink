@@ -1,23 +1,24 @@
 "use client";
 
-import { pageSectionModelEnum, pageTargetEnum } from "@/db/schema/enums";
-import { getButtonSize, TModalVariant } from "../ui/modal";
-import { useTranslations } from "next-intl";
-import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
 import {
   Path,
   SubmitErrorHandler,
   SubmitHandler,
   useForm,
 } from "react-hook-form";
-import Modal from "../ui/modal";
-import SimpleForm from "../ui/simpleform";
-import { ButtonSize } from "../ui/buttonIcon";
-import Spinner from "../ui/spinner";
-import Confirmation from "../ui/confirmation";
 import { useCallback, useEffect } from "react";
+import { useTranslations } from "next-intl";
+
+import { pageSectionModelEnum, pageTargetEnum } from "@/db/schema/enums";
+import { getButtonSize, TModalVariant } from "../ui/modal";
+import Confirmation from "../ui/confirmation";
+import { ButtonSize } from "../ui/buttonIcon";
+import SimpleForm from "../ui/simpleform";
+import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
+import Modal from "../ui/modal";
 
 type CreatePageProps = {
   clubId: string;
@@ -87,7 +88,7 @@ export function usePageSection() {
       if (tg) return t(tg.label);
       return "?";
     },
-    [t]
+    [t],
   );
 
   const getSectionName = useCallback(
@@ -97,7 +98,7 @@ export function usePageSection() {
       if (sc) return t(sc.label);
       return "?";
     },
-    [t]
+    [t],
   );
 
   const defaultSection = useCallback(
@@ -106,7 +107,7 @@ export function usePageSection() {
       const ts = TARGET_SECTIONS.find((ts) => ts.target === target);
       return ts?.sections?.[0] ?? "HERO";
     },
-    []
+    [],
   );
 
   const getSections = useCallback((target: PageTarget): PageSectionModel[] => {
@@ -281,7 +282,7 @@ export function UpdatePage({
               component: (
                 <select
                   defaultValue={getValues(
-                    "target" as Path<CreatePageFormValues>
+                    "target" as Path<CreatePageFormValues>,
                   )}
                   {...register("target" as Path<CreatePageFormValues>)}
                 >

@@ -1,19 +1,20 @@
+import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
+import { twMerge } from "tailwind-merge";
+import { headers } from "next/headers";
+import Link from "next/link";
+
 import {
   CreateOffer,
   DeleteOffer,
   UpdateOffer,
 } from "@/components/modals/manageCoach";
 import { CoachOfferPage } from "@/components/sections/coachOffer";
-import Title from "@/components/title";
+import { getOfferName } from "@/lib/offers/serverOffer";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
-import { getOfferName } from "@/lib/offers/serverOffer";
-import { getCoachOffers, getOfferById } from "@/server/api/routers/coachs";
-import { getTranslations } from "next-intl/server";
-import { headers } from "next/headers";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { twMerge } from "tailwind-merge";
+import Title from "@/components/title";
 
 export default async function CoachOffer({
   searchParams,
@@ -34,7 +35,9 @@ export default async function CoachOffer({
   const offerId = (await searchParams).offerId;
   const headerList = await headers();
   const href = headerList.get("x-current-href");
-  const offerQuery = await getCoachOffers(userId);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const offerQuery = await caller.coachs.getCoachOffers(userId);
 
   if (!offerId && offerQuery.length > 0)
     redirect(createLink({ offerId: offerQuery[0]?.id }, href));
@@ -54,7 +57,7 @@ export default async function CoachOffer({
                 href={createLink({ offerId: offer.id }, href)}
                 className={twMerge(
                   "flex w-full justify-between",
-                  offerId === offer.id && "badge badge-primary"
+                  offerId === offer.id && "badge badge-primary",
                 )}
               >
                 <span>{offer.name}</span>
@@ -80,7 +83,9 @@ type OfferContentProps = {
 
 async function OfferContent({ userId, offerId }: OfferContentProps) {
   const t = await getTranslations("coach");
-  const offerQuery = await getOfferById(offerId);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const offerQuery = await caller.coachs.getOfferById(offerId);
   if (!offerQuery) return null;
   return (
     <div className="w-full space-y-4">

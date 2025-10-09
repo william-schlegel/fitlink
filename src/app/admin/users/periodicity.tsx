@@ -1,7 +1,8 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/client";
 import { useTranslations } from "next-intl";
+
+import { trpc } from "@/lib/trpc/client";
 
 export default function Periodicity({
   userId,

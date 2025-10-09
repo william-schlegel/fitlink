@@ -1,13 +1,15 @@
 "use client";
 
 import { createContext, useContext, useMemo } from "react";
-import type { CSSProperties, PropsWithChildren } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+
+import { CSS } from "@dnd-kit/utilities";
+
 import type {
   DraggableSyntheticListeners,
   UniqueIdentifier,
 } from "@dnd-kit/core";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import type { CSSProperties, PropsWithChildren } from "react";
 
 interface Props {
   id: UniqueIdentifier;
@@ -48,7 +50,7 @@ export function SortableItem({
       listeners,
       ref: setActivatorNodeRef,
     }),
-    [attributes, listeners, setActivatorNodeRef]
+    [attributes, listeners, setActivatorNodeRef],
   );
   const style: CSSProperties = {
     opacity: isDragging ? 0.4 : undefined,

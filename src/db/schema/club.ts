@@ -7,24 +7,9 @@ import {
   real,
   integer,
 } from "drizzle-orm/pg-core";
+import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
-import { userCoach, userDocument, userManager, userMember } from "./user";
-import {
-  openingCalendarClubs,
-  openingCalendarSites,
-  openingCalendarRooms,
-  planning,
-  planningActivity,
-  reservation,
-} from "./planning";
-import { page } from "./page";
-import {
-  subscription,
-  subscriptionToActivity,
-  subscriptionToActivityGroup,
-  subscriptionToRoom,
-  subscriptionToSite,
-} from "./subscription";
+
 import {
   certification,
   certificationModule,
@@ -33,8 +18,24 @@ import {
   certificationModuleActivityGroups,
   coachMarketPlaceActivityGroups,
 } from "./coach";
+import {
+  subscription,
+  subscriptionToActivity,
+  subscriptionToActivityGroup,
+  subscriptionToRoom,
+  subscriptionToSite,
+} from "./subscription";
+import {
+  openingCalendarClubs,
+  openingCalendarSites,
+  openingCalendarRooms,
+  planning,
+  planningActivity,
+  reservation,
+} from "./planning";
+import { userCoach, userDocument, userManager, userMember } from "./user";
 import { roomReservationEnum } from "./enums";
-import { createId } from "@paralleldrive/cuid2";
+import { page } from "./page";
 
 export const club = pgTable(
   "Club",
@@ -49,7 +50,7 @@ export const club = pgTable(
   (table) => [
     index("club_manager_idx").on(table.managerId),
     index("club_logo_idx").on(table.logoId),
-  ]
+  ],
 );
 
 export const clubRelations = relations(club, ({ one, many }) => ({
@@ -85,7 +86,7 @@ export const site = pgTable(
     clubId: text("club_id").notNull(),
     openWithClub: boolean("open_with_club").default(true),
   },
-  (table) => [index("site_club_idx").on(table.clubId)]
+  (table) => [index("site_club_idx").on(table.clubId)],
 );
 
 export const siteRelations = relations(site, ({ one, many }) => ({
@@ -113,7 +114,7 @@ export const room = pgTable(
     openWithSite: boolean("open_with_site").default(true),
     siteId: text("site_id").notNull(),
   },
-  (table) => [index("room_site_idx").on(table.siteId)]
+  (table) => [index("room_site_idx").on(table.siteId)],
 );
 
 export const roomRelations = relations(room, ({ one, many }) => ({
@@ -155,7 +156,7 @@ export const event = pgTable(
   (table) => [
     index("event_page_idx").on(table.pageId),
     index("event_club_idx").on(table.clubId),
-  ]
+  ],
 );
 
 export const eventRelations = relations(event, ({ one }) => ({
@@ -181,7 +182,7 @@ export const activityGroup = pgTable(
     default: boolean("default").default(false),
     coachId: text("coach_id"),
   },
-  (table) => [index("activity_group_coach_idx").on(table.coachId)]
+  (table) => [index("activity_group_coach_idx").on(table.coachId)],
 );
 
 export const activityGroupRelations = relations(
@@ -199,7 +200,7 @@ export const activityGroupRelations = relations(
     subscriptions: many(subscriptionToActivityGroup),
     marketPlaceSearchs: many(coachMarketPlace),
     coachMarketPlaceActivityGroups: many(coachMarketPlaceActivityGroups),
-  })
+  }),
 );
 
 export const activity = pgTable(
@@ -215,7 +216,7 @@ export const activity = pgTable(
   (table) => [
     index("activity_group_idx").on(table.groupId),
     index("activity_club_idx").on(table.clubId),
-  ]
+  ],
 );
 
 export const activityRelations = relations(activity, ({ one, many }) => ({
@@ -239,7 +240,7 @@ export const coachingActivity = pgTable(
     name: text("name").notNull(),
     coachId: text("coach_id").notNull(),
   },
-  (table) => [index("coaching_activity_coach_idx").on(table.coachId)]
+  (table) => [index("coaching_activity_coach_idx").on(table.coachId)],
 );
 
 export const coachingActivityRelations = relations(
@@ -249,7 +250,7 @@ export const coachingActivityRelations = relations(
       fields: [coachingActivity.coachId],
       references: [userCoach.userId],
     }),
-  })
+  }),
 );
 
 export const clubMembers = pgTable(
@@ -266,7 +267,7 @@ export const clubMembers = pgTable(
   (table) => [
     index("club_members_club_idx").on(table.clubId),
     index("club_members_member_idx").on(table.memberUserId),
-  ]
+  ],
 );
 
 export const clubCoachs = pgTable(
@@ -283,7 +284,7 @@ export const clubCoachs = pgTable(
   (table) => [
     index("club_coachs_club_idx").on(table.clubId),
     index("club_coachs_coach_idx").on(table.coachUserId),
-  ]
+  ],
 );
 
 export const roomActivities = pgTable(
@@ -300,7 +301,7 @@ export const roomActivities = pgTable(
   (table) => [
     index("room_activities_room_idx").on(table.roomId),
     index("room_activities_activity_idx").on(table.activityId),
-  ]
+  ],
 );
 
 // Relations for many-to-many intermediate tables

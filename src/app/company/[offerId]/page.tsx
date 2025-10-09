@@ -1,6 +1,7 @@
+import { notFound } from "next/navigation";
+
 import { CoachOfferPage } from "@/components/sections/coachOffer";
 import { isCUID } from "@/lib/utils";
-import { notFound } from "next/navigation";
 
 export default async function OfferPage({
   params,

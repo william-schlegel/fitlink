@@ -1,6 +1,7 @@
+import { getTranslations } from "next-intl/server";
+
 import { getUserById } from "@/server/api/routers/users";
 import FormProfile from "./formProfile";
-import { getTranslations } from "next-intl/server";
 
 export default async function Profile({
   params,

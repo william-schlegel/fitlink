@@ -1,20 +1,21 @@
 "use client";
 
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import { type TThemes } from "../themeSelector";
-import { useTranslations } from "next-intl";
-import AddressSearch, { AddressData } from "../ui/addressSearch";
-import { trpc } from "@/lib/trpc/client";
-import { useHover, useLocalStorage } from "usehooks-ts";
 import Map, { Layer, Marker, Source, useMap } from "react-map-gl/mapbox";
-import ButtonIcon from "../ui/buttonIcon";
-import { env } from "@/env";
-import hslToHex from "@/lib/hslToHex";
-import Rating from "../ui/rating";
-import generateCircle from "./utils";
+import { useHover, useLocalStorage } from "usehooks-ts";
+import { useTranslations } from "next-intl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import Link from "next/link";
+
+import AddressSearch, { AddressData } from "../ui/addressSearch";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { type TThemes } from "../themeSelector";
+import ButtonIcon from "../ui/buttonIcon";
+import { trpc } from "@/lib/trpc/client";
+import hslToHex from "@/lib/hslToHex";
+import generateCircle from "./utils";
+import Rating from "../ui/rating";
+import { env } from "@/env";
 
 type FindCoachProps = {
   address?: string;
@@ -43,7 +44,7 @@ function FindCoach({
       locationLng: myAddress.lng,
       range,
     },
-    { enabled: false, refetchOnWindowFocus: false }
+    { enabled: false, refetchOnWindowFocus: false },
   );
   const [theme] = useLocalStorage<TThemes>("theme", "cupcake");
 

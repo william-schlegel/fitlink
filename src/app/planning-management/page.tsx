@@ -1,7 +1,8 @@
-import { getActualUser } from "@/lib/auth/server";
+import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { redirect, RedirectType } from "next/navigation";
+
+import { getActualUser } from "@/lib/auth/server";
 
 export default async function PlanningManagement() {
   const user = await getActualUser();

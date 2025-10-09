@@ -1,21 +1,22 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/client";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
-import ThemeSelector, { TThemes } from "../themeSelector";
-import { toast } from "@/lib/toast";
-import Spinner from "../ui/spinner";
-import Confirmation from "../ui/confirmation";
-import Modal, { getButtonSize } from "../ui/modal";
-import { useWriteFile } from "@/lib/useManageFile";
-import { useUser } from "@/lib/auth/client";
-import { isCUID } from "@/lib/utils";
-import { formatSize } from "@/lib/formatNumber";
-import ButtonIcon from "../ui/buttonIcon";
-import { TextError } from "../ui/simpleform";
+
 import { PageSectionElementTypeEnum } from "@/db/schema/enums";
+import ThemeSelector, { TThemes } from "../themeSelector";
+import { useWriteFile } from "@/lib/useManageFile";
+import Modal, { getButtonSize } from "../ui/modal";
+import { formatSize } from "@/lib/formatNumber";
+import Confirmation from "../ui/confirmation";
+import { TextError } from "../ui/simpleform";
+import { useUser } from "@/lib/auth/client";
+import ButtonIcon from "../ui/buttonIcon";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
 
 type ActivityCreationProps = {
   clubId: string;
@@ -40,7 +41,7 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
   const createSection = trpc.pages.createPageSection.useMutation();
   const querySection = trpc.pages.getPageSection.useQuery(
     { pageId, section: "ACTIVITIES" },
-    { refetchOnWindowFocus: false }
+    { refetchOnWindowFocus: false },
   );
 
   useEffect(() => {
@@ -118,7 +119,7 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
                   <div className={`mt-4 grid grid-cols-3 gap-2`}>
                     {querySection.data?.elements
                       .filter((e) =>
-                        JSON.parse(e.optionValue ?? "[]").includes(group.id)
+                        JSON.parse(e.optionValue ?? "[]").includes(group.id),
                       )
                       .map((e) => (
                         <ActivityContentCard key={e.id} activity={e} preview />
@@ -211,7 +212,7 @@ function UpdateActivity({ pageId, activityId }: UpdateActivityProps) {
     {
       enabled: isCUID(activityId),
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   useEffect(() => {
@@ -356,7 +357,7 @@ function ActivityForm({
     {
       enabled: isCUID(pageId),
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   useEffect(() => {

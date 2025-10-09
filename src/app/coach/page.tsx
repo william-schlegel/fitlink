@@ -1,11 +1,12 @@
-import Title from "@/components/title";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+
 import { Feature, FeatureContainer } from "@/components/ui/features";
+import { getPricingForRole } from "@/server/api/routers/pricing";
 import { PricingContainer } from "@/components/ui/pricing";
 import { PricingComponent } from "@/components/ui/pricing";
 import { getActualUser } from "@/lib/auth/server";
-import { getPricingForRole } from "@/server/api/routers/pricing";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
+import Title from "@/components/title";
 
 export default async function CoachPage() {
   const pricingQuery = await getPricingForRole("COACH");

@@ -1,18 +1,18 @@
-import { getActualUser } from "@/lib/auth/server";
-import { getClubById } from "@/server/api/routers/clubs";
-import { getCoachById, getCoachsForClub } from "@/server/api/routers/coachs";
-import createLink, { createHref } from "@/lib/createLink";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import Title from "@/components/title";
+import { twMerge } from "tailwind-merge";
+import { headers } from "next/headers";
+import Link from "next/link";
+
 import {
   AddCoachToClub,
   CoachDataPresentation,
 } from "@/components/modals/manageClub";
-import Link from "next/link";
-import { headers } from "next/headers";
-import { twMerge } from "tailwind-merge";
+import createLink, { createHref } from "@/lib/createLink";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { getActualUser } from "@/lib/auth/server";
 import { CoachPlanning } from "./coachPlanning";
+import Title from "@/components/title";
 
 export default async function ManageCoachs({
   params,
@@ -32,8 +32,11 @@ export default async function ManageCoachs({
     return <div>{t("manager-only")}</div>;
   const { userId, clubId } = await params;
   const coachId = (await searchParams).coachId;
-  const clubQuery = await getClubById(clubId, userId);
-  const coachsQuery = await getCoachsForClub(clubId);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const clubQuery = await caller.clubs.getClubById({ clubId, userId });
+
+  const coachsQuery = await caller.coachs.getCoachsForClub(clubId);
   const headerList = await headers();
   const href = headerList.get("x-current-href");
   if (coachsQuery.length && !coachId)
@@ -75,7 +78,7 @@ export default async function ManageCoachs({
                 href={createLink({ coachId: coach.id })}
                 className={twMerge(
                   "w-full text-center",
-                  coachId === coach.id && "badge badge-primary"
+                  coachId === coach.id && "badge badge-primary",
                 )}
               >
                 {coach.name}
@@ -99,7 +102,9 @@ type CoachContentProps = {
 
 export async function CoachContent({ coachId, clubId }: CoachContentProps) {
   const t = await getTranslations("club");
-  const queryCoach = await getCoachById(coachId);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const queryCoach = await caller.coachs.getCoachById(coachId);
   if (!queryCoach) return <div>{t("coach.coach-unknown")}</div>;
   return (
     <section className="w-full space-y-4">

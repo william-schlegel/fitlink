@@ -1,15 +1,16 @@
-import { getActualUser } from "@/lib/auth/server";
 import { getTranslations } from "next-intl/server";
-import UserFilter from "./userFilter";
-import { getAllUsers } from "@/server/api/routers/users";
-import { TUserFilter } from "./userFilter";
 import { redirect } from "next/navigation";
+import { twMerge } from "tailwind-merge";
+import Link from "next/link";
+
+import { getAllUsers } from "@/server/api/routers/users";
 import { getRoleName } from "@/server/lib/userTools";
 import Pagination from "@/components/ui/pagination";
+import { getActualUser } from "@/lib/auth/server";
+import { TUserFilter } from "./userFilter";
 import UserContent from "./userContent";
-import Link from "next/link";
 import Title from "@/components/title";
-import { twMerge } from "tailwind-merge";
+import UserFilter from "./userFilter";
 
 const PER_PAGE = 20;
 
@@ -64,7 +65,7 @@ export default async function UserManagement({
                   <Link
                     className={twMerge(
                       "flex w-full items-center justify-between text-center",
-                      userId === user.id && "badge badge-primary"
+                      userId === user.id && "badge badge-primary",
                     )}
                     href={`/admin/users?userId=${user.id}`}
                   >

@@ -1,7 +1,7 @@
 import destination from "@turf/destination";
+import { getCoord } from "@turf/invariant";
 import distance from "@turf/distance";
 import { point } from "@turf/helpers";
-import { getCoord } from "@turf/invariant";
 /**
  * calculate the bounding box arround a point at a certain distance (top left and bottom right)
  * @param originLat latitude
@@ -11,7 +11,7 @@ import { getCoord } from "@turf/invariant";
 export function calculateBBox(
   originLng: number,
   originLat: number,
-  distance: number
+  distance: number,
 ) {
   if (distance <= 0) {
     return [
@@ -34,7 +34,7 @@ export function calculateDistance(
   originLng: number,
   originLat: number,
   distanceLng: number,
-  distanceLat: number
+  distanceLat: number,
 ) {
   const from = point([originLng, originLat]);
   const to = point([distanceLng, distanceLat]);

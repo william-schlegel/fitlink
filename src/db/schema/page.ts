@@ -1,5 +1,7 @@
 import { boolean, index, pgTable, text } from "drizzle-orm/pg-core";
+import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
+
 import {
   pageSectionElementTypeEnum,
   pageSectionModelEnum,
@@ -7,7 +9,6 @@ import {
 } from "./enums";
 import { userCoach, userDocument } from "./user";
 import { club, event } from "./club";
-import { createId } from "@paralleldrive/cuid2";
 
 export const pageSectionElement = pgTable(
   "PageSectionElement",
@@ -23,7 +24,7 @@ export const pageSectionElement = pgTable(
     sectionId: text("section_id").notNull(),
     optionValue: text("option_value"),
   },
-  (table) => [index("page_section_element_section_idx").on(table.sectionId)]
+  (table) => [index("page_section_element_section_idx").on(table.sectionId)],
 );
 
 export const pageSectionElementDocuments = pgTable(
@@ -40,7 +41,7 @@ export const pageSectionElementDocuments = pgTable(
   (table) => [
     index("pse_documents_element_idx").on(table.elementId),
     index("pse_documents_document_idx").on(table.documentId),
-  ]
+  ],
 );
 
 export const pageSectionElementDocumentsRelations = relations(
@@ -54,7 +55,7 @@ export const pageSectionElementDocumentsRelations = relations(
       fields: [pageSectionElementDocuments.documentId],
       references: [userDocument.id],
     }),
-  })
+  }),
 );
 
 export const pageSectionElementRelations = relations(
@@ -65,7 +66,7 @@ export const pageSectionElementRelations = relations(
       fields: [pageSectionElement.sectionId],
       references: [pageSection.id],
     }),
-  })
+  }),
 );
 
 export const pageSection = pgTable(
@@ -77,7 +78,7 @@ export const pageSection = pgTable(
     subTitle: text("sub_title"),
     pageId: text("page_id").notNull(),
   },
-  (table) => [index("page_section_page_idx").on(table.pageId)]
+  (table) => [index("page_section_page_idx").on(table.pageId)],
 );
 export const pageSectionRelations = relations(pageSection, ({ one, many }) => ({
   elements: many(pageSectionElement),
@@ -102,7 +103,7 @@ export const page = pgTable(
     index("page_club_idx").on(table.clubId),
     index("page_coach_idx").on(table.coachId),
     index("page_event_idx").on(table.eventId),
-  ]
+  ],
 );
 export const pageRelations = relations(page, ({ one, many }) => ({
   sections: many(pageSection),

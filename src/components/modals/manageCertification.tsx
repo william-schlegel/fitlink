@@ -1,18 +1,19 @@
 "use client";
 
-import { toast } from "@/lib/toast";
-import { trpc } from "@/lib/trpc/client";
-import { useWriteFile } from "@/lib/useManageFile";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
-import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import ButtonIcon, { ButtonSize } from "../ui/buttonIcon";
 import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import SimpleForm from "../ui/simpleform";
-import Confirmation from "../ui/confirmation";
-import Spinner from "../ui/spinner";
 import { twMerge } from "tailwind-merge";
+
+import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
+import ButtonIcon, { ButtonSize } from "../ui/buttonIcon";
+import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
+import { useWriteFile } from "@/lib/useManageFile";
+import Confirmation from "../ui/confirmation";
+import SimpleForm from "../ui/simpleform";
+import { trpc } from "@/lib/trpc/client";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
 
 type CertificationFormValues = {
   name: string;
@@ -35,13 +36,13 @@ type OptionItem = {
 export const CreateCertification = ({ userId }: CreateCertificationProps) => {
   const [groupId, setGroupId] = useState("");
   const [moduleIds, setModuleIds] = useState<Map<string, OptionItem>>(
-    new Map()
+    new Map(),
   );
   const [activityIds, setActivityIds] = useState<Map<string, OptionItem>>(
-    new Map()
+    new Map(),
   );
   const [obtentionDate, setObtentionDate] = useState<Date>(
-    new Date(Date.now())
+    new Date(Date.now()),
   );
   const [file, setFile] = useState<File>();
 
@@ -83,7 +84,7 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
   for (const a of selectedGroup?.modules
     .filter((m) => moduleIds.get(m.id)?.selected)
     .flatMap((m) =>
-      m.certificationModuleActivityGroups.map((a) => a.activityGroup)
+      m.certificationModuleActivityGroups.map((a) => a.activityGroup),
     ) ?? []) {
     selectedActivities.set(a.id, a);
   }
@@ -126,9 +127,9 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
       const activities = Array.from(
         new Set(
           selectedModules.flatMap((m) =>
-            m.certificationModuleActivityGroups.map((a) => a.activityGroup.id)
-          ) ?? []
-        )
+            m.certificationModuleActivityGroups.map((a) => a.activityGroup.id),
+          ) ?? [],
+        ),
       );
       const aIds = new Map<string, OptionItem>();
       for (const a of activities) {
@@ -168,7 +169,7 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
                 <div
                   className={twMerge(
                     "flex",
-                    groupId === group.id && "badge badge-primary"
+                    groupId === group.id && "badge badge-primary",
                   )}
                 >
                   <button
@@ -655,7 +656,7 @@ function CertificationGroupForm({
             <div
               className={twMerge(
                 "flex w-full items-center justify-between text-center",
-                moduleId === mod.dbId && "badge badge-primary"
+                moduleId === mod.dbId && "badge badge-primary",
               )}
               onClick={() => selectModule(mod.dbId)}
             >

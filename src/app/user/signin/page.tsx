@@ -1,12 +1,13 @@
-import Head from "next/head";
 import { getTranslations } from "next-intl/server";
-import { getSession } from "@/lib/auth/server";
 import { redirect } from "next/navigation";
+import Head from "next/head";
+
+import { getSession } from "@/lib/auth/server";
+import CreateAccount from "./createAccount";
 import { auth } from "@/lib/auth/server";
+import Title from "@/components/title";
 import Providers from "./providers";
 import FormEmail from "./formEmail";
-import CreateAccount from "./createAccount";
-import Title from "@/components/title";
 
 export default async function SignIn({
   searchParams,
@@ -35,7 +36,7 @@ export default async function SignIn({
       </div>
     );
   if (signInCredentials) {
-    if (session?.user?.id) redirect("/videoach");
+    if (session?.user?.id) redirect("/fitlink");
   }
 
   return (

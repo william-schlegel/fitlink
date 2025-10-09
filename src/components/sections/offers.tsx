@@ -1,24 +1,25 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/client";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
-import ThemeSelector, { TThemes } from "../themeSelector";
-import { toast } from "@/lib/toast";
-import Spinner from "../ui/spinner";
-import Confirmation from "../ui/confirmation";
-import Modal, { getButtonSize } from "../ui/modal";
-import { useWriteFile } from "@/lib/useManageFile";
-import { isCUID } from "@/lib/utils";
-import { formatMoney, formatSize } from "@/lib/formatNumber";
-import ButtonIcon from "../ui/buttonIcon";
-import { PageSectionElementTypeEnum } from "@/db/schema/enums";
-import { useUser } from "@/lib/auth/client";
-import { TextError } from "../ui/simpleform";
 import Link from "next/link";
+
 import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
+import { PageSectionElementTypeEnum } from "@/db/schema/enums";
+import { formatMoney, formatSize } from "@/lib/formatNumber";
+import ThemeSelector, { TThemes } from "../themeSelector";
+import { useWriteFile } from "@/lib/useManageFile";
+import Modal, { getButtonSize } from "../ui/modal";
 import { List } from "@/app/member/[userId]/list";
+import Confirmation from "../ui/confirmation";
+import { TextError } from "../ui/simpleform";
+import { useUser } from "@/lib/auth/client";
+import ButtonIcon from "../ui/buttonIcon";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
 
 type OfferCreationProps = {
   clubId: string;
@@ -45,7 +46,7 @@ export const OfferCreation = ({ clubId, pageId }: OfferCreationProps) => {
     { pageId, section: "OFFERS" },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   useEffect(() => {
@@ -364,7 +365,7 @@ function OfferForm({
       if (!image) return;
       if (image.size > MAX_SIZE) {
         toast.error(
-          t("pages.image-size-error", { size: formatSize(MAX_SIZE) })
+          t("pages.image-size-error", { size: formatSize(MAX_SIZE) }),
         );
         setValue("images", undefined);
         return;
@@ -482,7 +483,7 @@ export const OfferDisplayCard = ({ pageId, clubId }: OfferDisplayProps) => {
     },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   if (querySection.isLoading) return <Spinner />;
@@ -528,7 +529,7 @@ function OfferContentCard({
   const user = useUser();
   const offerQuery = trpc.subscriptions.getSubscriptionById.useQuery(
     offer.optionValue ?? "",
-    { enabled: isCUID(offer.optionValue) }
+    { enabled: isCUID(offer.optionValue) },
   );
   const { shortInfo, sites, rooms, activityGroups, activities } =
     useDisplaySubscriptionInfo(
@@ -537,7 +538,7 @@ function OfferContentCard({
       offerQuery.data?.activitieGroups.map((ag) => ag.activityGroupId) ?? [],
       offerQuery.data?.activities.map((ag) => ag.activityId) ?? [],
       offerQuery.data?.sites.map((ag) => ag.siteId) ?? [],
-      offerQuery.data?.rooms.map((ag) => ag.roomId) ?? []
+      offerQuery.data?.rooms.map((ag) => ag.roomId) ?? [],
     );
   const t = useTranslations();
 

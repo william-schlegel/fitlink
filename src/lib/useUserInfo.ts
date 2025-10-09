@@ -1,10 +1,11 @@
 "use client";
 
-import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
+import { differenceInDays, isDate } from "date-fns";
 import { useEffect, useState } from "react";
+
+import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
 import { useSession } from "./auth/client";
 import { trpc } from "./trpc/client";
-import { differenceInDays, isDate } from "date-fns";
 
 export default function useUserInfo(userId?: string | null) {
   const [remainTrial, setRemainTrial] = useState(0);
@@ -17,7 +18,7 @@ export default function useUserInfo(userId?: string | null) {
     { id: uId, options: { withFeatures: true } },
     {
       enabled: typeof uId === "string",
-    }
+    },
   );
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function useUserInfo(userId?: string | null) {
       setRemainTrial(
         isDate(u.data.trialUntil)
           ? differenceInDays(u.data.trialUntil, new Date())
-          : 0
+          : 0,
       );
       setFeatures(u.data.features ?? []);
     }

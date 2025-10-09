@@ -45,17 +45,17 @@ function ButtonIcon({
       ? "txt-primary"
       : "txt-secondary"
     : primary
-    ? "btn btn-primary"
-    : "btn btn-secondary";
+      ? "btn btn-primary"
+      : "btn btn-secondary";
 
   const sz =
     buttonSize === "lg"
       ? "btn-lg"
       : buttonSize === "md"
-      ? "btn-md"
-      : buttonSize === "sm"
-      ? "btn-sm"
-      : "btn-xs";
+        ? "btn-md"
+        : buttonSize === "sm"
+          ? "btn-sm"
+          : "btn-xs";
 
   return fullButton ? (
     <label

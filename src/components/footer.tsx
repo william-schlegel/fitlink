@@ -1,7 +1,7 @@
-import { format } from "date-fns";
-import { useTranslations } from "next-intl";
 import { siYoutube, siX, siFacebook } from "simple-icons";
+import { useTranslations } from "next-intl";
 import { Stars } from "lucide-react";
+import { format } from "date-fns";
 
 export default function Footer() {
   const t = useTranslations("common");
@@ -10,7 +10,7 @@ export default function Footer() {
       <div className="flex items-center gap-4">
         <Stars size={60} />
         <p>
-          Videoach
+          Fitlink
           <br />
           {t("tag-line")}
           <br />

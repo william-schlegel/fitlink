@@ -1,12 +1,13 @@
 "use client";
 
-import { DayName } from "@/lib/dates/data";
-import { useDayName } from "@/lib/dates/useDayName";
-import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+
+import { useDayName } from "@/lib/dates/useDayName";
 import Spinner from "@/components/ui/spinner";
+import { DayName } from "@/lib/dates/data";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
 
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@/server/api/root";
@@ -39,7 +40,7 @@ export function CoachPlanning({
     { coachId, clubId },
     {
       enabled: isCUID(coachId),
-    }
+    },
   );
 
   useEffect(() => {

@@ -1,13 +1,14 @@
-import { Feature, FeatureContainer } from "@/components/ui/features";
-import { PricingComponent, PricingContainer } from "@/components/ui/pricing";
-import { getActualUser } from "@/lib/auth/server";
-import { getPricingForRole } from "@/server/api/routers/pricing";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { PricingComponent, PricingContainer } from "@/components/ui/pricing";
+import { Feature, FeatureContainer } from "@/components/ui/features";
+import { getPricingForRole } from "@/server/api/routers/pricing";
+import { getActualUser } from "@/lib/auth/server";
+
 /**
  *
- *  Manager presentation on Videoach page
+ *  Manager presentation on Fitlink page
  *
  */
 

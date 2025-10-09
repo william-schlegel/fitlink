@@ -1,24 +1,25 @@
 "use client";
-import { CoachingTargetEnum } from "@/db/schema/enums";
-import { toast } from "@/lib/toast";
-import { trpc } from "@/lib/trpc/client";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import Modal from "../ui/modal";
-import { isCUID } from "@/lib/utils";
-import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import Spinner from "../ui/spinner";
-import Confirmation from "../ui/confirmation";
 import {
   SubmitErrorHandler,
   SubmitHandler,
   useForm,
   useWatch,
 } from "react-hook-form";
-import { useUser } from "@/lib/auth/client";
-import { formatMoney } from "@/lib/formatNumber";
-import { COACHING_LEVEL, COACHING_TARGET } from "@/lib/offers/data";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+
 import { useCoachingLevel, useCoachingTarget } from "@/lib/offers/useOffers";
+import { COACHING_LEVEL, COACHING_TARGET } from "@/lib/offers/data";
+import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
+import { CoachingTargetEnum } from "@/db/schema/enums";
+import { formatMoney } from "@/lib/formatNumber";
+import Confirmation from "../ui/confirmation";
+import { useUser } from "@/lib/auth/client";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
+import Modal from "../ui/modal";
 
 type OfferFormValues = {
   name: string;
@@ -64,7 +65,7 @@ export const CreateOffer = ({ userId }: { userId: string }) => {
 
   const onSubmit = async (data: OfferFormValues) => {
     const levels = COACHING_LEVEL.filter((_, idx) => data.levels[idx]).map(
-      (l) => l.value
+      (l) => l.value,
     );
     createOffer.mutate({
       coachId: userId,
@@ -108,7 +109,7 @@ export const UpdateOffer = ({ userId, offerId }: PropsUpdateDelete) => {
     if (queryOffer.data) {
       const levels = COACHING_LEVEL.map(
         (l) =>
-          !!queryOffer.data?.coachingLevel?.find((cl) => cl.level === l.value)
+          !!queryOffer.data?.coachingLevel?.find((cl) => cl.level === l.value),
       );
       setInitialData({
         name: queryOffer.data?.name ?? "",
@@ -116,7 +117,7 @@ export const UpdateOffer = ({ userId, offerId }: PropsUpdateDelete) => {
         target: queryOffer.data?.target ?? "INDIVIDUAL",
         excludingTaxes: queryOffer.data?.excludingTaxes ?? false,
         startDate: formatDateAsYYYYMMDD(
-          queryOffer.data?.startDate ?? new Date(Date.now())
+          queryOffer.data?.startDate ?? new Date(Date.now()),
         ),
         inHouse: queryOffer.data?.inHouse ?? false,
         physical: queryOffer.data?.physical ?? false,
@@ -154,7 +155,7 @@ export const UpdateOffer = ({ userId, offerId }: PropsUpdateDelete) => {
 
   const onSubmit = async (data: OfferFormValues) => {
     const levels = COACHING_LEVEL.filter((_, idx) => data.levels[idx]).map(
-      (l) => l.value
+      (l) => l.value,
     );
     updateOffer.mutate({
       id: offerId,

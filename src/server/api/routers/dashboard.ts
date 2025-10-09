@@ -1,12 +1,13 @@
-import { db } from "@/db";
-import { user } from "@/db/schema/auth";
-import { club, event } from "@/db/schema/club";
-import { hasRole, isAdmin } from "@/server/lib/userTools";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
+import { asc, eq, gte } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { startOfToday } from "date-fns";
-import { asc, eq, gte } from "drizzle-orm";
 import { z } from "zod";
+
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
+import { hasRole, isAdmin } from "@/server/lib/userTools";
+import { club, event } from "@/db/schema/club";
+import { user } from "@/db/schema/auth";
+import { db } from "@/db";
 
 export async function getAdminData() {
   await isAdmin();
@@ -81,7 +82,7 @@ export async function getManagerDataForUserId(userId: string) {
       acc.activities += c.activities.length;
       return acc;
     },
-    initialValue
+    initialValue,
   );
   members = memberSet.size;
 

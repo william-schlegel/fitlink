@@ -1,6 +1,7 @@
+import { getTranslations } from "next-intl/server";
+
 import { CoachingTargetEnum } from "@/db/schema/enums";
 import { COACHING_TARGET } from "./data";
-import { getTranslations } from "next-intl/server";
 
 export function getOfferLabel(value?: CoachingTargetEnum | null) {
   return (

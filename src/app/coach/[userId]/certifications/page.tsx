@@ -1,15 +1,15 @@
-import Title from "@/components/title";
-import { getActualUser } from "@/lib/auth/server";
-import { getUserById } from "@/server/api/routers/users";
-import { getTranslations } from "next-intl/server";
 import { redirect, RedirectType } from "next/navigation";
-import DocButton from "./docButton";
-import { getCertificationsForCoach } from "@/server/api/routers/coachs";
+import { getTranslations } from "next-intl/server";
+
 import {
   CreateCertification,
   DeleteCertification,
   UpdateCertification,
 } from "@/components/modals/manageCertification";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { getActualUser } from "@/lib/auth/server";
+import Title from "@/components/title";
+import DocButton from "./docButton";
 
 export default async function ManageCertifications({
   params,
@@ -29,7 +29,11 @@ export default async function ManageCertifications({
   if (!user || (user.internalRole !== "COACH" && user.internalRole !== "ADMIN"))
     return <div className="alert alert-error">{t("coach.coach-only")}</div>;
 
-  const certificationQuery = await getCertificationsForCoach(userId);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+
+  const certificationQuery =
+    await caller.coachs.getCertificationsForCoach(userId);
   if (
     certificationQuery &&
     !certificationId &&
@@ -37,11 +41,14 @@ export default async function ManageCertifications({
   ) {
     redirect(
       `${userId}/certifications?certificationId=${certificationQuery.certifications[0].id}`,
-      RedirectType.replace
+      RedirectType.replace,
     );
   }
 
-  const { features } = await getUserById(userId, { withFeatures: true });
+  const { features } = await caller.users.getUserById({
+    id: userId,
+    options: { withFeatures: true },
+  });
 
   if (!features.includes("COACH_CERTIFICATION"))
     return (

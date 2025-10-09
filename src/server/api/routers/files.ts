@@ -1,22 +1,23 @@
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {
   S3Client,
   GetObjectCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
-import { env } from "@/env";
+import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { TRPCError } from "@trpc/server";
+import { and, eq } from "drizzle-orm";
+import { z } from "zod";
+
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { db } from "@/db";
-import { userDocument } from "@/db/schema/user";
-import { and, eq } from "drizzle-orm";
 import { userDocumentTypeEnum } from "@/db/schema/enums";
+import { userDocument } from "@/db/schema/user";
+import { env } from "@/env";
+import { db } from "@/db";
 
 const s3 = new S3Client({
   region: "eu-west-3",
@@ -26,13 +27,13 @@ const s3 = new S3Client({
   },
 });
 
-const Bucket = "videoach-dev";
-//process.env.NODE_ENV === "production" ? "videoach-prod" : "videoach-dev";
+const Bucket = "fitlink-dev";
+//process.env.NODE_ENV === "production" ? "fitlink-prod" : "fitlink-dev";
 
 export async function createPost(
   key: string,
   fileType: string,
-  maxSize: number = 1024 * 1024
+  maxSize: number = 1024 * 1024,
 ) {
   return await createPresignedPost(s3, {
     Bucket,
@@ -52,7 +53,7 @@ export async function getDocUrl(userId: string, documentId: string) {
     new GetObjectCommand({
       Bucket,
       Key: `${userId}/${documentId}`,
-    })
+    }),
   );
 }
 
@@ -60,7 +61,7 @@ export const fileRouter = createTRPCRouter({
   createPresignedUrl: protectedProcedure
     .input(
       z.object({
-        userId: z.string().cuid2(),
+        userId: z.string(),
         maxSize: z
           .number()
           .optional()
@@ -68,7 +69,7 @@ export const fileRouter = createTRPCRouter({
         fileType: z.string(),
         fileName: z.string(),
         documentType: z.enum(userDocumentTypeEnum.enumValues),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId) {
@@ -91,21 +92,21 @@ export const fileRouter = createTRPCRouter({
       const presigned = await createPost(
         `${userId}/${document[0].id}`,
         input.fileType,
-        input.maxSize
+        input.maxSize,
       );
       return { ...presigned, documentId: document[0].id };
     }),
   createPresignedUrlDirect: protectedProcedure
     .input(
       z.object({
-        userId: z.cuid2(),
+        userId: z.string(),
         fileId: z.uuid(),
         fileType: z.string(),
         maxSize: z
           .number()
           .optional()
           .default(1024 * 1024),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId) {
@@ -118,7 +119,7 @@ export const fileRouter = createTRPCRouter({
       const presigned = await createPost(
         `${userId}/${input.fileId}`,
         input.fileType,
-        input.maxSize
+        input.maxSize,
       );
       return { ...presigned };
     }),
@@ -140,9 +141,9 @@ export const fileRouter = createTRPCRouter({
   getDocumentsForUser: protectedProcedure
     .input(
       z.object({
-        userId: z.cuid2(),
+        userId: z.string(),
         documentType: z.enum(userDocumentTypeEnum.enumValues).optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId) {
@@ -156,20 +157,20 @@ export const fileRouter = createTRPCRouter({
           eq(userDocument.userId, input.userId),
           input.documentType
             ? eq(userDocument.documentType, input.documentType)
-            : undefined
+            : undefined,
         ),
       });
       const extendedDocuments = await Promise.all(
         documents.map(async (doc) => ({
           ...doc,
           url: await getDocUrl(input.userId, doc.id),
-        }))
+        })),
       );
       return extendedDocuments;
     }),
   deleteUserDocument: protectedProcedure
     .input(
-      z.object({ userId: z.string().cuid2(), documentId: z.string().cuid2() })
+      z.object({ userId: z.string().cuid2(), documentId: z.string().cuid2() }),
     )
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId) {

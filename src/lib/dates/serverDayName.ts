@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
-import { DayName, DAYS } from "./data";
 import { getDay, startOfToday } from "date-fns";
+
+import { DayName, DAYS } from "./data";
 
 export function getLabel(value?: DayName | null) {
   return DAYS.find((d) => d.value === value)?.label ?? "monday";

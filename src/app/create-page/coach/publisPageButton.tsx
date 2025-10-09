@@ -1,8 +1,9 @@
 "use client";
 
-import { toast } from "@/lib/toast";
-import { trpc } from "@/lib/trpc/client";
 import { useTranslations } from "next-intl";
+
+import { trpc } from "@/lib/trpc/client";
+import { toast } from "@/lib/toast";
 
 export default function PublishPageButton({
   userId,
@@ -19,7 +20,7 @@ export default function PublishPageButton({
     onSuccess(data) {
       utils.pages.getPageForCoach.invalidate(userId);
       toast.success(
-        t(data[0].published ? "page-published" : "page-unpublished")
+        t(data[0].published ? "page-published" : "page-unpublished"),
       );
     },
   });

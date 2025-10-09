@@ -1,10 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+
 import { DeleteGroup, UpdateGroup } from "@/components/modals/manageActivity";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 type AGContentProps = {
   agId: string;
@@ -29,7 +30,7 @@ export function AGContent({ agId }: AGContentProps) {
     agId,
     {
       enabled: isCUID(agId),
-    }
+    },
   );
 
   useEffect(() => {

@@ -2,23 +2,24 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
-import { isCUID } from "@/lib/utils";
-import { formatDateLocalized } from "@/lib/formatDate";
-import { formatMoney } from "@/lib/formatNumber";
-import Spinner from "@/components/ui/spinner";
+
 import {
   DeleteSubscription,
   UpdateSubscription,
   useSubscriptionMode,
   useSubscriptionRestriction,
 } from "@/components/modals/manageSubscription";
-import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
 import {
   SubscriptionModeEnum,
   SubscriptionRestrictionEnum,
 } from "@/db/schema/enums";
+import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
+import { formatDateLocalized } from "@/lib/formatDate";
+import { formatMoney } from "@/lib/formatNumber";
+import Spinner from "@/components/ui/spinner";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import { toast } from "@/lib/toast";
 
 type SubscriptionContentProps = {
   clubId: string;
@@ -45,17 +46,17 @@ export function SubscriptionContent({
     subscriptionId,
     {
       enabled: isCUID(subscriptionId),
-    }
+    },
   );
   useEffect(() => {
     if (subQuery.data) {
       setSelectedSites(subQuery.data?.sites.map((s) => s.siteId) ?? []);
       setSelectedRooms(subQuery.data?.rooms.map((s) => s.roomId) ?? []);
       setSelectedActivityGroups(
-        subQuery.data?.activitieGroups.map((s) => s.activityGroupId) ?? []
+        subQuery.data?.activitieGroups.map((s) => s.activityGroupId) ?? [],
       );
       setSelectedActivities(
-        subQuery.data?.activities.map((s) => s.activityId) ?? []
+        subQuery.data?.activities.map((s) => s.activityId) ?? [],
       );
     }
   }, [subQuery.data]);
@@ -66,7 +67,7 @@ export function SubscriptionContent({
     selectedActivityGroups,
     selectedActivities,
     selectedSites,
-    selectedRooms
+    selectedRooms,
   );
 
   const userCount = subQuery.data?.users.length ?? 0;
@@ -336,7 +337,7 @@ function SelectDataForMode({
         {t(
           mode === "ACTIVITY_GROUP"
             ? "subscription.mode.activity-group"
-            : "subscription.mode.activity"
+            : "subscription.mode.activity",
         )}
       </span>
       {choices.data?.activityGroups

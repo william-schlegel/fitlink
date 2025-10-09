@@ -1,93 +1,69 @@
-import { db } from "@/db";
-import { user } from "@/db/schema/auth";
-import { activity, club, clubCoachs, site } from "@/db/schema/club";
+import { asc, eq, inArray } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+import z from "zod";
+
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { asc, eq, inArray } from "drizzle-orm";
-import z from "zod";
-import { getDocUrl } from "../../../../files";
-import { page } from "@/db/schema/page";
-import { TRPCError } from "@trpc/server";
-import { userCoach, userDocument } from "@/db/schema/user";
+import { activity, club, clubCoachs, site } from "@/db/schema/club";
 import { openingCalendarClubs } from "@/db/schema/planning";
+import { userCoach, userDocument } from "@/db/schema/user";
+import { page } from "@/db/schema/page";
+import { user } from "@/db/schema/auth";
 import { isCUID } from "@/lib/utils";
-
-export async function getClubsForManager(userId: string) {
-  const userData = await db.query.user.findFirst({
-    where: eq(user.id, userId),
-    with: {
-      pricing: {
-        with: {
-          features: true,
-        },
-      },
-    },
-  });
-  const take = userData?.pricing?.features.find(
-    (f) => f.feature === "MANAGER_MULTI_CLUB"
-  )
-    ? undefined
-    : 1;
-  return db.query.club.findMany({
-    where: eq(club.managerId, userId),
-    orderBy: asc(club.name),
-    limit: take,
-  });
-}
-
-export async function getClubById(clubId: string, userId: string) {
-  if (!isCUID(clubId) || !userId) return null;
-  const userData = await db.query.user.findFirst({
-    where: eq(user.id, userId),
-    with: {
-      pricing: {
-        with: {
-          features: true,
-        },
-      },
-    },
-  });
-  const take: number | undefined = userData?.pricing?.features.find(
-    (f) => f.feature === "MANAGER_MULTI_SITE"
-  )
-    ? undefined
-    : 1;
-  const myClub = await db.query.club.findFirst({
-    where: eq(club.id, clubId),
-    with: {
-      sites: {
-        limit: take,
-        with: {
-          rooms: {
-            with: {
-              activities: {
-                with: {
-                  activity: true,
-                },
-              },
-            },
-          },
-        },
-      },
-
-      activities: { with: { group: true } },
-      logo: true,
-    },
-  });
-  let logoUrl = "";
-  if (myClub?.logoId) {
-    logoUrl = await getDocUrl(myClub.managerId, myClub.logoId);
-  }
-  return { ...myClub, logoUrl };
-}
+import { getDocUrl } from "./files";
+import { db } from "@/db";
 
 export const clubRouter = createTRPCRouter({
   getClubById: protectedProcedure
     .input(z.object({ clubId: z.cuid2(), userId: z.string() }))
-    .query(async ({ input }) => await getClubById(input.clubId, input.userId)),
+    .query(async ({ input }) => {
+      if (!isCUID(input.clubId) || !input.userId) return null;
+      const userData = await db.query.user.findFirst({
+        where: eq(user.id, input.userId),
+        with: {
+          pricing: {
+            with: {
+              features: true,
+            },
+          },
+        },
+      });
+      const take: number | undefined = userData?.pricing?.features.find(
+        (f) => f.feature === "MANAGER_MULTI_SITE",
+      )
+        ? undefined
+        : 1;
+      const myClub = await db.query.club.findFirst({
+        where: eq(club.id, input.clubId),
+        with: {
+          sites: {
+            limit: take,
+            with: {
+              rooms: {
+                with: {
+                  activities: {
+                    with: {
+                      activity: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+
+          activities: { with: { group: true } },
+          logo: true,
+        },
+      });
+      let logoUrl = "";
+      if (myClub?.logoId) {
+        logoUrl = await getDocUrl(myClub.managerId, myClub.logoId);
+      }
+      return { ...myClub, logoUrl };
+    }),
   getClubPagesForNavByClubId: publicProcedure
     .input(z.string())
     .query(async ({ input }) => {
@@ -123,12 +99,33 @@ export const clubRouter = createTRPCRouter({
     }),
   getClubsForManager: protectedProcedure
     .input(z.string())
-    .query(({ input }) => getClubsForManager(input)),
+    .query(async ({ input }) => {
+      const userData = await db.query.user.findFirst({
+        where: eq(user.id, input),
+        with: {
+          pricing: {
+            with: {
+              features: true,
+            },
+          },
+        },
+      });
+      const take = userData?.pricing?.features.find(
+        (f) => f.feature === "MANAGER_MULTI_CLUB",
+      )
+        ? undefined
+        : 1;
+      return db.query.club.findMany({
+        where: eq(club.managerId, input),
+        orderBy: asc(club.name),
+        limit: take,
+      });
+    }),
   getAllClubs: publicProcedure.query(async () =>
     db.query.club.findMany({
       orderBy: asc(club.name),
       with: { activities: { with: { group: true } }, pages: true },
-    })
+    }),
   ),
   createClub: protectedProcedure
     .input(
@@ -141,7 +138,7 @@ export const clubRouter = createTRPCRouter({
         latitude: z.number(),
         logoId: z.cuid2().optional(),
         isSite: z.boolean(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId)
@@ -190,7 +187,7 @@ export const clubRouter = createTRPCRouter({
         name: z.string(),
         address: z.string(),
         logoId: z.cuid2().nullable(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const initialClub = await db.query.club.findFirst({
@@ -252,7 +249,7 @@ export const clubRouter = createTRPCRouter({
       z.object({
         id: z.cuid2(),
         calendarId: z.cuid2(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       return db
@@ -286,7 +283,7 @@ export const clubRouter = createTRPCRouter({
       z.object({
         id: z.cuid2(),
         activities: z.array(z.string()),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const initialClub = await db.query.club.findFirst({
@@ -314,8 +311,8 @@ export const clubRouter = createTRPCRouter({
     .input(
       z.object({
         clubId: z.cuid2(),
-        coachUserId: z.cuid2(),
-      })
+        coachUserId: z.string(),
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const initialClub = await db.query.club.findFirst({

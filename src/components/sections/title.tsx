@@ -1,19 +1,20 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/client";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+
 import ThemeSelector, { TThemes } from "../themeSelector";
-import { toast } from "@/lib/toast";
-import Spinner from "../ui/spinner";
-import Confirmation from "../ui/confirmation";
-import { getButtonSize } from "../ui/modal";
 import { useWriteFile } from "@/lib/useManageFile";
-import { isCUID } from "@/lib/utils";
 import { formatSize } from "@/lib/formatNumber";
-import ButtonIcon from "../ui/buttonIcon";
+import Confirmation from "../ui/confirmation";
 import { useUser } from "@/lib/auth/client";
+import { getButtonSize } from "../ui/modal";
+import ButtonIcon from "../ui/buttonIcon";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
 
 type TitleCreationProps = {
   clubId: string;
@@ -41,7 +42,7 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
     {
       enabled: isCUID(clubId),
       refetchOnWindowFocus: false,
-    }
+    },
   );
   const fields = useWatch({ control });
   const utils = trpc.useContext();
@@ -52,7 +53,7 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
     { pageId, section: "TITLE" },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
       return;
     }
     const hc = querySection.data?.elements.find(
-      (e) => e.elementType === "HERO_CONTENT"
+      (e) => e.elementType === "HERO_CONTENT",
     );
     setImagePreview(hc?.images?.[0]?.url ?? "");
 
@@ -77,7 +78,7 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
   const writeFile = useWriteFile(
     clubQuery.data?.managerId ?? "",
     "PAGE_IMAGE",
-    MAX_SIZE
+    MAX_SIZE,
   );
   const createSection = trpc.pages.createPageSection.useMutation({
     onSuccess() {
@@ -138,7 +139,7 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
   const onSubmit: SubmitHandler<TitleCreationForm> = async (data) => {
     if (updating) {
       const hc = querySection?.data?.elements.find(
-        (e) => e.elementType === "HERO_CONTENT"
+        (e) => e.elementType === "HERO_CONTENT",
       );
       let docId: string | undefined;
       if (data.images?.[0]) {
@@ -309,10 +310,10 @@ export const TitleDisplay = ({ pageId }: TitleDisplayProps) => {
     },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
   const titleContent = querySection.data?.elements.find(
-    (e) => e.elementType === "HERO_CONTENT"
+    (e) => e.elementType === "HERO_CONTENT",
   );
   if (querySection.isLoading) return <Spinner />;
   if (!querySection.data) return <div>Title section unavailable</div>;

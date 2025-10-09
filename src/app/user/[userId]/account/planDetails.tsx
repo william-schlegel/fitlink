@@ -1,7 +1,8 @@
 "use client";
 
-import { formatMoney } from "@/lib/formatNumber";
 import { useTranslations } from "next-intl";
+
+import { formatMoney } from "@/lib/formatNumber";
 
 type PlanDetailsProps = {
   monthlyPayment: boolean;
@@ -26,8 +27,8 @@ export default function PlanDetails({
       {free
         ? t("account.free")
         : monthlyPayment
-        ? `${formatMoney(monthly)} ${t("account.per-month")}`
-        : `${formatMoney(yearly)} ${t("account.per-year")}`}
+          ? `${formatMoney(monthly)} ${t("account.per-month")}`
+          : `${formatMoney(yearly)} ${t("account.per-year")}`}
       )
     </>
   );

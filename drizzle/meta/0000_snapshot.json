@@ -93,12 +93,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -174,12 +170,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -189,9 +181,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -357,9 +347,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -445,17 +433,12 @@
         "VerificationToken_token_unique": {
           "name": "VerificationToken_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         },
         "VerificationToken_identifier_token_unique": {
           "name": "VerificationToken_identifier_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "identifier",
-            "token"
-          ]
+          "columns": ["identifier", "token"]
         }
       },
       "policies": {},
@@ -678,9 +661,7 @@
         "Club_logo_id_unique": {
           "name": "Club_logo_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "logo_id"
-          ]
+          "columns": ["logo_id"]
         }
       },
       "policies": {},
@@ -944,9 +925,7 @@
         "Event_document_id_unique": {
           "name": "Event_document_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "document_id"
-          ]
+          "columns": ["document_id"]
         }
       },
       "policies": {},
@@ -1204,9 +1183,7 @@
         "Certification_document_id_unique": {
           "name": "Certification_document_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "document_id"
-          ]
+          "columns": ["document_id"]
         }
       },
       "policies": {},
@@ -1905,16 +1882,12 @@
         "Page_coach_id_unique": {
           "name": "Page_coach_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "coach_id"
-          ]
+          "columns": ["coach_id"]
         },
         "Page_event_id_unique": {
           "name": "Page_event_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "event_id"
-          ]
+          "columns": ["event_id"]
         }
       },
       "policies": {},
@@ -3105,12 +3078,8 @@
           "name": "subscription_to_activity_subscription_id_Subscription_id_fk",
           "tableFrom": "subscription_to_activity",
           "tableTo": "Subscription",
-          "columnsFrom": [
-            "subscription_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subscription_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3118,12 +3087,8 @@
           "name": "subscription_to_activity_activity_id_Activity_id_fk",
           "tableFrom": "subscription_to_activity",
           "tableTo": "Activity",
-          "columnsFrom": [
-            "activity_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["activity_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3179,12 +3144,8 @@
           "name": "subscription_to_activity_group_subscription_id_Subscription_id_fk",
           "tableFrom": "subscription_to_activity_group",
           "tableTo": "Subscription",
-          "columnsFrom": [
-            "subscription_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subscription_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3192,12 +3153,8 @@
           "name": "subscription_to_activity_group_activity_group_id_ActivityGroup_id_fk",
           "tableFrom": "subscription_to_activity_group",
           "tableTo": "ActivityGroup",
-          "columnsFrom": [
-            "activity_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["activity_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3253,12 +3210,8 @@
           "name": "subscription_to_room_subscription_id_Subscription_id_fk",
           "tableFrom": "subscription_to_room",
           "tableTo": "Subscription",
-          "columnsFrom": [
-            "subscription_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subscription_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3266,12 +3219,8 @@
           "name": "subscription_to_room_room_id_Room_id_fk",
           "tableFrom": "subscription_to_room",
           "tableTo": "Room",
-          "columnsFrom": [
-            "room_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["room_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3327,12 +3276,8 @@
           "name": "subscription_to_site_subscription_id_Subscription_id_fk",
           "tableFrom": "subscription_to_site",
           "tableTo": "Subscription",
-          "columnsFrom": [
-            "subscription_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subscription_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3340,12 +3285,8 @@
           "name": "subscription_to_site_site_id_Site_id_fk",
           "tableFrom": "subscription_to_site",
           "tableTo": "Site",
-          "columnsFrom": [
-            "site_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["site_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3479,9 +3420,7 @@
         "UserCoach_user_id_unique": {
           "name": "UserCoach_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -3573,9 +3512,7 @@
         "UserManager_user_id_unique": {
           "name": "UserManager_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -3626,9 +3563,7 @@
         "UserMember_user_id_unique": {
           "name": "UserMember_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -3680,12 +3615,8 @@
           "name": "user_member_to_subscription_user_id_UserMember_id_fk",
           "tableFrom": "user_member_to_subscription",
           "tableTo": "UserMember",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3693,12 +3624,8 @@
           "name": "user_member_to_subscription_subscription_id_Subscription_id_fk",
           "tableFrom": "user_member_to_subscription",
           "tableTo": "Subscription",
-          "columnsFrom": [
-            "subscription_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subscription_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3826,10 +3753,7 @@
     "public.CoachMarketPlaceType": {
       "name": "CoachMarketPlaceType",
       "schema": "public",
-      "values": [
-        "SEARCH",
-        "OFFER"
-      ]
+      "values": ["SEARCH", "OFFER"]
     },
     "public.CoachingLevelList": {
       "name": "CoachingLevelList",
@@ -3847,10 +3771,7 @@
     "public.CoachingTarget": {
       "name": "CoachingTarget",
       "schema": "public",
-      "values": [
-        "INDIVIDUAL",
-        "COMPANY"
-      ]
+      "values": ["INDIVIDUAL", "COMPANY"]
     },
     "public.DayName": {
       "name": "DayName",
@@ -3907,10 +3828,7 @@
     "public.PackMode": {
       "name": "PackMode",
       "schema": "public",
-      "values": [
-        "PHYSICAL",
-        "WEBCAM"
-      ]
+      "values": ["PHYSICAL", "WEBCAM"]
     },
     "public.PageSectionElementType": {
       "name": "PageSectionElementType",
@@ -3961,42 +3879,22 @@
     "public.Role": {
       "name": "Role",
       "schema": "public",
-      "values": [
-        "MEMBER",
-        "COACH",
-        "MANAGER",
-        "MANAGER_COACH",
-        "ADMIN"
-      ]
+      "values": ["MEMBER", "COACH", "MANAGER", "MANAGER_COACH", "ADMIN"]
     },
     "public.RoomReservation": {
       "name": "RoomReservation",
       "schema": "public",
-      "values": [
-        "NONE",
-        "POSSIBLE",
-        "MANDATORY"
-      ]
+      "values": ["NONE", "POSSIBLE", "MANDATORY"]
     },
     "public.SubscriptionMode": {
       "name": "SubscriptionMode",
       "schema": "public",
-      "values": [
-        "ALL_INCLUSIVE",
-        "ACTIVITY_GROUP",
-        "ACTIVITY",
-        "DAY",
-        "COURSE"
-      ]
+      "values": ["ALL_INCLUSIVE", "ACTIVITY_GROUP", "ACTIVITY", "DAY", "COURSE"]
     },
     "public.SubscriptionRestriction": {
       "name": "SubscriptionRestriction",
       "schema": "public",
-      "values": [
-        "CLUB",
-        "SITE",
-        "ROOM"
-      ]
+      "values": ["CLUB", "SITE", "ROOM"]
     },
     "public.UserDocumentType": {
       "name": "UserDocumentType",

@@ -1,5 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+
 import {
   DeletePage,
   PageSectionModel,
@@ -7,18 +11,15 @@ import {
   usePageSection,
 } from "@/components/modals/managePage";
 import { ActivityGroupCreation } from "@/components/sections/activities";
-import { ActivityCreation } from "@/components/sections/activity";
-import { HeroCreation } from "@/components/sections/hero";
-import { OfferCreation } from "@/components/sections/offers";
 import { PlanningCreation } from "@/components/sections/planning";
+import { ActivityCreation } from "@/components/sections/activity";
+import { OfferCreation } from "@/components/sections/offers";
 import { TitleCreation } from "@/components/sections/title";
+import { HeroCreation } from "@/components/sections/hero";
 import Spinner from "@/components/ui/spinner";
-import { toast } from "@/lib/toast";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { toast } from "@/lib/toast";
 
 type PageContentProps = {
   pageId: string;
@@ -51,7 +52,7 @@ export default function PageContent({ pageId, clubId }: PageContentProps) {
       utils.pages.getPageById.invalidate(pageId);
       utils.pages.getPagesForClub.invalidate(clubId);
       toast.success(
-        t(data[0].published ? "page-published" : "page-unpublished")
+        t(data[0].published ? "page-published" : "page-unpublished"),
       );
     },
   });

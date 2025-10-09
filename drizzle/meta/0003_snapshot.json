@@ -93,12 +93,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -174,12 +170,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -189,9 +181,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -357,9 +347,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -445,17 +433,12 @@
         "VerificationToken_token_unique": {
           "name": "VerificationToken_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         },
         "VerificationToken_identifier_token_unique": {
           "name": "VerificationToken_identifier_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "identifier",
-            "token"
-          ]
+          "columns": ["identifier", "token"]
         }
       },
       "policies": {},
@@ -678,9 +661,7 @@
         "Club_logo_id_unique": {
           "name": "Club_logo_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "logo_id"
-          ]
+          "columns": ["logo_id"]
         }
       },
       "policies": {},
@@ -747,12 +728,8 @@
           "name": "ClubCoachs_club_id_Club_id_fk",
           "tableFrom": "ClubCoachs",
           "tableTo": "Club",
-          "columnsFrom": [
-            "club_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["club_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -760,12 +737,8 @@
           "name": "ClubCoachs_coach_user_id_UserCoach_user_id_fk",
           "tableFrom": "ClubCoachs",
           "tableTo": "UserCoach",
-          "columnsFrom": [
-            "coach_user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["coach_user_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -836,12 +809,8 @@
           "name": "ClubMembers_club_id_Club_id_fk",
           "tableFrom": "ClubMembers",
           "tableTo": "Club",
-          "columnsFrom": [
-            "club_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["club_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -849,12 +818,8 @@
           "name": "ClubMembers_member_user_id_UserMember_user_id_fk",
           "tableFrom": "ClubMembers",
           "tableTo": "UserMember",
-          "columnsFrom": [
-            "member_user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["member_user_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1072,9 +1037,7 @@
         "Event_document_id_unique": {
           "name": "Event_document_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "document_id"
-          ]
+          "columns": ["document_id"]
         }
       },
       "policies": {},
@@ -1223,12 +1186,8 @@
           "name": "RoomActivities_room_id_Room_id_fk",
           "tableFrom": "RoomActivities",
           "tableTo": "Room",
-          "columnsFrom": [
-            "room_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["room_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1236,12 +1195,8 @@
           "name": "RoomActivities_activity_id_Activity_id_fk",
           "tableFrom": "RoomActivities",
           "tableTo": "Activity",
-          "columnsFrom": [
-            "activity_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["activity_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1396,9 +1351,7 @@
         "Certification_document_id_unique": {
           "name": "Certification_document_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "document_id"
-          ]
+          "columns": ["document_id"]
         }
       },
       "policies": {},
@@ -1428,12 +1381,8 @@
           "name": "certification_activity_groups_certification_id_Certification_id_fk",
           "tableFrom": "certification_activity_groups",
           "tableTo": "Certification",
-          "columnsFrom": [
-            "certification_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["certification_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1441,12 +1390,8 @@
           "name": "certification_activity_groups_activity_group_id_ActivityGroup_id_fk",
           "tableFrom": "certification_activity_groups",
           "tableTo": "ActivityGroup",
-          "columnsFrom": [
-            "activity_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["activity_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1480,12 +1425,8 @@
           "name": "certification_certification_modules_certification_id_Certification_id_fk",
           "tableFrom": "certification_certification_modules",
           "tableTo": "Certification",
-          "columnsFrom": [
-            "certification_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["certification_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1493,12 +1434,8 @@
           "name": "certification_certification_modules_certification_module_id_CertificationModule_id_fk",
           "tableFrom": "certification_certification_modules",
           "tableTo": "CertificationModule",
-          "columnsFrom": [
-            "certification_module_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["certification_module_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1604,12 +1541,8 @@
           "name": "certification_module_activity_groups_certification_module_id_CertificationModule_id_fk",
           "tableFrom": "certification_module_activity_groups",
           "tableTo": "CertificationModule",
-          "columnsFrom": [
-            "certification_module_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["certification_module_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1617,12 +1550,8 @@
           "name": "certification_module_activity_groups_activity_group_id_ActivityGroup_id_fk",
           "tableFrom": "certification_module_activity_groups",
           "tableTo": "ActivityGroup",
-          "columnsFrom": [
-            "activity_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["activity_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1755,12 +1684,8 @@
           "name": "coach_market_place_activity_groups_coach_market_place_id_CoachMarketPlace_id_fk",
           "tableFrom": "coach_market_place_activity_groups",
           "tableTo": "CoachMarketPlace",
-          "columnsFrom": [
-            "coach_market_place_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["coach_market_place_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1768,12 +1693,8 @@
           "name": "coach_market_place_activity_groups_activity_group_id_ActivityGroup_id_fk",
           "tableFrom": "coach_market_place_activity_groups",
           "tableTo": "ActivityGroup",
-          "columnsFrom": [
-            "activity_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["activity_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1807,12 +1728,8 @@
           "name": "coach_market_place_certifications_coach_market_place_id_CoachMarketPlace_id_fk",
           "tableFrom": "coach_market_place_certifications",
           "tableTo": "CoachMarketPlace",
-          "columnsFrom": [
-            "coach_market_place_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["coach_market_place_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1820,12 +1737,8 @@
           "name": "coach_market_place_certifications_certification_id_Certification_id_fk",
           "tableFrom": "coach_market_place_certifications",
           "tableTo": "Certification",
-          "columnsFrom": [
-            "certification_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["certification_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1859,12 +1772,8 @@
           "name": "coach_market_place_sites_coach_market_place_id_CoachMarketPlace_id_fk",
           "tableFrom": "coach_market_place_sites",
           "tableTo": "CoachMarketPlace",
-          "columnsFrom": [
-            "coach_market_place_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["coach_market_place_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1872,12 +1781,8 @@
           "name": "coach_market_place_sites_site_id_Site_id_fk",
           "tableFrom": "coach_market_place_sites",
           "tableTo": "Site",
-          "columnsFrom": [
-            "site_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["site_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2259,16 +2164,12 @@
         "Page_coach_id_unique": {
           "name": "Page_coach_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "coach_id"
-          ]
+          "columns": ["coach_id"]
         },
         "Page_event_id_unique": {
           "name": "Page_event_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "event_id"
-          ]
+          "columns": ["event_id"]
         }
       },
       "policies": {},
@@ -2486,12 +2387,8 @@
           "name": "PageSectionElementDocuments_element_id_PageSectionElement_id_fk",
           "tableFrom": "PageSectionElementDocuments",
           "tableTo": "PageSectionElement",
-          "columnsFrom": [
-            "element_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["element_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2499,12 +2396,8 @@
           "name": "PageSectionElementDocuments_document_id_UserDocument_id_fk",
           "tableFrom": "PageSectionElementDocuments",
           "tableTo": "UserDocument",
-          "columnsFrom": [
-            "document_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["document_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2615,12 +2508,8 @@
           "name": "DayOpeningTimeCalendars_day_opening_time_id_DayOpeningTime_id_fk",
           "tableFrom": "DayOpeningTimeCalendars",
           "tableTo": "DayOpeningTime",
-          "columnsFrom": [
-            "day_opening_time_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["day_opening_time_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2628,12 +2517,8 @@
           "name": "DayOpeningTimeCalendars_opening_calendar_id_OpeningCalendar_id_fk",
           "tableFrom": "DayOpeningTimeCalendars",
           "tableTo": "OpeningCalendar",
-          "columnsFrom": [
-            "opening_calendar_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["opening_calendar_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2730,12 +2615,8 @@
           "name": "OpeningCalendarClubs_opening_calendar_id_OpeningCalendar_id_fk",
           "tableFrom": "OpeningCalendarClubs",
           "tableTo": "OpeningCalendar",
-          "columnsFrom": [
-            "opening_calendar_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["opening_calendar_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2743,12 +2624,8 @@
           "name": "OpeningCalendarClubs_club_id_Club_id_fk",
           "tableFrom": "OpeningCalendarClubs",
           "tableTo": "Club",
-          "columnsFrom": [
-            "club_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["club_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2819,12 +2696,8 @@
           "name": "OpeningCalendarPlannings_opening_calendar_id_OpeningCalendar_id_fk",
           "tableFrom": "OpeningCalendarPlannings",
           "tableTo": "OpeningCalendar",
-          "columnsFrom": [
-            "opening_calendar_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["opening_calendar_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2832,12 +2705,8 @@
           "name": "OpeningCalendarPlannings_planning_id_Planning_id_fk",
           "tableFrom": "OpeningCalendarPlannings",
           "tableTo": "Planning",
-          "columnsFrom": [
-            "planning_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["planning_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2908,12 +2777,8 @@
           "name": "OpeningCalendarRooms_opening_calendar_id_OpeningCalendar_id_fk",
           "tableFrom": "OpeningCalendarRooms",
           "tableTo": "OpeningCalendar",
-          "columnsFrom": [
-            "opening_calendar_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["opening_calendar_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2921,12 +2786,8 @@
           "name": "OpeningCalendarRooms_room_id_Room_id_fk",
           "tableFrom": "OpeningCalendarRooms",
           "tableTo": "Room",
-          "columnsFrom": [
-            "room_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["room_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2997,12 +2858,8 @@
           "name": "OpeningCalendarSites_opening_calendar_id_OpeningCalendar_id_fk",
           "tableFrom": "OpeningCalendarSites",
           "tableTo": "OpeningCalendar",
-          "columnsFrom": [
-            "opening_calendar_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["opening_calendar_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3010,12 +2867,8 @@
           "name": "OpeningCalendarSites_site_id_Site_id_fk",
           "tableFrom": "OpeningCalendarSites",
           "tableTo": "Site",
-          "columnsFrom": [
-            "site_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["site_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3117,12 +2970,8 @@
           "name": "OpeningTimeDays_opening_time_id_OpeningTime_id_fk",
           "tableFrom": "OpeningTimeDays",
           "tableTo": "OpeningTime",
-          "columnsFrom": [
-            "opening_time_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["opening_time_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3130,12 +2979,8 @@
           "name": "OpeningTimeDays_day_opening_time_id_DayOpeningTime_id_fk",
           "tableFrom": "OpeningTimeDays",
           "tableTo": "DayOpeningTime",
-          "columnsFrom": [
-            "day_opening_time_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["day_opening_time_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3957,12 +3802,8 @@
           "name": "subscription_to_activity_subscription_id_Subscription_id_fk",
           "tableFrom": "subscription_to_activity",
           "tableTo": "Subscription",
-          "columnsFrom": [
-            "subscription_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subscription_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3970,12 +3811,8 @@
           "name": "subscription_to_activity_activity_id_Activity_id_fk",
           "tableFrom": "subscription_to_activity",
           "tableTo": "Activity",
-          "columnsFrom": [
-            "activity_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["activity_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4031,12 +3868,8 @@
           "name": "subscription_to_activity_group_subscription_id_Subscription_id_fk",
           "tableFrom": "subscription_to_activity_group",
           "tableTo": "Subscription",
-          "columnsFrom": [
-            "subscription_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subscription_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4044,12 +3877,8 @@
           "name": "subscription_to_activity_group_activity_group_id_ActivityGroup_id_fk",
           "tableFrom": "subscription_to_activity_group",
           "tableTo": "ActivityGroup",
-          "columnsFrom": [
-            "activity_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["activity_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4105,12 +3934,8 @@
           "name": "subscription_to_room_subscription_id_Subscription_id_fk",
           "tableFrom": "subscription_to_room",
           "tableTo": "Subscription",
-          "columnsFrom": [
-            "subscription_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subscription_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4118,12 +3943,8 @@
           "name": "subscription_to_room_room_id_Room_id_fk",
           "tableFrom": "subscription_to_room",
           "tableTo": "Room",
-          "columnsFrom": [
-            "room_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["room_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4179,12 +4000,8 @@
           "name": "subscription_to_site_subscription_id_Subscription_id_fk",
           "tableFrom": "subscription_to_site",
           "tableTo": "Subscription",
-          "columnsFrom": [
-            "subscription_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subscription_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4192,12 +4009,8 @@
           "name": "subscription_to_site_site_id_Site_id_fk",
           "tableFrom": "subscription_to_site",
           "tableTo": "Site",
-          "columnsFrom": [
-            "site_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["site_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4331,9 +4144,7 @@
         "UserCoach_user_id_unique": {
           "name": "UserCoach_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -4425,9 +4236,7 @@
         "UserManager_user_id_unique": {
           "name": "UserManager_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -4478,9 +4287,7 @@
         "UserMember_user_id_unique": {
           "name": "UserMember_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -4532,12 +4339,8 @@
           "name": "user_member_to_subscription_user_id_UserMember_id_fk",
           "tableFrom": "user_member_to_subscription",
           "tableTo": "UserMember",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4545,12 +4348,8 @@
           "name": "user_member_to_subscription_subscription_id_Subscription_id_fk",
           "tableFrom": "user_member_to_subscription",
           "tableTo": "Subscription",
-          "columnsFrom": [
-            "subscription_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subscription_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4678,10 +4477,7 @@
     "public.CoachMarketPlaceType": {
       "name": "CoachMarketPlaceType",
       "schema": "public",
-      "values": [
-        "SEARCH",
-        "OFFER"
-      ]
+      "values": ["SEARCH", "OFFER"]
     },
     "public.CoachingLevelList": {
       "name": "CoachingLevelList",
@@ -4699,10 +4495,7 @@
     "public.CoachingTarget": {
       "name": "CoachingTarget",
       "schema": "public",
-      "values": [
-        "INDIVIDUAL",
-        "COMPANY"
-      ]
+      "values": ["INDIVIDUAL", "COMPANY"]
     },
     "public.DayName": {
       "name": "DayName",
@@ -4759,10 +4552,7 @@
     "public.PackMode": {
       "name": "PackMode",
       "schema": "public",
-      "values": [
-        "PHYSICAL",
-        "WEBCAM"
-      ]
+      "values": ["PHYSICAL", "WEBCAM"]
     },
     "public.PageSectionElementType": {
       "name": "PageSectionElementType",
@@ -4813,42 +4603,22 @@
     "public.Role": {
       "name": "Role",
       "schema": "public",
-      "values": [
-        "MEMBER",
-        "COACH",
-        "MANAGER",
-        "MANAGER_COACH",
-        "ADMIN"
-      ]
+      "values": ["MEMBER", "COACH", "MANAGER", "MANAGER_COACH", "ADMIN"]
     },
     "public.RoomReservation": {
       "name": "RoomReservation",
       "schema": "public",
-      "values": [
-        "NONE",
-        "POSSIBLE",
-        "MANDATORY"
-      ]
+      "values": ["NONE", "POSSIBLE", "MANDATORY"]
     },
     "public.SubscriptionMode": {
       "name": "SubscriptionMode",
       "schema": "public",
-      "values": [
-        "ALL_INCLUSIVE",
-        "ACTIVITY_GROUP",
-        "ACTIVITY",
-        "DAY",
-        "COURSE"
-      ]
+      "values": ["ALL_INCLUSIVE", "ACTIVITY_GROUP", "ACTIVITY", "DAY", "COURSE"]
     },
     "public.SubscriptionRestriction": {
       "name": "SubscriptionRestriction",
       "schema": "public",
-      "values": [
-        "CLUB",
-        "SITE",
-        "ROOM"
-      ]
+      "values": ["CLUB", "SITE", "ROOM"]
     },
     "public.UserDocumentType": {
       "name": "UserDocumentType",

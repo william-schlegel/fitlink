@@ -1,20 +1,21 @@
-import { db } from "@/db";
-import { activityGroup, club, room, site } from "@/db/schema/club";
-import { activity } from "@/db/schema/club";
-import { subscription } from "@/db/schema/subscription";
-import {
-  subscriptionModeEnum,
-  subscriptionRestrictionEnum,
-} from "@/db/schema/enums";
+import { asc, eq, inArray } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { z } from "zod";
-import { asc, eq, inArray } from "drizzle-orm";
+import {
+  subscriptionModeEnum,
+  subscriptionRestrictionEnum,
+} from "@/db/schema/enums";
+import { activityGroup, club, room, site } from "@/db/schema/club";
+import { subscription } from "@/db/schema/subscription";
+import { activity } from "@/db/schema/club";
 import { isCUID } from "@/lib/utils";
-import { TRPCError } from "@trpc/server";
+import { db } from "@/db";
 
 const subscriptionObject = z.object({
   id: z.cuid2(),
@@ -34,7 +35,7 @@ export async function getDataNames(
   siteIds: string[],
   roomIds: string[],
   activityGroupIds: string[],
-  activityIds: string[]
+  activityIds: string[],
 ) {
   const sites = await db.query.site.findMany({
     where: inArray(site.id, siteIds),
@@ -90,7 +91,7 @@ export const subscriptionRouter = createTRPCRouter({
         .update(subscription)
         .set(input)
         .where(eq(subscription.id, input.id!))
-        .returning()
+        .returning(),
     ),
   updateSubscriptionSelection: protectedProcedure
     .input(
@@ -100,7 +101,7 @@ export const subscriptionRouter = createTRPCRouter({
         rooms: z.array(z.cuid2()),
         activityGroups: z.array(z.cuid2()),
         activities: z.array(z.cuid2()),
-      })
+      }),
     )
     .mutation(({ input }) => {
       return null;
@@ -151,7 +152,7 @@ export const subscriptionRouter = createTRPCRouter({
         restriction: z.enum(subscriptionRestrictionEnum.enumValues),
         siteIds: z.array(z.cuid2()),
         roomIds: z.array(z.cuid2()),
-      })
+      }),
     )
     .query(async ({ input }) => {
       if (input.mode === "ACTIVITY_GROUP") {
@@ -203,7 +204,7 @@ export const subscriptionRouter = createTRPCRouter({
               for (const activity of room.activities)
                 activityGroups.set(
                   activity.activity.groupId,
-                  activity.activity.group
+                  activity.activity.group,
                 );
 
           return { activityGroups: Array.from(activityGroups.values()) };
@@ -232,7 +233,7 @@ export const subscriptionRouter = createTRPCRouter({
             for (const activity of room.activities)
               activityGroups.set(
                 activity.activity.groupId,
-                activity.activity.group
+                activity.activity.group,
               );
 
           return { activityGroups: Array.from(activityGroups.values()) };
@@ -292,14 +293,14 @@ export const subscriptionRouter = createTRPCRouter({
         roomIds: z.array(z.cuid2()),
         activityGroupIds: z.array(z.cuid2()),
         activityIds: z.array(z.cuid2()),
-      })
+      }),
     )
     .query(async ({ input }) =>
       getDataNames(
         input.siteIds,
         input.roomIds,
         input.activityGroupIds,
-        input.activityIds
-      )
+        input.activityIds,
+      ),
     ),
 });

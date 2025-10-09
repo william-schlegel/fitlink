@@ -1,34 +1,35 @@
 "use client";
 
-import { useUser } from "@/lib/auth/client";
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import { toast } from "@/lib/toast";
-import { trpc } from "@/lib/trpc/client";
-import { useWriteFile } from "@/lib/useManageFile";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import Modal from "../ui/modal";
-import { isCUID } from "@/lib/utils";
 import {
   SubmitErrorHandler,
   SubmitHandler,
   useForm,
   useWatch,
 } from "react-hook-form";
-import { formatSize } from "@/lib/formatNumber";
-import ButtonIcon from "../ui/buttonIcon";
-import AddressSearch from "../ui/addressSearch";
 import MapComponent, { Marker } from "react-map-gl/mapbox";
-import "mapbox-gl/dist/mapbox-gl.css";
-import { env } from "@/env";
-import Confirmation from "../ui/confirmation";
-import FindCoach from "../sections/findCoach";
-import Image from "next/image";
-import CollapsableGroup from "../ui/collapsableGroup";
-import Rating from "../ui/rating";
-import Link from "next/link";
-import Spinner from "../ui/spinner";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import "mapbox-gl/dist/mapbox-gl.css";
+import Image from "next/image";
+import Link from "next/link";
+
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import CollapsableGroup from "../ui/collapsableGroup";
+import { useWriteFile } from "@/lib/useManageFile";
+import AddressSearch from "../ui/addressSearch";
+import { formatSize } from "@/lib/formatNumber";
+import FindCoach from "../sections/findCoach";
+import Confirmation from "../ui/confirmation";
+import { useUser } from "@/lib/auth/client";
+import ButtonIcon from "../ui/buttonIcon";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
+import Rating from "../ui/rating";
+import Modal from "../ui/modal";
+import { env } from "@/env";
 
 const MAX_SIZE_LOGO = 1024 * 1024;
 
@@ -100,7 +101,7 @@ export const UpdateClub = ({ clubId }: PropsUpdateDelete) => {
     { clubId, userId },
     {
       enabled: isCUID(clubId) && userId !== "",
-    }
+    },
   );
   useEffect(() => {
     if (queryClub.data) {
@@ -116,7 +117,7 @@ export const UpdateClub = ({ clubId }: PropsUpdateDelete) => {
   const saveLogo = useWriteFile(
     queryClub.data?.managerId ?? "",
     "IMAGE",
-    MAX_SIZE_LOGO
+    MAX_SIZE_LOGO,
   );
   const updateClub = trpc.clubs.updateClub.useMutation({
     onSuccess: () => {
@@ -508,7 +509,7 @@ type IdName = {
 };
 
 type CoachDataPresentationProps = {
-  url: string;
+  url?: string;
   activityGroups: IdName[];
   certifications: { id: string; name: string; modules: IdName[] }[];
   rating: number;
@@ -527,14 +528,16 @@ export function CoachDataPresentation({
   const t = useTranslations("club");
   return (
     <>
-      <Image
-        src={url}
-        width={300}
-        height={300}
-        alt=""
-        style={{ objectFit: "contain" }}
-        className="rounded-md shadow"
-      />
+      {url ? (
+        <Image
+          src={url}
+          width={300}
+          height={300}
+          alt=""
+          style={{ objectFit: "contain" }}
+          className="rounded-md shadow"
+        />
+      ) : null}
 
       <div className="flex flex-col gap-2">
         <label>{t("activity.activities")}</label>

@@ -1,5 +1,16 @@
 "use client";
 
+import {
+  type FormEventHandler,
+  Fragment,
+  type ReactNode,
+  type HTMLInputTypeAttribute,
+} from "react";
+import { useTranslations } from "next-intl";
+import { twMerge } from "tailwind-merge";
+
+import Spinner from "./spinner";
+
 import type {
   UseFormRegister,
   FieldErrors,
@@ -7,15 +18,6 @@ import type {
   FieldValues,
   RegisterOptions,
 } from "react-hook-form";
-import {
-  type FormEventHandler,
-  Fragment,
-  type ReactNode,
-  type HTMLInputTypeAttribute,
-} from "react";
-import Spinner from "./spinner";
-import { useTranslations } from "next-intl";
-import { twMerge } from "tailwind-merge";
 
 type SimpleFormField<T> = {
   label?: string;
@@ -52,7 +54,7 @@ export default function SimpleForm<T extends FieldValues>({
     <form
       className={twMerge(
         "grid grid-cols-[auto_1fr] gap-2 items-start",
-        className
+        className,
       )}
       onSubmit={typeof onSubmit === "function" ? (e) => onSubmit(e) : undefined}
     >
@@ -66,8 +68,8 @@ export default function SimpleForm<T extends FieldValues>({
             field.required === true
               ? true
               : typeof field.required === "string"
-              ? field.required
-              : undefined;
+                ? field.required
+                : undefined;
 
           const inputRegisterOptions = {
             ...(requiredOption !== undefined
@@ -89,7 +91,7 @@ export default function SimpleForm<T extends FieldValues>({
                   <label
                     className={twMerge(
                       "label cursor-pointer justify-start gap-4",
-                      field.required && "required"
+                      field.required && "required",
                     )}
                   >
                     <input
@@ -107,7 +109,7 @@ export default function SimpleForm<T extends FieldValues>({
                     <label
                       className={twMerge(
                         field.required && "required",
-                        isTextArea && "self-start"
+                        isTextArea && "self-start",
                       )}
                     >
                       {field.label}
@@ -126,7 +128,7 @@ export default function SimpleForm<T extends FieldValues>({
                             inputRegisterOptions as unknown as RegisterOptions<
                               T,
                               Path<T>
-                            >
+                            >,
                           )}
                           type={field.type || "text"}
                           disabled={field.disabled}
@@ -141,7 +143,7 @@ export default function SimpleForm<T extends FieldValues>({
                           textareaRegisterOptions as unknown as RegisterOptions<
                             T,
                             Path<T>
-                          >
+                          >,
                         )}
                         disabled={field.disabled}
                         rows={field.rows}
@@ -153,7 +155,7 @@ export default function SimpleForm<T extends FieldValues>({
                           inputRegisterOptions as unknown as RegisterOptions<
                             T,
                             Path<T>
-                          >
+                          >,
                         )}
                         type={field.type || "text"}
                         disabled={field.disabled}

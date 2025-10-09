@@ -1,26 +1,27 @@
 "use client";
 
 import {
-  SubscriptionModeEnum,
-  SubscriptionRestrictionEnum,
-} from "@/db/schema/enums";
-import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import { toast } from "@/lib/toast";
-import { trpc } from "@/lib/trpc/client";
-import {
   SubmitErrorHandler,
   SubmitHandler,
   useForm,
   FormProvider,
   useFormContext,
 } from "react-hook-form";
-import Modal, { TModalVariant } from "../ui/modal";
-import { useEffect } from "react";
-import { isCUID } from "@/lib/utils";
-import { useUser } from "@/lib/auth/client";
-import Confirmation from "../ui/confirmation";
-import SimpleForm from "../ui/simpleform";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
+
+import {
+  SubscriptionModeEnum,
+  SubscriptionRestrictionEnum,
+} from "@/db/schema/enums";
+import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
+import Modal, { TModalVariant } from "../ui/modal";
+import Confirmation from "../ui/confirmation";
+import { useUser } from "@/lib/auth/client";
+import SimpleForm from "../ui/simpleform";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import { toast } from "@/lib/toast";
 
 type SubscriptionFormValues = {
   name: string;
@@ -108,7 +109,7 @@ export const UpdateSubscription = ({
     subscriptionId,
     {
       enabled: isCUID(subscriptionId),
-    }
+    },
   );
 
   useEffect(() => {

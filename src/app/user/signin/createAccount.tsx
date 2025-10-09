@@ -1,13 +1,14 @@
 "use client";
 
-import Modal from "@/components/ui/modal";
-import SimpleForm from "@/components/ui/simpleform";
-import { toast } from "@/lib/toast";
-import { trpc } from "@/lib/trpc/client";
+import { SubmitErrorHandler } from "react-hook-form";
+import { SubmitHandler } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { SubmitHandler } from "react-hook-form";
-import { SubmitErrorHandler } from "react-hook-form";
+
+import SimpleForm from "@/components/ui/simpleform";
+import Modal from "@/components/ui/modal";
+import { trpc } from "@/lib/trpc/client";
+import { toast } from "@/lib/toast";
 
 type AccountFormValues = {
   name: string;

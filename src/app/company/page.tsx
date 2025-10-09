@@ -1,18 +1,19 @@
 "use client";
-import ActivitySearch from "@/components/ui/activitySearch";
-import AddressSearch from "@/components/ui/addressSearch";
-import CollapsableGroup from "@/components/ui/collapsableGroup";
-import Rating from "@/components/ui/rating";
-import Spinner from "@/components/ui/spinner";
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import { formatMoney } from "@/lib/formatNumber";
-import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
+import { useForm, useWatch } from "react-hook-form";
+import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+
+import CollapsableGroup from "@/components/ui/collapsableGroup";
+import ActivitySearch from "@/components/ui/activitySearch";
+import AddressSearch from "@/components/ui/addressSearch";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { formatMoney } from "@/lib/formatNumber";
+import Spinner from "@/components/ui/spinner";
+import Rating from "@/components/ui/rating";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
 
 type SearchFormValues = {
   activity: string;
@@ -58,7 +59,7 @@ export default function CoachPage() {
       priceMax: fields.priceMax,
       range: fields.range,
     },
-    { enabled: false, refetchOnWindowFocus: false }
+    { enabled: false, refetchOnWindowFocus: false },
   );
   const { data } = offerQuery;
 
@@ -84,7 +85,7 @@ export default function CoachPage() {
             <div className="mb-2 flex justify-around">
               <CollapsableGroup
                 groupName={`${t("home.price-range")} (${formatMoney(
-                  fields.priceMax
+                  fields.priceMax,
                 )})`}
                 className="w-fit"
               >
@@ -98,7 +99,7 @@ export default function CoachPage() {
               </CollapsableGroup>
               <CollapsableGroup
                 groupName={`${t(
-                  "home.distance-range"
+                  "home.distance-range",
                 )} (${fields.range?.toFixed(0)}km)`}
                 className="w-fit"
               >

@@ -1,17 +1,18 @@
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { and, asc, eq, gte, lte } from "drizzle-orm";
 import { z } from "zod";
+
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { db } from "@/db";
-import { and, asc, eq, gte, lte } from "drizzle-orm";
-import { room, site } from "@/db/schema/club";
-import { calculateBBox, calculateDistance } from "@/lib/distance";
-import { user } from "@/db/schema/auth";
 import { pricing, pricingFeature } from "@/db/schema/subscription";
+import { calculateBBox, calculateDistance } from "@/lib/distance";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { roomReservationEnum } from "@/db/schema/enums";
+import { room, site } from "@/db/schema/club";
+import { user } from "@/db/schema/auth";
+import { db } from "@/db";
 
 const SiteObject = z.object({
   id: z.cuid2(),
@@ -47,7 +48,7 @@ export async function getSitesForClub(clubId: string, userId: string) {
   });
 
   const limit = u?.pricing?.features.find(
-    (f) => f.feature === "MANAGER_MULTI_SITE"
+    (f) => f.feature === "MANAGER_MULTI_SITE",
   )
     ? undefined
     : 1;
@@ -114,7 +115,7 @@ export const siteRouter = createTRPCRouter({
           longitude: input.longitude,
           latitude: input.latitude,
         })
-        .returning()
+        .returning(),
     ),
   updateSite: protectedProcedure
     .input(SiteObject.partial())
@@ -162,7 +163,7 @@ export const siteRouter = createTRPCRouter({
       db
         .insert(room)
         .values({ ...input })
-        .returning()
+        .returning(),
     ),
   updateRoom: protectedProcedure
     .input(RoomObject.partial())
@@ -199,20 +200,20 @@ export const siteRouter = createTRPCRouter({
         locationLng: z.number().default(LONGITUDE),
         locationLat: z.number().default(LATITUDE),
         range: z.number().max(100).default(25),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const bbox = calculateBBox(
         input.locationLng,
         input.locationLat,
-        input.range
+        input.range,
       );
       const sites = await db.query.site.findMany({
         where: and(
           gte(site.longitude, bbox?.[0]?.[0] ?? LONGITUDE),
           lte(site.longitude, bbox?.[1]?.[0] ?? LONGITUDE),
           gte(site.latitude, bbox?.[1]?.[1] ?? LATITUDE),
-          lte(site.latitude, bbox?.[0]?.[1] ?? LATITUDE)
+          lte(site.latitude, bbox?.[0]?.[1] ?? LATITUDE),
         ),
 
         with: {
@@ -228,7 +229,7 @@ export const siteRouter = createTRPCRouter({
             input.locationLng,
             input.locationLat,
             site.longitude ?? 0,
-            site.latitude ?? 0
+            site.latitude ?? 0,
           ),
         }))
         .filter((c) => c.distance <= input.range);

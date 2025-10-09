@@ -1,9 +1,10 @@
 "use client";
-import { twMerge } from "tailwind-merge";
-import { Pricing } from "./page";
 import { useRouter } from "next/navigation";
-import createLink from "@/lib/createLink";
+import { twMerge } from "tailwind-merge";
+
 import { formatMoney } from "@/lib/formatNumber";
+import createLink from "@/lib/createLink";
+import { Pricing } from "./page";
 
 export default function PricingCard({
   pricingId,
@@ -17,7 +18,7 @@ export default function PricingCard({
     <button
       className={twMerge(
         "flex w-full items-center justify-between text-center",
-        pricingId === pricing.id && "active"
+        pricingId === pricing.id && "active",
       )}
       onClick={() => router.push(createLink({ pricingId: pricing.id }))}
     >

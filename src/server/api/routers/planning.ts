@@ -1,19 +1,20 @@
-import { db } from "@/db";
-import { user } from "@/db/schema/auth";
-import { activity, club, room, site } from "@/db/schema/club";
-import { dayNameEnum } from "@/db/schema/enums";
-import { planning, planningActivity, reservation } from "@/db/schema/planning";
-import { userCoach } from "@/db/schema/user";
-import { DayName } from "@/lib/dates/data";
-import { getDayName } from "@/lib/dates/days";
+import { and, asc, eq, inArray, lte } from "drizzle-orm";
+import z from "zod";
+
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
+import { planning, planningActivity, reservation } from "@/db/schema/planning";
+import { activity, club, room, site } from "@/db/schema/club";
+import { dayNameEnum } from "@/db/schema/enums";
+import { getDayName } from "@/lib/dates/days";
+import { userCoach } from "@/db/schema/user";
+import { DayName } from "@/lib/dates/data";
+import { user } from "@/db/schema/auth";
 import { isCUID } from "@/lib/utils";
-import { and, asc, eq, inArray, lte } from "drizzle-orm";
-import z from "zod";
+import { db } from "@/db";
 
 const planningObject = z.object({
   id: z.cuid2(),
@@ -39,13 +40,13 @@ const planningActivityObject = z.object({
 
 export async function getClubDailyPlanning(
   clubId: string,
-  day: (typeof dayNameEnum.enumValues)[number]
+  day: (typeof dayNameEnum.enumValues)[number],
 ) {
   if (!isCUID(clubId)) return null;
   const clubPlanning = await db.query.planning.findFirst({
     where: and(
       eq(planning.clubId, clubId),
-      lte(planning.startDate, new Date(Date.now()))
+      lte(planning.startDate, new Date(Date.now())),
     ),
     with: {
       club: true,
@@ -101,14 +102,14 @@ export async function getCoachDailyPlanning(coachId: string, day: DayName) {
     where: and(
       eq(planning.clubId, coachId),
       lte(planning.startDate, new Date(Date.now())),
-      eq(planningActivity.coachId, coachId)
+      eq(planningActivity.coachId, coachId),
     ),
     with: {
       club: true,
       planningActivities: {
         where: and(
           eq(planningActivity.day, day),
-          eq(planningActivity.coachId, coachId)
+          eq(planningActivity.coachId, coachId),
         ),
 
         with: {
@@ -158,7 +159,7 @@ export const planningRouter = createTRPCRouter({
         .update(planning)
         .set(input)
         .where(eq(planning.id, input.id ?? ""))
-        .returning()
+        .returning(),
     ),
   duplicatePlanningForClub: protectedProcedure
     .input(planningObject.partial())
@@ -190,7 +191,7 @@ export const planningRouter = createTRPCRouter({
             coachId: pa.coachId,
             siteId: pa.siteId,
             roomId: pa.roomId,
-          }))
+          })),
         );
         return newPlanning[0];
       });
@@ -201,7 +202,7 @@ export const planningRouter = createTRPCRouter({
   addPlanningActivity: protectedProcedure
     .input(planningActivityObject.omit({ id: true }))
     .mutation(({ input }) =>
-      db.insert(planningActivity).values(input).returning()
+      db.insert(planningActivity).values(input).returning(),
     ),
   updatePlanningActivity: protectedProcedure
     .input(planningActivityObject.partial())
@@ -210,7 +211,7 @@ export const planningRouter = createTRPCRouter({
         .update(planningActivity)
         .set(input)
         .where(eq(planningActivity.id, input.id ?? ""))
-        .returning()
+        .returning(),
     ),
   deletePlanningActivity: protectedProcedure
     .input(z.string())
@@ -218,14 +219,14 @@ export const planningRouter = createTRPCRouter({
       db
         .delete(planningActivity)
         .where(eq(planningActivity.id, input))
-        .returning()
+        .returning(),
     ),
   getClubDailyPlanning: publicProcedure
     .input(
       z.object({
         clubId: z.cuid2(),
         day: z.enum(dayNameEnum.enumValues),
-      })
+      }),
     )
     .query(({ input }) => getClubDailyPlanning(input.clubId, input.day)),
   getCoachDailyPlanning: protectedProcedure
@@ -233,23 +234,24 @@ export const planningRouter = createTRPCRouter({
       z.object({
         coachId: z.cuid2(),
         day: z.enum(dayNameEnum.enumValues),
-      })
+      }),
     )
     .query(
-      async ({ input }) => await getCoachDailyPlanning(input.coachId, input.day)
+      async ({ input }) =>
+        await getCoachDailyPlanning(input.coachId, input.day),
     ),
   getCoachPlanningForClub: protectedProcedure
     .input(
       z.object({
         coachId: z.cuid2(),
         clubId: z.cuid2(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const coachPlanning = await db.query.planning.findFirst({
         where: and(
           eq(planning.clubId, input.clubId),
-          lte(planning.startDate, new Date(Date.now()))
+          lte(planning.startDate, new Date(Date.now())),
         ),
         with: {
           club: true,
@@ -272,7 +274,7 @@ export const planningRouter = createTRPCRouter({
       z.object({
         memberId: z.cuid2(),
         date: z.date(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const userData = await db.query.user.findFirst({
@@ -295,13 +297,13 @@ export const planningRouter = createTRPCRouter({
       });
 
       const clubIds = Array.from(
-        new Set(userData?.memberData?.clubs.map((c) => c.clubId))
+        new Set(userData?.memberData?.clubs.map((c) => c.clubId)),
       );
 
       const planningClubs = await db.query.planning.findMany({
         where: and(
           lte(planning.startDate, new Date(Date.now())),
-          inArray(planning.clubId, clubIds)
+          inArray(planning.clubId, clubIds),
         ),
         with: { club: true },
       });
@@ -468,7 +470,7 @@ export const planningRouter = createTRPCRouter({
         memberId: z.cuid2(),
         planningActivityId: z.cuid2(),
         date: z.date(),
-      })
+      }),
     )
     .mutation(({ input }) =>
       db
@@ -478,12 +480,12 @@ export const planningRouter = createTRPCRouter({
           planningActivityId: input.planningActivityId,
           userId: input.memberId,
         })
-        .returning()
+        .returning(),
     ),
   deleteReservation: protectedProcedure
     .input(z.cuid2())
     .mutation(({ input }) =>
-      db.delete(reservation).where(eq(reservation.id, input))
+      db.delete(reservation).where(eq(reservation.id, input)),
     ),
   createActivityReservation: protectedProcedure
     .input(
@@ -493,7 +495,7 @@ export const planningRouter = createTRPCRouter({
         date: z.date(),
         activitySlot: z.number(),
         roomId: z.cuid2(),
-      })
+      }),
     )
     .mutation(({ input }) =>
       db
@@ -505,6 +507,6 @@ export const planningRouter = createTRPCRouter({
           activitySlot: input.activitySlot,
           roomId: input.roomId,
         })
-        .returning()
+        .returning(),
     ),
 });

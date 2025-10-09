@@ -1,12 +1,13 @@
-import Title from "@/components/title";
-import { getActualUser } from "@/lib/auth/server";
-import { getTranslations } from "next-intl/server";
 import { redirect, RedirectType } from "next/navigation";
-import { AGContent } from "./agContent";
-import Link from "next/link";
-import { getAllActivityGroups } from "@/server/api/routers/activities";
-import { NewGroup } from "@/components/modals/manageActivity";
+import { getTranslations } from "next-intl/server";
 import { twMerge } from "tailwind-merge";
+import Link from "next/link";
+
+import { NewGroup } from "@/components/modals/manageActivity";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { getActualUser } from "@/lib/auth/server";
+import { AGContent } from "./agContent";
+import Title from "@/components/title";
 
 export default async function ActivityGroupManagement({
   searchParams,
@@ -19,12 +20,14 @@ export default async function ActivityGroupManagement({
   const agId = (await searchParams).agId;
   if (user.internalRole !== "ADMIN") return <div>{t("admin-only")}</div>;
 
-  const agQuery = await getAllActivityGroups();
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const agQuery = await caller.activities.getAllActivityGroups();
 
   if (!agId && agQuery[0]?.id)
     redirect(
       `/admin/activitygroups?agId=${agQuery[0]?.id || ""}`,
-      RedirectType.replace
+      RedirectType.replace,
     );
 
   return (
@@ -43,7 +46,7 @@ export default async function ActivityGroupManagement({
                 <Link
                   className={twMerge(
                     "flex w-full items-center justify-between text-center",
-                    agId === ag.id && "badge badge-primary"
+                    agId === ag.id && "badge badge-primary",
                   )}
                   href={`/admin/activitygroups?agId=${ag.id}`}
                 >

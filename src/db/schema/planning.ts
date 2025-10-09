@@ -6,12 +6,13 @@ import {
   timestamp,
   integer,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
-import { user } from "./auth";
-import { dayNameEnum } from "./enums";
-import { activity, club, room, site } from "./club";
-import { userCoach } from "./user";
 import { createId } from "@paralleldrive/cuid2";
+import { relations } from "drizzle-orm";
+
+import { activity, club, room, site } from "./club";
+import { dayNameEnum } from "./enums";
+import { userCoach } from "./user";
+import { user } from "./auth";
 
 export const openingCalendar = pgTable("OpeningCalendar", {
   id: text("id").primaryKey().$defaultFn(createId),
@@ -48,7 +49,7 @@ export const planning = pgTable(
     index("planning_site_idx").on(table.siteId),
     index("planning_room_idx").on(table.roomId),
     index("planning_coach_idx").on(table.coachId),
-  ]
+  ],
 );
 
 export const planningRelations = relations(planning, ({ one, many }) => ({
@@ -91,7 +92,7 @@ export const planningActivity = pgTable(
     index("planning_activity_site_idx").on(table.siteId),
     index("planning_activity_room_idx").on(table.roomId),
     index("planning_activity_coach_idx").on(table.coachId),
-  ]
+  ],
 );
 export const planningActivityRelations = relations(
   planningActivity,
@@ -117,7 +118,7 @@ export const planningActivityRelations = relations(
       references: [userCoach.userId],
     }),
     reservations: many(reservation),
-  })
+  }),
 );
 
 export const reservation = pgTable(
@@ -137,7 +138,7 @@ export const reservation = pgTable(
     index("reservation_activity_idx").on(table.activityId),
     index("reservation_planning_activity_idx").on(table.planningActivityId),
     index("reservation_user_idx").on(table.userId),
-  ]
+  ],
 );
 export const reservationRelations = relations(reservation, ({ one }) => ({
   planningActivity: one(planningActivity, {
@@ -173,7 +174,7 @@ export const openingCalendarClubs = pgTable(
   (table) => [
     index("opening_calendar_clubs_calendar_idx").on(table.openingCalendarId),
     index("opening_calendar_clubs_club_idx").on(table.clubId),
-  ]
+  ],
 );
 
 export const openingCalendarSites = pgTable(
@@ -190,7 +191,7 @@ export const openingCalendarSites = pgTable(
   (table) => [
     index("opening_calendar_sites_calendar_idx").on(table.openingCalendarId),
     index("opening_calendar_sites_site_idx").on(table.siteId),
-  ]
+  ],
 );
 
 export const openingCalendarRooms = pgTable(
@@ -207,7 +208,7 @@ export const openingCalendarRooms = pgTable(
   (table) => [
     index("opening_calendar_rooms_calendar_idx").on(table.openingCalendarId),
     index("opening_calendar_rooms_room_idx").on(table.roomId),
-  ]
+  ],
 );
 
 export const openingCalendarPlannings = pgTable(
@@ -223,10 +224,10 @@ export const openingCalendarPlannings = pgTable(
   },
   (table) => [
     index("opening_calendar_plannings_calendar_idx").on(
-      table.openingCalendarId
+      table.openingCalendarId,
     ),
     index("opening_calendar_plannings_planning_idx").on(table.planningId),
-  ]
+  ],
 );
 
 export const dayOpeningTimeCalendars = pgTable(
@@ -243,9 +244,9 @@ export const dayOpeningTimeCalendars = pgTable(
   (table) => [
     index("day_opening_time_calendars_day_idx").on(table.dayOpeningTimeId),
     index("day_opening_time_calendars_calendar_idx").on(
-      table.openingCalendarId
+      table.openingCalendarId,
     ),
-  ]
+  ],
 );
 
 export const openingTimeDays = pgTable(
@@ -262,7 +263,7 @@ export const openingTimeDays = pgTable(
   (table) => [
     index("opening_time_days_time_idx").on(table.openingTimeId),
     index("opening_time_days_day_idx").on(table.dayOpeningTimeId),
-  ]
+  ],
 );
 
 // Relations for openingCalendar
@@ -274,7 +275,7 @@ export const openingCalendarRelations = relations(
     rooms: many(openingCalendarRooms),
     plannings: many(openingCalendarPlannings),
     dayOpeningTimes: many(dayOpeningTimeCalendars),
-  })
+  }),
 );
 
 // Relations for intermediate tables
@@ -289,7 +290,7 @@ export const openingCalendarClubsRelations = relations(
       fields: [openingCalendarClubs.clubId],
       references: [club.id],
     }),
-  })
+  }),
 );
 
 export const openingCalendarSitesRelations = relations(
@@ -303,7 +304,7 @@ export const openingCalendarSitesRelations = relations(
       fields: [openingCalendarSites.siteId],
       references: [site.id],
     }),
-  })
+  }),
 );
 
 export const openingCalendarRoomsRelations = relations(
@@ -317,7 +318,7 @@ export const openingCalendarRoomsRelations = relations(
       fields: [openingCalendarRooms.roomId],
       references: [room.id],
     }),
-  })
+  }),
 );
 
 export const openingCalendarPlanningsRelations = relations(
@@ -331,7 +332,7 @@ export const openingCalendarPlanningsRelations = relations(
       fields: [openingCalendarPlannings.planningId],
       references: [planning.id],
     }),
-  })
+  }),
 );
 
 // Relations for dayOpeningTime and openingTime
@@ -340,7 +341,7 @@ export const dayOpeningTimeRelations = relations(
   ({ many }) => ({
     openingTimes: many(openingTimeDays),
     calendars: many(dayOpeningTimeCalendars),
-  })
+  }),
 );
 
 export const dayOpeningTimeCalendarsRelations = relations(
@@ -354,7 +355,7 @@ export const dayOpeningTimeCalendarsRelations = relations(
       fields: [dayOpeningTimeCalendars.openingCalendarId],
       references: [openingCalendar.id],
     }),
-  })
+  }),
 );
 
 export const openingTimeRelations = relations(openingTime, ({ many }) => ({
@@ -372,5 +373,5 @@ export const openingTimeDaysRelations = relations(
       fields: [openingTimeDays.dayOpeningTimeId],
       references: [dayOpeningTime.id],
     }),
-  })
+  }),
 );

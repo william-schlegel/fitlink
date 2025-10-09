@@ -1,9 +1,10 @@
-import { env } from "@/env";
-import { createAuthClient } from "better-auth/react";
-import { trpc } from "../trpc/client";
 import { magicLinkClient } from "better-auth/client/plugins";
-import { GetUserByIdOptions } from "@/server/api/routers/users";
 import { adminClient } from "better-auth/client/plugins";
+import { createAuthClient } from "better-auth/react";
+
+import { GetUserByIdOptions } from "@/server/api/routers/users";
+import { trpc } from "../trpc/client";
+import { env } from "@/env";
 
 export const authClient = createAuthClient({
   baseURL: env.NEXT_PUBLIC_HOSTNAME,
@@ -19,7 +20,7 @@ export function useUser(options?: GetUserByIdOptions) {
     { id: userId ?? "", options },
     {
       enabled: !!userId && typeof userId == "string",
-    }
+    },
   );
   return user;
 }

@@ -1,22 +1,23 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/client";
-import Modal, { TModalVariant } from "../ui/modal";
-import { toast } from "@/lib/toast";
-import { isCUID } from "@/lib/utils";
 import {
   SubmitErrorHandler,
   SubmitHandler,
   useForm,
   useWatch,
 } from "react-hook-form";
-import { isDate } from "date-fns";
 import { useTranslations } from "next-intl";
-import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { useEffect, useState } from "react";
-import Spinner from "../ui/spinner";
+import { isDate } from "date-fns";
+
+import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
+import Modal, { TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { useUser } from "@/lib/auth/client";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
 
 type CreatePlanningProps = {
   clubId: string;
@@ -54,7 +55,7 @@ export const CreatePlanning = ({
     { clubId, userId },
     {
       enabled: isCUID(clubId),
-    }
+    },
   );
   const {
     register,
@@ -235,7 +236,7 @@ export function UpdatePlanning({
       onError(error) {
         toast.error(error.message);
       },
-    }
+    },
   );
 
   const t = useTranslations("planning");

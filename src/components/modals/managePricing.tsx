@@ -1,16 +1,6 @@
 "use client";
 
 import {
-  SubmitErrorHandler,
-  SubmitHandler,
-  useForm,
-  FormProvider,
-  useWatch,
-  useFormContext,
-} from "react-hook-form";
-import Modal, { type TModalVariant } from "../ui/modal";
-import { useEffect, useRef, type PropsWithoutRef } from "react";
-import {
   DndContext,
   closestCenter,
   KeyboardSensor,
@@ -27,16 +17,27 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
+import {
+  SubmitErrorHandler,
+  SubmitHandler,
+  useForm,
+  FormProvider,
+  useWatch,
+  useFormContext,
+} from "react-hook-form";
+import { useEffect, useRef, type PropsWithoutRef } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
-import Spinner from "../ui/spinner";
+
+import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
+import Modal, { type TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import ButtonIcon from "../ui/buttonIcon";
+import { CSS } from "@dnd-kit/utilities";
+import { trpc } from "@/lib/trpc/client";
 import { ROLE_LIST } from "@/lib/data";
-import { useRouter } from "next/navigation";
+import Spinner from "../ui/spinner";
+import { toast } from "@/lib/toast";
 
 type PricingFormValues = {
   title: string;
@@ -136,7 +137,7 @@ export const UpdatePricing = ({
     if (!queryPricing?.data) return;
 
     const featureList = getListForRole(
-      queryPricing.data?.roleTarget ?? "MEMBER"
+      queryPricing.data?.roleTarget ?? "MEMBER",
     );
 
     form.reset({
@@ -150,7 +151,7 @@ export const UpdatePricing = ({
       options: queryPricing.data?.options?.map((o) => o.name) ?? [],
       features:
         featureList.map((f) =>
-          queryPricing.data?.features.map((f) => f.feature).includes(f.value)
+          queryPricing.data?.features.map((f) => f.feature).includes(f.value),
         ) ?? [],
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -303,7 +304,7 @@ function PricingForm() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
   const { getListForRole } = useFeature();
 
@@ -644,7 +645,7 @@ export function useFeature() {
 
   function getListForRole(internalRole: RoleEnum) {
     return PRICING_FEATURES.filter((f) =>
-      f.internalRole.includes(internalRole)
+      f.internalRole.includes(internalRole),
     );
   }
 

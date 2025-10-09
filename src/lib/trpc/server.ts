@@ -1,9 +1,10 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
-import { ZodError } from "zod";
-import { auth } from "../auth/server";
-import { user } from "@/db/schema/auth";
 import { eq } from "drizzle-orm";
+import { ZodError } from "zod";
+
+import { user } from "@/db/schema/auth";
+import { auth } from "../auth/server";
 import { db } from "@/db";
 
 /**
