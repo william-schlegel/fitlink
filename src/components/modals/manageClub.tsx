@@ -9,7 +9,7 @@ import {
 import MapComponent, { Marker } from "react-map-gl/mapbox";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Image from "next/image";
 import Link from "next/link";
@@ -43,7 +43,7 @@ export const CreateClub = () => {
   const createClub = trpc.clubs.createClub.useMutation({
     onSuccess: () => {
       utils.clubs.getClubsForManager.invalidate(user?.id ?? "");
-      router.reload();
+      router.refresh();
       toast.success(t("club.created"));
     },
     onError(error) {

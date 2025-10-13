@@ -212,7 +212,7 @@ function OfferCard({ id }: { id: string }) {
           height={200}
           className="object-cover object-center"
         />
-        <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-20 px-4 py-2 text-accent">
+        <div className="absolute bottom-0 left-0 w-full bg-black/20 px-4 py-2 text-accent">
           <h3>{offer.data?.coach?.publicName}</h3>
           <p className="space-x-2">
             {offer.data?.coach?.searchAddress},

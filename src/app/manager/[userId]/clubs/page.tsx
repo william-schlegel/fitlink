@@ -6,6 +6,7 @@ import Link from "next/link";
 import { getUserById } from "@/server/api/routers/users";
 import CreateClub from "@/components/modals/manageClub";
 import LockedButton from "@/components/ui/lockedButton";
+import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { ClubContent } from "./clubContent";
@@ -39,38 +40,32 @@ export default async function ManageClubs({
   const headerList = await headers();
   const href = headerList.get("x-current-href");
 
+  const listClubs = clubQuery?.map((club) => ({
+    id: club.id,
+    name: club.name,
+    link: createLink({ clubId: club.id }, href),
+  }));
+
   return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title
-        title={t("club.manage-my-club", { count: clubQuery?.length ?? 0 })}
-      />
-      <div className="mb-4 flex flex-row items-center gap-4">
-        <h1>{t("club.manage-my-club", { count: clubQuery?.length ?? 0 })}</h1>
-        {features.includes("MANAGER_MULTI_CLUB") || !clubQuery?.length ? (
+    <LayoutPage
+      title={t("club.manage-my-club", { count: clubQuery?.length ?? 0 })}
+      titleComponents={
+        features.includes("MANAGER_MULTI_CLUB") || !clubQuery?.length ? (
           <CreateClub />
         ) : (
           <LockedButton label={t("club.create-new")} limited />
-        )}
-      </div>
-      <div className="flex gap-4">
-        <ul className="menu w-1/4 overflow-hidden rounded bg-base-100">
-          {clubQuery?.map((club) => (
-            <li key={club.id}>
-              <Link
-                href={createLink({ clubId: club.id }, href)}
-                className={twMerge(
-                  "w-full text-center",
-                  clubId === club.id && "badge badge-primary",
-                )}
-              >
-                {club.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        )
+      }
+    >
+      <LayoutPage.Main>
+        <LayoutPage.List
+          list={listClubs}
+          itemId={clubId}
+          noItemsText={t("club.no-club")}
+        />
 
         {clubId === "" ? null : <ClubContent userId={userId} clubId={clubId} />}
-      </div>
-    </div>
+      </LayoutPage.Main>
+    </LayoutPage>
   );
 }

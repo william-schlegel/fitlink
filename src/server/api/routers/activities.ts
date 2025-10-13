@@ -129,7 +129,7 @@ export const activityRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        userId: z.cuid2().optional().nullable(),
+        userId: z.string().optional().nullable(),
         default: z.boolean().optional().default(false),
       }),
     )

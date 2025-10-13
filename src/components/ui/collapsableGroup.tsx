@@ -1,29 +1,30 @@
-import { useState, type ReactNode } from "react";
+import { HTMLInputTypeAttribute, type ReactNode } from "react";
 
 type Props = {
   groupName: string;
   children: ReactNode;
   className?: string;
+  inputType?: "checkbox" | "radio";
+  inputName?: string;
 };
 
-function CollapsableGroup({ groupName, children, className }: Props) {
-  const [opened, setOpened] = useState(false);
+function CollapsableGroup({
+  groupName,
+  children,
+  className,
+  inputType,
+  inputName,
+}: Props) {
   return (
-    <button
-      onClick={() => setOpened((p) => !p)}
-      className={`pill ${className ?? ""}`}
-      type="button"
+    <div
+      className={`collapse collapse-arrow border border-base-300 bg-base-100 rounded-box ${className}`}
     >
-      <span className="text-primary">{groupName}</span>
-      <div className="flex flex-wrap items-center gap-2 transition-transform duration-200">
-        {opened ? <>{children}</> : null}
-        <i
-          className={`bx bx-chevron-right bx-sm ${
-            opened ? "rotate-180" : "rotate-0"
-          }`}
-        />
+      <input type={inputType ?? "checkbox"} name={inputName} />
+      <div className="collapse-title text-primary">{groupName}</div>
+      <div className="collapse-content flex flex-wrap items-center gap-2 transition-transform duration-200">
+        {children}
       </div>
-    </button>
+    </div>
   );
 }
 

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { CreateSubscription } from "@/components/modals/manageSubscription";
 import { getSubscriptionsForClub } from "@/server/api/routers/subscription";
 import createLink, { createHref } from "@/lib/createLink";
+import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { SubscriptionContent } from "./pageContent";
 import { getActualUser } from "@/lib/auth/server";
@@ -44,48 +45,37 @@ export default async function ManageSubscriptions({
   if (siteQuery.length && !subscriptionId)
     redirect(createLink({ subscriptionId: siteQuery[0]?.id }, href));
 
+  const listSubscriptions = siteQuery?.map((site) => ({
+    id: site.id,
+    name: site.name,
+    link: createLink({ subscriptionId: site.id }, href),
+  }));
+
   return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title
-        title={t("subscription.manage-my-subscriptions", {
-          count: siteQuery?.length ?? 0,
-        })}
-      />
-      <div className="mb-4 flex flex-row items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="flex items-center gap-4">
-            {t("subscription.manage-my-subscriptions", {
-              count: siteQuery?.length ?? 0,
-            })}
-            <span className="text-secondary">{clubQuery?.name}</span>
-          </h1>
+    <LayoutPage
+      title={t("subscription.manage-my-subscriptions", {
+        count: siteQuery?.length ?? 0,
+      })}
+      titleComponents={
+        <div className="flex items-center gap-4 justify-between">
           <CreateSubscription clubId={clubId} />
+          <Link
+            className="btn-outline btn btn-primary"
+            href={createHref(href, ["manager", userId, "clubs"], {
+              clubId: clubId,
+            })}
+          >
+            {t("subscription.back-to-clubs")}
+          </Link>
         </div>
-        <Link
-          className="btn-outline btn btn-primary"
-          href={createHref(href, ["manager", userId, "clubs"], {
-            clubId: clubId,
-          })}
-        >
-          {t("subscription.back-to-clubs")}
-        </Link>
-      </div>
-      <div className="flex gap-4">
-        <ul className="menu w-1/4 overflow-hidden rounded bg-base-100">
-          {siteQuery?.map((site) => (
-            <li key={site.id}>
-              <Link
-                href={createLink({ subscriptionId: site.id }, href)}
-                className={twMerge(
-                  "w-full text-center",
-                  subscriptionId === site.id && "badge badge-primary",
-                )}
-              >
-                {site.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
+      }
+    >
+      <LayoutPage.Main>
+        <LayoutPage.List
+          list={listSubscriptions}
+          itemId={subscriptionId}
+          noItemsText={t("subscription.no-subscription")}
+        />
 
         {subscriptionId === "" ? null : (
           <SubscriptionContent
@@ -94,7 +84,7 @@ export default async function ManageSubscriptions({
             subscriptionId={subscriptionId}
           />
         )}
-      </div>
-    </div>
+      </LayoutPage.Main>
+    </LayoutPage>
   );
 }

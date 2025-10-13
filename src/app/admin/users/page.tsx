@@ -1,15 +1,11 @@
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
-import { twMerge } from "tailwind-merge";
-import Link from "next/link";
 
 import { getAllUsers } from "@/server/api/routers/users";
-import { getRoleName } from "@/server/lib/userTools";
+import { LayoutPage } from "@/components/layoutPage";
 import Pagination from "@/components/ui/pagination";
 import { getActualUser } from "@/lib/auth/server";
 import { TUserFilter } from "./userFilter";
 import UserContent from "./userContent";
-import Title from "@/components/title";
 import UserFilter from "./userFilter";
 
 const PER_PAGE = 20;
@@ -32,16 +28,25 @@ export default async function UserManagement({
     take: PER_PAGE,
   });
 
+  const userList = userQuery.users.map((user) => ({
+    id: user.id,
+    name: user.name,
+    link: `/admin/users?userId=${user.id}`,
+    badgeColor:
+      user.internalRole === "MEMBER" ? "badge-secondary" : "badge-accent",
+    badgeText: tCommon(`roles.${user.internalRole ?? "MEMBER"}`),
+  }));
+
   return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title title={t("user.manage-users")} />
-      <div className="mb-4 flex flex-row items-center gap-4">
-        <h1>{t("user.manage-users")}</h1>
-      </div>
-      <div className="flex gap-4">
-        <div className="flex w-1/4 flex-col gap-4">
+    <LayoutPage title={t("user.manage-users")}>
+      <LayoutPage.Main>
+        <LayoutPage.List
+          list={userList}
+          itemId={userId}
+          noItemsText={t("user.no-users")}
+        >
           <div className="collapse-arrow rounded-box collapse border border-base-300 bg-base-100">
-            <input type="checkbox" />
+            <input type="checkbox" className="hidden" />
             <div className="collapse-title text-xl font-medium">
               <span className="flex items-center gap-4">
                 {t("user.filter")}
@@ -54,50 +59,17 @@ export default async function UserManagement({
               <UserFilter filter={parsedFilter} />
             </div>
           </div>
-          {userQuery.users.length === 0 ? (
-            <div className="text-center">
-              <p>{t("user.no-users")}</p>
-            </div>
-          ) : (
-            <ul className="menu overflow-hidden rounded bg-base-100">
-              {userQuery.users.map((user) => (
-                <li key={user.id}>
-                  <Link
-                    className={twMerge(
-                      "flex w-full items-center justify-between text-center",
-                      userId === user.id && "badge badge-primary",
-                    )}
-                    href={`/admin/users?userId=${user.id}`}
-                  >
-                    <span>{user.name}</span>
-                    <span
-                      className={`${
-                        user.internalRole === "MEMBER"
-                          ? "badge-secondary"
-                          : "badge-accent"
-                      } badge`}
-                    >
-                      {tCommon(`roles.${user.internalRole ?? "MEMBER"}`)}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
           <Pagination
             actualPage={page}
             count={userQuery.userCount ?? 0}
-            // onPageClick={(page) =>
-            //   redirect(
-            //     `/admin/users?page=${page}&filter=${JSON.stringify(filter)}`
-            //   )
-            // }
             perPage={PER_PAGE}
           />
-        </div>
+        </LayoutPage.List>
 
-        {userId === "" ? null : <UserContent userId={userId} />}
-      </div>
-    </div>
+        <LayoutPage.Content>
+          {userId === "" ? null : <UserContent userId={userId} />}
+        </LayoutPage.Content>
+      </LayoutPage.Main>
+    </LayoutPage>
   );
 }

@@ -61,7 +61,7 @@ export default function PageContent({ pageId, clubId }: PageContentProps) {
 
   if (queryPage.isLoading) return <Spinner />;
   return (
-    <article className="flex flex-grow flex-col gap-4">
+    <article className="flex grow flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between">
         <h2> {queryPage.data?.name}</h2>
         <div className="flex flex-wrap items-center gap-2">

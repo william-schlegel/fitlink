@@ -1,9 +1,8 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { twMerge } from "tailwind-merge";
-import Link from "next/link";
 
 import { NewGroup } from "@/components/modals/manageActivity";
+import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { AGContent } from "./agContent";
@@ -23,6 +22,14 @@ export default async function ActivityGroupManagement({
   const caller = await createTrpcCaller();
   if (!caller) return null;
   const agQuery = await caller.activities.getAllActivityGroups();
+  const agList = agQuery.map((ag) => ({
+    id: ag.id,
+    name: ag.name,
+    link: `/admin/activitygroups?agId=${ag.id}`,
+    badgeColor: ag.default ? "badge-primary" : "badge-secondary",
+    badgeText: ag.default ? undefined : ag.coach?.user.name,
+    badgeIcon: ag.default ? "bx bxs-star bx-xs text-accent" : undefined,
+  }));
 
   if (!agId && agQuery[0]?.id)
     redirect(
@@ -31,38 +38,17 @@ export default async function ActivityGroupManagement({
     );
 
   return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title title={t("ag.manage-ag")} />
-      <div className="mb-4 flex flex-row items-center gap-4">
-        <h1>{t("ag.manage-ag")}</h1>
-        <NewGroup />
-      </div>
-      <div className="flex gap-4">
-        <div className="w-1/4 ">
+    <LayoutPage title={t("ag.manage-ag")} titleComponents={<NewGroup />}>
+      <LayoutPage.Main>
+        <LayoutPage.List
+          list={agList}
+          itemId={agId}
+          noItemsText={t("ag.no-groups")}
+        >
           <h3>{t("ag.groups")}</h3>
-          <ul className="menu overflow-hidden rounded bg-base-100">
-            {agQuery?.map((ag) => (
-              <li key={ag.id}>
-                <Link
-                  className={twMerge(
-                    "flex w-full items-center justify-between text-center",
-                    agId === ag.id && "badge badge-primary",
-                  )}
-                  href={`/admin/activitygroups?agId=${ag.id}`}
-                >
-                  <span>{ag.name}</span>
-                  {ag.default ? (
-                    <i className="bx bxs-star bx-xs text-accent" />
-                  ) : (
-                    <span className="badge">{ag.coach?.user.name}</span>
-                  )}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+        </LayoutPage.List>
         {agId ? <AGContent agId={agId} /> : null}
-      </div>
-    </div>
+      </LayoutPage.Main>
+    </LayoutPage>
   );
 }

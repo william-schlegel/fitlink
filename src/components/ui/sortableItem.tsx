@@ -61,7 +61,7 @@ export function SortableItem({
   return (
     <SortableItemContext.Provider value={context}>
       <li
-        className={`flex flex-grow items-center justify-between rounded-md border border-neutral bg-base-100 px-4 py-2 text-base-content shadow-sm ${
+        className={`flex grow items-center justify-between rounded-md border border-neutral bg-base-100 px-4 py-2 text-base-content shadow-sm ${
           className ?? ""
         }`}
         ref={setNodeRef}
@@ -82,7 +82,7 @@ export function DragHandle({ className }: DragHandleProps) {
 
   return (
     <button
-      className={`flex w-3 cursor-pointer touch-none appearance-none items-center justify-center rounded-md border-none bg-transparent p-4 outline-none hover:bg-black hover:bg-opacity-5 focus-visible:outline-primary ${
+      className={`flex w-3 cursor-pointer touch-none appearance-none items-center justify-center rounded-md border-none bg-transparent p-4 outline-none hover:bg-black/5 focus-visible:outline-primary ${
         className ?? ""
       }`}
       {...attributes}

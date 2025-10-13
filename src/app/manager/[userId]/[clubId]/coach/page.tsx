@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { twMerge } from "tailwind-merge";
 import { headers } from "next/headers";
 import Link from "next/link";
 
@@ -9,10 +8,10 @@ import {
   CoachDataPresentation,
 } from "@/components/modals/manageClub";
 import createLink, { createHref } from "@/lib/createLink";
+import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { CoachPlanning } from "./coachPlanning";
-import Title from "@/components/title";
 
 export default async function ManageCoachs({
   params,
@@ -42,25 +41,20 @@ export default async function ManageCoachs({
   if (coachsQuery.length && !coachId)
     redirect(createLink({ coachId: coachsQuery[0]?.id }, href));
 
+  const coachList = coachsQuery.map((coach) => ({
+    id: coach.id,
+    name: coach.name,
+    link: createLink({ coachId: coach.id }),
+  }));
+
   return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title
-        title={t("coach.manage-my-coachs", {
-          count: coachsQuery?.length ?? 0,
-        })}
-      />
-      <header className="mb-4 flex flex-row items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="space-x-2">
-            <span className="text-secondary">{clubQuery?.name}</span>
-            <span>
-              {t("coach.manage-my-coachs", {
-                count: coachsQuery?.length ?? 0,
-              })}
-            </span>
-          </h1>
-        </div>
-        <div className="flex gap-4">
+    <LayoutPage
+      preTitle={clubQuery?.name}
+      title={t("coach.manage-my-coachs", {
+        count: coachsQuery?.length ?? 0,
+      })}
+      titleComponents={
+        <div className="flex items-center gap-4 justify-between">
           <AddCoachToClub clubId={clubId} userId={userId} />
           <Link
             className="btn-outline btn btn-primary"
@@ -69,29 +63,20 @@ export default async function ManageCoachs({
             {t("coach.back-to-clubs")}
           </Link>
         </div>
-      </header>
-      <aside className="flex gap-4">
-        <ul className="menu w-1/4 overflow-hidden rounded bg-base-100">
-          {coachsQuery?.map((coach) => (
-            <li key={coach.id}>
-              <Link
-                href={createLink({ coachId: coach.id })}
-                className={twMerge(
-                  "w-full text-center",
-                  coachId === coach.id && "badge badge-primary",
-                )}
-              >
-                {coach.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
+      }
+    >
+      <LayoutPage.Main>
+        <LayoutPage.List
+          list={coachList}
+          itemId={coachId}
+          noItemsText={t("coach.no-coachs")}
+        ></LayoutPage.List>
 
-        {coachId === "" ? null : (
+        {Boolean(coachId) ? (
           <CoachContent clubId={clubId} coachId={coachId} />
-        )}
-      </aside>
-    </div>
+        ) : null}
+      </LayoutPage.Main>
+    </LayoutPage>
   );
 }
 

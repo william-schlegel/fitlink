@@ -20,7 +20,7 @@ export default function Periodicity({
 
   const t = useTranslations("admin.user");
   return (
-    <span className="flex flex-grow items-center justify-between rounded border border-primary px-2 text-primary">
+    <span className="flex grow items-center justify-between rounded border border-primary px-2 text-primary">
       <span>{t("modify-period")}</span>
       <label className="swap">
         <input

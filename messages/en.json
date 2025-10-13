@@ -69,6 +69,7 @@
     "ag": {
       "manage-ag": "Manage activities",
       "groups": "Activity groups",
+      "no-groups": "No activity group found",
       "group-clubs": "Clubs using this group (activities)",
       "group-activities": "Activities attached to this group (club that created it)",
       "ag-created": "Activity group created",
@@ -252,6 +253,7 @@
   },
   "club": {
     "manager-only": "This page is reserved for club managers",
+    "no-club": "No club found",
     "select-club": "Select club",
     "name-mandatory": "Name is required",
     "address-mandatory": "Address is required",
@@ -354,6 +356,7 @@
       "find": "Find a coach",
       "add": "Add a coach",
       "coachs": "Coach list",
+      "no-coachs": "No coach found",
       "certifications": "Certifications",
       "view-page": "View their presentation page",
       "rating": "Rating",
@@ -372,6 +375,7 @@
     "subscription": {
       "manage-subscriptions": "Manage subscriptions",
       "manage-my-subscriptions": "{count, plural, =0 {No subscription offer yet} =1 {Manage my subscription offer} other {Manage my subscription offers}}",
+      "no-subscription": "No subscription found",
       "back-to-clubs": "Back to my clubs",
       "create": "Create a subscription",
       "create-new": "Create a new subscription",
@@ -951,6 +955,7 @@
     "coach": "Coach",
     "select-club": "Select club",
     "plannings": "Plannings",
+    "no-plannings": "No plannings found",
     "planning-created": "Planning created successfully",
     "create-new-planning": "Create a new planning",
     "start-date": "Start date",

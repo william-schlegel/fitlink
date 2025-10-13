@@ -46,12 +46,12 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
   const queryCoach = trpc.users.getUserById.useQuery(
     { id: userId, options: { withMemberData: true } },
     {
-      enabled: isCUID(userId),
+      enabled: Boolean(userId),
       refetchOnWindowFocus: false,
     },
   );
   const queryCoachData = trpc.pages.getCoachDataForPage.useQuery(userId, {
-    enabled: isCUID(userId),
+    enabled: Boolean(userId),
     refetchOnWindowFocus: false,
   });
   const fields = useWatch({ control: form.control });

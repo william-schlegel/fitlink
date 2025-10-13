@@ -17,6 +17,7 @@ import Link from "next/link";
 
 import { DeleteClub, UpdateClub } from "@/components/modals/manageClub";
 import CollapsableGroup from "@/components/ui/collapsableGroup";
+import AddActivity from "@/components/modals/manageActivity";
 import LockedButton from "@/components/ui/lockedButton";
 import ButtonIcon from "@/components/ui/buttonIcon";
 import { activityGroup } from "@/db/schema/club";
@@ -176,19 +177,25 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
                   count: clubQuery?.data?.activities?.length ?? 0,
                 })}
               </h3>
-              {/* <AddActivity
+              <AddActivity
                 clubId={clubId}
                 userId={userId}
                 onSuccess={() => {
-                  utils.clubs.getClubById.invalidate(clubId);
+                  utils.clubs.getClubById.invalidate({ clubId, userId });
                 }}
                 withAdd
                 withUpdate
-              /> */}
+              />
             </div>
-            <div className="flex flex-1 flex-wrap gap-2">
+            <div className="join join-vertical flex">
               {groups.map((gp) => (
-                <CollapsableGroup key={gp.id} groupName={gp.name}>
+                <CollapsableGroup
+                  key={gp.id}
+                  groupName={gp.name}
+                  className="join-item"
+                  inputType="radio"
+                  inputName="group"
+                >
                   {clubQuery.data?.activities
                     ?.filter((a) => a.groupId === gp.id)
                     ?.map((a) => (
@@ -215,14 +222,16 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
             <h3>{t("activity.manage-club-activities")}</h3>
             <p>{t("activity.manage-club-activities-help")}</p>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="join join-vertical">
             {clubQuery.data?.sites?.map((site) => (
               <div
                 key={site.id}
-                className="collapse-arrow rounded-box collapse border border-secondary bg-base-100"
+                className="collapse collapse-arrow join-item w-full bg-base-100 border-secondary border"
               >
                 <input type="checkbox" defaultChecked={true} />
-                <h4 className="collapse-title">{site.name}</h4>
+                <div className="collapse-title">
+                  <h4>{site.name}</h4>
+                </div>
                 <div className="collapse-content">
                   {site.rooms?.map((room) => (
                     <DroppableArea

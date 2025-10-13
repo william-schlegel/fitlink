@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 
 import { userNotification } from "@/db/schema/user";
 import { trpc } from "./trpc/client";
-import { isCUID } from "./utils";
 
 type UserNotification = typeof userNotification.$inferSelect;
 
@@ -15,7 +14,7 @@ function useNotifications(userId: string | undefined | null) {
   const getNotifications = trpc.notifications.getNotificationToUser.useQuery(
     { userToId: userId ?? "" },
     {
-      enabled: isCUID(userId),
+      enabled: Boolean(userId),
       refetchInterval: 1 * 60 * 1000, // 1'
     },
   );

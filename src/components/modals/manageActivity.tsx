@@ -30,7 +30,7 @@ const AddActivity = ({
   const [groupId, setGroupId] = useState("");
   const queryGroups = trpc.activities.getActivityGroupsForUser.useQuery(
     userId,
-    { enabled: isCUID(userId) },
+    { enabled: Boolean(userId) },
   );
 
   useEffect(() => {
@@ -44,7 +44,7 @@ const AddActivity = ({
       userId,
     },
     {
-      enabled: isCUID(clubId) && isCUID(userId),
+      enabled: isCUID(clubId) && Boolean(userId),
     },
   );
   const updateClubActivities = trpc.clubs.updateClubActivities.useMutation({

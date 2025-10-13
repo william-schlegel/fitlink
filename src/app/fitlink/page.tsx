@@ -15,7 +15,7 @@ export default async function FitlinkPage() {
       <section className="bg-gradient-home-hero hero min-h-screen">
         <div className="hero-content flex-col lg:flex-row-reverse">
           <Image
-            src="/images/image.png"
+            src="/images/photo.jpg"
             alt=""
             width={800}
             height={800}

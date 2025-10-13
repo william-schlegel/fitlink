@@ -21,7 +21,6 @@ import {
 import { getPlanningById } from "@/server/api/routers/planning";
 import { PlanningName } from "@/components/planningName";
 import Confirmation from "@/components/ui/confirmation";
-import { planningActivity } from "@/db/schema/planning";
 import { useDayName } from "@/lib/dates/useDayName";
 import { DayName, DAYS } from "@/lib/dates/data";
 import Spinner from "@/components/ui/spinner";
@@ -72,6 +71,7 @@ export function PlanningContent({
 }: PlanningContentProps) {
   const queryPlanning = trpc.plannings.getPlanningById.useQuery(planningId);
   const t = useTranslations("planning");
+  console.log("{ clubId, userId }", { clubId, userId });
   const queryClub = trpc.clubs.getClubById.useQuery({ clubId, userId });
   const queryActivities = trpc.activities.getActivitiesForClub.useQuery(
     {
@@ -79,7 +79,7 @@ export function PlanningContent({
       userId,
     },
     {
-      enabled: isCUID(clubId) && isCUID(userId),
+      enabled: isCUID(clubId) && Boolean(userId),
     },
   );
   const refModalDrop = useRef<HTMLInputElement>(null);
@@ -188,7 +188,7 @@ export function PlanningContent({
         </div>
       </div>
       {/* planning content */}
-      <article className="flex flex-grow flex-col gap-4">
+      <article className="flex grow flex-col gap-4">
         <section className="flex items-center justify-between">
           <h2>
             {queryPlanning.data ? (
@@ -239,7 +239,7 @@ export function PlanningContent({
             <div className="flex max-w-full gap-[1px] overflow-auto">
               {DAYS.map((day) => (
                 <div key={day.value} className="shrink-0">
-                  <div className="w-max-fit flex flex-shrink-0 flex-col">
+                  <div className="w-max-fit flex shrink-0 flex-col">
                     <DayLabel day={day.label} />
                     <div
                       className={`grid gap-[1px]`}

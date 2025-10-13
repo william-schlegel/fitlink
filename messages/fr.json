@@ -70,6 +70,7 @@
     "ag": {
       "manage-ag": "Gérer les activités",
       "groups": "Groupes d'activité",
+      "no-groups": "Aucun groupe d'activité trouvé",
       "group-clubs": "Clubs qui utilisent ce groupe (activités)",
       "group-activities": "Activités attachées à ce groupe (club qui l'a créée)",
       "ag-created": "Groupe d'activité créé",
@@ -261,6 +262,7 @@
 
     "club": {
       "manage-my-club": "{count, plural, =0 {Je n'ai encore aucun club} =1 {Gérer mon club} other {Gérer mes clubs}}",
+      "no-club": "Aucun club trouvé",
       "create-new": "Créer un nouveau club",
       "enter-new-club-info": "Saisissez les informations relatives à votre nouveau club",
       "name": "Nom du club",
@@ -358,6 +360,7 @@
       "find": "Trouver un coach",
       "add": "Ajouter un coach",
       "coachs": "Liste des coachs",
+      "no-coachs": "Aucun coach trouvé",
       "certifications": "Certifications",
       "view-page": "Voir sa page de présentation",
       "rating": "Note",
@@ -376,6 +379,7 @@
     "subscription": {
       "manage-subscriptions": "Gérer les abonnements",
       "manage-my-subscriptions": "{count, plural, =0 {Pas d'offre d'abonnement pour le moment} =1 {Gérer mon offre d'abonnement} other {Gérer mes offres d'abonnement}}",
+      "no-subscription": "Aucun abonnement trouvé",
       "back-to-clubs": "Retour à mes clubs",
       "create": "Créer un abonnement",
       "create-new": "Créer un nouvel abonnement",
@@ -962,6 +966,7 @@
     "coach": "Coach",
     "select-club": "Sélection du club",
     "plannings": "Plannings",
+    "no-plannings": "Aucun planning trouvé",
     "planning-created": "Planning créé avec succès",
     "create-new-planning": "Créer un nouveau planning",
     "start-date": "Date de démarrage",

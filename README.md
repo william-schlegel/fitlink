@@ -135,7 +135,7 @@ export function MyComponent() {
 
 ## Project Structure
 
-```
+```text
 src/
 ├── app/                    # Next.js App Router pages
 │   ├── api/               # API routes

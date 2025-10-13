@@ -119,7 +119,7 @@ export function CoachOfferPage({ offerId, condensed }: CoachOfferPageProps) {
             backgroundPosition: "center",
           }}
         >
-          <div className="mt-auto h-fit bg-black bg-opacity-20 px-4 py-2 text-accent xl:w-full">
+          <div className="mt-auto h-fit bg-black/20 px-4 py-2 text-accent xl:w-full">
             <h3 className="text-center text-accent">
               {offerQuery.data?.coach?.publicName}
             </h3>

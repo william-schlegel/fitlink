@@ -432,7 +432,7 @@ function PricingForm() {
             items={fields.options ?? []}
             strategy={verticalListSortingStrategy}
           >
-            <ul className="rounded border border-base-content border-opacity-20 p-2">
+            <ul className="rounded border border-base-content/20  p-2">
               {fields.options?.map((option, idx) => (
                 <Option key={idx} option={option} />
               ))}
