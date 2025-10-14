@@ -1,8 +1,14 @@
 import { and, desc, eq, lte } from "drizzle-orm";
 import { z } from "zod";
 
+import {
+  dayOpeningTime,
+  openingCalendar,
+  openingCalendarClubs,
+  openingCalendarRooms,
+  openingCalendarSites,
+} from "@/db/schema/planning";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
-import { dayOpeningTime, openingCalendar } from "@/db/schema/planning";
 import { dayNameEnum } from "@/db/schema/enums";
 import { room, site } from "@/db/schema/club";
 import { db } from "@/db";
@@ -62,8 +68,8 @@ export const calendarRouter = createTRPCRouter({
   getCalendarForSite: protectedProcedure
     .input(
       z.object({
-        siteId: z.string().cuid(),
-        clubId: z.string().cuid(),
+        siteId: z.cuid2(),
+        clubId: z.cuid2(),
         openWithClub: z.boolean().default(false),
       }),
     )
@@ -180,9 +186,16 @@ export const calendarRouter = createTRPCRouter({
       return roomCal;
     }),
   createCalendar: protectedProcedure
-    .input(z.object(CalendarData))
+    .input(
+      z.object({
+        calendar: z.object(CalendarData),
+        siteId: z.cuid2().optional(),
+        roomId: z.cuid2().optional(),
+        clubId: z.cuid2().optional(),
+      }),
+    )
     .mutation(({ input }) => {
-      const createOT = input.openingTime.map((i) => ({
+      const createOT = input.calendar.openingTime.map((i) => ({
         name: i.name,
         wholeDay: i.wholeDay,
         closed: i.closed,
@@ -194,10 +207,32 @@ export const calendarRouter = createTRPCRouter({
         },
       }));
       return db.transaction(async (tx) => {
-        const calendar = await tx.insert(openingCalendar).values({
-          startDate: input.startDate,
-        });
+        const calendar = await tx
+          .insert(openingCalendar)
+          .values({
+            startDate: input.calendar.startDate,
+          })
+          .returning();
+        const calendarId = calendar[0].id;
         await tx.insert(dayOpeningTime).values(createOT);
+        if (input.siteId) {
+          await tx.insert(openingCalendarSites).values({
+            siteId: input.siteId,
+            openingCalendarId: calendarId,
+          });
+        }
+        if (input.roomId) {
+          await tx.insert(openingCalendarRooms).values({
+            roomId: input.roomId,
+            openingCalendarId: calendarId,
+          });
+        }
+        if (input.clubId) {
+          await tx.insert(openingCalendarClubs).values({
+            clubId: input.clubId,
+            openingCalendarId: calendarId,
+          });
+        }
         return calendar;
       });
     }),

@@ -289,6 +289,7 @@
       "manage": "Gérer les sites d'activité",
       "manage-my-sites": "{count, plural, =0 {Je n'ai encore aucun site d'activité pour mon club} =1 {Gérer le site d'activité pour mon club} other {Gérer les sites d'activité pour mon club}}",
       "back-to-clubs": "Retour à mes clubs",
+      "no-sites": "Aucun site trouvé",
       "create": "Créer un nouveau site",
       "enter-info-new-site": "Saisissez les informations relatives à votre nouveau site d'activités",
       "update": "Mettre à jour le site d'activité",
@@ -326,6 +327,7 @@
     "room": {
       "room": "{count, plural, =0 {Aucune salle} =1 {Salle} other {Salles}}",
       "manage": "Gérer les salles",
+      "no-rooms": "Aucune salle trouvée",
       "reservation": "Réservation",
       "no-reservation": "Pas de réservation",
       "reservation-possible": "Possible",

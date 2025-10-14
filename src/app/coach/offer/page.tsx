@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { twMerge } from "tailwind-merge";
-import { headers } from "next/headers";
 import Link from "next/link";
 
 import {
@@ -14,6 +13,7 @@ import { getOfferName } from "@/lib/offers/serverOffer";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
+import { getHref } from "@/lib/getHref";
 import Title from "@/components/title";
 
 export default async function CoachOffer({
@@ -33,8 +33,7 @@ export default async function CoachOffer({
     return <div>{t("coach-only")}</div>;
 
   const offerId = (await searchParams).offerId;
-  const headerList = await headers();
-  const href = headerList.get("x-current-href");
+  const href = await getHref();
   const caller = await createTrpcCaller();
   if (!caller) return null;
   const offerQuery = await caller.coachs.getCoachOffers(userId);

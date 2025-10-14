@@ -1,7 +1,5 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { twMerge } from "tailwind-merge";
-import { headers } from "next/headers";
 import Link from "next/link";
 
 import { CreateSubscription } from "@/components/modals/manageSubscription";
@@ -11,7 +9,7 @@ import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { SubscriptionContent } from "./pageContent";
 import { getActualUser } from "@/lib/auth/server";
-import Title from "@/components/title";
+import { getHref } from "@/lib/getHref";
 
 export default async function ManageSubscriptions({
   params,
@@ -38,10 +36,8 @@ export default async function ManageSubscriptions({
   const { subscriptionId } = await searchParams;
   const caller = await createTrpcCaller();
   if (!caller) return null;
-  const clubQuery = await caller.clubs.getClubById({ clubId, userId });
   const siteQuery = await getSubscriptionsForClub(clubId);
-  const headerList = await headers();
-  const href = headerList.get("x-current-href");
+  const href = await getHref();
   if (siteQuery.length && !subscriptionId)
     redirect(createLink({ subscriptionId: siteQuery[0]?.id }, href));
 

@@ -1,7 +1,5 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { twMerge } from "tailwind-merge";
-import { headers } from "next/headers";
 import Link from "next/link";
 
 import { getSitesForClub } from "@/server/api/routers/sites";
@@ -9,9 +7,10 @@ import { CreateSite } from "@/components/modals/manageSite";
 import createLink, { createHref } from "@/lib/createLink";
 import { getUserById } from "@/server/api/routers/users";
 import LockedButton from "@/components/ui/lockedButton";
+import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
+import { getHref } from "@/lib/getHref";
 import SiteContent from "./siteContent";
-import Title from "@/components/title";
 
 export default async function ManageSites({
   params,
@@ -25,8 +24,7 @@ export default async function ManageSites({
   const user = await getUserById(userId, { withFeatures: true });
   if (!user) redirect("/", RedirectType.replace);
   const t = await getTranslations("club");
-  const headerList = await headers();
-  const href = headerList.get("x-current-href");
+  const href = await getHref();
   if (
     user.internalRole !== "MANAGER" &&
     user.internalRole !== "MANAGER_COACH" &&
@@ -41,56 +39,46 @@ export default async function ManageSites({
   if (siteQuery.length && !siteId)
     redirect(createLink({ siteId: siteQuery[0]?.id }, href), RedirectType.push);
 
+  const siteList = siteQuery.map((site) => ({
+    id: site.id,
+    name: site.name,
+    link: createLink({ siteId: site.id }, href),
+  }));
+
   return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title
-        title={t("site.manage-my-sites", {
-          count: siteQuery.length,
-        })}
-      />
-      <div className="mb-4 flex flex-row items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="flex items-center gap-4">
-            {t("site.manage-my-sites", { count: siteQuery?.length ?? 0 })}
-            <span className="text-secondary">{clubQuery?.name}</span>
-          </h1>
+    <LayoutPage
+      preTitle={clubQuery?.name}
+      title={t("site.manage-my-sites", {
+        count: siteQuery.length,
+      })}
+      titleComponents={
+        <div className="flex items-center gap-4 justify-between">
           {user.features.includes("MANAGER_MULTI_SITE") ||
           !siteQuery?.length ? (
             <CreateSite clubId={clubId} />
           ) : (
             <LockedButton label={t("site.create")} limited />
           )}
+          <Link
+            className="btn-outline btn btn-primary"
+            href={createHref(href, ["manager", userId, "clubs"], { clubId })}
+          >
+            {t("site.back-to-clubs")}
+          </Link>
         </div>
-        <Link
-          className="btn-outline btn btn-primary ml-4"
-          href={createHref(href, ["manager", userId, "clubs"], {
-            clubId: clubId,
-          })}
-        >
-          {t("site.back-to-clubs")}
-        </Link>
-      </div>
-      <div className="flex gap-4">
-        <ul className="menu w-1/4 overflow-hidden rounded bg-base-100">
-          {siteQuery?.map((site) => (
-            <li key={site.id}>
-              <Link
-                href={createLink({ siteId: site.id }, href)}
-                className={twMerge(
-                  "w-full text-center",
-                  siteId === site.id && "badge badge-primary",
-                )}
-              >
-                {site.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
+      }
+    >
+      <LayoutPage.Main>
+        <LayoutPage.List
+          list={siteList}
+          itemId={siteId}
+          noItemsText={t("site.no-sites")}
+        />
 
         {siteId === "" ? null : (
           <SiteContent userId={userId} clubId={clubId} siteId={siteId} />
         )}
-      </div>
-    </div>
+      </LayoutPage.Main>
+    </LayoutPage>
   );
 }

@@ -1,6 +1,5 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { headers } from "next/headers";
 
 import { getPlanningsForClub } from "@/server/api/routers/planning";
 import { PlanningName } from "@/components/planningName";
@@ -10,6 +9,7 @@ import { PlanningContent } from "./planningContent";
 import { getActualUser } from "@/lib/auth/server";
 import SelectClub from "@/components/selectClub";
 import createLink from "@/lib/createLink";
+import { getHref } from "@/lib/getHref";
 
 export default async function ClubPlanning({
   searchParams,
@@ -32,8 +32,7 @@ export default async function ClubPlanning({
 
   const { clubId, userId, planningId } = await searchParams;
 
-  const headerList = await headers();
-  const href = headerList.get("x-current-href");
+  const href = await getHref();
   const caller = await createTrpcCaller();
   if (!caller) return null;
   const queryClubs = await caller.clubs.getClubsForManager(userId ?? user.id);

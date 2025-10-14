@@ -1,7 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import { twMerge } from "tailwind-merge";
-import { headers } from "next/headers";
-import Link from "next/link";
 
 import { getUserById } from "@/server/api/routers/users";
 import CreateClub from "@/components/modals/manageClub";
@@ -11,7 +8,7 @@ import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { ClubContent } from "./clubContent";
 import createLink from "@/lib/createLink";
-import Title from "@/components/title";
+import { getHref } from "@/lib/getHref";
 
 export default async function ManageClubs({
   params,
@@ -37,8 +34,7 @@ export default async function ManageClubs({
   if (!caller) return null;
   const clubQuery = await caller.clubs.getClubsForManager(userId);
   const { features } = await getUserById(userId, { withFeatures: true });
-  const headerList = await headers();
-  const href = headerList.get("x-current-href");
+  const href = await getHref();
 
   const listClubs = clubQuery?.map((club) => ({
     id: club.id,

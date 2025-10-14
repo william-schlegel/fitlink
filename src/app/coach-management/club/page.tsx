@@ -2,7 +2,6 @@ import { redirect, RedirectType } from "next/navigation";
 import { inferProcedureOutput } from "@trpc/server";
 import { getTranslations } from "next-intl/server";
 import { twMerge } from "tailwind-merge";
-import { headers } from "next/headers";
 import Link from "next/link";
 
 import {
@@ -14,6 +13,7 @@ import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { AppRouter } from "@/server/api/root";
 import createLink from "@/lib/createLink";
+import { getHref } from "@/lib/getHref";
 import Title from "@/components/title";
 import { isCUID } from "@/lib/utils";
 
@@ -37,8 +37,7 @@ export default async function CoachManagementForClub({
     redirect("/", RedirectType.replace);
 
   const t = await getTranslations();
-  const headerList = await headers();
-  const href = headerList.get("x-current-href");
+  const href = await getHref();
 
   const caller = await createTrpcCaller();
   if (!caller) return null;

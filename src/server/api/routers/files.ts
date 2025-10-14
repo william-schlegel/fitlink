@@ -169,9 +169,7 @@ export const fileRouter = createTRPCRouter({
       return extendedDocuments;
     }),
   deleteUserDocument: protectedProcedure
-    .input(
-      z.object({ userId: z.string().cuid2(), documentId: z.string().cuid2() }),
-    )
+    .input(z.object({ userId: z.cuid2(), documentId: z.cuid2() }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId) {
         throw new TRPCError({

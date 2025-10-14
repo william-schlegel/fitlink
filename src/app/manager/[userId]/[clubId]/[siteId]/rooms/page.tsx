@@ -1,7 +1,6 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { twMerge } from "tailwind-merge";
-import { headers } from "next/headers";
 import Link from "next/link";
 
 import {
@@ -17,6 +16,7 @@ import {
 import createLink, { createHref } from "@/lib/createLink";
 import { getUserById } from "@/server/api/routers/users";
 import { RESERVATIONS } from "@/lib/data";
+import { getHref } from "@/lib/getHref";
 import Title from "@/components/title";
 import { isCUID } from "@/lib/utils";
 
@@ -32,8 +32,7 @@ export default async function ManageRooms({
   const user = await getUserById(userId, { withFeatures: true });
   if (!user) redirect("/", RedirectType.replace);
   const t = await getTranslations();
-  const headerList = await headers();
-  const href = headerList.get("x-current-href");
+  const href = await getHref();
   if (
     user.internalRole !== "MANAGER" &&
     user.internalRole !== "MANAGER_COACH" &&

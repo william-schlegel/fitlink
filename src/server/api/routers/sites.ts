@@ -129,13 +129,14 @@ export const siteRouter = createTRPCRouter({
           longitude: input.longitude,
           latitude: input.latitude,
         })
-        .where(eq(site.id, input.id!));
+        .where(eq(site.id, input.id!))
+        .returning();
     }),
   // updateSiteCalendar: protectedProcedure
   //   .input(
   //     z.object({
-  //       id: z.string().cuid2(),
-  //       calendarId: z.string().cuid2(),
+  //       id: z.cuid2(),
+  //       calendarId: z.cuid2(),
   //     })
   //   )
   //   .mutation(({ ctx, input }) =>
@@ -180,10 +181,10 @@ export const siteRouter = createTRPCRouter({
   // updateRoomCalendar: protectedProcedure
   //   .input(
   //     z.object({
-  //       id: z.string().cuid2(),
+  //       id: z.cuid2(),
   //       openWithClub: z.boolean().optional(),
   //       openWithSite: z.boolean().optional(),
-  //       calendarId: z.string().cuid2().optional(),
+  //       calendarId: z.cuid2().optional(),
   //     })
   //   )
   //   .mutation(({ ctx, input }) =>

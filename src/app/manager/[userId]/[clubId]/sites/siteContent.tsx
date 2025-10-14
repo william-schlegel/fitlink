@@ -1,15 +1,17 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import { twMerge } from "tailwind-merge";
+import { useEffect } from "react";
 import Link from "next/link";
 
 import { DeleteSite, UpdateSite } from "@/components/modals/manageSite";
 import LockedButton from "@/components/ui/lockedButton";
+import CalendarWeek from "@/components/calendarWeek";
+import { LayoutPage } from "@/components/layoutPage";
 import Spinner from "@/components/ui/spinner";
 import useUserInfo from "@/lib/useUserInfo";
+import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 
@@ -20,33 +22,43 @@ type SiteContentProps = {
 };
 
 export default function SiteContent({ clubId, siteId }: SiteContentProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const roomId = searchParams.get("roomId") as string;
+  const pathname = usePathname();
+
   const siteQuery = trpc.sites.getSiteById.useQuery(siteId, {
     enabled: isCUID(siteId),
   });
 
   useEffect(() => {
-    if (siteQuery.data?.rooms?.length) {
-      setRoomId(siteQuery.data?.rooms?.[0]?.id ?? "");
+    if (siteQuery.data?.rooms?.length && roomId === "") {
+      router.push(`${pathname}?roomId=${siteQuery.data?.rooms?.[0]?.id ?? ""}`);
     }
-  }, [siteQuery.data]);
+  }, [siteQuery.data, roomId, pathname, router]);
 
-  // const calendarQuery = trpc.calendars.getCalendarForSite.useQuery(
-  //   {
-  //     siteId,
-  //     clubId,
-  //   },
-  //   { enabled: isCUID(clubId) && isCUID(siteId) }
-  // );
+  const calendarQuery = trpc.calendars.getCalendarForSite.useQuery(
+    {
+      siteId,
+      clubId,
+    },
+    { enabled: isCUID(clubId) && isCUID(siteId) },
+  );
 
   const t = useTranslations("club");
   const { features } = useUserInfo();
-  const pathname = usePathname();
-  const [roomId, setRoomId] = useState("");
   const actualRoom = siteQuery.data?.rooms?.find((r) => r.id === roomId);
 
   const root = pathname.split("/");
   root.pop();
   const path = root.reduce((a, r) => a.concat(`${r}/`), "");
+
+  const roomList =
+    siteQuery.data?.rooms?.map((room) => ({
+      id: room.id,
+      name: room.name,
+      link: createLink({ roomId: room.id }),
+    })) ?? [];
 
   if (siteQuery.isLoading) return <Spinner />;
 
@@ -63,62 +75,45 @@ export default function SiteContent({ clubId, siteId }: SiteContentProps) {
           <DeleteSite clubId={clubId} siteId={siteId} />
         </div>
       </div>
-      {/* <CalendarWeek
+      <CalendarWeek
         calendar={calendarQuery.data}
         isLoading={calendarQuery.isLoading}
-      /> */}
-      <div className="flex flex-wrap gap-4">
-        <div className="flex-1 rounded border border-primary p-4 ">
-          <div className="mb-4 flex flex-row items-center justify-between gap-4">
-            <h3>
-              {t("room.room", { count: siteQuery?.data?.rooms?.length ?? 0 })}
-            </h3>
-            {features.includes("MANAGER_ROOM") ? (
-              <Link
-                className="btn btn-secondary"
-                href={`${path}${siteId}/rooms`}
-              >
-                {t("room.manage")}
-              </Link>
-            ) : (
-              <LockedButton label={t("room.manage")} />
-            )}
-          </div>
+      />
+      <LayoutPage
+        variant="section"
+        title={t("room.room", { count: siteQuery?.data?.rooms?.length ?? 0 })}
+        titleComponents={
+          features.includes("MANAGER_ROOM") ? (
+            <Link className="btn btn-secondary" href={`${path}${siteId}/rooms`}>
+              {t("room.manage")}
+            </Link>
+          ) : (
+            <LockedButton label={t("room.manage")} />
+          )
+        }
+      >
+        <LayoutPage.Main>
           {features.includes("MANAGER_ROOM") ? (
-            <div className="flex gap-4">
-              <ul className="menu w-1/4 overflow-hidden rounded bg-base-100">
-                {siteQuery?.data?.rooms?.map((room) => (
-                  <li key={room.id}>
-                    <button
-                      className={twMerge(
-                        "flex w-full items-center justify-between text-center",
-                        roomId === room.id && "badge badge-primary",
-                      )}
-                      onClick={() => setRoomId(room.id)}
-                    >
-                      <span>{room.name}</span>
-                      {room.reservation === "MANDATORY" && (
-                        <i className="bx bx-calendar-exclamation bx-sm text-secondary" />
-                      )}
-                      {room.reservation === "POSSIBLE" && (
-                        <i className="bx bx-calendar-alt bx-sm text-secondary" />
-                      )}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex-1 rounded border border-primary p-4 ">
-                Planning des activités
-              </div>
-              {actualRoom?.reservation !== "NONE" ? (
+            <>
+              <LayoutPage.List
+                list={roomList}
+                itemId={roomId}
+                noItemsText={t("room.no-rooms")}
+              />
+              <div>
                 <div className="flex-1 rounded border border-primary p-4 ">
-                  Planning de réservation
+                  Planning des activités
                 </div>
-              ) : null}
-            </div>
+                {actualRoom?.reservation !== "NONE" ? (
+                  <div className="flex-1 rounded border border-primary p-4 ">
+                    Planning de réservation
+                  </div>
+                ) : null}
+              </div>
+            </>
           ) : null}
-        </div>
-      </div>
+        </LayoutPage.Main>
+      </LayoutPage>
     </div>
   );
 }

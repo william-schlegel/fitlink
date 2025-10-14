@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import Link from "next/link";
 
 import {
@@ -12,6 +11,7 @@ import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { CoachPlanning } from "./coachPlanning";
+import { getHref } from "@/lib/getHref";
 
 export default async function ManageCoachs({
   params,
@@ -36,8 +36,7 @@ export default async function ManageCoachs({
   const clubQuery = await caller.clubs.getClubById({ clubId, userId });
 
   const coachsQuery = await caller.coachs.getCoachsForClub(clubId);
-  const headerList = await headers();
-  const href = headerList.get("x-current-href");
+  const href = await getHref();
   if (coachsQuery.length && !coachId)
     redirect(createLink({ coachId: coachsQuery[0]?.id }, href));
 

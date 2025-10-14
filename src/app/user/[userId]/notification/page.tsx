@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { twMerge } from "tailwind-merge";
-import { headers } from "next/headers";
 import Link from "next/link";
 
 import {
@@ -12,6 +11,7 @@ import { NotificationMessage } from "./notificationMessage";
 import { formatDateLocalized } from "@/lib/formatDate";
 import Pagination from "@/components/ui/pagination";
 import createLink from "@/lib/createLink";
+import { getHref } from "@/lib/getHref";
 import Title from "@/components/title";
 import { FromTo } from "./types";
 
@@ -38,8 +38,7 @@ export default async function ManageNotifications({
     PER_PAGE,
   );
 
-  const headerList = await headers();
-  const href = headerList.get("x-current-href");
+  const href = await getHref();
 
   if (notificationQuery.notifications.length > 0 && !notificationId) {
     redirect(

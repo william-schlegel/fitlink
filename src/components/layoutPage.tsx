@@ -8,22 +8,28 @@ function LayoutPage({
   preTitle,
   title,
   titleComponents,
+  variant = "main",
 }: {
   preTitle?: string;
   children: React.ReactNode;
   title: string;
   titleComponents?: React.ReactNode;
+  variant?: "main" | "section";
 }) {
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title title={title} />
+      {variant === "main" ? <Title title={title} /> : null}
       <header className="mb-4 flex flex-row items-center gap-4">
-        <h1>
-          {Boolean(preTitle) ? (
-            <span className="text-secondary mr-2">{preTitle}</span>
-          ) : null}
-          {title}
-        </h1>
+        {variant === "main" ? (
+          <h1>
+            {Boolean(preTitle) ? (
+              <span className="text-secondary mr-2">{preTitle}</span>
+            ) : null}
+            {title}
+          </h1>
+        ) : (
+          <h2>{title}</h2>
+        )}
         {titleComponents ? (
           <div className="flex-1">{titleComponents}</div>
         ) : null}
@@ -67,7 +73,7 @@ function List<
           <p>{noItemsText}</p>
         </div>
       ) : (
-        <ul className="menu overflow-hidden rounded bg-base-100 w-full mt-4">
+        <ul className="menu overflow-hidden rounded bg-base-100 w-full">
           {list.map((item) => (
             <li key={item.id}>
               <Link
