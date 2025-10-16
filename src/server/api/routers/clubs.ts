@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import z from "zod";
 
 import {
+  createTRPCCaller,
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
@@ -10,10 +11,12 @@ import {
 import { activity, club, clubCoachs, site } from "@/db/schema/club";
 import { openingCalendarClubs } from "@/db/schema/planning";
 import { userCoach, userDocument } from "@/db/schema/user";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { page } from "@/db/schema/page";
 import { user } from "@/db/schema/auth";
 import { isCUID } from "@/lib/utils";
 import { getDocUrl } from "./files";
+import { appRouter } from "../root";
 import { db } from "@/db";
 
 export const clubRouter = createTRPCRouter({
@@ -148,6 +151,11 @@ export const clubRouter = createTRPCRouter({
         });
 
       const newClub = await db.transaction(async (tx) => {
+        // create the channel for the club
+        const chatGroup = await caller.chat.createChannel(
+          input.name,
+          input.userId,
+        );
         const clb = await tx
           .insert(club)
           .values({
@@ -155,6 +163,7 @@ export const clubRouter = createTRPCRouter({
             address: input.address,
             managerId: input.userId,
             logoId: input.logoId ? input.logoId : undefined,
+            chatGroupId: chatGroup.guid,
           })
           .returning();
         if (input.isSite) {
@@ -169,14 +178,6 @@ export const clubRouter = createTRPCRouter({
         }
         return clb[0];
       });
-
-      // create the channel for the club
-
-      // const channel = streamchatClient.channel("messaging", club.id, {
-      //   name: input.name,
-      //   created_by_id: input.userId,
-      // });
-      // await channel.create();
 
       return newClub;
     }),
