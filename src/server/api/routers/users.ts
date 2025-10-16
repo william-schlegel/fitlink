@@ -101,180 +101,6 @@ async function getPricingData(pricingId: string) {
   });
 }
 
-export async function getUserById(id: string, options?: GetUserByIdOptions) {
-  const u = await db.query.user.findFirst({
-    where: eq(user.id, id),
-    with: {
-      accounts: true,
-    },
-  });
-  if (!u) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "User not found",
-    });
-  }
-  let profileImageUrl: string = u?.image ?? "/images/dummy.jpg";
-  if (options?.withImage && u.profileImageId) {
-    profileImageUrl = await getDocUrl(u.id, u.profileImageId);
-  }
-  let extraData: Awaited<ReturnType<typeof getMemberData>> | null = null;
-
-  if (options?.withMemberData) extraData = await getMemberData(u.id);
-
-  let pricingData: Awaited<ReturnType<typeof getPricingData>> | null = null;
-
-  if (options?.withPricing) pricingData = await getPricingData(u.pricingId!);
-
-  let features: (typeof featureEnum.enumValues)[number][] = [];
-  if (options?.withFeatures) {
-    const featuresData = await db.query.pricing.findFirst({
-      where: eq(pricing.id, u.pricingId!),
-      with: {
-        features: true,
-      },
-    });
-    features = featuresData?.features.map((f) => f.feature) ?? [];
-  }
-
-  return {
-    id: u.id,
-    name: u.name,
-    email: u.email,
-    phone: u.phone,
-    address: u.address,
-    internalRole: u.internalRole,
-    profileImageId: u.profileImageId,
-    profileImageUrl,
-    pricingId: u.pricingId,
-    trialUntil: u.trialUntil,
-    monthlyPayment: u.monthlyPayment,
-    accounts: u.accounts.map((a) => ({
-      id: a.id,
-      provider: a.providerId,
-    })),
-
-    memberData: extraData?.memberData ?? null,
-    coachData: extraData?.coachData ?? null,
-    managerData: extraData?.managerData ?? null,
-    pricing: pricingData,
-    features,
-  };
-
-  // const u = await db.query.user.findFirst({
-  //   where: eq(user.id, id),
-  //   with: {
-  //     pricing: {
-  //       with: {
-  //         features: true,
-  //       },
-  //     },
-  //     paiements: true,
-  //     accounts: true,
-  //   },
-  // });
-  // let coachData:
-  //   | (typeof userCoach.$inferSelect & {
-  //       coachingActivities?: (typeof coachingActivity.$inferSelect)[];
-  //     })
-  //   | undefined = undefined;
-  // if (u?.internalRole === "COACH" || u?.internalRole === "MANAGER_COACH") {
-  //   coachData = await db.query.userCoach.findFirst({
-  //     where: eq(userCoach.userId, id),
-  //     with: {
-  //       coachingActivities: true,
-  //     },
-  //   });
-  // }
-  // let memberData:
-  //   | (typeof userMember.$inferSelect & {
-  //       subscriptions?: FullSubscription[];
-  //     })
-  //   | undefined = undefined;
-  // if (u?.internalRole === "MEMBER") {
-  //   const memberJoin = await db.query.userMember.findFirst({
-  //     where: eq(userMember.userId, id),
-  //     with: {
-  //       subscriptions: {
-  //         with: {
-  //           subscription: {
-  //             with: {
-  //               activitieGroups: {
-  //                 with: {
-  //                   activityGroup: true,
-  //                 },
-  //               },
-  //               activities: {
-  //                 with: {
-  //                   activity: true,
-  //                 },
-  //               },
-  //               sites: {
-  //                 with: {
-  //                   site: true,
-  //                 },
-  //               },
-  //               rooms: {
-  //                 with: {
-  //                   room: true,
-  //                 },
-  //               },
-  //               club: true,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     },
-  //   });
-  //   if (memberJoin) {
-  //     memberData = {
-  //       ...memberJoin,
-  //       subscriptions:
-  //         memberJoin.subscriptions?.map(({ subscription: s }) => ({
-  //           ...s,
-  //           activitieGroups: s.activitieGroups.map((j) => j.activityGroup),
-  //           activities: s.activities.map((j) => j.activity),
-  //           sites: s.sites.map((j) => j.site),
-  //           rooms: s.rooms.map((j) => j.room),
-  //         })) ?? [],
-  //     };
-  //   }
-  // }
-  // let managerData:
-  //   | (typeof userManager.$inferSelect & {
-  //       managedClubs?: (typeof club.$inferSelect)[];
-  //     })
-  //   | undefined = undefined;
-  // if (u?.internalRole === "MANAGER" || u?.internalRole === "MANAGER_COACH") {
-  //   managerData = await db.query.userManager.findFirst({
-  //     where: eq(userManager.userId, id),
-  //     with: {
-  //       managedClubs: true,
-  //     },
-  //   });
-  // }
-  // // TODO: add chat token
-  // // if (u?.id && !u?.chatToken) {
-  // //   const token = createToken(user.id);
-  // //   user.chatToken = token;
-  // //   await ctx.prisma.user.update({
-  // //     where: { id: input },
-  // //     data: { chatToken: token },
-  // //   });
-  // // }
-  // let profileImageUrl = u?.image ?? "/images/dummy.jpg";
-  // if (u?.profileImageId) {
-  //   profileImageUrl = await getDocUrl(u.id, u.profileImageId);
-  // }
-  // return {
-  //   ...u,
-  //   coachData: coachData ?? { coachingActivities: [] },
-  //   memberData: memberData ?? { subscriptions: [] as FullSubscription[] },
-  //   managerData: managerData ?? { managedClubs: [] },
-  //   profileImageUrl,
-  // };
-}
-
 export async function getAllUsers(input: {
   filter: TUserFilter;
   skip: number;
@@ -348,11 +174,82 @@ export const userRouter = createTRPCRouter({
             withImage: z.boolean().optional().default(true),
             withMemberData: z.boolean().optional().default(false),
             withFeatures: z.boolean().optional().default(false),
+            withPricing: z.boolean().optional().default(false),
           })
           .optional(),
       }),
     )
-    .query(({ input }) => getUserById(input.id, input.options)),
+    .query(async ({ input }) => {
+      const u = await db.query.user.findFirst({
+        where: eq(user.id, input.id),
+        with: {
+          accounts: true,
+        },
+      });
+      if (!u) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+      let profileImageUrl: string = u?.image ?? "/images/dummy.jpg";
+      if (input.options?.withImage && u.profileImageId) {
+        profileImageUrl = await getDocUrl(u.id, u.profileImageId);
+      }
+      let extraData: Awaited<ReturnType<typeof getMemberData>> | null = null;
+
+      if (input.options?.withMemberData) extraData = await getMemberData(u.id);
+
+      let pricingData: Awaited<ReturnType<typeof getPricingData>> | null = null;
+
+      if (input.options?.withPricing)
+        pricingData = await getPricingData(u.pricingId!);
+
+      let features: (typeof featureEnum.enumValues)[number][] = [];
+      if (input.options?.withFeatures) {
+        const featuresData = await db.query.pricing.findFirst({
+          where: eq(pricing.id, u.pricingId!),
+          with: {
+            features: true,
+          },
+        });
+        features = featuresData?.features.map((f) => f.feature) ?? [];
+      }
+
+      return {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        phone: u.phone,
+        address: u.address,
+        internalRole: u.internalRole,
+        profileImageId: u.profileImageId,
+        profileImageUrl,
+        pricingId: u.pricingId,
+        trialUntil: u.trialUntil,
+        monthlyPayment: u.monthlyPayment,
+        accounts: u.accounts.map((a) => ({
+          id: a.id,
+          provider: a.providerId,
+        })),
+
+        memberData: extraData?.memberData ?? null,
+        coachData: extraData?.coachData ?? null,
+        managerData: extraData?.managerData ?? null,
+        pricing: pricingData,
+        features,
+      };
+
+      // // TODO: add chat token
+      // // if (u?.id && !u?.chatToken) {
+      // //   const token = createToken(user.id);
+      // //   user.chatToken = token;
+      // //   await ctx.prisma.user.update({
+      // //     where: { id: input },
+      // //     data: { chatToken: token },
+      // //   });
+      // // }
+    }),
   getUserSubscriptionsById: protectedProcedure
     .input(z.string())
     .query(async ({ input }) => {
@@ -493,14 +390,6 @@ export const userRouter = createTRPCRouter({
           // });
         }
 
-        // update internalRole in stream chat if admin
-        // if (input.internalRole === "ADMIN") {
-        //   await streamchatClient.partialUpdateUser({
-        //     id: input.id,
-        //     set: { internalRole: "admin" },
-        //   });
-        // }
-
         return tx
           .update(user)
           .set({
@@ -635,11 +524,6 @@ export const userRouter = createTRPCRouter({
           data: { internalRole: "MEMBER" },
         },
       });
-      if (newUser.user?.id) return await getUserById(newUser.user.id);
-
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to create user",
-      });
+      return newUser;
     }),
 });

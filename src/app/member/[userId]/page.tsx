@@ -2,7 +2,7 @@ import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-import { getUserById } from "@/server/api/routers/users";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import Subscription from "./subscription";
 
@@ -26,8 +26,15 @@ export default async function MemberDashboard({
     redirect("/", RedirectType.replace);
   }
   const t = await getTranslations("dashboard");
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const queryUser = await caller.users.getUserById({
+    id: userId,
+    options: {
+      withMemberData: true,
+    },
+  });
 
-  const queryUser = await getUserById(userId, { withMemberData: true });
   // const [day, setDay] = useState(startOfToday());
 
   // const queryReservations = trpc.users.getReservationsByUserId.useQuery({

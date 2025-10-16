@@ -11,9 +11,11 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-import { getUserById } from "@/server/api/routers/users";
+import { inferProcedureOutput } from "@trpc/server";
+
 import ButtonIcon from "@/components/ui/buttonIcon";
 import { formatSize } from "@/lib/formatNumber";
+import { AppRouter } from "@/server/api/root";
 import { trpc } from "@/lib/trpc/client";
 import { toast } from "@/lib/toast";
 
@@ -31,7 +33,7 @@ const MAX_SIZE_IMAGE = 512 * 1024;
 export default function FormProfile({
   userData,
 }: {
-  userData: NonNullable<Awaited<ReturnType<typeof getUserById>>>;
+  userData: inferProcedureOutput<AppRouter["users"]["getUserById"]>;
 }) {
   const form = useForm<FormValues>();
   const t = useTranslations("auth");

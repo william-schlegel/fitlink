@@ -529,6 +529,7 @@
     "upload-new-document": "Télécharger un nouveau document",
     "document-error": "Erreur de lecture du document",
     "type-invalid": "Le type de document est invalide (PDF seulement)",
+    "no-coachs": "Aucun coach trouvé",
     "offer": {
       "create-new": "Créer une nouvelle offre",
       "my-offer": "{count, plural, =0 {Aucune offre de coaching pour le moment} =1 {Mon offre de coaching} other {Mes offres de coaching}}",

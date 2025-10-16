@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
 
-import { getUserById } from "@/server/api/routers/users";
 import CreateClub from "@/components/modals/manageClub";
 import LockedButton from "@/components/ui/lockedButton";
 import { LayoutPage } from "@/components/layoutPage";
@@ -33,7 +32,12 @@ export default async function ManageClubs({
   const caller = await createTrpcCaller();
   if (!caller) return null;
   const clubQuery = await caller.clubs.getClubsForManager(userId);
-  const { features } = await getUserById(userId, { withFeatures: true });
+  const { features } = await caller.users.getUserById({
+    id: userId,
+    options: {
+      withFeatures: true,
+    },
+  });
   const href = await getHref();
 
   const listClubs = clubQuery?.map((club) => ({

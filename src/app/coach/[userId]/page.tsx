@@ -4,9 +4,9 @@ import Link from "next/link";
 
 import { getCoachDataForUserId } from "@/server/api/routers/dashboard";
 import { getCoachDailyPlanning } from "@/server/api/routers/planning";
-import { getUserById } from "@/server/api/routers/users";
 import LockedButton from "@/components/ui/lockedButton";
 import { getToday } from "@/lib/dates/serverDayName";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import SelectDay from "@/components/ui/selectDay";
 import { getActualUser } from "@/lib/auth/server";
 import { DayName } from "@/lib/dates/data";
@@ -31,9 +31,13 @@ export default async function CoachDashboard({
   const certificationCount = coachQuery?.coachData?.certifications?.length ?? 0;
   const activityCount = coachQuery?.coachData?.activityGroups?.length ?? 0;
   const offerCount = coachQuery?.coachData?.coachingPrices?.length ?? 0;
-
-  const { features } = await getUserById(userId, {
-    withFeatures: true,
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const { features } = await caller.users.getUserById({
+    id: userId,
+    options: {
+      withFeatures: true,
+    },
   });
 
   const published = coachQuery?.coachData?.page?.published;

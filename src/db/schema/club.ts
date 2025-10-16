@@ -46,6 +46,7 @@ export const club = pgTable(
     managerId: text("manager_id").notNull(),
     pageStyle: text("page_style").default("light"),
     logoId: text("logo_id").unique(),
+    chatGroupId: text("chat_group_id"),
   },
   (table) => [
     index("club_manager_idx").on(table.managerId),

@@ -1,7 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
-import { getUserById } from "@/server/api/routers/users";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import FormAccount from "./formAccount";
+import Title from "@/components/title";
 
 export default async function Account({
   params,
@@ -9,12 +10,16 @@ export default async function Account({
   params: Promise<{ userId: string }>;
 }) {
   const { userId } = await params;
-  const myUserId = (Array.isArray(userId) ? userId[0] : userId) || "";
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
 
-  const userData = await getUserById(myUserId, {
-    withImage: false,
-    withMemberData: false,
-    withPricing: true,
+  const userData = await caller.users.getUserById({
+    id: userId,
+    options: {
+      withImage: false,
+      withMemberData: false,
+      withPricing: true,
+    },
   });
   const t = await getTranslations("auth");
 
@@ -53,10 +58,8 @@ export default async function Account({
   // const  t  = useTranslations("auth");
 
   return (
-    <div
-      // title={t("account.your-account")}
-      className="container mx-auto my-2 space-y-2 p-2"
-    >
+    <div className="container mx-auto my-2 space-y-2 p-2">
+      <Title title={t("account.your-account")} />
       <div className="flex items-center justify-between">
         <h1>{t("account.your-account")}</h1>
         {/* <Modal

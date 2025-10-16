@@ -3,7 +3,6 @@ import superjson from "superjson";
 import { eq } from "drizzle-orm";
 import { ZodError } from "zod";
 
-import { appRouter } from "@/server/api/root";
 import { user } from "@/db/schema/auth";
 import { auth } from "../auth/server";
 import { db } from "@/db";

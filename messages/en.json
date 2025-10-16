@@ -523,6 +523,7 @@
     "upload-new-document": "Upload a new document",
     "document-error": "Document reading error",
     "type-invalid": "Document type is invalid (PDF only)",
+    "no-coachs": "No coach found",
     "offer": {
       "create-new": "Create a new offer",
       "my-offer": "{count, plural, =0 {No coaching offer yet} =1 {My coaching offer} other {My coaching offers}}",

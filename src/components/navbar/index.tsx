@@ -3,8 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { getNotificationToUser } from "@/server/api/routers/notification";
-import { getUserById } from "@/server/api/routers/users";
 import { formatMessage } from "@/lib/getNotifications";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { RoleEnum } from "@/db/schema/enums";
 import ThemeButton from "./themeButton";
 import UserButton from "./userButton";
@@ -26,7 +26,16 @@ export default async function Navbar({
   const unread = notificationsQuery.unread;
   const notifications = notificationsQuery.notifications;
 
-  const user = userId ? await getUserById(userId) : undefined;
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const user = userId
+    ? await caller.users.getUserById({
+        id: userId,
+        options: {
+          withFeatures: true,
+        },
+      })
+    : undefined;
 
   return (
     <div className="navbar bg-base-100">

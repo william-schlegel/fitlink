@@ -11,13 +11,15 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 
+import { inferProcedureOutput } from "@trpc/server";
+
 import { SubscriptionForm } from "@/components/modals/manageUser";
 import AddressSearch from "@/components/ui/addressSearch";
 import generateCircle from "@/components/sections/utils";
-import { getUserById } from "@/server/api/routers/users";
 import Confirmation from "@/components/ui/confirmation";
 import { TThemes } from "@/components/themeSelector";
 import { remainingDays } from "@/lib/formatDate";
+import { AppRouter } from "@/server/api/root";
 import { RoleEnum } from "@/db/schema/enums";
 import { trpc } from "@/lib/trpc/client";
 import PlanDetails from "./planDetails";
@@ -45,7 +47,7 @@ type FormValues = {
 export default function FormAccount({
   userData,
 }: {
-  userData: NonNullable<Awaited<ReturnType<typeof getUserById>>>;
+  userData: inferProcedureOutput<AppRouter["users"]["getUserById"]>;
 }) {
   const [newActivity, setNewActivity] = useState("");
   const [theme] = useLocalStorage<TThemes>("theme", "cupcake");

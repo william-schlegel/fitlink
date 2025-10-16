@@ -1,20 +1,18 @@
 import { redirect, RedirectType } from "next/navigation";
 import { inferProcedureOutput } from "@trpc/server";
 import { getTranslations } from "next-intl/server";
-import { twMerge } from "tailwind-merge";
-import Link from "next/link";
 
 import {
   AddCoachToClub,
   CoachDataPresentation,
 } from "@/components/modals/manageClub";
 import SelectClub from "../../../components/selectClub";
+import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { AppRouter } from "@/server/api/root";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
-import Title from "@/components/title";
 import { isCUID } from "@/lib/utils";
 
 export default async function CoachManagementForClub({
@@ -66,34 +64,29 @@ export default async function CoachManagementForClub({
     queryCoach = await caller.coachs.getCoachById(coachId);
   }
 
-  return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title title={t("common.navigation.coach-management")} />
-      <h1 className="flex items-center">
-        {t("common.navigation.coach-management")}
+  const coachList = queryCoachs.map((coach) => ({
+    id: coach.id,
+    name: coach.name,
+    link: createLink({ clubId, coachId: coach.id }, href),
+  }));
 
-        <SelectClub clubId={clubId} clubs={queryClubs} />
-      </h1>
-      <div className="flex flex-col gap-4 lg:flex-row">
-        <aside className="min-w-fit space-y-2 lg:max-w-xs">
-          <h4>{t("club.coach.coachs")}</h4>
+  return (
+    <LayoutPage
+      preTitle={queryClubs[0]?.name}
+      title={t("common.navigation.coach-management")}
+      titleComponents={
+        <div className="flex items-center gap-2 justify-between">
           <AddCoachToClub clubId={clubId} userId={userId} />
-          <ul className="menu overflow-hidden rounded border border-secondary bg-base-100">
-            {queryCoachs?.map((coach) => (
-              <li key={coach.id}>
-                <Link
-                  href={createLink({ clubId, coachId: coach.id }, href)}
-                  className={twMerge(
-                    "w-full text-center",
-                    coachId === coach.id && "badge badge-primary",
-                  )}
-                >
-                  {coach.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </aside>
+          <SelectClub clubId={clubId} clubs={queryClubs} />
+        </div>
+      }
+    >
+      <LayoutPage.Main>
+        <LayoutPage.List
+          list={coachList}
+          itemId={coachId}
+          noItemsText={t("coach.no-coachs")}
+        />
         {queryCoach ? (
           <CoachDataPresentation
             url={queryCoach.imageUrl}
@@ -118,7 +111,7 @@ export default async function CoachManagementForClub({
             pageId={queryCoach.coachData?.page?.id}
           />
         ) : null}
-      </div>
-    </div>
+      </LayoutPage.Main>
+    </LayoutPage>
   );
 }

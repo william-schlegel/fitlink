@@ -14,7 +14,7 @@ import {
   UpdateRoom,
 } from "@/components/modals/manageRoom";
 import createLink, { createHref } from "@/lib/createLink";
-import { getUserById } from "@/server/api/routers/users";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { RESERVATIONS } from "@/lib/data";
 import { getHref } from "@/lib/getHref";
 import Title from "@/components/title";
@@ -29,7 +29,15 @@ export default async function ManageRooms({
 }) {
   const { clubId, userId, siteId } = await params;
   const { roomId } = (await searchParams) ?? {};
-  const user = await getUserById(userId, { withFeatures: true });
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const user = await caller.users.getUserById({
+    id: userId,
+    options: {
+      withFeatures: true,
+    },
+  });
+
   if (!user) redirect("/", RedirectType.replace);
   const t = await getTranslations();
   const href = await getHref();

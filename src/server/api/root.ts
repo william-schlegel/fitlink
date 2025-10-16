@@ -13,6 +13,7 @@ import { siteRouter } from "./routers/sites";
 // import { fileRouter } from "./routers/files";
 import { clubRouter } from "./routers/clubs";
 import { pageRouter } from "./routers/page";
+import { chatRouter } from "./routers/chat";
 
 /**
  * This is the primary router for your server.
@@ -28,6 +29,7 @@ export const appRouter = createTRPCRouter({
   dashboards: dashboardRouter,
   // files: fileRouter,
   clubs: clubRouter,
+  chat: chatRouter,
   calendars: calendarRouter,
   activities: activityRouter,
   plannings: planningRouter,

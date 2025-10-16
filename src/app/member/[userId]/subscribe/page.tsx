@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
-import { getUserById } from "@/server/api/routers/users";
 import FindClub from "@/components/sections/findClub";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import Title from "@/components/title";
 
 export default async function Subscribe({
@@ -12,7 +12,10 @@ export default async function Subscribe({
   const t = await getTranslations("auth");
 
   const userId = (await params).userId;
-  const userQuery = await getUserById(userId);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const userQuery = await caller.users.getUserById({ id: userId });
+
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">
       <Title title={t("new-subscription")} />

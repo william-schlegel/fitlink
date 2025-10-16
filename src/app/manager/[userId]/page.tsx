@@ -11,9 +11,9 @@ import {
 } from "@/components/modals/manageEvent";
 import { getManagerDataForUserId } from "@/server/api/routers/dashboard";
 import { getClubDailyPlanning } from "@/server/api/routers/planning";
-import { getUserById } from "@/server/api/routers/users";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { getToday } from "@/lib/dates/serverDayName";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import Title from "@/components/title";
 /***
@@ -40,7 +40,14 @@ export default async function ManagerClubs({
 
   const managerQuery = await getManagerDataForUserId(userId);
   const t = await getTranslations();
-  const { features } = await getUserById(userId, { withFeatures: true });
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const { features } = await caller.users.getUserById({
+    id: userId,
+    options: {
+      withFeatures: true,
+    },
+  });
 
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { getSitesForClub } from "@/server/api/routers/sites";
 import { CreateSite } from "@/components/modals/manageSite";
 import createLink, { createHref } from "@/lib/createLink";
-import { getUserById } from "@/server/api/routers/users";
 import LockedButton from "@/components/ui/lockedButton";
 import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
@@ -21,7 +20,15 @@ export default async function ManageSites({
 }) {
   const { clubId, userId } = await params;
   const { siteId } = await searchParams;
-  const user = await getUserById(userId, { withFeatures: true });
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const user = await caller.users.getUserById({
+    id: userId,
+    options: {
+      withFeatures: true,
+    },
+  });
+
   if (!user) redirect("/", RedirectType.replace);
   const t = await getTranslations("club");
   const href = await getHref();
@@ -32,8 +39,6 @@ export default async function ManageSites({
   )
     return <div>{t("manager-only")}</div>;
 
-  const caller = await createTrpcCaller();
-  if (!caller) return null;
   const clubQuery = await caller.clubs.getClubById({ clubId, userId: user.id });
   const siteQuery = await getSitesForClub(clubId, user.id);
   if (siteQuery.length && !siteId)
