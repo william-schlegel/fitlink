@@ -153,6 +153,7 @@ export const clubRouter = createTRPCRouter({
         const chatChannel = await createChannelService({
           name: input.name,
           createdByUserId: input.userId,
+          type: "CLUB",
         });
         const clb = await tx
           .insert(club)

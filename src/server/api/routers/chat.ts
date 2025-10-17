@@ -6,8 +6,13 @@ import {
   channelUsers,
   directConversation,
   message,
-  messageTypeEnum,
+  messageReaction,
 } from "@/db/schema/chat";
+import {
+  channelTypeEnum,
+  messageTypeEnum,
+  reactionTypeEnum,
+} from "@/db/schema/enums";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 import { createChannelService } from "@/server/lib/chat";
 import { db } from "@/db";
@@ -18,6 +23,9 @@ export const chatRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         createdByUserId: z.string(),
+        type: z.enum(channelTypeEnum.enumValues),
+        imageDocumentId: z.cuid2().optional(),
+        users: z.array(z.string()).optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -26,24 +34,25 @@ export const chatRouter = createTRPCRouter({
   updateChannel: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: z.cuid2(),
         name: z.string(),
+        imageDocumentId: z.cuid2().optional(),
       }),
     )
     .mutation(async ({ input }) => {
       return db
         .update(channel)
-        .set({ name: input.name })
+        .set({ name: input.name, imageDocumentId: input.imageDocumentId })
         .where(eq(channel.id, input.id))
         .returning();
     }),
   deleteChannel: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.cuid2() }))
     .mutation(async ({ input }) => {
       return db.delete(channel).where(eq(channel.id, input.id)).returning();
     }),
   addUserToChannel: protectedProcedure
-    .input(z.object({ channelId: z.string(), userId: z.string() }))
+    .input(z.object({ channelId: z.cuid2(), userId: z.string() }))
     .mutation(async ({ input }) => {
       return db
         .insert(channelUsers)
@@ -51,7 +60,7 @@ export const chatRouter = createTRPCRouter({
         .returning();
     }),
   removeUserFromChannel: protectedProcedure
-    .input(z.object({ channelId: z.string(), userId: z.string() }))
+    .input(z.object({ channelId: z.cuid2(), userId: z.string() }))
     .mutation(async ({ input }) => {
       return db
         .delete(channelUsers)
@@ -66,24 +75,58 @@ export const chatRouter = createTRPCRouter({
   getChannelsForUser: protectedProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ input }) => {
-      return db.query.channelUsers.findMany({
+      const channels = await db.query.channelUsers.findMany({
         where: eq(channelUsers.userId, input.userId),
         with: { channel: true },
       });
+      return channels.map((channel) => ({
+        id: channel.channel.id,
+        name: channel.channel.name,
+      }));
+    }),
+  getChannelById: protectedProcedure
+    .input(z.object({ channelId: z.cuid2() }))
+    .query(async ({ input }) => {
+      return db.query.channel.findFirst({
+        where: eq(channel.id, input.channelId),
+        with: { users: true },
+      });
     }),
   getUsersForChannel: protectedProcedure
-    .input(z.object({ channelId: z.string() }))
+    .input(z.object({ channelId: z.cuid2() }))
     .query(async ({ input }) => {
       return db.query.channelUsers.findMany({
         where: eq(channelUsers.channelId, input.channelId),
         with: { user: true },
       });
     }),
+
+  getMessageById: protectedProcedure
+    .input(z.object({ messageId: z.cuid2() }))
+    .query(async ({ input }) => {
+      return db.query.message.findFirst({
+        where: eq(message.id, input.messageId),
+        with: {
+          author: true,
+        },
+      });
+    }),
   getMessagesForChannel: protectedProcedure
-    .input(z.object({ channelId: z.string(), limit: z.number().optional() }))
+    .input(z.object({ channelId: z.cuid2(), limit: z.number().optional() }))
     .query(async ({ input }) => {
       return db.query.message.findMany({
         where: eq(message.channelId, input.channelId),
+        with: {
+          author: true,
+          channel: true,
+          directConversation: true,
+          replies: true,
+          reactions: {
+            with: {
+              user: true,
+            },
+          },
+        },
         orderBy: asc(message.createdAt),
         limit: input.limit,
       });
@@ -91,7 +134,7 @@ export const chatRouter = createTRPCRouter({
   sendMessageToChannel: protectedProcedure
     .input(
       z.object({
-        channelId: z.string(),
+        channelId: z.cuid2(),
         content: z.string(),
         userId: z.string(),
         type: z.enum(messageTypeEnum.enumValues).optional(),
@@ -113,7 +156,7 @@ export const chatRouter = createTRPCRouter({
         .returning();
     }),
   deleteMessageFromChannel: protectedProcedure
-    .input(z.object({ messageId: z.string() }))
+    .input(z.object({ messageId: z.cuid2() }))
     .mutation(async ({ input }) => {
       return db
         .delete(message)
@@ -137,7 +180,7 @@ export const chatRouter = createTRPCRouter({
       });
     }),
   getUnreadMessagesForUserInChannel: protectedProcedure
-    .input(z.object({ userId: z.string(), channelId: z.string() }))
+    .input(z.object({ userId: z.string(), channelId: z.cuid2() }))
     .query(async ({ input }) => {
       const channelUser = await db.query.channelUsers.findFirst({
         where: and(
@@ -154,7 +197,7 @@ export const chatRouter = createTRPCRouter({
       });
     }),
   getUnreadMessagesForUserInDirectConversation: protectedProcedure
-    .input(z.object({ userId: z.string(), directConversationId: z.string() }))
+    .input(z.object({ userId: z.string(), directConversationId: z.cuid2() }))
     .query(async ({ input }) => {
       return db.query.message.findMany({
         where: and(
@@ -168,7 +211,7 @@ export const chatRouter = createTRPCRouter({
       });
     }),
   markChannelMessageAsRead: protectedProcedure
-    .input(z.object({ userId: z.string(), channelId: z.string() }))
+    .input(z.object({ userId: z.string(), channelId: z.cuid2() }))
     .mutation(async ({ input }) => {
       return db
         .update(channelUsers)
@@ -182,7 +225,7 @@ export const chatRouter = createTRPCRouter({
         .returning();
     }),
   markDirectConversationMessageAsRead: protectedProcedure
-    .input(z.object({ userId: z.string(), directConversationId: z.string() }))
+    .input(z.object({ userId: z.string(), directConversationId: z.cuid2() }))
     .mutation(async ({ input }) => {
       return db
         .update(directConversation)
@@ -193,6 +236,24 @@ export const chatRouter = createTRPCRouter({
             eq(directConversation.userBId, input.userId),
           ),
         )
+        .returning();
+    }),
+  addReactionToMessage: protectedProcedure
+    .input(
+      z.object({
+        messageId: z.cuid2(),
+        userId: z.string(),
+        reaction: z.enum(reactionTypeEnum.enumValues),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return db
+        .insert(messageReaction)
+        .values({
+          messageId: input.messageId,
+          userId: input.userId,
+          type: input.reaction,
+        })
         .returning();
     }),
 });

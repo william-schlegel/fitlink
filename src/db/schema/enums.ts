@@ -164,3 +164,28 @@ export const coachMarketPlaceTypeEnum = pgEnum("CoachMarketPlaceType", [
   "SEARCH",
   "OFFER",
 ]);
+
+export const messageTypeEnum = pgEnum("MessageType", ["TEXT", "IMAGE"]);
+
+export const channelTypeEnum = pgEnum("ChannelType", [
+  "PRIVATE",
+  "CLUB",
+  "COACH",
+  "GROUP",
+]);
+
+export type ChannelTypeEnum = (typeof channelTypeEnum.enumValues)[number];
+
+export const reactionTypeEnum = pgEnum("ReactionType", [
+  "LIKE",
+  "LOVE",
+  "LOL",
+  "SAD",
+  "GRRR",
+  "WOAH",
+  "CHECK",
+  "STRENGTH",
+  "FIST",
+]);
+
+export type ReactionTypeEnum = (typeof reactionTypeEnum.enumValues)[number];

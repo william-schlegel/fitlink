@@ -1,27 +1,12 @@
-import {
-  pgTable,
-  text,
-  timestamp,
-  index,
-  pgEnum,
-  boolean,
-} from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, index, boolean } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 
+import { channelTypeEnum, messageTypeEnum, reactionTypeEnum } from "./enums";
 import { userDocument } from "./user";
 import { user } from "./auth";
 
 // Enums local to chat schema
-export const messageTypeEnum = pgEnum("MessageType", ["TEXT", "IMAGE"]);
-export const reactionTypeEnum = pgEnum("ReactionType", [
-  "LIKE",
-  "LOVE",
-  "LAUGH",
-  "WOW",
-  "SAD",
-  "ANGRY",
-]);
 
 // Channels
 export const channel = pgTable(
@@ -29,6 +14,8 @@ export const channel = pgTable(
   {
     id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
+    type: channelTypeEnum("type").default("PRIVATE").notNull(),
+    imageDocumentId: text("image_document_id"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     createdByUserId: text("created_by_user_id"),
   },

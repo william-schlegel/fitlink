@@ -1,19 +1,94 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { LayoutPage } from "@/components/layoutPage";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
-import Title from "@/components/title";
+import { createHref } from "@/lib/createLink";
+import { getHref } from "@/lib/getHref";
+import ChatContent from "./chatContent";
+import { isCUID } from "@/lib/utils";
 
-export default async function Chat() {
-  const t = await getTranslations("dashboard");
+const Chat = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ channelId: string }>;
+}) => {
+  const t = await getTranslations("message");
   const user = await getActualUser();
+  const { channelId } = await searchParams;
+  const userId = user?.id ?? "";
+
   if (!user) redirect("/", RedirectType.replace);
 
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+
+  const channels = await caller.chat.getChannelsForUser({ userId });
+
+  console.log("channels", channels);
+  const selectedChannel = channels?.find((c) => c.id === channelId);
+
+  const href = await getHref();
+  if (!isCUID(channelId) && channels?.length)
+    redirect(
+      createHref(href, ["chat"], { channelId: channels[0].id }),
+      RedirectType.replace,
+    );
+
+  const messages = isCUID(channelId)
+    ? await caller.chat.getMessagesForChannel({ channelId })
+    : [];
+
+  const listChannels = channels?.map((channel) => ({
+    id: channel.id,
+    name: channel.name,
+    link: createHref(href, ["chat"], { channelId: channel.id }),
+  }));
+
+  // const createMessage = api.messages.createMessage.useMutation({
+  //   onSuccess() {
+  //     utils.messages.getMessagesForUser.invalidate({
+  //       userId,
+  //       channelId,
+  //     });
+  //   },
+  // });
+  // const [replyData, setReplyData] = useState({ id: "", message: "" });
+
+  // function onSubmit(e: FormEvent<HTMLFormElement>) {
+  //   e.preventDefault();
+  //   if (message) {
+  //     createMessage.mutate({
+  //       channelId,
+  //       from: userId,
+  //       message,
+  //       messageRefId: replyData.id !== "" ? replyData.id : undefined,
+  //     });
+  //   }
+  //   setMessage("");
+  //   setReplyData({ id: "", message: "" });
+  // }
+
   return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title title={t("my-chat")} />
-      <h1>{t("my-chat")}</h1>
-      {user?.name}
-    </div>
+    <LayoutPage title={t("my-chat")}>
+      <LayoutPage.Main>
+        <LayoutPage.List
+          list={listChannels}
+          itemId={channelId}
+          noItemsText={t("no-channel")}
+        />
+
+        {channelId === "" ? null : (
+          <ChatContent
+            userId={userId}
+            channelId={channelId}
+            messages={messages}
+          />
+        )}
+      </LayoutPage.Main>
+    </LayoutPage>
   );
-}
+};
+
+export default Chat;

@@ -992,5 +992,28 @@
     "activity-deletion-confirmation": "Delete",
     "update-course": "Update activity",
     "update": "Update"
+  },
+  "message": {
+    "my-chat": "My chat",
+    "no-message-yet": "No message yet",
+    "no-channel": "No channel found",
+    "group-name": "Group name",
+    "name-mandatory": "Name is required",
+    "new-group": "New group",
+    "new-message": "Your message",
+    "image": "Group image",
+    "image-size": "Maximum size: {size}",
+    "image-size-error": "The maximum allowed size for images is {size}",
+    "group-users": "Group users",
+    "and-n-more_one": "And {count} other",
+    "and-n-more_other": "And {count} others",
+    "delete-user": "Delete",
+    "update-group": "Update group",
+    "group-updated": "Group updated",
+    "group-created": "Group created",
+    "group-deleted": "Group deleted",
+    "group-deletion": "Delete group",
+    "group-deletion-message": "Do you want to delete this group?|This action is irreversible",
+    "group-deletion-confirmation": "Delete"
   }
 }

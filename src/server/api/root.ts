@@ -10,7 +10,7 @@ import { coachRouter } from "./routers/coachs";
 import { eventRouter } from "./routers/event";
 import { userRouter } from "./routers/users";
 import { siteRouter } from "./routers/sites";
-// import { fileRouter } from "./routers/files";
+import { fileRouter } from "./routers/files";
 import { clubRouter } from "./routers/clubs";
 import { pageRouter } from "./routers/page";
 import { chatRouter } from "./routers/chat";
@@ -27,7 +27,7 @@ export const appRouter = createTRPCRouter({
   pricings: pricingRouter,
   events: eventRouter,
   dashboards: dashboardRouter,
-  // files: fileRouter,
+  files: fileRouter,
   clubs: clubRouter,
   chat: chatRouter,
   calendars: calendarRouter,
