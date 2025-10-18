@@ -1016,8 +1016,7 @@
     "image-size": "Taille maximum de l'image {{size}}",
     "image-size-error": "La taille maximum autorisée est {{size}}",
     "group-users": "Invités",
-    "and-n-more_one": "Et {{count}} autre",
-    "and-n-more_other": "Et {{count}} autres",
+    "and-n-more": "{count, plural, =1 {Et un autre} other {Et # autres}}",
     "delete-user": "Supprimer",
     "update-group": "Modifier le groupe",
     "group-updated": "Groupe mis à jour",
@@ -1025,6 +1024,7 @@
     "group-deleted": "Groupe supprimé",
     "deletion-message": "Vous allez supprimer ce groupe.|Tous les messages associés seront également supprimés.|Cette action est irréversible. Confirmez-vous ?",
     "group-deletion": "Suppression d'un groupe",
+    "delete-groupImage": "Supprimer l'image de groupe",
     "react": "Réagir",
     "reply": "Répondre",
     "reply-to": "Réponse au message",
@@ -1042,7 +1042,7 @@
       "LOVE": "J'adore !",
       "SAD": "Snif",
       "WOAH": "Whaou",
-      "STRENGHT": "Force",
+      "STRENGTH": "Force",
       "FIST": "Check"
     }
   }

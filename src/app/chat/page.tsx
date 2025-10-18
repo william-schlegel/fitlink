@@ -26,9 +26,6 @@ const Chat = async ({
 
   const channels = await caller.chat.getChannelsForUser({ userId });
 
-  console.log("channels", channels);
-  const selectedChannel = channels?.find((c) => c.id === channelId);
-
   const href = await getHref();
   if (!isCUID(channelId) && channels?.length)
     redirect(
@@ -45,30 +42,6 @@ const Chat = async ({
     name: channel.name,
     link: createHref(href, ["chat"], { channelId: channel.id }),
   }));
-
-  // const createMessage = api.messages.createMessage.useMutation({
-  //   onSuccess() {
-  //     utils.messages.getMessagesForUser.invalidate({
-  //       userId,
-  //       channelId,
-  //     });
-  //   },
-  // });
-  // const [replyData, setReplyData] = useState({ id: "", message: "" });
-
-  // function onSubmit(e: FormEvent<HTMLFormElement>) {
-  //   e.preventDefault();
-  //   if (message) {
-  //     createMessage.mutate({
-  //       channelId,
-  //       from: userId,
-  //       message,
-  //       messageRefId: replyData.id !== "" ? replyData.id : undefined,
-  //     });
-  //   }
-  //   setMessage("");
-  //   setReplyData({ id: "", message: "" });
-  // }
 
   return (
     <LayoutPage title={t("my-chat")}>
