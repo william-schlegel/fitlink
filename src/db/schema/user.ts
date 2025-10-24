@@ -18,7 +18,12 @@ import {
   coachingActivity,
   event,
 } from "./club";
-import { certification, coachingPrice, coachMarketPlace } from "./coach";
+import {
+  coachCertification,
+  coachingPrice,
+  coachMarketPlace,
+  coachOrganisms,
+} from "./coach";
 import { notificationTypeEnum, userDocumentTypeEnum } from "./enums";
 import { page, pageSectionElementDocuments } from "./page";
 import { planning, planningActivity } from "./planning";
@@ -55,7 +60,8 @@ export const userCoachRelations = relations(userCoach, ({ one, many }) => ({
   activityGroups: many(activityGroup),
   coachingPrices: many(coachingPrice),
   coachingActivities: many(coachingActivity),
-  certifications: many(certification),
+  certifications: many(coachCertification),
+  organisms: many(coachOrganisms),
   page: one(page),
   planningActivities: many(planningActivity),
   plannings: many(planning),
@@ -81,7 +87,7 @@ export const userMemberRelations = relations(userMember, ({ one, many }) => ({
 }));
 
 export const userMemberToSubscription = pgTable(
-  "user_member_to_subscription",
+  "UserMemberToSubscription",
   {
     userId: text("user_id")
       .notNull()

@@ -101,47 +101,62 @@ export const coachingPricePackRelations = relations(
 
 /* Certifications */
 
-export const certificationGroup = pgTable("CertificationGroup", {
+export const certificationOrganism = pgTable("CertificationOrganism", {
   id: text("id").primaryKey().$defaultFn(createId),
   name: text("name").notNull(),
 });
-
-export const certificationGroupRelations = relations(
-  certificationGroup,
-  ({ many }) => ({
-    modules: many(certificationModule),
-  }),
-);
 
 export const certificationModule = pgTable(
   "CertificationModule",
   {
     id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
-    certificationGroupId: text("certification_group_id").notNull(),
+    certificationOrganismId: text("certification_organism_id").notNull(),
   },
   (table) => [
-    index("certification_module_certification_group_idx").on(
-      table.certificationGroupId,
+    index("certification_module_certification_organism_idx").on(
+      table.certificationOrganismId,
     ),
   ],
 );
-export const certificationModuleRelations = relations(
-  certificationModule,
-  ({ one, many }) => ({
-    certificationGroup: one(certificationGroup, {
-      fields: [certificationModule.certificationGroupId],
-      references: [certificationGroup.id],
+
+// Many-to-many: CertificationOrganism <-> CertificationModule
+export const certificationOrganismModules = pgTable(
+  "CertificationOrganismModules",
+  {
+    id: text("id").primaryKey().$defaultFn(createId),
+    certificationOrganismId: text("certification_organism_id")
+      .notNull()
+      .references(() => certificationOrganism.id),
+    certificationModuleId: text("certification_module_id")
+      .notNull()
+      .references(() => certificationModule.id),
+  },
+  (table) => [
+    index("cert_org_modules_org_idx").on(table.certificationOrganismId),
+    index("cert_org_modules_mod_idx").on(table.certificationModuleId),
+  ],
+);
+
+export const certificationOrganismModulesRelations = relations(
+  certificationOrganismModules,
+  ({ one }) => ({
+    organism: one(certificationOrganism, {
+      fields: [certificationOrganismModules.certificationOrganismId],
+      references: [certificationOrganism.id],
     }),
-    activityGroups: many(activityGroup),
-    certifications: many(certification),
-    certificationModuleActivityGroups: many(certificationModuleActivityGroups),
-    certificationCertificationModules: many(certificationCertificationModules),
+    module: one(certificationModule, {
+      fields: [certificationOrganismModules.certificationModuleId],
+      references: [certificationModule.id],
+    }),
   }),
 );
 
-export const certification = pgTable(
-  "Certification",
+// relations for certificationOrganism and certificationModule will be defined
+// after dependent tables are declared to avoid temporal dead zone issues
+
+export const coachCertification = pgTable(
+  "CoachCertification",
   {
     id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
@@ -152,80 +167,67 @@ export const certification = pgTable(
   },
   (table) => [index("certification_coach_idx").on(table.coachId)],
 );
+
 export const certificationRelations = relations(
-  certification,
+  coachCertification,
   ({ one, many }) => ({
     document: one(userDocument, {
-      fields: [certification.documentId],
+      fields: [coachCertification.documentId],
       references: [userDocument.id],
     }),
+
     coach: one(userCoach, {
-      fields: [certification.coachId],
-      references: [userCoach.id],
+      fields: [coachCertification.coachId],
+      references: [userCoach.userId],
     }),
-    modules: many(certificationModule),
     activityGroups: many(activityGroup),
     marketPlaceSearchs: many(coachMarketPlace),
-    certificationCertificationModules: many(certificationCertificationModules),
-    certificationActivityGroups: many(certificationActivityGroups),
+    selectedModuleForCoach: many(selectedModuleForCoach),
   }),
 );
 
-export const certificationCertificationModules = pgTable(
-  "certification_certification_modules",
-  {
-    certificationId: text("certification_id")
-      .notNull()
-      .references(() => certification.id),
-    certificationModuleId: text("certification_module_id")
-      .notNull()
-      .references(() => certificationModule.id),
-  },
-);
+export const selectedModuleForCoach = pgTable("SelectedModuleForCoach", {
+  coachId: text("coach_id")
+    .notNull()
+    .references(() => userCoach.id),
+  certificationId: text("certification_id")
+    .notNull()
+    .references(() => coachCertification.id),
+  certificationModuleId: text("certification_module_id")
+    .notNull()
+    .references(() => certificationModule.id),
+  certificationOrganismId: text("certification_organism_id")
+    .notNull()
+    .references(() => certificationOrganism.id),
+});
 
-export const certificationCertificationModulesRelations = relations(
-  certificationCertificationModules,
+export const selectedModuleForCoachRelations = relations(
+  selectedModuleForCoach,
   ({ one }) => ({
-    certification: one(certification, {
-      fields: [certificationCertificationModules.certificationId],
-      references: [certification.id],
+    coach: one(userCoach, {
+      fields: [selectedModuleForCoach.coachId],
+      references: [userCoach.id],
     }),
-    certificationModule: one(certificationModule, {
-      fields: [certificationCertificationModules.certificationModuleId],
+    certification: one(coachCertification, {
+      fields: [selectedModuleForCoach.certificationId],
+      references: [coachCertification.id],
+    }),
+    module: one(certificationModule, {
+      fields: [selectedModuleForCoach.certificationModuleId],
       references: [certificationModule.id],
     }),
-  }),
-);
-
-export const certificationActivityGroups = pgTable(
-  "certification_activity_groups",
-  {
-    certificationId: text("certification_id")
-      .notNull()
-      .references(() => certification.id),
-    activityGroupId: text("activity_group_id")
-      .notNull()
-      .references(() => activityGroup.id),
-  },
-);
-
-export const certificationActivityGroupsRelations = relations(
-  certificationActivityGroups,
-  ({ one }) => ({
-    certification: one(certification, {
-      fields: [certificationActivityGroups.certificationId],
-      references: [certification.id],
-    }),
-    activityGroup: one(activityGroup, {
-      fields: [certificationActivityGroups.activityGroupId],
-      references: [activityGroup.id],
+    organism: one(certificationOrganism, {
+      fields: [selectedModuleForCoach.certificationOrganismId],
+      references: [certificationOrganism.id],
     }),
   }),
 );
 
+// Many-to-many: CertificationModule <-> ActivityGroup
 export const certificationModuleActivityGroups = pgTable(
-  "certification_module_activity_groups",
+  "CertificationModuleActivityGroups",
   {
+    id: text("id").primaryKey().$defaultFn(createId),
     certificationModuleId: text("certification_module_id")
       .notNull()
       .references(() => certificationModule.id),
@@ -233,12 +235,16 @@ export const certificationModuleActivityGroups = pgTable(
       .notNull()
       .references(() => activityGroup.id),
   },
+  (table) => [
+    index("cert_mod_act_groups_mod_idx").on(table.certificationModuleId),
+    index("cert_mod_act_groups_grp_idx").on(table.activityGroupId),
+  ],
 );
 
 export const certificationModuleActivityGroupsRelations = relations(
   certificationModuleActivityGroups,
   ({ one }) => ({
-    certificationModule: one(certificationModule, {
+    module: one(certificationModule, {
       fields: [certificationModuleActivityGroups.certificationModuleId],
       references: [certificationModule.id],
     }),
@@ -246,6 +252,54 @@ export const certificationModuleActivityGroupsRelations = relations(
       fields: [certificationModuleActivityGroups.activityGroupId],
       references: [activityGroup.id],
     }),
+  }),
+);
+
+// Many-to-many: Coach <-> CertificationOrganism
+export const coachOrganisms = pgTable(
+  "CoachOrganisms",
+  {
+    id: text("id").primaryKey().$defaultFn(createId),
+    coachUserId: text("coach_user_id")
+      .notNull()
+      .references(() => userCoach.userId),
+    certificationOrganismId: text("certification_organism_id")
+      .notNull()
+      .references(() => certificationOrganism.id),
+  },
+  (table) => [
+    index("coach_organisms_coach_idx").on(table.coachUserId),
+    index("coach_organisms_org_idx").on(table.certificationOrganismId),
+  ],
+);
+
+export const coachOrganismsRelations = relations(coachOrganisms, ({ one }) => ({
+  coach: one(userCoach, {
+    fields: [coachOrganisms.coachUserId],
+    references: [userCoach.userId],
+  }),
+  organism: one(certificationOrganism, {
+    fields: [coachOrganisms.certificationOrganismId],
+    references: [certificationOrganism.id],
+  }),
+}));
+
+// Now that all dependent tables are declared, define base relations
+export const certificationOrganismRelations = relations(
+  certificationOrganism,
+  ({ many }) => ({
+    modules: many(certificationOrganismModules),
+    coaches: many(coachOrganisms),
+    selectedModulesForCoach: many(selectedModuleForCoach),
+  }),
+);
+
+export const certificationModuleRelations = relations(
+  certificationModule,
+  ({ many }) => ({
+    organisms: many(certificationOrganismModules),
+    activityGroups: many(certificationModuleActivityGroups),
+    selectedModulesForCoach: many(selectedModuleForCoach),
   }),
 );
 
@@ -282,7 +336,7 @@ export const coachMarketPlaceRelations = relations(
       references: [userCoach.userId],
     }),
     sites: many(site),
-    certifications: many(certification),
+    certifications: many(coachCertification),
     activities: many(activityGroup),
     coachMarketPlaceSites: many(coachMarketPlaceSites),
     coachMarketPlaceCertifications: many(coachMarketPlaceCertifications),
@@ -290,7 +344,7 @@ export const coachMarketPlaceRelations = relations(
   }),
 );
 
-export const coachMarketPlaceSites = pgTable("coach_market_place_sites", {
+export const coachMarketPlaceSites = pgTable("CoachMarketPlaceSites", {
   coachMarketPlaceId: text("coach_market_place_id")
     .notNull()
     .references(() => coachMarketPlace.id),
@@ -314,14 +368,14 @@ export const coachMarketPlaceSitesRelations = relations(
 );
 
 export const coachMarketPlaceCertifications = pgTable(
-  "coach_market_place_certifications",
+  "CoachMarketPlaceCertifications",
   {
     coachMarketPlaceId: text("coach_market_place_id")
       .notNull()
       .references(() => coachMarketPlace.id),
     certificationId: text("certification_id")
       .notNull()
-      .references(() => certification.id),
+      .references(() => coachCertification.id),
   },
 );
 
@@ -332,15 +386,15 @@ export const coachMarketPlaceCertificationsRelations = relations(
       fields: [coachMarketPlaceCertifications.coachMarketPlaceId],
       references: [coachMarketPlace.id],
     }),
-    certification: one(certification, {
+    certification: one(coachCertification, {
       fields: [coachMarketPlaceCertifications.certificationId],
-      references: [certification.id],
+      references: [coachCertification.id],
     }),
   }),
 );
 
 export const coachMarketPlaceActivityGroups = pgTable(
-  "coach_market_place_activity_groups",
+  "CoachMarketPlaceActivityGroups",
   {
     coachMarketPlaceId: text("coach_market_place_id")
       .notNull()

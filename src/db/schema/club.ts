@@ -11,12 +11,11 @@ import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 
 import {
-  certification,
+  coachCertification,
   certificationModule,
   coachMarketPlace,
-  certificationActivityGroups,
-  certificationModuleActivityGroups,
   coachMarketPlaceActivityGroups,
+  certificationModuleActivityGroups,
 } from "./coach";
 import {
   subscription,
@@ -194,9 +193,8 @@ export const activityGroupRelations = relations(
       fields: [activityGroup.coachId],
       references: [userCoach.id],
     }),
-    certifications: many(certification),
+    coachCertification: many(coachCertification),
     certificationModules: many(certificationModule),
-    certificationActivityGroups: many(certificationActivityGroups),
     certificationModuleActivityGroups: many(certificationModuleActivityGroups),
     subscriptions: many(subscriptionToActivityGroup),
     marketPlaceSearchs: many(coachMarketPlace),

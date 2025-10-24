@@ -146,14 +146,16 @@ const Logo = () => {
     <div className="flex flex-1 items-center">
       <Link
         href={"/fitlink"}
-        className="btn btn-ghost text-2xl capitalize flex items-center gap-2"
+        className="btn btn-ghost text-2xl capitalize flex items-center gap-2 relative"
       >
         <Image src="/images/fitlink.svg" alt="Fitlink" width={24} height={24} />
         <span>Fitlink</span>
+        {BETA ? (
+          <span className="badge badge-xs badge-warning hidden lg:inline absolute bottom-0 right-0 opacity-50">
+            BETA
+          </span>
+        ) : null}
       </Link>
-      {BETA ? (
-        <span className="badge badge-warning hidden lg:inline">BETA</span>
-      ) : null}
     </div>
   );
 };

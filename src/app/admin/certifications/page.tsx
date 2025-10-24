@@ -1,16 +1,17 @@
+import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
-import { twMerge } from "tailwind-merge";
-import Link from "next/link";
 
 import {
-  CreateCertificationGroup,
+  CreateCertificationOrganism,
   DeleteCertificationGroup,
   UpdateCertificationGroup,
 } from "@/components/modals/manageCertification";
+import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
-import Title from "@/components/title";
+import createLink from "@/lib/createLink";
+import { getHref } from "@/lib/getHref";
+import { isCUID } from "@/lib/utils";
 
 export default async function CertificationsManagement({
   searchParams,
@@ -26,40 +27,33 @@ export default async function CertificationsManagement({
 
   const caller = await createTrpcCaller();
   if (!caller) return null;
-  const cgQuery = await caller.coachs.getCertificationGroups();
+  const cgQuery = await caller.coachs.getCertificationOrganisms();
 
+  const href = await getHref();
   if (!cgId && cgQuery.length > 0)
-    redirect(`/admin/certifications?cgId=${cgQuery[0]?.id}`);
+    redirect(createLink({ cgId: cgQuery[0]?.id }, href), RedirectType.replace);
+
+  const cgList = cgQuery.map((cg) => ({
+    id: cg.id,
+    name: cg.name,
+    link: createLink({ cgId: cg.id }, href),
+  }));
 
   return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title title={t("certification.manage-cg")} />
-      <div className="mb-4 flex flex-row items-center gap-4">
-        <h1>{t("certification.manage-cg")}</h1>
-        <CreateCertificationGroup />
-      </div>
-      <div className="flex gap-4">
-        <div className="w-1/4 ">
-          <h3>{t("certification.groups")}</h3>
-          <ul className="menu overflow-hidden rounded bg-base-100">
-            {cgQuery?.map((cg) => (
-              <li key={cg.id}>
-                <Link
-                  className={twMerge(
-                    "flex w-full items-center justify-between text-center",
-                    cgId === cg.id && "badge badge-primary",
-                  )}
-                  href={`/admin/certifications?cgId=${cg.id}`}
-                >
-                  <span>{cg.name}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+    <LayoutPage
+      title={t("certification.manage-cg")}
+      titleComponents={<CreateCertificationOrganism />}
+    >
+      <LayoutPage.Main>
+        <LayoutPage.List
+          list={cgList}
+          itemId={cgId}
+          noItemsText={t("certification.no-cg")}
+        />
+
         {cgId === "" ? null : <CGContent cgId={cgId} />}
-      </div>
-    </div>
+      </LayoutPage.Main>
+    </LayoutPage>
   );
 }
 
@@ -69,9 +63,8 @@ type CGContentProps = {
 
 export async function CGContent({ cgId }: CGContentProps) {
   const caller = await createTrpcCaller();
-  if (!caller) return null;
-  const cgQuery = await caller.coachs.getCertificationGroupById(cgId);
-  console.log("cgQuery :>> ", cgQuery);
+  if (!caller || !isCUID(cgId)) return null;
+  const cgQuery = await caller.coachs.getCertificationOrganismById(cgId);
   const t = await getTranslations("admin");
 
   if (!cgQuery) return null;
@@ -95,8 +88,7 @@ export async function CGContent({ cgId }: CGContentProps) {
               <div key={module.id} className="pill">
                 <span>{module.name}</span>
                 <span className="badge-primary badge">
-                  {"??"}
-                  {/* {module.activityGroups?.flatMap((a) => a.activities)?.length} */}
+                  {module.activities.length}
                 </span>
               </div>
             ))}

@@ -1,0 +1,1203 @@
+enum ChannelType {
+  PRIVATE
+  CLUB
+  COACH
+  GROUP
+}
+
+enum CoachMarketPlaceType {
+  SEARCH
+  OFFER
+}
+
+enum CoachingLevelList {
+  ALL
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+  COMPETITOR
+  PROFESSIONAL
+}
+
+enum CoachingTarget {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum DayName {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+enum Feature {
+  COACH_OFFER
+  COACH_OFFER_COMPANY
+  COACH_CERTIFICATION
+  COACH_MEETING
+  COACH_MARKET_PLACE
+  MANAGER_MULTI_CLUB
+  MANAGER_MULTI_SITE
+  MANAGER_ROOM
+  MANAGER_EVENT
+  MANAGER_PLANNING
+  MANAGER_COACH
+  MANAGER_MARKET_PLACE
+  MANAGER_SHOP
+  MANAGER_EMPLOYEES
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+}
+
+enum NotificationType {
+  SEARCH_COACH
+  SEARCH_CLUB
+  COACH_ACCEPT
+  COACH_REFUSE
+  CLUB_ACCEPT
+  CLUB_REFUSE
+  NEW_MESSAGE
+  NEW_SUBSCRIPTION
+  NEW_REQUEST
+  SUBSCRIPTION_VALIDATED
+  SUBSCRIPTION_REJECTED
+  REQUEST_VALIDATED
+  REQUEST_REJECTED
+}
+
+enum PackMode {
+  PHYSICAL
+  WEBCAM
+}
+
+enum PageSectionElementType {
+  HERO_CONTENT
+  CTA
+  CARD
+  OPENING_TIME
+  MAP
+  FEATURE
+  BUTTON
+  NEWSLETTER
+  OPTION
+}
+
+enum PageSectionModel {
+  HERO
+  TITLE
+  PLANNINGS
+  ACTIVITY_GROUPS
+  ACTIVITIES
+  OFFERS
+  VIDEO
+  LOCATION
+  SOCIAL
+  TEAMMATES
+  CONTACT
+  FOOTER
+}
+
+enum PageTarget {
+  HOME
+  ACTIVITIES
+  OFFERS
+  TEAM
+  PLANNING
+  VIDEOS
+  EVENTS
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  LOL
+  SAD
+  GRRR
+  WOAH
+  CHECK
+  STRENGTH
+  FIST
+}
+
+enum Role {
+  MEMBER
+  COACH
+  MANAGER
+  MANAGER_COACH
+  ADMIN
+}
+
+enum RoomReservation {
+  NONE
+  POSSIBLE
+  MANDATORY
+}
+
+enum SubscriptionMode {
+  ALL_INCLUSIVE
+  ACTIVITY_GROUP
+  ACTIVITY
+  DAY
+  COURSE
+}
+
+enum SubscriptionRestriction {
+  CLUB
+  SITE
+  ROOM
+}
+
+enum UserDocumentType {
+  DOCUMENT
+  IMAGE
+  PROFILE_IMAGE
+  PAGE_IMAGE
+  CERTIFICATION
+  MEDICAL_CERTIFICAT
+}
+
+table account {
+  id text [pk, not null]
+  account_id text [not null]
+  provider_id text [not null]
+  user_id text [not null]
+  access_token text
+  refresh_token text
+  id_token text
+  access_token_expires_at timestamp
+  refresh_token_expires_at timestamp
+  scope text
+  password text
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+table session {
+  id text [pk, not null]
+  expires_at timestamp [not null]
+  token text [not null, unique]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  ip_address text
+  user_agent text
+  user_id text [not null]
+  impersonated_by text
+}
+
+table user {
+  id text [pk, not null]
+  name text [not null]
+  email text [not null, unique]
+  email_verified boolean [not null]
+  image text
+  profile_image_id text
+  internal_role Role [default: 'MEMBER']
+  pricing_id text
+  monthly_payment boolean [default: false]
+  trial_until timestamp
+  due_date timestamp
+  cancelation_date timestamp
+  phone text
+  address text
+  chat_token text
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  role text [default: 'regular']
+  banned boolean [default: false]
+  ban_reason text
+  ban_expires timestamp
+
+  indexes {
+    pricing_id [name: 'user_pricing_idx']
+  }
+}
+
+table verification {
+  id text [pk, not null]
+  identifier text [not null]
+  value text [not null]
+  expires_at timestamp [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+table VerificationToken {
+  identifier text [not null]
+  token text [not null, unique]
+  expires timestamp [not null]
+
+  indexes {
+    (identifier, token) [name: 'VerificationToken_identifier_token_unique', unique]
+  }
+}
+
+table Activity {
+  id text [pk, not null]
+  name text [not null]
+  group_id text [not null]
+  club_id text [not null]
+  no_calendar boolean [default: false]
+  reservation_duration integer [default: 60]
+
+  indexes {
+    group_id [name: 'activity_group_idx']
+    club_id [name: 'activity_club_idx']
+  }
+}
+
+table ActivityGroup {
+  id text [pk, not null]
+  name text [not null]
+  default boolean [default: false]
+  coach_id text
+
+  indexes {
+    coach_id [name: 'activity_group_coach_idx']
+  }
+}
+
+table Club {
+  id text [pk, not null]
+  name text [not null]
+  address text [not null]
+  manager_id text [not null]
+  page_style text [default: 'light']
+  logo_id text [unique]
+  chat_group_id text
+
+  indexes {
+    manager_id [name: 'club_manager_idx']
+    logo_id [name: 'club_logo_idx']
+  }
+}
+
+table ClubCoachs {
+  id text [pk, not null]
+  club_id text [not null]
+  coach_user_id text [not null]
+
+  indexes {
+    club_id [name: 'club_coachs_club_idx']
+    coach_user_id [name: 'club_coachs_coach_idx']
+  }
+}
+
+table ClubMembers {
+  id text [pk, not null]
+  club_id text [not null]
+  member_user_id text [not null]
+
+  indexes {
+    club_id [name: 'club_members_club_idx']
+    member_user_id [name: 'club_members_member_idx']
+  }
+}
+
+table CoachingActivity {
+  id text [pk, not null]
+  name text [not null]
+  coach_id text [not null]
+
+  indexes {
+    coach_id [name: 'coaching_activity_coach_idx']
+  }
+}
+
+table Event {
+  id text [pk, not null]
+  club_id text [not null]
+  name text [not null]
+  brief text [not null]
+  description text [not null]
+  page_id text
+  start_date timestamp [not null]
+  end_date timestamp [not null]
+  start_display timestamp [not null, default: `now()`]
+  end_display timestamp [not null]
+  banner_text text [not null]
+  cancelled boolean [not null]
+  document_id text [unique]
+  price real [not null]
+  free boolean [not null]
+  address text [not null]
+  search_address text
+  latitude real [default: 48.8583701]
+  longitude real [default: 2.2944813]
+
+  indexes {
+    page_id [name: 'event_page_idx']
+    club_id [name: 'event_club_idx']
+  }
+}
+
+table Room {
+  id text [pk, not null]
+  name text [not null]
+  reservation RoomReservation [default: 'NONE']
+  capacity integer [not null]
+  unavailable boolean [default: false]
+  open_with_club boolean [default: true]
+  open_with_site boolean [default: true]
+  site_id text [not null]
+
+  indexes {
+    site_id [name: 'room_site_idx']
+  }
+}
+
+table RoomActivities {
+  id text [pk, not null]
+  room_id text [not null]
+  activity_id text [not null]
+
+  indexes {
+    room_id [name: 'room_activities_room_idx']
+    activity_id [name: 'room_activities_activity_idx']
+  }
+}
+
+table Site {
+  id text [pk, not null]
+  name text [not null]
+  address text [not null]
+  search_address text
+  latitude real [default: 48.8583701]
+  longitude real [default: 2.2944813]
+  club_id text [not null]
+  open_with_club boolean [default: true]
+
+  indexes {
+    club_id [name: 'site_club_idx']
+  }
+}
+
+table CertificationModule {
+  id text [pk, not null]
+  name text [not null]
+  certification_organism_id text [not null]
+
+  indexes {
+    certification_organism_id [name: 'certification_module_certification_organism_idx']
+  }
+}
+
+table CertificationModuleActivityGroups {
+  id text [pk, not null]
+  certification_module_id text [not null]
+  activity_group_id text [not null]
+
+  indexes {
+    certification_module_id [name: 'cert_mod_act_groups_mod_idx']
+    activity_group_id [name: 'cert_mod_act_groups_grp_idx']
+  }
+}
+
+table CertificationOrganism {
+  id text [pk, not null]
+  name text [not null]
+}
+
+table CertificationOrganismModules {
+  id text [pk, not null]
+  certification_organism_id text [not null]
+  certification_module_id text [not null]
+
+  indexes {
+    certification_organism_id [name: 'cert_org_modules_org_idx']
+    certification_module_id [name: 'cert_org_modules_mod_idx']
+  }
+}
+
+table CoachCertification {
+  id text [pk, not null]
+  name text [not null]
+  obtained_in timestamp [not null]
+  document_id text [unique]
+  coach_id text [not null]
+  manual_module text
+
+  indexes {
+    coach_id [name: 'certification_coach_idx']
+  }
+}
+
+table CoachMarketPlace {
+  id text [pk, not null]
+  type CoachMarketPlaceType [not null]
+  club_id text
+  coach_id text
+  publication_date timestamp [not null]
+  title text [not null]
+  content text [not null]
+  views integer [not null]
+  displays integer [not null]
+
+  indexes {
+    club_id [name: 'coach_market_place_club_idx']
+    coach_id [name: 'coach_market_place_coach_idx']
+  }
+}
+
+table CoachMarketPlaceActivityGroups {
+  coach_market_place_id text [not null]
+  activity_group_id text [not null]
+}
+
+table CoachMarketPlaceCertifications {
+  coach_market_place_id text [not null]
+  certification_id text [not null]
+}
+
+table CoachMarketPlaceSites {
+  coach_market_place_id text [not null]
+  site_id text [not null]
+}
+
+table CoachOrganisms {
+  id text [pk, not null]
+  coach_user_id text [not null]
+  certification_organism_id text [not null]
+
+  indexes {
+    coach_user_id [name: 'coach_organisms_coach_idx']
+    certification_organism_id [name: 'coach_organisms_org_idx']
+  }
+}
+
+table CoachingLevel {
+  id text [pk, not null]
+  offer_id text [not null]
+  level CoachingLevelList [not null]
+
+  indexes {
+    offer_id [name: 'coaching_level_offer_idx']
+  }
+}
+
+table CoachingPrice {
+  id text [pk, not null]
+  name text [not null]
+  target CoachingTarget [default: 'INDIVIDUAL']
+  excluding_taxes boolean [default: false]
+  description text [not null]
+  start_date timestamp [not null]
+  physical boolean [default: false]
+  in_house boolean [default: false]
+  my_place boolean [default: false]
+  public_place boolean [default: false]
+  per_hour_physical real [default: 0]
+  per_day_physical real [default: 0]
+  travel_fee real [default: 0]
+  travel_limit integer [default: 0]
+  webcam boolean [not null]
+  per_hour_webcam real [default: 0]
+  per_day_webcam real [default: 0]
+  free_hours integer [default: 0]
+  coach_id text [not null]
+
+  indexes {
+    coach_id [name: 'coaching_price_coach_idx']
+  }
+}
+
+table CoachingPricePack {
+  id text [pk, not null]
+  nb_hours integer [default: 1]
+  pack_price real [default: 0]
+  mode PackMode [default: 'PHYSICAL']
+  coaching_price_id text [not null]
+
+  indexes {
+    coaching_price_id [name: 'coaching_price_pack_coaching_price_idx']
+  }
+}
+
+table SelectedModuleForCoach {
+  coach_id text [not null]
+  certification_id text [not null]
+  certification_module_id text [not null]
+  certification_organism_id text [not null]
+}
+
+table Page {
+  id text [pk, not null]
+  name text [not null]
+  target PageTarget [default: 'HOME']
+  club_id text
+  coach_id text [unique]
+  published boolean [default: false]
+  event_id text [unique]
+
+  indexes {
+    club_id [name: 'page_club_idx']
+    coach_id [name: 'page_coach_idx']
+    event_id [name: 'page_event_idx']
+  }
+}
+
+table PageSection {
+  id text [pk, not null]
+  model PageSectionModel [not null]
+  title text
+  sub_title text
+  page_id text [not null]
+
+  indexes {
+    page_id [name: 'page_section_page_idx']
+  }
+}
+
+table PageSectionElement {
+  id text [pk, not null]
+  title text
+  sub_title text
+  element_type PageSectionElementType
+  content text
+  link text
+  page_id text
+  page_section PageSectionModel
+  section_id text [not null]
+  option_value text
+
+  indexes {
+    section_id [name: 'page_section_element_section_idx']
+  }
+}
+
+table PageSectionElementDocuments {
+  id text [pk, not null]
+  element_id text [not null]
+  document_id text [not null]
+
+  indexes {
+    element_id [name: 'pse_documents_element_idx']
+    document_id [name: 'pse_documents_document_idx']
+  }
+}
+
+table DayOpeningTime {
+  id text [pk, not null]
+  name DayName [not null]
+  whole_day boolean [default: false]
+  closed boolean [default: false]
+}
+
+table DayOpeningTimeCalendars {
+  id text [pk, not null]
+  day_opening_time_id text [not null]
+  opening_calendar_id text [not null]
+
+  indexes {
+    day_opening_time_id [name: 'day_opening_time_calendars_day_idx']
+    opening_calendar_id [name: 'day_opening_time_calendars_calendar_idx']
+  }
+}
+
+table OpeningCalendar {
+  id text [pk, not null]
+  start_date timestamp [not null, default: `now()`]
+}
+
+table OpeningCalendarClubs {
+  id text [pk, not null]
+  opening_calendar_id text [not null]
+  club_id text [not null]
+
+  indexes {
+    opening_calendar_id [name: 'opening_calendar_clubs_calendar_idx']
+    club_id [name: 'opening_calendar_clubs_club_idx']
+  }
+}
+
+table OpeningCalendarPlannings {
+  id text [pk, not null]
+  opening_calendar_id text [not null]
+  planning_id text [not null]
+
+  indexes {
+    opening_calendar_id [name: 'opening_calendar_plannings_calendar_idx']
+    planning_id [name: 'opening_calendar_plannings_planning_idx']
+  }
+}
+
+table OpeningCalendarRooms {
+  id text [pk, not null]
+  opening_calendar_id text [not null]
+  room_id text [not null]
+
+  indexes {
+    opening_calendar_id [name: 'opening_calendar_rooms_calendar_idx']
+    room_id [name: 'opening_calendar_rooms_room_idx']
+  }
+}
+
+table OpeningCalendarSites {
+  id text [pk, not null]
+  opening_calendar_id text [not null]
+  site_id text [not null]
+
+  indexes {
+    opening_calendar_id [name: 'opening_calendar_sites_calendar_idx']
+    site_id [name: 'opening_calendar_sites_site_idx']
+  }
+}
+
+table OpeningTime {
+  id text [pk, not null]
+  opening text [not null]
+  closing text [not null]
+}
+
+table OpeningTimeDays {
+  id text [pk, not null]
+  opening_time_id text [not null]
+  day_opening_time_id text [not null]
+
+  indexes {
+    opening_time_id [name: 'opening_time_days_time_idx']
+    day_opening_time_id [name: 'opening_time_days_day_idx']
+  }
+}
+
+table Planning {
+  id text [pk, not null]
+  name text
+  club_id text [not null]
+  site_id text
+  room_id text
+  start_date timestamp [not null, default: `now()`]
+  end_date timestamp
+  coach_id text
+
+  indexes {
+    club_id [name: 'planning_club_idx']
+    site_id [name: 'planning_site_idx']
+    room_id [name: 'planning_room_idx']
+    coach_id [name: 'planning_coach_idx']
+  }
+}
+
+table PlanningActivity {
+  id text [pk, not null]
+  planning_id text [not null]
+  activity_id text [not null]
+  site_id text [not null]
+  room_id text
+  day DayName [not null]
+  start_time text [not null]
+  duration integer [not null]
+  coach_id text
+
+  indexes {
+    planning_id [name: 'planning_activity_planning_idx']
+    activity_id [name: 'planning_activity_activity_idx']
+    site_id [name: 'planning_activity_site_idx']
+    room_id [name: 'planning_activity_room_idx']
+    coach_id [name: 'planning_activity_coach_idx']
+  }
+}
+
+table Reservation {
+  id text [pk, not null]
+  planning_activity_id text
+  activity_id text
+  activity_slot integer
+  date timestamp [not null]
+  room_id text
+  user_id text [not null]
+  reservation_date timestamp [not null, default: `now()`]
+
+  indexes {
+    room_id [name: 'reservation_room_idx']
+    activity_id [name: 'reservation_activity_idx']
+    planning_activity_id [name: 'reservation_planning_activity_idx']
+    user_id [name: 'reservation_user_idx']
+  }
+}
+
+table Paiement {
+  id text [pk, not null]
+  user_id text [not null]
+  subscription_id text [not null]
+  amount real [not null]
+  paiement_date timestamp [not null]
+
+  indexes {
+    user_id [name: 'paiement_user_idx']
+    subscription_id [name: 'paiement_subscription_idx']
+  }
+}
+
+table Pricing {
+  id text [pk, not null]
+  role_target Role [not null]
+  title text [not null]
+  description text [not null]
+  free boolean [default: false]
+  highlighted boolean [default: false]
+  monthly real [default: 0]
+  yearly real [default: 0]
+  deleted boolean [default: false]
+  deletion_date timestamp
+}
+
+table PricingFeature {
+  id text [pk, not null]
+  feature Feature [not null]
+  pricing_id text [not null]
+
+  indexes {
+    pricing_id [name: 'pricing_feature_pricing_idx']
+  }
+}
+
+table PricingOption {
+  id text [pk, not null]
+  name text [not null]
+  weight integer [not null]
+  pricing_id text [not null]
+
+  indexes {
+    pricing_id [name: 'pricing_option_pricing_idx']
+  }
+}
+
+table Subscription {
+  id text [pk, not null]
+  name text [not null]
+  mode SubscriptionMode [default: 'ALL_INCLUSIVE']
+  restriction SubscriptionRestriction [default: 'CLUB']
+  highlight text [not null]
+  description text [not null]
+  start_date timestamp [not null]
+  deletion_date timestamp
+  monthly real [default: 0]
+  yearly real [default: 0]
+  cancelation_fee real [default: 0]
+  inscription_fee real [default: 0]
+  day DayName
+  club_id text [not null]
+
+  indexes {
+    club_id [name: 'subscription_club_idx']
+  }
+}
+
+table SubscriptionToActivity {
+  subscription_id text [not null]
+  activity_id text [not null]
+
+  indexes {
+    (subscription_id, activity_id) [name: 'subscription_to_activity_idx']
+  }
+}
+
+table SubscriptionToActivityGroup {
+  subscription_id text [not null]
+  activity_group_id text [not null]
+
+  indexes {
+    (subscription_id, activity_group_id) [name: 'subscription_to_activity_group_idx']
+  }
+}
+
+table SubscriptionToRoom {
+  subscription_id text [not null]
+  room_id text [not null]
+
+  indexes {
+    (subscription_id, room_id) [name: 'subscription_to_room_idx']
+  }
+}
+
+table SubscriptionToSite {
+  subscription_id text [not null]
+  site_id text [not null]
+
+  indexes {
+    (subscription_id, site_id) [name: 'subscription_to_site_idx']
+  }
+}
+
+table UserCoach {
+  id text [pk, not null]
+  user_id text [not null, unique]
+  public_name text
+  description text
+  about_me text
+  search_address text
+  latitude real [default: 48.8583701]
+  longitude real [default: 2.2944813]
+  range real [default: 10]
+  facebook_link text
+  twitter_link text
+  youtube_link text
+  instagram_link text
+  rating real [default: 0]
+  page_style text [default: 'light']
+
+  indexes {
+    user_id [name: 'user_coach_user_idx']
+  }
+}
+
+table UserDocument {
+  id text [pk, not null]
+  user_id text [not null]
+  document_type UserDocumentType [default: 'DOCUMENT']
+  file_type text [not null]
+  file_name text
+
+  indexes {
+    user_id [name: 'user_document_user_idx']
+  }
+}
+
+table UserManager {
+  id text [pk, not null]
+  user_id text [not null, unique]
+}
+
+table UserMember {
+  id text [pk, not null]
+  user_id text [not null, unique]
+  inscription_fee_offered boolean [default: false]
+  cancelation_fee_offered boolean [default: false]
+  subscription_start timestamp
+}
+
+table UserMemberToSubscription {
+  user_id text [not null]
+  subscription_id text [not null]
+
+  indexes {
+    (user_id, subscription_id) [name: 'user_member_to_subscription_idx']
+  }
+}
+
+table UserNotification {
+  id text [pk, not null]
+  type NotificationType [not null]
+  user_to_id text [not null]
+  user_from_id text [not null]
+  message text [not null]
+  view_date timestamp
+  date timestamp [not null, default: `now()`]
+  data json
+  answered timestamp
+  answer text
+  linked_notification text
+
+  indexes {
+    user_to_id [name: 'user_notification_user_to_idx']
+    user_from_id [name: 'user_notification_user_from_idx']
+  }
+}
+
+table Channel {
+  id text [pk, not null]
+  name text [not null]
+  type ChannelType [not null, default: 'PRIVATE']
+  image_document_id text
+  created_at timestamp [not null, default: `now()`]
+  created_by_user_id text
+
+  indexes {
+    name [name: 'channel_name_idx']
+    created_by_user_id [name: 'channel_created_by_idx']
+  }
+}
+
+table ChannelUsers {
+  id text [pk, not null]
+  channel_id text [not null]
+  user_id text [not null]
+  is_admin boolean [default: false]
+  is_moderator boolean [default: false]
+  joined_at timestamp [not null, default: `now()`]
+  last_read_at timestamp
+
+  indexes {
+    channel_id [name: 'channel_users_channel_idx']
+    user_id [name: 'channel_users_user_idx']
+    (channel_id, is_admin) [name: 'channel_users_admin_idx']
+    (channel_id, is_moderator) [name: 'channel_users_moderator_idx']
+    (channel_id, last_read_at) [name: 'channel_users_read_idx']
+    (channel_id, user_id) [name: 'channel_users_unique']
+  }
+}
+
+table DirectConversation {
+  id text [pk, not null]
+  user_a_id text [not null]
+  user_b_id text [not null]
+  created_at timestamp [not null, default: `now()`]
+  user_a_last_read_at timestamp
+  user_b_last_read_at timestamp
+
+  indexes {
+    user_a_id [name: 'direct_conversation_user_a_idx']
+    user_b_id [name: 'direct_conversation_user_b_idx']
+    (user_a_id, user_b_id) [name: 'direct_conversation_unique_pair']
+    (user_a_id, user_a_last_read_at) [name: 'direct_conversation_user_a_read_idx']
+    (user_b_id, user_b_last_read_at) [name: 'direct_conversation_user_b_read_idx']
+  }
+}
+
+table Message {
+  id text [pk, not null]
+  channel_id text
+  direct_conversation_id text
+  user_id text [not null]
+  type MessageType [not null, default: 'TEXT']
+  content text
+  image_document_id text
+  reply_to_message_id text
+  created_at timestamp [not null, default: `now()`]
+  edited_at timestamp
+
+  indexes {
+    channel_id [name: 'message_channel_idx']
+    direct_conversation_id [name: 'message_direct_conversation_idx']
+    user_id [name: 'message_user_idx']
+    reply_to_message_id [name: 'message_reply_to_idx']
+    (channel_id, created_at) [name: 'message_channel_created_idx']
+    (direct_conversation_id, created_at) [name: 'message_direct_created_idx']
+  }
+}
+
+table MessageReaction {
+  id text [pk, not null]
+  message_id text [not null]
+  user_id text [not null]
+  type ReactionType [not null]
+  created_at timestamp [not null, default: `now()`]
+
+  indexes {
+    message_id [name: 'message_reaction_message_idx']
+    user_id [name: 'message_reaction_user_idx']
+    (message_id, user_id, type) [name: 'message_reaction_unique']
+  }
+}
+
+ref: account.user_id > user.id
+
+ref: session.user_id > user.id
+
+ref: user.pricing_id > Pricing.id
+
+ref: UserMember.user_id - user.id
+
+ref: UserCoach.user_id - user.id
+
+ref: UserManager.user_id - user.id
+
+ref: ActivityGroup.coach_id > UserCoach.id
+
+ref: Activity.group_id > ActivityGroup.id
+
+ref: Activity.club_id > Club.id
+
+ref: ClubCoachs.club_id > Club.id
+
+ref: ClubCoachs.coach_user_id > UserCoach.user_id
+
+ref: ClubMembers.club_id > Club.id
+
+ref: ClubMembers.member_user_id > UserMember.user_id
+
+ref: Club.manager_id > UserManager.user_id
+
+ref: Club.logo_id - UserDocument.id
+
+ref: CoachingActivity.coach_id > UserCoach.user_id
+
+ref: Event.club_id > Club.id
+
+ref: Page.event_id - Event.id
+
+ref: Event.document_id - UserDocument.id
+
+ref: RoomActivities.room_id > Room.id
+
+ref: RoomActivities.activity_id > Activity.id
+
+ref: Room.site_id > Site.id
+
+ref: Site.club_id > Club.id
+
+ref: CertificationModuleActivityGroups.certification_module_id > CertificationModule.id
+
+ref: CertificationModuleActivityGroups.activity_group_id > ActivityGroup.id
+
+ref: CertificationOrganismModules.certification_organism_id > CertificationOrganism.id
+
+ref: CertificationOrganismModules.certification_module_id > CertificationModule.id
+
+ref: CoachCertification.document_id - UserDocument.id
+
+ref: CoachCertification.coach_id > UserCoach.user_id
+
+ref: CoachMarketPlaceActivityGroups.coach_market_place_id > CoachMarketPlace.id
+
+ref: CoachMarketPlaceActivityGroups.activity_group_id > ActivityGroup.id
+
+ref: CoachMarketPlaceCertifications.coach_market_place_id > CoachMarketPlace.id
+
+ref: CoachMarketPlaceCertifications.certification_id - CoachCertification.id
+
+ref: CoachMarketPlace.club_id > Club.id
+
+ref: CoachMarketPlace.coach_id > UserCoach.user_id
+
+ref: CoachMarketPlaceSites.coach_market_place_id > CoachMarketPlace.id
+
+ref: CoachMarketPlaceSites.site_id - Site.id
+
+ref: CoachOrganisms.coach_user_id > UserCoach.user_id
+
+ref: CoachOrganisms.certification_organism_id > CertificationOrganism.id
+
+ref: CoachingLevel.offer_id > CoachingPrice.id
+
+ref: CoachingPricePack.coaching_price_id > CoachingPrice.id
+
+ref: CoachingPrice.coach_id > UserCoach.user_id
+
+ref: SelectedModuleForCoach.coach_id - UserCoach.id
+
+ref: SelectedModuleForCoach.certification_id > CoachCertification.id
+
+ref: SelectedModuleForCoach.certification_module_id > CertificationModule.id
+
+ref: SelectedModuleForCoach.certification_organism_id > CertificationOrganism.id
+
+ref: Page.club_id > Club.id
+
+ref: Page.coach_id - UserCoach.user_id
+
+ref: PageSectionElementDocuments.element_id > PageSectionElement.id
+
+ref: PageSectionElementDocuments.document_id > UserDocument.id
+
+ref: PageSectionElement.section_id > PageSection.id
+
+ref: PageSection.page_id > Page.id
+
+ref: DayOpeningTimeCalendars.day_opening_time_id > DayOpeningTime.id
+
+ref: DayOpeningTimeCalendars.opening_calendar_id > OpeningCalendar.id
+
+ref: OpeningCalendarClubs.opening_calendar_id > OpeningCalendar.id
+
+ref: OpeningCalendarClubs.club_id > Club.id
+
+ref: OpeningCalendarPlannings.opening_calendar_id > OpeningCalendar.id
+
+ref: OpeningCalendarPlannings.planning_id > Planning.id
+
+ref: OpeningCalendarRooms.opening_calendar_id > OpeningCalendar.id
+
+ref: OpeningCalendarRooms.room_id > Room.id
+
+ref: OpeningCalendarSites.opening_calendar_id > OpeningCalendar.id
+
+ref: OpeningCalendarSites.site_id > Site.id
+
+ref: OpeningTimeDays.opening_time_id > OpeningTime.id
+
+ref: OpeningTimeDays.day_opening_time_id > DayOpeningTime.id
+
+ref: PlanningActivity.planning_id > Planning.id
+
+ref: PlanningActivity.activity_id > Activity.id
+
+ref: PlanningActivity.site_id > Site.id
+
+ref: PlanningActivity.room_id > Room.id
+
+ref: PlanningActivity.coach_id > UserCoach.user_id
+
+ref: Planning.club_id > Club.id
+
+ref: Planning.site_id > Site.id
+
+ref: Planning.room_id > Room.id
+
+ref: Planning.coach_id > UserCoach.user_id
+
+ref: Reservation.planning_activity_id > PlanningActivity.id
+
+ref: Reservation.activity_id > Activity.id
+
+ref: Reservation.room_id > Room.id
+
+ref: Reservation.user_id > user.id
+
+ref: Paiement.user_id > user.id
+
+ref: Paiement.subscription_id > Subscription.id
+
+ref: PricingFeature.pricing_id > Pricing.id
+
+ref: PricingOption.pricing_id > Pricing.id
+
+ref: Subscription.club_id > Club.id
+
+ref: SubscriptionToActivityGroup.subscription_id > Subscription.id
+
+ref: SubscriptionToActivityGroup.activity_group_id > ActivityGroup.id
+
+ref: SubscriptionToActivity.subscription_id > Subscription.id
+
+ref: SubscriptionToActivity.activity_id > Activity.id
+
+ref: SubscriptionToRoom.subscription_id > Subscription.id
+
+ref: SubscriptionToRoom.room_id > Room.id
+
+ref: SubscriptionToSite.subscription_id > Subscription.id
+
+ref: SubscriptionToSite.site_id > Site.id
+
+ref: UserDocument.user_id > user.id
+
+ref: UserMemberToSubscription.subscription_id > Subscription.id
+
+ref: UserMemberToSubscription.user_id > UserMember.id
+
+ref: UserNotification.user_to_id > user.id
+
+ref: UserNotification.user_from_id > user.id
+
+ref: Channel.created_by_user_id - user.id
+
+ref: ChannelUsers.channel_id > Channel.id
+
+ref: ChannelUsers.user_id - user.id
+
+ref: DirectConversation.user_a_id - user.id
+
+ref: DirectConversation.user_b_id - user.id
+
+ref: MessageReaction.message_id > Message.id
+
+ref: MessageReaction.user_id - user.id
+
+ref: Message.channel_id > Channel.id
+
+ref: Message.direct_conversation_id > DirectConversation.id
+
+ref: Message.user_id - user.id
+
+ref: Message.image_document_id - UserDocument.id
+
+ref: Message.reply_to_message_id > Message.id

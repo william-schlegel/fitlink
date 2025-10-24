@@ -20,16 +20,19 @@ neonConfig.webSocketConstructor = ws;
 const pool = new Pool({
   connectionString: env.DATABASE_URL,
 });
+
+export const schema = {
+  ...auth,
+  ...club,
+  ...coach,
+  ...enums,
+  ...page,
+  ...planning,
+  ...subscription,
+  ...user,
+  ...chat,
+};
+
 export const db = drizzle(pool, {
-  schema: {
-    ...auth,
-    ...club,
-    ...coach,
-    ...enums,
-    ...page,
-    ...planning,
-    ...subscription,
-    ...user,
-    ...chat,
-  },
+  schema,
 });

@@ -4,9 +4,12 @@ import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { ButtonSize } from "../ui/buttonIcon";
+import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
@@ -369,11 +372,13 @@ type NewGroupProps = {
 
 export const NewGroup = ({ userId, variant = "Primary" }: NewGroupProps) => {
   const utils = trpc.useUtils();
+  const router = useRouter();
   const createGroup = trpc.activities.createGroup.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       if (userId) utils.activities.getActivityGroupsForUser.invalidate(userId);
       else utils.activities.getAllActivityGroups.invalidate();
       toast.success(t("group.created"));
+      router.push(createLink({ agId: data[0].id }));
     },
     onError(error) {
       toast.error(error.message);

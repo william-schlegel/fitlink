@@ -4,6 +4,7 @@
     "pricing": {
       "new": "New pricing",
       "manage-my-pricing": "Manage my pricing",
+      "no-pricing": "No pricing found",
       "update": "Update pricing",
       "delete": "Delete pricing",
       "name": "Pricing name",
@@ -78,9 +79,10 @@
     },
     "certification": {
       "manage-cg": "Manage certifications",
+      "no-cg": "No certification organization found",
       "groups": "Certification organization",
-      "group-coachs": "Coaches certified with this group (modules)",
-      "group-modules": "Modules attached to this group (activities)",
+      "group-coachs": "Coaches certified with this certification (modules)",
+      "group-modules": "Modules attached to this certification (activities)",
       "group-name": "Certification organization name",
       "name-mandatory": "Name is required",
       "modules": "Training modules",
@@ -526,6 +528,7 @@
     "no-coachs": "No coach found",
     "offer": {
       "create-new": "Create a new offer",
+      "no-offer": "No coaching offer found",
       "my-offer": "{count, plural, =0 {No coaching offer yet} =1 {My coaching offer} other {My coaching offers}}",
       "start-date": "Start date",
       "date-mandatory": "Date is required",

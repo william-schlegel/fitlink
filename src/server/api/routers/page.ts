@@ -419,7 +419,13 @@ export const pageRouter = createTRPCRouter({
         pricing: { with: { features: true } },
         coachData: {
           with: {
-            certifications: { with: { modules: true } },
+            certifications: {
+              with: {
+                certificationCertificationModules: {
+                  with: { certificationModule: true },
+                },
+              },
+            },
             coachingActivities: true,
             coachingPrices: { with: { coachingLevel: true } },
           },
@@ -495,7 +501,13 @@ export const pageRouter = createTRPCRouter({
           pricing: { with: { features: true } },
           coachData: {
             with: {
-              certifications: { with: { modules: true } },
+              certifications: {
+                with: {
+                  certificationCertificationModules: {
+                    with: { certificationModule: true },
+                  },
+                },
+              },
               coachingActivities: true,
               coachingPrices: { with: { coachingLevel: true } },
             },

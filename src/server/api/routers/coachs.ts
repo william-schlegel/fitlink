@@ -1,24 +1,28 @@
-import { and, eq, gte, ilike, lte, or } from "drizzle-orm";
+import { and, eq, gte, ilike, lte, or, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  certification,
-  certificationActivityGroups,
-  certificationCertificationModules,
-  certificationGroup,
+  coachCertification,
+  selectedModuleForCoach,
+  certificationOrganism,
   certificationModule,
   certificationModuleActivityGroups,
+  certificationOrganismModules,
   coachingLevel,
   coachingPrice,
   coachingPricePack,
 } from "@/db/schema/coach";
 import {
+  coachingLevelListEnum,
+  CoachingTargetEnum,
+  coachingTargetEnum,
+} from "@/db/schema/enums";
+import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
 import { LATITUDE, LONGITUDE, DEFAULT_RANGE } from "@/lib/defaultValues";
 import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { calculateBBox, calculateDistance } from "@/lib/distance";
@@ -83,8 +87,7 @@ export const coachRouter = createTRPCRouter({
             },
             certifications: {
               with: {
-                modules: true,
-                document: true,
+                activityGroups: true,
               },
             },
             clubs: true,
@@ -170,7 +173,7 @@ export const coachRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       return await db.transaction(async (tx) => {
         const certif = await tx
-          .insert(certification)
+          .insert(coachCertification)
           .values({
             name: input.name,
             obtainedIn: input.obtainedIn,
@@ -179,28 +182,32 @@ export const coachRouter = createTRPCRouter({
           .returning();
 
         const certifId = certif[0].id;
-        if (input.modules.length)
-          await tx.insert(certificationCertificationModules).values(
-            input.modules.map((m) => ({
-              certificationId: certifId,
-              certificationModuleId: m,
-            })),
-          );
-        if (input.activityGroups.length)
-          await tx.insert(certificationActivityGroups).values(
-            input.activityGroups.map((a) => ({
-              certificationId: certifId,
-              activityGroupId: a,
-            })),
-          );
 
-        if (input.activityGroups.length)
-          await tx.insert(certificationActivityGroups).values(
-            input.activityGroups.map((a) => ({
-              certificationId: certifId,
-              activityGroupId: a,
-            })),
+        if (input.modules.length) {
+          const coach = await tx.query.userCoach.findFirst({
+            where: eq(userCoach.userId, input.userId),
+            columns: { id: true },
+          });
+          const modules = await tx.query.certificationModule.findMany({
+            where: inArray(certificationModule.id, input.modules),
+            columns: { id: true, certificationOrganismId: true },
+          });
+          const byId = new Map(modules.map((m) => [m.id, m]));
+          await tx.insert(selectedModuleForCoach).values(
+            input.modules
+              .map((m) => byId.get(m))
+              .filter(
+                (m): m is { id: string; certificationOrganismId: string } =>
+                  Boolean(m),
+              )
+              .map((m) => ({
+                coachId: coach?.id ?? "",
+                certificationId: certifId,
+                certificationModuleId: m.id,
+                certificationOrganismId: m.certificationOrganismId,
+              })),
           );
+        }
 
         // coach: {
         //   connect: {
@@ -210,11 +217,11 @@ export const coachRouter = createTRPCRouter({
 
         if (input.documentId) {
           await tx
-            .update(certification)
+            .update(coachCertification)
             .set({
               documentId: input.documentId,
             })
-            .where(eq(certification.id, certifId));
+            .where(eq(coachCertification.id, certifId));
         }
         return certif;
       });
@@ -230,7 +237,7 @@ export const coachRouter = createTRPCRouter({
             message: "Invalid certification id",
           });
         const certif = await tx
-          .update(certification)
+          .update(coachCertification)
           .set({
             name: input.name,
             obtainedIn: input.obtainedIn,
@@ -246,30 +253,34 @@ export const coachRouter = createTRPCRouter({
             //     }
             //   : undefined,
           })
-          .where(eq(certification.id, certifId))
+          .where(eq(coachCertification.id, certifId))
           .returning();
         await tx
-          .delete(certificationCertificationModules)
-          .where(
-            eq(certificationCertificationModules.certificationId, certifId),
-          );
-        await tx
-          .delete(certificationActivityGroups)
-          .where(eq(certificationActivityGroups.certificationId, certifId));
+          .delete(selectedModuleForCoach)
+          .where(eq(selectedModuleForCoach.certificationId, certifId));
         if (input.modules?.length) {
-          await tx.insert(certificationCertificationModules).values(
-            input.modules.map((m) => ({
-              certificationId: certifId,
-              certificationModuleId: m,
-            })),
-          );
-        }
-        if (input.activityGroups?.length) {
-          await tx.insert(certificationActivityGroups).values(
-            input.activityGroups.map((a) => ({
-              certificationId: certifId,
-              activityGroupId: a,
-            })),
+          const coach = await tx.query.userCoach.findFirst({
+            where: eq(userCoach.userId, input.userId ?? ""),
+            columns: { id: true },
+          });
+          const modules = await tx.query.certificationModule.findMany({
+            where: inArray(certificationModule.id, input.modules),
+            columns: { id: true, certificationOrganismId: true },
+          });
+          const byId = new Map(modules.map((m) => [m.id, m]));
+          await tx.insert(selectedModuleForCoach).values(
+            input.modules
+              .map((m) => byId.get(m))
+              .filter(
+                (m): m is { id: string; certificationOrganismId: string } =>
+                  Boolean(m),
+              )
+              .map((m) => ({
+                coachId: coach?.id ?? "",
+                certificationId: certifId,
+                certificationModuleId: m.id,
+                certificationOrganismId: m.certificationOrganismId,
+              })),
           );
         }
 
@@ -279,7 +290,7 @@ export const coachRouter = createTRPCRouter({
   deleteCertification: protectedProcedure
     .input(z.cuid2())
     .mutation(({ input }) =>
-      db.delete(certification).where(eq(certification.id, input)),
+      db.delete(coachCertification).where(eq(coachCertification.id, input)),
     ),
   getAllCoachs: publicProcedure.query(() =>
     db.query.user.findMany({
@@ -318,54 +329,142 @@ export const coachRouter = createTRPCRouter({
       );
     }),
 
-  getCertificationsForCoach: protectedProcedure.input(z.string()).query(
-    async ({ input }) =>
-      await db.query.userCoach.findFirst({
+  getCertificationsForCoach: protectedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const coach = await db.query.userCoach.findFirst({
         where: eq(userCoach.userId, input),
         with: {
           certifications: {
             with: {
-              modules: true,
-              activityGroups: true,
+              selectedModuleForCoach: {
+                with: {
+                  module: {
+                    with: {
+                      activityGroups: { with: { activityGroup: true } },
+                    },
+                  },
+                },
+              },
             },
           },
         },
-      }),
-  ),
-
-  getCertificationById: protectedProcedure.input(z.cuid2()).query(({ input }) =>
-    db.query.certification.findFirst({
-      where: eq(certification.id, input),
-      with: {
-        certificationActivityGroups: { with: { activityGroup: true } },
-        modules: true,
-      },
+      });
+      if (!coach) return coach;
+      const certifications = (coach.certifications ?? []).map((c) => ({
+        ...c,
+        modules: (c.selectedModuleForCoach ?? []).map((cm) => cm.module),
+        activityGroups: (c.selectedModuleForCoach ?? [])
+          .flatMap((cm) => cm.module.activityGroups.map((g) => g.activityGroup))
+          .filter((v, i, a) => a.findIndex((x) => x.id === v.id) === i),
+      }));
+      return {
+        ...coach,
+        certifications,
+      };
     }),
-  ),
-  getCertificationGroups: protectedProcedure.query(() =>
-    db.query.certificationGroup.findMany({
+
+  getCertificationById: protectedProcedure
+    .input(z.cuid2())
+    .query(async ({ input }) => {
+      const cert = await db.query.coachCertification.findFirst({
+        where: eq(coachCertification.id, input),
+        with: {
+          selectedModuleForCoach: {
+            with: {
+              module: {
+                with: {
+                  activityGroups: {
+                    with: { activityGroup: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      if (!cert) return cert;
+      return {
+        ...cert,
+        modules: (cert.selectedModuleForCoach ?? []).map((cm) => cm.module),
+        activityGroups: (
+          cert.selectedModuleForCoach?.flatMap((cm) =>
+            cm.module.activityGroups.map((g) => g.activityGroup),
+          ) ?? []
+        ).filter((v, i, a) => a.findIndex((x) => x.id === v.id) === i),
+      };
+    }),
+  getCertificationOrganisms: protectedProcedure.query(async () => {
+    const organisms = await db.query.certificationOrganism.findMany({
       with: {
         modules: {
           with: {
-            certificationModuleActivityGroups: {
-              with: { activityGroup: true },
+            module: {
+              with: {
+                activityGroups: {
+                  with: { activityGroup: true },
+                },
+              },
             },
           },
         },
       },
-    }),
-  ),
-  getCertificationGroupById: protectedProcedure
+    });
+    // const organisms = await db.select()
+    // .from(certificationOrganism)
+    // .leftJoin(certificationModule,
+    //   eq(certificationOrganism.id,
+    //     certificationModule.certificationOrganismId))
+    //     .leftJoin(certificationModuleActivityGroups, eq(certificationModule.id, certificationModuleActivityGroups.certificationModuleId))
+    //     .leftJoin(activityGroup, eq(certificationModuleActivityGroups.activityGroupId, activityGroup.id))
+
+    return organisms.map((organism) => ({
+      id: organism.id,
+      name: organism.name,
+      modules: organism.modules.map((link) => ({
+        id: link.module.id,
+        name: link.module.name,
+        activities: link.module.activityGroups.map((g) => ({
+          id: g.activityGroup.id,
+          name: g.activityGroup.name,
+        })),
+      })),
+    }));
+  }),
+  getCertificationOrganismById: protectedProcedure
     .input(z.cuid2())
-    .query(({ input }) =>
-      db.query.certificationGroup.findFirst({
-        where: eq(certificationGroup.id, input),
+    .query(async ({ input }) => {
+      const cg = await db.query.certificationOrganism.findFirst({
+        where: eq(certificationOrganism.id, input),
         with: {
-          modules: true,
+          modules: {
+            with: {
+              module: {
+                with: {
+                  activityGroups: {
+                    with: { activityGroup: true },
+                  },
+                },
+              },
+            },
+          },
         },
-      }),
-    ),
-  createGroup: protectedProcedure
+      });
+      if (!cg) return null;
+      return {
+        id: cg.id,
+        name: cg.name,
+        modules: cg.modules.map((link) => ({
+          id: link.module.id,
+          name: link.module.name,
+          activities: link.module.activityGroups.map((g) => ({
+            id: g.activityGroup.id,
+            name: g.activityGroup.name,
+          })),
+        })),
+      };
+    }),
+  createOrganism: protectedProcedure
     .input(
       z.object({
         name: z.string(),
@@ -379,47 +478,94 @@ export const coachRouter = createTRPCRouter({
     )
     .mutation(({ input }) =>
       db.transaction(async (tx) => {
-        const group = await tx
-          .insert(certificationGroup)
+        const organism = await tx
+          .insert(certificationOrganism)
           .values({
             name: input.name,
           })
           .returning();
-        input.modules.forEach(async (mod) => {
-          const newModule = await tx
+        const organismId = organism[0].id;
+        for (const mod of input.modules) {
+          const [newModule] = await tx
             .insert(certificationModule)
             .values({
               name: mod.name,
-              certificationGroupId: group[0].id,
+              certificationOrganismId: organismId,
             })
             .returning();
+          const moduleId = newModule.id;
+          await tx.insert(certificationOrganismModules).values({
+            certificationOrganismId: organismId,
+            certificationModuleId: moduleId,
+          });
           if (mod.activityIds.length > 0) {
             await tx.insert(certificationModuleActivityGroups).values(
               mod.activityIds.map((id) => ({
-                certificationModuleId: newModule[0].id,
+                certificationModuleId: moduleId,
                 activityGroupId: id,
               })),
             );
           }
-        });
-        return group;
+        }
+        return organism;
       }),
     ),
-  updateGroup: protectedProcedure
+  updateOrganism: protectedProcedure
     .input(
       z.object({
         id: z.cuid2(),
         name: z.string(),
+        modules: z.array(
+          z.object({
+            name: z.string(),
+            activityIds: z.array(z.cuid2()),
+          }),
+        ),
       }),
     )
     .mutation(({ input }) =>
-      db
-        .update(certificationGroup)
-        .set({
-          name: input.name,
-        })
-        .where(eq(certificationGroup.id, input.id))
-        .returning(),
+      db.transaction(async (tx) => {
+        const organism = await tx
+          .update(certificationOrganism)
+          .set({
+            name: input.name,
+          })
+          .where(eq(certificationOrganism.id, input.id))
+          .returning();
+        // Remove existing module links for this organism
+        await tx
+          .delete(certificationOrganismModules)
+          .where(
+            eq(certificationOrganismModules.certificationOrganismId, input.id),
+          )
+          .catch(() => {
+            console.error("error deleting organism-module links");
+          });
+        // Recreate modules and links
+        for (const mod of input.modules) {
+          const [newModule] = await tx
+            .insert(certificationModule)
+            .values({
+              name: mod.name,
+              certificationOrganismId: input.id,
+            })
+            .returning();
+          const moduleId = newModule.id;
+          await tx.insert(certificationOrganismModules).values({
+            certificationOrganismId: input.id,
+            certificationModuleId: moduleId,
+          });
+          if (mod.activityIds.length > 0) {
+            await tx.insert(certificationModuleActivityGroups).values(
+              mod.activityIds.map((id) => ({
+                certificationModuleId: moduleId,
+                activityGroupId: id,
+              })),
+            );
+          }
+        }
+        return organism;
+      }),
     ),
 
   updateActivitiesForModule: protectedProcedure
@@ -430,45 +576,64 @@ export const coachRouter = createTRPCRouter({
       }),
     )
     .mutation(({ input }) =>
-      db
-        .update(certificationModule)
-        .set({
-          // activityGroups: {
-          //   connect: input.activityIds.map((a) => ({ id: a })),
-          // },
-        })
-        .where(eq(certificationModule.id, input.moduleId))
-        .returning(),
+      db.transaction(async (tx) => {
+        await tx
+          .delete(certificationModuleActivityGroups)
+          .where(
+            eq(
+              certificationModuleActivityGroups.certificationModuleId,
+              input.moduleId,
+            ),
+          );
+        await tx.insert(certificationModuleActivityGroups).values(
+          input.activityIds.map((id) => ({
+            certificationModuleId: input.moduleId,
+            activityGroupId: id,
+          })),
+        );
+      }),
     ),
 
-  deleteGroup: protectedProcedure
+  deleteOrganism: protectedProcedure
     .input(z.cuid2())
     .mutation(async ({ input }) => {
       await isAdmin(true);
       return db
-        .delete(certificationGroup)
-        .where(eq(certificationGroup.id, input))
+        .delete(certificationOrganism)
+        .where(eq(certificationOrganism.id, input))
         .returning();
     }),
   createModule: protectedProcedure
     .input(
       z.object({
         name: z.string(),
-        groupId: z.cuid2(),
+        organismId: z.cuid2(),
         activityIds: z.array(z.cuid2()),
       }),
     )
     .mutation(({ input }) =>
-      db
-        .insert(certificationModule)
-        .values({
-          name: input.name,
-          certificationGroupId: input.groupId,
-          // activityGroups: {
-          //   connect: input.activityIds.map((id) => ({ id })),
-          // },
-        })
-        .returning(),
+      db.transaction(async (tx) => {
+        const [mod] = await tx
+          .insert(certificationModule)
+          .values({
+            name: input.name,
+            certificationOrganismId: input.organismId,
+          })
+          .returning();
+        await tx.insert(certificationOrganismModules).values({
+          certificationOrganismId: input.organismId,
+          certificationModuleId: mod.id,
+        });
+        if (input.activityIds.length) {
+          await tx.insert(certificationModuleActivityGroups).values(
+            input.activityIds.map((id) => ({
+              certificationModuleId: mod.id,
+              activityGroupId: id,
+            })),
+          );
+        }
+        return mod;
+      }),
     ),
   updateModule: protectedProcedure
     .input(
@@ -494,10 +659,17 @@ export const coachRouter = createTRPCRouter({
   deleteModule: protectedProcedure
     .input(z.cuid2())
     .mutation(async ({ input }) => {
-      return db
-        .delete(certificationModule)
-        .where(eq(certificationModule.id, input))
-        .returning();
+      db.transaction(async (tx) => {
+        await tx
+          .delete(certificationModuleActivityGroups)
+          .where(
+            eq(certificationModuleActivityGroups.certificationModuleId, input),
+          );
+        return tx
+          .delete(certificationModule)
+          .where(eq(certificationModule.id, input))
+          .returning();
+      });
     }),
   getCoachData: protectedProcedure.input(z.cuid2()).query(({ input }) =>
     db.query.userCoach.findFirst({
@@ -604,7 +776,7 @@ export const coachRouter = createTRPCRouter({
       }
       return { ...offer, imageUrl };
     }),
-  getCoachOffers: protectedProcedure.input(z.cuid2()).query(({ input }) =>
+  getCoachOffers: protectedProcedure.input(z.string()).query(({ input }) =>
     db.query.coachingPrice.findMany({
       where: eq(coachingPrice.coachId, input),
       with: {
@@ -623,13 +795,16 @@ export const coachRouter = createTRPCRouter({
           },
         },
       });
+      console.log("u", u);
 
       const pricingData = u?.pricing;
-      const target = pricingData?.features.find(
+      const target: CoachingTargetEnum = pricingData?.features.find(
         (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY",
       )
         ? input.target
         : "INDIVIDUAL";
+
+      console.log("input", input);
       return db.transaction(async (tx) => {
         const [cp] = await tx
           .insert(coachingPrice)
@@ -654,6 +829,7 @@ export const coachRouter = createTRPCRouter({
             travelLimit: input.travelLimit,
           })
           .returning();
+        console.log("cp", cp);
         if (input.packs.length)
           await tx.insert(coachingPricePack).values(
             input.packs.map((pack) => ({

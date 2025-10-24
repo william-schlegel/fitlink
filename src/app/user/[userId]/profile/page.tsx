@@ -16,8 +16,8 @@ export default async function Profile({
   const userData = await caller.users.getUserById({
     id: userId,
     options: {
-      withImage: false,
-      withMemberData: false,
+      withImage: true,
+      withMemberData: true,
     },
   });
   const t = await getTranslations("auth");

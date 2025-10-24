@@ -1,6 +1,8 @@
 import { twMerge } from "tailwind-merge";
 import Link from "next/link";
 
+import { Fragment } from "react";
+
 import Title from "./title";
 
 function LayoutPage({
@@ -88,12 +90,14 @@ function List<
                 ) : (
                   item.name
                 )}
-                {item.badgeText && (
-                  <span className={`${item.badgeColor} badge`}>
-                    {item.badgeText}
-                  </span>
-                )}
-                {item.badgeIcon && <i className={item.badgeIcon} />}
+                <div className="flex items-center gap-2">
+                  {item.badgeText && (
+                    <span className={`${item.badgeColor} badge`}>
+                      {item.badgeText}
+                    </span>
+                  )}
+                  {item.badgeIcon && <i className={item.badgeIcon} />}
+                </div>
               </Link>
             </li>
           ))}
@@ -103,7 +107,77 @@ function List<
   );
 }
 
+function Lists<
+  T extends {
+    id: string;
+    name: string | React.ReactNode;
+    link: string;
+    badgeColor?: string;
+    badgeText?: string;
+    badgeIcon?: string;
+  },
+>({
+  children,
+  lists,
+  itemId,
+  noItemsText,
+}: {
+  children?: React.ReactNode;
+  lists: {
+    name: string;
+    items: T[];
+  }[];
+  itemId?: string;
+  noItemsText: string;
+}) {
+  return (
+    <aside>
+      {children}
+      {lists.length === 0 ? (
+        <div className="text-center">
+          <p>{noItemsText}</p>
+        </div>
+      ) : (
+        <ul className="menu overflow-hidden rounded bg-base-100 w-full">
+          {lists.map((group) => (
+            <Fragment key={group.name}>
+              <h2>{group.name}</h2>
+              {group.items.map((item) => (
+                <li key={item.id}>
+                  <Link
+                    className={twMerge(
+                      "flex w-full items-center justify-between p-2 rounded-md",
+                      itemId === item.id &&
+                        "border border-primary bg-primary/10",
+                    )}
+                    href={item.link}
+                  >
+                    {typeof item.name === "string" ? (
+                      <span>{item.name}</span>
+                    ) : (
+                      item.name
+                    )}
+                    <div className="flex items-center gap-2">
+                      {item.badgeText && (
+                        <span className={`${item.badgeColor} badge`}>
+                          {item.badgeText}
+                        </span>
+                      )}
+                      {item.badgeIcon && <i className={item.badgeIcon} />}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </Fragment>
+          ))}
+        </ul>
+      )}
+    </aside>
+  );
+}
+
 LayoutPage.List = List;
+LayoutPage.Lists = Lists;
 LayoutPage.Content = Content;
 LayoutPage.Main = Main;
 

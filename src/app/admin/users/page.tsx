@@ -45,7 +45,7 @@ export default async function UserManagement({
           itemId={userId}
           noItemsText={t("user.no-users")}
         >
-          <div className="collapse-arrow rounded-box collapse border border-base-300 bg-base-100">
+          <div className="collapse-arrow rounded-box collapse border border-base-300 bg-base-100 mb-4">
             <input type="checkbox" className="hidden" />
             <div className="collapse-title text-xl font-medium">
               <span className="flex items-center gap-4">

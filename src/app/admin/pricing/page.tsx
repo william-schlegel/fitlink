@@ -9,12 +9,14 @@ import {
 } from "@/components/modals/managePricing";
 import { getAllPricing, getPricingById } from "@/server/api/routers/pricing";
 import { PricingComponent } from "@/components/ui/pricing";
+import { LayoutPage } from "@/components/layoutPage";
 import { getRoleName } from "@/server/lib/userTools";
 import { pricing } from "@/db/schema/subscription";
 import { getActualUser } from "@/lib/auth/server";
+import { formatMoney } from "@/lib/formatNumber";
 import { RoleEnum } from "@/db/schema/enums";
 import createLink from "@/lib/createLink";
-import PricingCard from "./pricingCard";
+import { getHref } from "@/lib/getHref";
 
 export type Pricing = typeof pricing.$inferSelect;
 
@@ -43,37 +45,47 @@ export default async function PricingManagement({
   }));
 
   const user = await getActualUser();
-
+  const href = await getHref();
   if (user && user.internalRole !== "ADMIN")
     return <div>{t("admin-only")}</div>;
 
+  const pricingList = groupedData.map((group) => ({
+    name: group.name,
+    items: group.items.map((pricing) => ({
+      id: pricing.id,
+      name: pricing.title,
+      link: createLink({ pricingId: pricing.id }, href),
+      badgeColor: pricing.free
+        ? "primary"
+        : pricing.deleted
+          ? "red"
+          : undefined,
+      badgeText: pricing.free
+        ? "Free"
+        : pricing.deleted
+          ? "Deleted"
+          : formatMoney(pricing.monthly),
+      badgeIcon: pricing.highlighted
+        ? "bx bxs-star bx-xs text-accent"
+        : undefined,
+    })),
+  }));
+
   return (
-    <div
-      // title={t("pricing.manage-my-pricing")}
-      className="container mx-auto my-2 space-y-2 p-2"
+    <LayoutPage
+      title={t("pricing.manage-my-pricing")}
+      titleComponents={<CreatePricing />}
     >
-      <div className="mb-4 flex flex-row items-center gap-4">
-        <h1>{t("pricing.manage-my-pricing")}</h1>
-        <CreatePricing />
-      </div>
-      <div className="flex gap-4">
-        <div className="w-1/4 ">
-          {groupedData.map((group) => (
-            <div key={group.name} className="mb-4 ">
-              <h3>{group.name}</h3>
-              <ul className="menu overflow-hidden rounded bg-base-100">
-                {group.items.map((pricing) => (
-                  <li key={pricing.id}>
-                    <PricingCard pricingId={pricingId} pricing={pricing} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+      <LayoutPage.Main>
+        <LayoutPage.Lists
+          lists={pricingList}
+          itemId={pricingId}
+          noItemsText={t("pricing.no-pricing")}
+        />
+
         {pricingId === "" ? null : <PricingContent pricingId={pricingId} />}
-      </div>
-    </div>
+      </LayoutPage.Main>
+    </LayoutPage>
   );
 }
 

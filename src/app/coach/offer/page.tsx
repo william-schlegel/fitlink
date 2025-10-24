@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { twMerge } from "tailwind-merge";
 import Link from "next/link";
 
 import {
@@ -10,11 +9,11 @@ import {
 } from "@/components/modals/manageCoach";
 import { CoachOfferPage } from "@/components/sections/coachOffer";
 import { getOfferName } from "@/lib/offers/serverOffer";
+import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
-import Title from "@/components/title";
 
 export default async function CoachOffer({
   searchParams,
@@ -41,38 +40,32 @@ export default async function CoachOffer({
   if (!offerId && offerQuery.length > 0)
     redirect(createLink({ offerId: offerQuery[0]?.id }, href));
 
-  return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title title={t("offer.my-offer", { count: offerQuery?.length ?? 0 })} />
-      <div className="mb-4 flex flex-row items-center gap-4">
-        <h1>{t("offer.my-offer", { count: offerQuery?.length ?? 0 })}</h1>
-        <CreateOffer userId={userId} />
-      </div>
-      <div className="flex flex-col gap-4 lg:flex-row">
-        <ul className="menu rounded bg-base-100 lg:w-1/4">
-          {offerQuery?.map((offer) => (
-            <li key={offer.id}>
-              <Link
-                href={createLink({ offerId: offer.id }, href)}
-                className={twMerge(
-                  "flex w-full justify-between",
-                  offerId === offer.id && "badge badge-primary",
-                )}
-              >
-                <span>{offer.name}</span>
-                <span className="badge-secondary badge">
-                  {getOfferName(offer.target ?? "INDIVIDUAL")}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+  const offerList = await Promise.all(
+    offerQuery.map(async (offer) => ({
+      id: offer.id,
+      name: offer.name,
+      link: createLink({ offerId: offer.id }, href),
+      badgeColor: "primary",
+      badgeText: await getOfferName(offer.target ?? "INDIVIDUAL"),
+    })),
+  );
 
+  return (
+    <LayoutPage
+      title={t("offer.my-offer", { count: offerQuery?.length ?? 0 })}
+      titleComponents={<CreateOffer userId={userId} />}
+    >
+      <LayoutPage.Main>
+        <LayoutPage.List
+          list={offerList}
+          itemId={offerId}
+          noItemsText={t("offer.no-offer")}
+        />
         {offerId === "" ? null : (
           <OfferContent userId={userId} offerId={offerId} />
         )}
-      </div>
-    </div>
+      </LayoutPage.Main>
+    </LayoutPage>
   );
 }
 type OfferContentProps = {

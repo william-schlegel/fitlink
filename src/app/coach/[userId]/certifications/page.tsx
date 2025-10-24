@@ -8,6 +8,8 @@ import {
 } from "@/components/modals/manageCertification";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
+import createLink from "@/lib/createLink";
+import { getHref } from "@/lib/getHref";
 import Title from "@/components/title";
 import DocButton from "./docButton";
 
@@ -39,8 +41,12 @@ export default async function ManageCertifications({
     !certificationId &&
     certificationQuery.certifications.length > 0
   ) {
+    const href = await getHref();
     redirect(
-      `${userId}/certifications?certificationId=${certificationQuery.certifications[0].id}`,
+      createLink(
+        { certificationId: certificationQuery.certifications[0].id },
+        href,
+      ),
       RedirectType.replace,
     );
   }

@@ -475,7 +475,7 @@ function PricingForm() {
       </div>
       <div>
         <label>{t("pricing.features")}</label>
-        <div className="border border-primary p-2">
+        <div className="border border-primary p-2 flex flex-wrap gap-2">
           {getListForRole(fields.roleTarget ?? "MEMBER").map((f, idx) => (
             <label
               key={f.value}

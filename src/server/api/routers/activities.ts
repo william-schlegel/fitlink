@@ -134,11 +134,14 @@ export const activityRouter = createTRPCRouter({
       }),
     )
     .mutation(({ input }) =>
-      db.insert(activityGroup).values({
-        name: input.name,
-        coachId: input.userId,
-        default: input.default,
-      }),
+      db
+        .insert(activityGroup)
+        .values({
+          name: input.name,
+          coachId: input.userId,
+          default: input.default,
+        })
+        .returning(),
     ),
   updateGroup: protectedProcedure
     .input(

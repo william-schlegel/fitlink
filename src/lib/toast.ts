@@ -28,11 +28,22 @@ const alertStyles = {
 
 type AlertType = keyof typeof alertStyles;
 
+type Position =
+  | "top-right"
+  | "top-left"
+  | "bottom-right"
+  | "bottom-left"
+  | "middle"
+  | "top"
+  | "bottom"
+  | "left"
+  | "right";
+
 function createToast(type: AlertType, title: string, message: string) {
   const alertConfig = alertStyles[type] || alertStyles.info;
 
   return `
-      <div class="alert ${alertConfig.class} shadow-lg flex justify-between items-start p-4 rounded-lg">
+      <div class="alert ${alertConfig.class} shadow-lg flex justify-between items-start p-2 rounded-md">
           <div class="flex flex-col w-full">
               <div class="flex justify-between items-center mb-2">
                   <div class="flex items-center">
@@ -86,7 +97,7 @@ const newToast = async (
   message: string,
   alertType: AlertType,
   duration = 10,
-  position = "right",
+  position: Position = "bottom-right",
   zIndex = 10000,
 ) => {
   // Check if we're in a browser environment
@@ -144,7 +155,7 @@ const newToast = async (
  */
 function toastDefaultStyle(
   toastyContainer: HTMLElement,
-  position: string,
+  position: Position,
   zIndex = 10000,
 ) {
   // Set the fixed positioning and other styles
@@ -177,6 +188,22 @@ function toastDefaultStyle(
       toastyContainer.style.top = "50%";
       toastyContainer.style.left = "50%";
       toastyContainer.style.transform = "translate(-50%, -50%)";
+      break;
+    case "top-right":
+      toastyContainer.style.top = "1rem";
+      toastyContainer.style.right = "1rem";
+      break;
+    case "top-left":
+      toastyContainer.style.top = "1rem";
+      toastyContainer.style.left = "1rem";
+      break;
+    case "bottom-right":
+      toastyContainer.style.bottom = "1rem";
+      toastyContainer.style.right = "1rem";
+      break;
+    case "bottom-left":
+      toastyContainer.style.bottom = "1rem";
+      toastyContainer.style.left = "1rem";
       break;
     default:
       toastyContainer.style.bottom = "1rem";

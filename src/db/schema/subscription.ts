@@ -137,7 +137,7 @@ export const pricingFeatureRelations = relations(pricingFeature, ({ one }) => ({
 }));
 
 export const subscriptionToActivityGroup = pgTable(
-  "subscription_to_activity_group",
+  "SubscriptionToActivityGroup",
   {
     subscriptionId: text("subscription_id")
       .notNull()
@@ -169,7 +169,7 @@ export const subscriptionToActivityGroupRelations = relations(
 );
 
 export const subscriptionToActivity = pgTable(
-  "subscription_to_activity",
+  "SubscriptionToActivity",
   {
     subscriptionId: text("subscription_id")
       .notNull()
@@ -201,7 +201,7 @@ export const subscriptionToActivityRelations = relations(
 );
 
 export const subscriptionToSite = pgTable(
-  "subscription_to_site",
+  "SubscriptionToSite",
   {
     subscriptionId: text("subscription_id")
       .notNull()
@@ -230,7 +230,7 @@ export const subscriptionToSiteRelations = relations(
 );
 
 export const subscriptionToRoom = pgTable(
-  "subscription_to_room",
+  "SubscriptionToRoom",
   {
     subscriptionId: text("subscription_id")
       .notNull()

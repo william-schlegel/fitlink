@@ -6,7 +6,6 @@ import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { AGContent } from "./agContent";
-import Title from "@/components/title";
 
 export default async function ActivityGroupManagement({
   searchParams,

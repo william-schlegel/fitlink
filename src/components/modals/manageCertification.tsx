@@ -5,11 +5,14 @@ import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { twMerge } from "tailwind-merge";
 
+import { useRouter } from "next/navigation";
+
 import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
 import ButtonIcon, { ButtonSize } from "../ui/buttonIcon";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { useWriteFile } from "@/lib/useManageFile";
 import Confirmation from "../ui/confirmation";
+import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
 import Spinner from "../ui/spinner";
@@ -17,7 +20,7 @@ import { toast } from "@/lib/toast";
 
 type CertificationFormValues = {
   name: string;
-  certificationGroupId: string;
+  certificationOrganismId: string;
   obtainedIn: Date;
   activityGroups: string[];
   modules: string[];
@@ -34,7 +37,7 @@ type OptionItem = {
 };
 
 export const CreateCertification = ({ userId }: CreateCertificationProps) => {
-  const [groupId, setGroupId] = useState("");
+  const [organismId, setOrganismId] = useState("");
   const [moduleIds, setModuleIds] = useState<Map<string, OptionItem>>(
     new Map(),
   );
@@ -50,22 +53,22 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
 
   const utils = trpc.useUtils();
 
-  const queryGroups = trpc.coachs.getCertificationGroups.useQuery();
+  const queryOrganisms = trpc.coachs.getCertificationOrganisms.useQuery();
 
   useEffect(() => {
-    if (queryGroups.data) {
-      if (groupId === "" && queryGroups.data.length > 0) {
-        const grpId = queryGroups.data[0]?.id || "";
-        setGroupId(grpId);
+    if (queryOrganisms.data) {
+      if (organismId === "" && queryOrganisms.data.length > 0) {
+        const grpId = queryOrganisms.data[0]?.id || "";
+        setOrganismId(grpId);
         const mIds = new Map<string, OptionItem>();
-        for (const m of queryGroups.data?.find((g) => g.id === grpId)
+        for (const m of queryOrganisms.data?.find((g) => g.id === grpId)
           ?.modules ?? []) {
           mIds.set(m.id, { id: m.id, selected: false });
         }
         setModuleIds(mIds);
       }
     }
-  }, [queryGroups.data, groupId]);
+  }, [queryOrganisms.data, organismId]);
 
   const t = useTranslations("coach");
   const addCertification = trpc.coachs.createCertification.useMutation({
@@ -78,14 +81,12 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
     },
   });
 
-  const selectedGroup = queryGroups.data?.find((g) => g.id === groupId);
+  const selectedGroup = queryOrganisms.data?.find((g) => g.id === organismId);
   const selectedActivities = new Map();
 
   for (const a of selectedGroup?.modules
     .filter((m) => moduleIds.get(m.id)?.selected)
-    .flatMap((m) =>
-      m.certificationModuleActivityGroups.map((a) => a.activityGroup),
-    ) ?? []) {
+    .flatMap((m) => m.activities.map((a) => ({ id: a.id }))) ?? []) {
     selectedActivities.set(a.id, a);
   }
 
@@ -107,9 +108,9 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
   };
 
   const selectGroup = (grpId: string) => {
-    setGroupId(grpId);
+    setOrganismId(grpId);
     const mIds = new Map<string, OptionItem>();
-    for (const m of queryGroups.data?.find((g) => g.id === grpId)?.modules ??
+    for (const m of queryOrganisms.data?.find((g) => g.id === grpId)?.modules ??
       []) {
       mIds.set(m.id, { id: m.id, selected: false });
     }
@@ -126,10 +127,8 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
         selectedGroup?.modules.filter((m) => mods.get(m.id)?.selected) ?? [];
       const activities = Array.from(
         new Set(
-          selectedModules.flatMap((m) =>
-            m.certificationModuleActivityGroups.map((a) => a.activityGroup.id),
-          ) ?? [],
-        ),
+          selectedModules.map((m) => m.activities.map((a) => a.id)).flat(2),
+        ) ?? [],
       );
       const aIds = new Map<string, OptionItem>();
       for (const a of activities) {
@@ -164,12 +163,12 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
         <div>
           <h4>{t("certification-provider")}</h4>
           <ul className="menu overflow-hidden rounded border border-secondary bg-base-100">
-            {queryGroups.data?.map((group) => (
+            {queryOrganisms.data?.map((group) => (
               <li key={group.id}>
                 <div
                   className={twMerge(
                     "flex",
-                    groupId === group.id && "badge badge-primary",
+                    organismId === group.id && "badge badge-primary",
                   )}
                 >
                   <button
@@ -370,17 +369,19 @@ type CreateCertificationGroupProps = {
 
 const emptyData: CertificationGroupForm = { name: "", modules: [] };
 
-export const CreateCertificationGroup = ({
+export const CreateCertificationOrganism = ({
   variant = "Primary",
 }: CreateCertificationGroupProps) => {
   const t = useTranslations("admin");
   const utils = trpc.useUtils();
   const [data, setData] = useState<CertificationGroupForm>(emptyData);
-  const createGroup = trpc.coachs.createGroup.useMutation({
-    onSuccess: () => {
-      utils.coachs.getCertificationGroups.invalidate();
+  const router = useRouter();
+  const createGroup = trpc.coachs.createOrganism.useMutation({
+    onSuccess: (data) => {
+      utils.coachs.getCertificationOrganisms.invalidate();
       setData(emptyData);
       toast.success(t("certification.group-created"));
+      router.push(createLink({ cgId: data[0].id }));
     },
     onError(error) {
       toast.error(error.message);
@@ -424,7 +425,7 @@ export function UpdateCertificationGroup({
   const t = useTranslations("admin");
   const utils = trpc.useUtils();
   const [data, setData] = useState<CertificationGroupForm>(emptyData);
-  const queryGroup = trpc.coachs.getCertificationGroupById.useQuery(groupId);
+  const queryGroup = trpc.coachs.getCertificationOrganismById.useQuery(groupId);
 
   useEffect(() => {
     if (queryGroup.data) {
@@ -434,18 +435,15 @@ export function UpdateCertificationGroup({
           queryGroup.data?.modules.map((m) => ({
             dbId: m.id,
             name: m.name,
-            activityIds: [],
-            // m.activityGroups.flatMap((g) =>
-            //   g.activities.map((a) => a.id)
-            // ),
+            activityIds: m.activities.map((g) => g.id),
           })) ?? [],
       });
     }
   }, [queryGroup.data]);
 
-  const updateGroup = trpc.coachs.updateGroup.useMutation({
+  const updateGroup = trpc.coachs.updateOrganism.useMutation({
     onSuccess: () => {
-      utils.coachs.getCertificationGroups.invalidate();
+      utils.coachs.getCertificationOrganisms.invalidate();
       setData(emptyData);
       toast.success(t("certification.group-updated"));
     },
@@ -458,6 +456,10 @@ export function UpdateCertificationGroup({
     updateGroup.mutate({
       id: groupId,
       name: data?.name ?? "",
+      modules: data?.modules.map((m) => ({
+        name: m.name,
+        activityIds: m.activityIds,
+      })),
     });
   };
 
@@ -489,9 +491,9 @@ type DeleteGroupProps = {
 
 export function DeleteCertificationGroup({ groupId }: DeleteGroupProps) {
   const utils = trpc.useUtils();
-  const deleteGroup = trpc.coachs.deleteGroup.useMutation({
+  const deleteGroup = trpc.coachs.deleteOrganism.useMutation({
     onSuccess() {
-      utils.coachs.getCertificationGroups.invalidate();
+      utils.coachs.getCertificationOrganisms.invalidate();
       toast.success(t("certification.group-deleted"));
     },
     onError(error) {
@@ -536,7 +538,8 @@ function CertificationGroupForm({
   const selectedModule = data.modules.find((m) => m.dbId === moduleId);
   const addActivities = trpc.coachs.updateActivitiesForModule.useMutation({
     onSuccess() {
-      if (groupId) utils.coachs.getCertificationGroupById.invalidate(groupId);
+      if (groupId)
+        utils.coachs.getCertificationOrganismById.invalidate(groupId);
     },
   });
 
@@ -649,96 +652,105 @@ function CertificationGroupForm({
           </p>
         ) : null}
       </form>
-      <label>{t("certification.modules")}</label>
-      <ul className="menu overflow-hidden rounded border border-base-300">
-        {data.modules.map((mod, idx) => (
-          <li key={mod.dbId ?? mod.name}>
-            <div
-              className={twMerge(
-                "flex w-full items-center justify-between text-center",
-                moduleId === mod.dbId && "badge badge-primary",
-              )}
-              onClick={() => selectModule(mod.dbId)}
-            >
-              <div className="flex grow items-center justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span>{mod.name}</span>
-                  {mod.activityIds.map((id) => (
-                    <span key={id} className="badge badge-primary">
-                      {agQuery.data?.find((g) => g.id === id)?.name ?? "???"}
-                    </span>
-                  ))}
-                </div>
-                <button onClick={() => handleDeleteModule(idx)}>
-                  <ButtonIcon
-                    iconComponent={<i className="bx bx-trash bx-xs" />}
-                    title={t("certification.delete-module")}
-                    buttonVariant="Icon-Outlined-Secondary"
-                    buttonSize="sm"
-                  />
-                </button>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 rounded-md border border-primary p-2">
+            <input
+              type={"text"}
+              ref={refOpt}
+              value={moduleName}
+              onChange={(e) => {
+                setModuleName(e.currentTarget.value);
+              }}
+              onKeyDown={(e) => handleKeyboard(e.key, e.currentTarget.value)}
+              className="input-bordered input w-full"
+            />
+            <h3>{t("certification.linked-activities")}</h3>
+            {agQuery.isLoading ? (
+              <Spinner />
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {agQuery.data?.map((ag) => (
+                  <button
+                    className={`btn btn-primary btn-sm normal-case ${
+                      selectedModule?.activityIds.includes(ag.id) ||
+                      activityIds.has(ag.id)
+                        ? ""
+                        : "btn-outline"
+                    }`}
+                    key={ag.id}
+                    onClick={() => toggleActivityGroup(ag.id)}
+                  >
+                    {ag.name}
+                  </button>
+                ))}
               </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-      <div className="flex items-center gap-2">
-        <div className="flex flex-col gap-2 rounded-md border border-primary p-2">
-          <input
-            type={"text"}
-            ref={refOpt}
-            value={moduleName}
-            onChange={(e) => {
-              setModuleName(e.currentTarget.value);
+            )}
+          </div>
+          <button
+            onClick={() => {
+              if (!refOpt.current) return;
+              addModule({
+                name: refOpt.current.value,
+                activityIds:
+                  selectedModule?.activityIds ?? Array.from(activityIds),
+              });
+              handleKeyboard("Escape", "");
             }}
-            onKeyDown={(e) => handleKeyboard(e.key, e.currentTarget.value)}
-            className="input-bordered input w-full"
-          />
-          <h3>{t("certification.linked-activities")}</h3>
-          {agQuery.isLoading ? (
-            <Spinner />
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {agQuery.data?.map((ag) => (
-                <button
-                  className={`btn btn-primary btn-sm normal-case ${
-                    selectedModule?.activityIds.includes(ag.id) ||
-                    activityIds.has(ag.id)
-                      ? ""
-                      : "btn-outline"
-                  }`}
-                  key={ag.id}
-                  onClick={() => toggleActivityGroup(ag.id)}
-                >
-                  {ag.name}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        <button
-          onClick={() => {
-            if (!refOpt.current) return;
-            addModule({
-              name: refOpt.current.value,
-              activityIds:
-                selectedModule?.activityIds ?? Array.from(activityIds),
-            });
-            handleKeyboard("Escape", "");
-          }}
-          onKeyDown={(e) => handleKeyboard(e.key, refOpt.current?.value ?? "")}
-        >
-          <ButtonIcon
-            iconComponent={
-              <i
-                className={`bx ${selectedModule ? "bx-edit" : "bx-plus"} bx-sm`}
-              />
+            onKeyDown={(e) =>
+              handleKeyboard(e.key, refOpt.current?.value ?? "")
             }
-            title={t("pricing.add-option")}
-            buttonVariant="Icon-Outlined-Primary"
-            buttonSize="md"
-          />
-        </button>
+          >
+            <ButtonIcon
+              iconComponent={
+                <i
+                  className={`bx ${selectedModule ? "bx-edit" : "bx-plus"} bx-sm`}
+                />
+              }
+              title={t("pricing.add-option")}
+              buttonVariant="Icon-Outlined-Primary"
+              buttonSize="md"
+            />
+          </button>
+        </div>
+        <div>
+          <label>{t("certification.modules")}</label>
+          {data.modules.length > 0 ? (
+            <ul className="menu overflow-hidden rounded border border-base-300">
+              {data.modules.map((mod, idx) => (
+                <li key={mod.dbId ?? mod.name}>
+                  <div
+                    className={twMerge(
+                      "flex w-full items-center justify-between text-center",
+                      moduleId === mod.dbId && "badge badge-primary",
+                    )}
+                    onClick={() => selectModule(mod.dbId)}
+                  >
+                    <div className="flex grow items-center justify-between gap-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span>{mod.name}</span>
+                        {mod.activityIds.map((id) => (
+                          <span key={id} className="badge badge-primary">
+                            {agQuery.data?.find((g) => g.id === id)?.name ??
+                              "???"}
+                          </span>
+                        ))}
+                      </div>
+                      <button onClick={() => handleDeleteModule(idx)}>
+                        <ButtonIcon
+                          iconComponent={<i className="bx bx-trash bx-xs" />}
+                          title={t("certification.delete-module")}
+                          buttonVariant="Icon-Outlined-Secondary"
+                          buttonSize="sm"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
       </div>
     </div>
   );

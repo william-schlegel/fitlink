@@ -76,13 +76,13 @@ const MENUS: MenuDefinitionType[] = [
     access: ["ADMIN"],
   },
   {
-    label: "navigation.certifications",
-    page: "/admin/certifications",
+    label: "navigation.activity-groups",
+    page: "/admin/activitygroups",
     access: ["ADMIN"],
   },
   {
-    label: "navigation.activity-groups",
-    page: "/admin/activitygroups",
+    label: "navigation.certifications",
+    page: "/admin/certifications",
     access: ["ADMIN"],
   },
 ];
