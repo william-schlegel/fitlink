@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import Head from "next/head";
 
 import { getSession } from "@/lib/auth/server";
 import CreateAccount from "./createAccount";

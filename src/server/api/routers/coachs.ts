@@ -88,6 +88,11 @@ export const coachRouter = createTRPCRouter({
             certifications: {
               with: {
                 activityGroups: true,
+                selectedModuleForCoach: {
+                  with: {
+                    module: true,
+                  },
+                },
               },
             },
             clubs: true,
@@ -123,7 +128,22 @@ export const coachRouter = createTRPCRouter({
     if (imgData) {
       imageUrl = await getDocUrl(input, imgData.id);
     }
-    return { ...coach, imageUrl: imageUrl ?? "/images/dummy.jpg" };
+    const certificationModules = coach.coachData?.certifications?.map(
+      (cert) => ({
+        id: cert.id,
+        name: cert.name,
+        modules: cert.selectedModuleForCoach.flatMap((mod) => ({
+          id: mod.module.id,
+          name: mod.module.name,
+        })),
+      }),
+    );
+
+    return {
+      ...coach,
+      certificationModules,
+      imageUrl: imageUrl ?? "/images/dummy.jpg",
+    };
   }),
   getCoachsFromDistance: publicProcedure
     .input(

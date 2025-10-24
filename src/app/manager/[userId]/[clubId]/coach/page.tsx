@@ -102,7 +102,7 @@ export async function CoachContent({ coachId, clubId }: CoachContentProps) {
             })) ?? []
           }
           certifications={
-            queryCoach.coachData?.certifications?.map((cert) => ({
+            queryCoach.certificationModules?.map((cert) => ({
               id: cert.id,
               name: cert.name,
               modules: cert.modules.map((mod) => ({

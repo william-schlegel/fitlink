@@ -5,10 +5,10 @@ import { signInAction, signInMagicLinkAction } from "@/actions/auth";
 export default async function FormEmail({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string }>;
 }) {
   const t = await getTranslations("auth");
-  const error = (await searchParams)?.error;
+  const error = searchParams ? (await searchParams)?.error : undefined;
 
   return (
     <>

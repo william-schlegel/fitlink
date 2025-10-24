@@ -421,8 +421,8 @@ export const pageRouter = createTRPCRouter({
           with: {
             certifications: {
               with: {
-                certificationCertificationModules: {
-                  with: { certificationModule: true },
+                selectedModuleForCoach: {
+                  with: { module: true },
                 },
               },
             },
@@ -503,8 +503,8 @@ export const pageRouter = createTRPCRouter({
             with: {
               certifications: {
                 with: {
-                  certificationCertificationModules: {
-                    with: { certificationModule: true },
+                  selectedModuleForCoach: {
+                    with: { module: true },
                   },
                 },
               },
