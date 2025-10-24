@@ -139,6 +139,7 @@ export const userDocument = pgTable(
     documentType: userDocumentTypeEnum("document_type").default("DOCUMENT"),
     fileType: text("file_type").notNull(),
     fileName: text("file_name"),
+    fileKey: text("file_key").notNull(),
   },
   (table) => [index("user_document_user_idx").on(table.userId)],
 );

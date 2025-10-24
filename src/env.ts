@@ -23,6 +23,8 @@ export const env = createEnv({
     SMTP_PASS: z.string(),
     SMTP_FROM_EMAIL: z.email(),
     SMTP_FROM_NAME: z.string(),
+    UPLOADTHING_SECRET: z.string(),
+    UPLOADTHING_TOKEN: z.string(),
   },
 
   /**
@@ -51,6 +53,8 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     AWS_ACCESS_KEY_ID_WSC: process.env.AWS_ACCESS_KEY_ID_WSC,
     AWS_SECRET_ACCESS_KEY_WSC: process.env.AWS_SECRET_ACCESS_KEY_WSC,
+    UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
+    UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
 
     NEXT_PUBLIC_HOSTNAME: process.env.NEXT_PUBLIC_HOSTNAME,
     NEXT_PUBLIC_BETA: process.env.NEXT_PUBLIC_BETA,
