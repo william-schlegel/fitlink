@@ -458,6 +458,7 @@ export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="field-sizing-content"
+              rows={4}
               placeholder={t("coach.message-placeholder") ?? ""}
               required
             />

@@ -25,8 +25,9 @@ export default async function ManageCertifications({
   }>;
 }) {
   const { userId } = await params;
+  const searchParamsValue = await searchParams;
+  const certificationId = searchParamsValue?.certificationId;
   const t = await getTranslations();
-  const { certificationId } = await searchParams;
   const user = await getActualUser();
   if (!user || (user.internalRole !== "COACH" && user.internalRole !== "ADMIN"))
     return <div className="alert alert-error">{t("coach.coach-only")}</div>;
@@ -80,7 +81,7 @@ export default async function ManageCertifications({
       </div>
       <div className="flex gap-4">
         <div className="flex flex-wrap gap-4">
-          {certificationQuery?.certifications.map((certification) => (
+          {(certificationQuery?.certifications ?? []).map((certification) => (
             <div
               key={certification.id}
               className="card w-96 bg-base-100 shadow-xl"

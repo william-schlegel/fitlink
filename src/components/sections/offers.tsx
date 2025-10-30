@@ -267,7 +267,7 @@ function UpdateOffer({ clubId, pageId, offerId }: UpdateOfferProps) {
         onSubmit={(data) => handleSubmit(data)}
         onCancel={() => setClose(true)}
         initialValues={initialData}
-        initialImageUrl={queryOffer.data?.images?.[0]?.url}
+        initialImageUrl={queryOffer.data?.images?.[0]}
         pageId={pageId}
         clubId={clubId}
       />
@@ -443,6 +443,7 @@ function OfferForm({
         <textarea
           {...register("description")}
           className="field-sizing-content"
+          rows={4}
         />
         <label>{t("offer.offer")}</label>
         <select defaultValue={getValues("offerId")} {...register("offerId")}>
@@ -517,11 +518,7 @@ type OfferContentElement = {
   elementType: PageSectionElementTypeEnum | null;
   link: string | null;
   optionValue: string | null;
-  images: {
-    docId: string;
-    userId: string;
-    url: string;
-  }[];
+  images: string[] | null;
 };
 
 function OfferContentCard({
@@ -553,7 +550,7 @@ function OfferContentCard({
     >
       <figure>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={offer.images[0]?.url} alt={offer.title ?? ""} />
+        <img src={offer.images?.[0] ?? ""} alt={offer.title ?? ""} />
       </figure>
       <div className="card-body">
         <h2 className="card-title">{offer.title}</h2>

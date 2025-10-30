@@ -7,8 +7,8 @@ import {
   pageSectionModelEnum,
   pageTargetEnum,
 } from "./enums";
-import { userCoach, userDocument } from "./user";
 import { club, event } from "./club";
+import { userCoach } from "./user";
 
 export const pageSectionElement = pgTable(
   "PageSectionElement",
@@ -23,45 +23,14 @@ export const pageSectionElement = pgTable(
     pageSection: pageSectionModelEnum("page_section"),
     sectionId: text("section_id").notNull(),
     optionValue: text("option_value"),
+    imageUrls: text("image_urls").array(),
   },
   (table) => [index("page_section_element_section_idx").on(table.sectionId)],
 );
 
-export const pageSectionElementDocuments = pgTable(
-  "PageSectionElementDocuments",
-  {
-    id: text("id").primaryKey().$defaultFn(createId),
-    elementId: text("element_id")
-      .notNull()
-      .references(() => pageSectionElement.id),
-    documentId: text("document_id")
-      .notNull()
-      .references(() => userDocument.id),
-  },
-  (table) => [
-    index("pse_documents_element_idx").on(table.elementId),
-    index("pse_documents_document_idx").on(table.documentId),
-  ],
-);
-
-export const pageSectionElementDocumentsRelations = relations(
-  pageSectionElementDocuments,
-  ({ one }) => ({
-    element: one(pageSectionElement, {
-      fields: [pageSectionElementDocuments.elementId],
-      references: [pageSectionElement.id],
-    }),
-    document: one(userDocument, {
-      fields: [pageSectionElementDocuments.documentId],
-      references: [userDocument.id],
-    }),
-  }),
-);
-
 export const pageSectionElementRelations = relations(
   pageSectionElement,
-  ({ one, many }) => ({
-    images: many(pageSectionElementDocuments),
+  ({ one }) => ({
     section: one(pageSection, {
       fields: [pageSectionElement.sectionId],
       references: [pageSection.id],

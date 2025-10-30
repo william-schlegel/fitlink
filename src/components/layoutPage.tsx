@@ -51,7 +51,8 @@ function List<
   T extends {
     id: string;
     name: string | React.ReactNode;
-    link: string;
+    link?: string;
+    onClick?: () => void;
     badgeColor?: string;
     badgeText?: string;
     badgeIcon?: string;
@@ -83,7 +84,8 @@ function List<
                   "flex w-full items-center justify-between p-2 rounded-md",
                   itemId === item.id && "border border-primary bg-primary/10",
                 )}
-                href={item.link}
+                href={item.link ?? ""}
+                onClick={item.onClick}
               >
                 {typeof item.name === "string" ? (
                   <span>{item.name}</span>

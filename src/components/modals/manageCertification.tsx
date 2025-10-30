@@ -12,6 +12,7 @@ import ButtonIcon, { ButtonSize } from "../ui/buttonIcon";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
+import { LayoutPage } from "../layoutPage";
 import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
@@ -48,15 +49,14 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
     new Date(Date.now()),
   );
   const [documentUrl, setDocumentUrl] = useState("");
-
-  // const writeFile = useWriteFile(userId, "CERTIFICATION");
-
   const utils = trpc.useUtils();
+  const router = useRouter();
 
   const queryOrganisms = trpc.coachs.getCertificationOrganisms.useQuery();
 
   useEffect(() => {
     if (queryOrganisms.data) {
+      console.log("queryOrganisms.data", queryOrganisms.data);
       if (organismId === "" && queryOrganisms.data.length > 0) {
         const grpId = queryOrganisms.data[0]?.id || "";
         setOrganismId(grpId);
@@ -75,6 +75,7 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
     onSuccess() {
       toast.success(t("certification-created"));
       utils.coachs.getCertificationsForCoach.invalidate(userId);
+      router.push(createLink({ userId, tab: "certifications" }));
     },
     onError(error) {
       toast.error(error.message);
@@ -86,13 +87,13 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
 
   for (const a of selectedGroup?.modules
     .filter((m) => moduleIds.get(m.id)?.selected)
-    .flatMap((m) => m.activities.map((a) => ({ id: a.id }))) ?? []) {
+    .flatMap((m) => m.activities.map((a) => ({ ...a }))) ?? []) {
     selectedActivities.set(a.id, a);
   }
 
-  const onSubmit = async () => {
-    // const documentId = await writeFile(file);
+  console.log("selectedActivities", Array.from(selectedActivities.values()));
 
+  const onSubmit = async () => {
     addCertification.mutate({
       userId,
       name: selectedGroup?.name ?? "?",
@@ -146,6 +147,13 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
     }
   };
 
+  const organismList =
+    queryOrganisms.data?.map((group) => ({
+      id: group.id,
+      name: group.name,
+      onClick: () => selectGroup(group.id),
+    })) ?? [];
+
   return (
     <Modal
       title={t("create-certification")}
@@ -154,63 +162,31 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
       buttonIcon={<i className="bx bx-plus bx-sm" />}
       className="w-11/12 max-w-5xl"
     >
-      <h3>{t("create-certification")}</h3>
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <h4>{t("certification-provider")}</h4>
-          <ul className="menu overflow-hidden rounded border border-secondary bg-base-100">
-            {queryOrganisms.data?.map((group) => (
-              <li key={group.id}>
-                <div
-                  className={twMerge(
-                    "flex",
-                    organismId === group.id && "badge badge-primary",
-                  )}
-                >
-                  <button
-                    className="flex w-full items-center justify-between"
-                    onClick={() => selectGroup(group.id)}
-                  >
-                    {group.name}
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h4>{t("modules")}</h4>
-          <div className="flex flex-wrap gap-2 rounded border border-secondary bg-base-100 p-2">
-            {selectedGroup?.modules?.map((mod) => (
-              <button
-                key={mod.id}
-                className={`btn btn-primary normal-case ${
-                  moduleIds.get(mod.id)?.selected ? "" : "btn-outline"
-                }`}
-                onClick={() => toggleModule(mod.id)}
-              >
-                {mod.name}
-              </button>
-            ))}
+      <LayoutPage title={t("create-certification")} variant="section">
+        <LayoutPage.Main>
+          <LayoutPage.List
+            list={organismList}
+            itemId={organismId}
+            noItemsText={t("no-organisms")}
+          />
+
+          <div>
+            <ModuleSelector
+              modules={selectedGroup?.modules}
+              moduleIds={moduleIds}
+              onToggle={toggleModule}
+              title={t("modules")}
+            />
+            <ActivitySelector
+              activities={Array.from(selectedActivities.values())}
+              activityIds={activityIds}
+              onToggle={toggleActivity}
+              title={t("activities")}
+            />
           </div>
-        </div>
-        <div>
-          <h4>{t("activities")}</h4>
-          <div className="flex flex-wrap gap-2 rounded border border-secondary bg-base-100 p-2">
-            {Array.from(selectedActivities.values()).map((act) => (
-              <button
-                key={act.id}
-                className={`btn btn-primary normal-case ${
-                  activityIds.get(act.id)?.selected ? "" : "btn-outline"
-                }`}
-                onClick={() => toggleActivity(act.id)}
-              >
-                {act.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+        </LayoutPage.Main>
+      </LayoutPage>
+      <hr />
       <form className={`mt-2 grid grid-cols-2 gap-2`}>
         <div className="flex flex-col">
           <label className="required">{t("obtention-date")}</label>
@@ -238,6 +214,72 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
     </Modal>
   );
 };
+
+type ModuleSelectorProps = {
+  modules?: Array<{ id: string; name: string }>;
+  moduleIds: Map<string, OptionItem>;
+  onToggle: (moduleId: string) => void;
+  title: string;
+};
+
+function ModuleSelector({
+  modules,
+  moduleIds,
+  onToggle,
+  title,
+}: ModuleSelectorProps) {
+  return (
+    <div>
+      <h4>{title}</h4>
+      <div className="flex flex-wrap gap-2 rounded border border-secondary bg-base-100 p-2">
+        {modules?.map((mod) => (
+          <button
+            key={mod.id}
+            className={`btn btn-primary normal-case ${
+              moduleIds.get(mod.id)?.selected ? "" : "btn-outline"
+            }`}
+            onClick={() => onToggle(mod.id)}
+          >
+            {mod.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+type ActivitySelectorProps = {
+  activities: Array<{ id: string; name: string }>;
+  activityIds: Map<string, OptionItem>;
+  onToggle: (activityId: string) => void;
+  title: string;
+};
+
+function ActivitySelector({
+  activities,
+  activityIds,
+  onToggle,
+  title,
+}: ActivitySelectorProps) {
+  return (
+    <div>
+      <h4>{title}</h4>
+      <div className="flex flex-wrap gap-2 rounded border border-secondary bg-base-100 p-2">
+        {activities.map((act) => (
+          <button
+            key={act.id}
+            className={`btn btn-primary normal-case ${
+              activityIds.get(act.id)?.selected ? "" : "btn-outline"
+            }`}
+            onClick={() => onToggle(act.id)}
+          >
+            {act.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 type UpdateCertificationProps = {
   userId: string;

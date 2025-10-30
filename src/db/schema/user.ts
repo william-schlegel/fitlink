@@ -25,9 +25,9 @@ import {
   coachOrganisms,
 } from "./coach";
 import { notificationTypeEnum, userDocumentTypeEnum } from "./enums";
-import { page, pageSectionElementDocuments } from "./page";
 import { planning, planningActivity } from "./planning";
 import { subscription } from "./subscription";
+import { page } from "./page";
 import { user } from "./auth";
 
 export const userCoach = pgTable(
@@ -144,17 +144,13 @@ export const userDocument = pgTable(
   (table) => [index("user_document_user_idx").on(table.userId)],
 );
 
-export const userDocumentRelations = relations(
-  userDocument,
-  ({ one, many }) => ({
-    user: one(user, {
-      fields: [userDocument.userId],
-      references: [user.id],
-    }),
-    pageSectionElements: many(pageSectionElementDocuments),
-    event: one(event),
+export const userDocumentRelations = relations(userDocument, ({ one }) => ({
+  user: one(user, {
+    fields: [userDocument.userId],
+    references: [user.id],
   }),
-);
+  event: one(event),
+}));
 
 export const userNotification = pgTable(
   "UserNotification",

@@ -261,7 +261,7 @@ function UpdatePlanning({ clubId, pageId, planningId }: UpdatePlanningProps) {
         onSubmit={(data) => handleSubmit(data)}
         onCancel={() => setClose(true)}
         initialValues={initialData}
-        initialImageUrl={queryPlanning.data?.images?.[0]?.url}
+        initialImageUrl={queryPlanning.data?.images?.[0]}
         pageId={pageId}
         clubId={clubId}
       />
@@ -453,6 +453,7 @@ function PlanningForm({
         <textarea
           {...register("description")}
           className="field-sizing-content"
+          rows={4}
         />
       </div>
       <div>
@@ -539,11 +540,7 @@ type PlanningContentElement = {
   elementType: PageSectionElementTypeEnum | null;
   link: string | null;
   optionValue: string | null;
-  images: {
-    docId: string;
-    userId: string;
-    url: string;
-  }[];
+  images: string[] | null;
 };
 
 function PlanningContentCard({
@@ -567,9 +564,7 @@ function PlanningContentCard({
         } w-full flex-col items-center justify-center gap-4`}
         style={{
           backgroundImage: `${
-            planning.images[0]?.url
-              ? `url(${planning.images[0]?.url})`
-              : "unset"
+            planning?.images?.[0] ? `url(${planning.images[0]})` : "unset"
           }`,
           backgroundColor: "rgb(255 255 255 / 0.5)",
           backgroundSize: "cover",

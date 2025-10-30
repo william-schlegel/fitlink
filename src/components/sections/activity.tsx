@@ -273,7 +273,7 @@ function UpdateActivity({ pageId, activityId }: UpdateActivityProps) {
         onSubmit={(data) => handleSubmit(data)}
         onCancel={() => setClose(true)}
         initialValues={initialData}
-        initialImageUrl={queryActivity.data?.images?.[0]?.url}
+        initialImageUrl={queryActivity.data?.images?.[0]}
         pageId={pageId}
       />
     </Modal>
@@ -471,6 +471,7 @@ function ActivityForm({
         <textarea
           {...register("description")}
           className="field-sizing-content"
+          rows={4}
         />
       </div>
       <div>
@@ -554,11 +555,7 @@ type ActivityContentElement = {
   elementType: PageSectionElementTypeEnum | null;
   link: string | null;
   optionValue: string | null;
-  images: {
-    docId: string;
-    userId: string;
-    url: string;
-  }[];
+  images: string[] | null;
 };
 
 type ActivitiesContentCardProps = {
@@ -572,10 +569,10 @@ function ActivityContentCard({
 }: ActivitiesContentCardProps) {
   return (
     <div key={activity.id} className="card bg-base-100 shadow-xl">
-      {activity.images?.[0]?.url ? (
+      {activity.images?.[0] ? (
         <figure className="white">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={activity.images[0].url} alt="" />
+          <img src={activity.images[0]} alt="" />
         </figure>
       ) : null}
       <div className={`card-body ${preview ? "p-4 text-sm" : ""}`}>

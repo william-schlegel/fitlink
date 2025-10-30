@@ -103,6 +103,7 @@ export default function FormProfile({
           <textarea
             {...form.register("address")}
             className="field-sizing-content"
+            rows={4}
           />
           <label>{t("profile.account-provider")}</label>
           <div className="flex gap-2">

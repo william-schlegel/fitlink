@@ -395,6 +395,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
           <textarea
             {...register("description")}
             className="field-sizing-content"
+            rows={4}
           />
         </div>
       </div>

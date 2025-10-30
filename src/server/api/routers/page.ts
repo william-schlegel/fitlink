@@ -1,5 +1,5 @@
-import { and, eq, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { and, eq } from "drizzle-orm";
 import z from "zod";
 
 import {
@@ -18,11 +18,10 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { userCoach, userDocument } from "@/db/schema/user";
 import { club, club as clubTable } from "@/db/schema/club";
+import { userCoach } from "@/db/schema/user";
 import { user } from "@/db/schema/auth";
 import { isCUID } from "@/lib/utils";
-import { getDocUrl } from "./files";
 import { db } from "@/db";
 
 const PageObject = z.object({
@@ -137,15 +136,7 @@ export const pageRouter = createTRPCRouter({
       with: {
         sections: {
           with: {
-            elements: {
-              with: {
-                images: {
-                  with: {
-                    document: true,
-                  },
-                },
-              },
-            },
+            elements: true,
           },
         },
       },
@@ -165,31 +156,10 @@ export const pageRouter = createTRPCRouter({
           eq(pageSection.model, input.section),
         ),
         with: {
-          elements: {
-            with: { images: { with: { document: true } } },
-          },
+          elements: true,
           page: { with: { club: true } },
         },
       });
-      const images: {
-        elemId: string;
-        docId: string;
-        userId: string;
-        url: string;
-      }[] = [];
-      const userId = section?.page.club?.managerId ?? "";
-      for (const elem of section?.elements ?? []) {
-        for (const doc of elem.images) {
-          const url = await getDocUrl(userId, doc.document.id);
-          if (url)
-            images.push({
-              elemId: elem.id,
-              docId: doc.document.id,
-              userId: doc.document.userId,
-              url,
-            });
-        }
-      }
       if (!section) return null;
       return {
         id: section.id,
@@ -206,12 +176,11 @@ export const pageRouter = createTRPCRouter({
           pageId: e.pageId,
           sectionId: e.sectionId,
           pageSection: e.pageSection,
-          images: images
-            .filter((i) => i.elemId === e.id)
-            .map((i) => ({ docId: i.docId, userId: i.userId, url: i.url })),
+          images: e.imageUrls,
         })),
       };
     }),
+
   getPageSectionElements: publicProcedure
     .input(
       z.object({
@@ -237,28 +206,7 @@ export const pageRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const elem = await db.query.pageSectionElement.findFirst({
         where: eq(pageSectionElement.id, input),
-        with: {
-          images: {
-            with: {
-              document: true,
-            },
-          },
-        },
       });
-      const images: {
-        docId: string;
-        userId: string;
-        url: string;
-      }[] = [];
-      for (const doc of elem?.images ?? []) {
-        const url = await getDocUrl(doc.document.userId, doc.document.id);
-        if (url)
-          images.push({
-            docId: doc.id,
-            userId: doc.document.userId,
-            url,
-          });
-      }
       if (!elem) return null;
       return {
         id: elem.id,
@@ -271,7 +219,7 @@ export const pageRouter = createTRPCRouter({
         pageId: elem.pageId,
         sectionId: elem.sectionId,
         pageSection: elem.pageSection,
-        images,
+        images: elem.imageUrls,
       };
     }),
   createPage: protectedProcedure
@@ -346,22 +294,7 @@ export const pageRouter = createTRPCRouter({
   deletePageSectionElement: protectedProcedure
     .input(z.string())
     .mutation(({ input }) =>
-      db.transaction(async (tx) => {
-        const images = await tx.query.pageSectionElement.findFirst({
-          where: eq(pageSectionElement.id, input),
-          with: {
-            images: { columns: { id: true } },
-          },
-        });
-        await tx
-          .delete(pageSectionElement)
-          .where(eq(pageSectionElement.id, input));
-        await tx
-          .delete(userDocument)
-          .where(
-            inArray(userDocument.id, images?.images.map((i) => i.id) ?? []),
-          );
-      }),
+      db.delete(pageSectionElement).where(eq(pageSectionElement.id, input)),
     ),
   getClubPage: publicProcedure.input(z.string()).query(async ({ input }) => {
     const clubPage = await db.query.page.findFirst({
@@ -369,11 +302,7 @@ export const pageRouter = createTRPCRouter({
       with: {
         sections: {
           with: {
-            elements: {
-              with: {
-                images: true,
-              },
-            },
+            elements: true,
           },
         },
       },
@@ -404,7 +333,7 @@ export const pageRouter = createTRPCRouter({
       with: {
         sections: {
           with: {
-            elements: { with: { images: true } },
+            elements: true,
           },
         },
       },
@@ -435,7 +364,7 @@ export const pageRouter = createTRPCRouter({
 
     const image = coachPage?.sections
       .find((s) => s.model === "HERO")
-      ?.elements.find((e) => e.elementType === "HERO_CONTENT")?.images?.[0];
+      ?.elements.find((e) => e.elementType === "HERO_CONTENT")?.imageUrls?.[0];
     const hero = coachPage?.sections
       .find((s) => s.model === "HERO")
       ?.elements.find((e) => e.elementType === "HERO_CONTENT");

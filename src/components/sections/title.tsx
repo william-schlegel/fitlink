@@ -22,7 +22,7 @@ type TitleCreationProps = {
 };
 
 type TitleCreationForm = {
-  images?: FileList;
+  images?: string[];
   title: string;
   subtitle: string;
   description: string;
@@ -45,7 +45,7 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
     },
   );
   const fields = useWatch({ control });
-  const utils = trpc.useContext();
+  const utils = trpc.useUtils();
   const [updating, setUpdating] = useState(false);
   const [previewTheme, setPreviewTheme] = useState<TThemes>("cupcake");
 
@@ -64,7 +64,7 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
     const hc = querySection.data?.elements.find(
       (e) => e.elementType === "HERO_CONTENT",
     );
-    setImagePreview(hc?.images?.[0]?.url ?? "");
+    setImagePreview(hc?.images?.[0] ?? "");
 
     const resetData: TitleCreationForm = {
       description: hc?.content ?? "",
@@ -141,26 +141,16 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
       const hc = querySection?.data?.elements.find(
         (e) => e.elementType === "HERO_CONTENT",
       );
-      let docId: string | undefined;
-      if (data.images?.[0]) {
-        if (hc?.images?.[0])
-          await deleteUserDocument.mutateAsync({
-            userId: hc.images[0].userId,
-            documentId: hc.images[0].docId,
-          });
-        docId = await writeFile(data?.images?.[0]);
-      }
       if (hc) {
         await updateSectionElement.mutateAsync({
           id: hc.id,
           title: data.title,
           subTitle: data.subtitle,
           content: data.description,
-          images: docId ? [docId] : undefined,
+          images: data.images?.[0] ? [data.images[0]] : undefined,
         });
       }
     } else {
-      const docId = await writeFile(data.images?.[0]);
       const section = await createSection.mutateAsync({
         model: "TITLE",
         pageId,
@@ -171,25 +161,17 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
         title: data.title,
         subTitle: data.subtitle,
         content: data.description,
-        images: docId ? [docId] : undefined,
+        images: data.images?.[0] ? [data.images[0]] : undefined,
       });
     }
   };
 
   useEffect(() => {
     if (fields.images?.length) {
-      const image = fields.images[0];
-      if (!image) return;
-      if (image.size > MAX_SIZE) {
-        toast.error(t("image-size-error", { size: formatSize(MAX_SIZE) }));
-        setValue("images", undefined);
-        return;
-      }
-
-      const src = URL.createObjectURL(image);
-      setImagePreview(src);
+      setImagePreview(fields.images[0]);
+      setValue("images", [fields.images[0]]);
     }
-  }, [fields.images, t, setValue]);
+  }, [fields.images, setValue]);
 
   const handleDeleteImage = () => {
     setImagePreview("");
@@ -256,6 +238,7 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
           <textarea
             {...register("description")}
             className="field-sizing-content"
+            rows={4}
           />
 
           <div className="col-span-2 flex justify-between">
@@ -323,7 +306,7 @@ export const TitleDisplay = ({ pageId }: TitleDisplayProps) => {
 
   return (
     <TitleContent
-      imageSrc={titleContent?.images?.[0]?.url}
+      imageSrc={titleContent?.images?.[0]}
       title={titleContent?.title ?? ""}
       subtitle={titleContent?.subTitle ?? ""}
       description={titleContent?.content ?? ""}

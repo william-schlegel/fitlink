@@ -490,6 +490,7 @@
     "select-certifications": "Sélectionnez vos certifications",
     "save-certifications": "Enregistrer les certifications",
     "create-certification": "Créer une nouvelle certification",
+    "no-organisms": "Aucun organisme de certification trouvé",
     "modules": "Modules",
     "new-group": "Nouveau certificateur",
     "create-group": "Créer un certificateur",

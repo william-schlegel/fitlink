@@ -377,28 +377,53 @@ export const coachRouter = createTRPCRouter({
 
       const certifications = await db.query.coachCertification.findMany({
         where: eq(coachCertification.coachId, input),
-        with: {
-          selectedModuleForCoach: {
-            with: {
-              module: {
-                with: {
-                  activityGroups: {
-                    with: { activityGroup: true },
+      });
+
+      // Fetch selectedModuleForCoach separately with correct coachId filter
+      const certificationIds = certifications.map((c) => c.id);
+      const selectedModules =
+        certificationIds.length > 0
+          ? await db.query.selectedModuleForCoach.findMany({
+              where: and(
+                eq(selectedModuleForCoach.coachId, coach.id),
+                inArray(
+                  selectedModuleForCoach.certificationId,
+                  certificationIds,
+                ),
+              ),
+              with: {
+                module: {
+                  with: {
+                    activityGroups: {
+                      with: { activityGroup: true },
+                    },
                   },
                 },
               },
-            },
-          },
-        },
-      });
+            })
+          : [];
 
-      const certificationsWithModules = certifications.map((c) => ({
-        ...c,
-        modules: (c.selectedModuleForCoach ?? []).map((cm) => cm.module),
-        activityGroups: (c.selectedModuleForCoach ?? [])
-          .flatMap((cm) => cm.module.activityGroups.map((g) => g.activityGroup))
-          .filter((v, i, a) => a.findIndex((x) => x.id === v.id) === i),
-      }));
+      // Group selectedModules by certificationId
+      const selectedModulesGroups = new Map<string, typeof selectedModules>();
+      for (const sm of selectedModules) {
+        if (!selectedModulesGroups.has(sm.certificationId)) {
+          selectedModulesGroups.set(sm.certificationId, []);
+        }
+        selectedModulesGroups.get(sm.certificationId)!.push(sm);
+      }
+
+      const certificationsWithModules = certifications.map((c) => {
+        const modules = selectedModulesGroups.get(c.id) ?? [];
+        return {
+          ...c,
+          modules: modules.map((cm) => cm.module),
+          activityGroups: modules
+            .flatMap((cm) =>
+              cm.module.activityGroups.map((g) => g.activityGroup),
+            )
+            .filter((v, i, a) => a.findIndex((x) => x.id === v.id) === i),
+        };
+      });
 
       return {
         ...coach,

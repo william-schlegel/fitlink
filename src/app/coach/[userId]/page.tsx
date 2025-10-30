@@ -20,7 +20,8 @@ export default async function CoachDashboard({
   searchParams: Promise<{ day: DayName }>;
 }) {
   const { userId } = await params;
-  const { day } = (await searchParams) ?? getToday();
+  const searchParamsValue = await searchParams;
+  const day = searchParamsValue?.day ?? getToday();
   const user = await getActualUser();
   if (!user || (user.internalRole !== "COACH" && user.internalRole !== "ADMIN"))
     redirect("/", RedirectType.replace);

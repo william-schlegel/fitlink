@@ -404,6 +404,7 @@ function EventForm({
               required: t("event.brief-mandatory") ?? true,
             })}
             className="field-sizing-content"
+            rows={4}
           />
           <TextError err={errors?.brief?.message} />
         </div>
@@ -411,6 +412,7 @@ function EventForm({
         <textarea
           {...register("description")}
           className="field-sizing-content"
+          rows={4}
         />
       </div>
       <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">

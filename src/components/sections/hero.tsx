@@ -8,10 +8,8 @@ import { useEffect, useState } from "react";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { PageSectionModelEnum } from "@/db/schema/enums";
 import { usePageSection } from "../modals/managePage";
-import { useWriteFile } from "@/lib/useManageFile";
-import { formatSize } from "@/lib/formatNumber";
 import Confirmation from "../ui/confirmation";
-import { useUser } from "@/lib/auth/client";
+import { UploadButton } from "../uploadthing";
 import { getButtonSize } from "../ui/modal";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
@@ -25,7 +23,7 @@ type HeroCreationProps = {
 };
 
 type HeroCreationForm = {
-  images?: FileList;
+  imageUrl?: string;
   title: string;
   subtitle: string;
   description: string;
@@ -36,21 +34,11 @@ type HeroCreationForm = {
   url: string;
 };
 
-const MAX_SIZE = 1024 * 1024;
-
 export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
   const t = useTranslations("pages");
   const { register, handleSubmit, getValues, control, setValue, reset } =
     useForm<HeroCreationForm>();
   const [imagePreview, setImagePreview] = useState("");
-  const { data: user } = useUser();
-  const userId = user?.id ?? "";
-  const clubQuery = trpc.clubs.getClubById.useQuery(
-    { clubId, userId },
-    {
-      enabled: isCUID(clubId),
-    },
-  );
   const fields = useWatch({ control });
   const utils = trpc.useUtils();
   const [updating, setUpdating] = useState(false);
@@ -75,7 +63,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
     const cta = querySection.data?.elements.find(
       (e) => e.elementType === "CTA",
     );
-    setImagePreview(hc?.images?.[0]?.url ?? "");
+    setImagePreview(hc?.images?.[0] ?? "");
 
     const linkUrl = cta?.link
       ? new URL(cta.link)
@@ -98,11 +86,6 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
   const queryPages = trpc.pages.getPagesForClub.useQuery(clubId, {
     enabled: isCUID(clubId),
   });
-  const writeFile = useWriteFile(
-    clubQuery.data?.managerId ?? "",
-    "PAGE_IMAGE",
-    MAX_SIZE,
-  );
   const createSection = trpc.pages.createPageSection.useMutation({
     onSuccess() {
       toast.success(t("section-created"));
@@ -139,7 +122,6 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
       toast.error(error.message);
     },
   });
-  const deleteUserDocument = trpc.files.deleteUserDocument.useMutation();
   const updatePageStyle = trpc.pages.updatePageStyleForClub.useMutation({
     onSuccess() {
       toast.success(t("style-saved"));
@@ -157,22 +139,13 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
       const cta = querySection?.data?.elements.find(
         (e) => e.elementType === "CTA",
       );
-      let docId: string | undefined;
-      if (data.images?.[0]) {
-        if (hc?.images?.[0])
-          await deleteUserDocument.mutateAsync({
-            userId: hc.images[0].userId,
-            documentId: hc.images[0].docId,
-          });
-        docId = await writeFile(data?.images?.[0]);
-      }
       if (hc) {
         await updateSectionElement.mutateAsync({
           id: hc.id,
           title: data.title,
           subTitle: data.subtitle,
           content: data.description,
-          images: docId ? [docId] : undefined,
+          images: data.imageUrl ? [data.imageUrl] : undefined,
         });
       }
       if (data.cta) {
@@ -204,7 +177,6 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
         await deleteSectionElement.mutateAsync(cta.id);
       }
     } else {
-      const docId = await writeFile(data.images?.[0]);
       const section = await createSection.mutateAsync({
         model: "HERO",
         pageId,
@@ -215,7 +187,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
         title: data.title,
         subTitle: data.subtitle,
         content: data.description,
-        images: docId ? [docId] : undefined,
+        images: data.imageUrl ? [data.imageUrl] : undefined,
       });
       if (data.cta) {
         await createSectionElement.mutateAsync({
@@ -240,23 +212,14 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
   }, [fields.linkedPage, queryPages?.data, getSections]);
 
   useEffect(() => {
-    if (fields.images?.length) {
-      const image = fields.images[0];
-      if (!image) return;
-      if (image.size > MAX_SIZE) {
-        toast.error(t("image-size-error", { size: formatSize(MAX_SIZE) }));
-        setValue("images", undefined);
-        return;
-      }
-
-      const src = URL.createObjectURL(image);
-      setImagePreview(src);
+    if (fields.imageUrl) {
+      setImagePreview(fields.imageUrl);
     }
-  }, [fields.images, t, setValue]);
+  }, [fields.imageUrl, t, setValue]);
 
   const handleDeleteImage = () => {
     setImagePreview("");
-    setValue("images", undefined);
+    setValue("imageUrl", undefined);
   };
 
   const handleDeleteSection = () => {
@@ -274,16 +237,13 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
           className="grid grid-cols-[auto_1fr] gap-2 rounded border border-primary p-2"
           onSubmit={handleSubmit(onSubmit)}
         >
-          <label>{t("hero.image")}</label>
-          <input
-            type="file"
-            className="file-input-bordered file-input-primary file-input w-full"
-            {...register("images")}
-            accept="image/*"
+          <UploadButton
+            endpoint="imageAttachment"
+            onClientUploadComplete={(result) =>
+              setValue("imageUrl", result[0].ufsUrl)
+            }
+            buttonText={t("hero.image")}
           />
-          <p className="col-span-2 text-sm text-gray-500">
-            {t("image-size", { size: formatSize(MAX_SIZE) })}
-          </p>
           {imagePreview ? (
             <div className="col-span-2 flex items-center justify-center gap-2">
               <div className="relative w-60 max-w-full">
@@ -319,6 +279,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
           <textarea
             {...register("description")}
             className="field-sizing-content"
+            rows={4}
           />
           <label>{t("hero.button-cta")}</label>
           <input
@@ -439,7 +400,7 @@ export const HeroDisplay = ({ clubId, pageId }: HeroDisplayProps) => {
 
   return (
     <HeroContent
-      imageSrc={heroContent?.images?.[0]?.url}
+      imageSrc={heroContent?.images?.[0]}
       title={heroContent?.title ?? ""}
       subtitle={heroContent?.subTitle ?? ""}
       description={heroContent?.content ?? ""}

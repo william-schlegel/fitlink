@@ -484,6 +484,7 @@
     "select-certifications": "Select your certifications",
     "save-certifications": "Save certifications",
     "create-certification": "Create a new certification",
+    "no-organisms": "No certification organization found",
     "modules": "Modules",
     "new-group": "New certificate provider",
     "create-group": "Create a certificate provider",

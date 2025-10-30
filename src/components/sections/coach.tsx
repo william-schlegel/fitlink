@@ -11,8 +11,7 @@ import Link from "next/link";
 import { CoachDataOfferType } from "@/server/api/routers/users";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import ThemeSelector, { TThemes } from "../themeSelector";
-import { useWriteFile } from "@/lib/useManageFile";
-import { formatSize } from "@/lib/formatNumber";
+import { UploadButton } from "../uploadthing";
 import ButtonIcon from "../ui/buttonIcon";
 import { OfferBadge } from "./coachOffer";
 import { trpc } from "@/lib/trpc/client";
@@ -30,14 +29,12 @@ type CoachCreationProps = {
 };
 
 type CoachCreationForm = {
-  images?: FileList;
+  imageUrl?: string;
   subtitle: string;
   description: string;
   withCertifications: boolean;
   withActivities: boolean;
 };
-
-const MAX_SIZE = 1024 * 1024;
 
 export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
   const t = useTranslations("pages");
@@ -81,7 +78,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
       (e) => e.elementType === "OPTION",
     );
 
-    if (hc?.images?.[0]) setImagePreview(hc.images[0].url);
+    if (hc?.images?.[0]) setImagePreview(hc.images[0]);
     const resetData: CoachCreationForm = {
       description: hc?.content ?? "",
       subtitle: hc?.subTitle ?? "",
@@ -93,11 +90,6 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
     };
     form.reset(resetData);
   }, [querySection.data, form]);
-  const writeFile = useWriteFile(
-    queryCoach.data?.id ?? "",
-    "PAGE_IMAGE",
-    MAX_SIZE,
-  );
   const createSectionElement =
     trpc.pages.createPageSectionElement.useMutation();
   const updateSectionElement = trpc.pages.updatePageSectionElement.useMutation({
@@ -108,7 +100,6 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
       toast.error(error.message);
     },
   });
-  const deleteUserDocument = trpc.files.deleteUserDocument.useMutation();
 
   const onSubmit: SubmitHandler<CoachCreationForm> = async (data) => {
     const hc = querySection?.data?.elements.find(
@@ -124,20 +115,11 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
     const optionCertifications = querySection?.data?.elements.find(
       (e) => e.elementType === "OPTION" && e.title === "certifications",
     );
-    let docId: string | undefined;
-    if (data.images?.[0]) {
-      if (hc?.images?.[0])
-        await deleteUserDocument.mutateAsync({
-          userId: hc.images[0].userId,
-          documentId: hc.images[0].docId,
-        });
-      docId = await writeFile(data.images?.[0]);
-    }
     await updateSectionElement.mutateAsync({
       id: hc.id,
       subTitle: data.subtitle,
       content: data.description,
-      images: docId ? [docId] : undefined,
+      images: data.imageUrl ? [data.imageUrl] : undefined,
     });
     if (optionCertifications?.id) {
       await updateSectionElement.mutateAsync({
@@ -168,23 +150,14 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
   };
 
   useEffect(() => {
-    if (fields.images?.length) {
-      const image = fields.images[0];
-      if (!image) return;
-      if (image.size > MAX_SIZE) {
-        toast.error(t("image-size-error", { size: formatSize(MAX_SIZE) }));
-        form.setValue("images", undefined);
-        return;
-      }
-
-      const src = URL.createObjectURL(image);
-      setImagePreview(src);
+    if (fields.imageUrl) {
+      setImagePreview(fields.imageUrl);
     }
-  }, [fields.images, t, form]);
+  }, [fields.imageUrl, t, form]);
 
   const handleDeleteImage = () => {
     setImagePreview("");
-    form.setValue("images", undefined);
+    form.setValue("imageUrl", undefined);
   };
 
   if (querySection.isLoading) return <Spinner />;
@@ -199,16 +172,13 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
         >
           <div className="col-span-2 flex items-start gap-4">
             <div className="flex-1">
-              <label>{t("hero.image")}</label>
-              <input
-                type="file"
-                className="file-input-bordered file-input-primary file-input w-full"
-                {...form.register("images")}
-                accept="image/*"
+              <UploadButton
+                endpoint="imageAttachment"
+                onClientUploadComplete={(result) =>
+                  form.setValue("imageUrl", result[0].ufsUrl)
+                }
+                buttonText={t("hero.image")}
               />
-              <p className="col-span-2 text-sm text-gray-500">
-                {t("image-size", { size: formatSize(MAX_SIZE) })}
-              </p>
             </div>
             {imagePreview ? (
               <div className="relative w-40 max-w-full">
@@ -245,6 +215,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
           <textarea
             {...form.register("description")}
             className="field-sizing-content"
+            rows={4}
           />
           <div className="form-control col-span-2">
             <div className="label cursor-pointer justify-start gap-4">
@@ -349,13 +320,7 @@ type CoachDisplayProps = {
 
 export const CoachDisplay = ({ pageId }: CoachDisplayProps) => {
   const queryPage = trpc.pages.getCoachPage.useQuery(pageId);
-  // const pageData = queryPage.data?.pageData;
   const hero = queryPage.data?.hero;
-  const queryImage = trpc.files.getDocumentUrlById.useQuery(
-    hero?.images?.[0]?.id ?? "",
-    { enabled: isCUID(hero?.images?.[0]?.id) },
-  );
-
   if (queryPage.isLoading) return <Spinner />;
   if (!queryPage.data) return <div>No page defined for this coach</div>;
 
@@ -372,7 +337,7 @@ export const CoachDisplay = ({ pageId }: CoachDisplayProps) => {
       <Title title={queryPage.data?.publicName ?? ""} />
 
       <PhotoSection
-        imageSrc={queryImage.data?.url}
+        imageSrc={hero?.imageUrls?.[0]}
         userName={queryPage.data?.publicName}
         info={hero?.subTitle}
         description={hero?.content}

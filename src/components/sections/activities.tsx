@@ -362,7 +362,7 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
         onSubmit={(data) => handleSubmit(data)}
         onCancel={() => setClose(true)}
         initialValues={initialData}
-        initialImageUrl={queryActivity.data?.images?.[0]?.url}
+        initialImageUrl={queryActivity.data?.images?.[0]}
       />
     </Modal>
   );
@@ -524,6 +524,7 @@ function ActivityGroupForm({
         <textarea
           {...register("description")}
           className="field-sizing-content"
+          rows={4}
         />
       </div>
       <div className="col-span-full mt-4 flex items-center justify-end gap-2">
@@ -577,11 +578,7 @@ type ActivityContentElement = {
   elementType: PageSectionElementTypeEnum | null;
   link: string | null;
   optionValue: string | null;
-  images: {
-    docId: string;
-    userId: string;
-    url: string;
-  }[];
+  images: string[] | null;
 };
 
 type ActivitiesContentCardProps = {
@@ -633,10 +630,10 @@ function ActivityGroupContentCard({
         >
           {elements?.map((activity) => (
             <div key={activity.id} className="card bg-base-100 shadow-xl">
-              {activity.images?.[0]?.url ? (
+              {activity.images?.[0] ? (
                 <figure className="white">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={activity.images[0].url} alt="" />
+                  <img src={activity.images[0]} alt="" />
                 </figure>
               ) : null}
               <div className={`card-body ${preview ? "p-4 text-sm" : ""}`}>
@@ -691,10 +688,10 @@ export const ActivityGroupDisplayElement = ({
   return (
     <div className={`container mx-auto p-4 py-12`}>
       <div className="hero-content flex-col lg:flex-row">
-        {queryElement.data.images?.[0]?.url ? (
+        {queryElement.data.images?.[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={queryElement.data.images[0].url}
+            src={queryElement.data.images[0]}
             alt={queryElement.data.title ?? ""}
             className="max-w-xl rounded-lg shadow-2xl"
           />

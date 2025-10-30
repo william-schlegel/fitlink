@@ -20,11 +20,8 @@ export default function SelectDay({
 }: SelectDayProps) {
   const { getName, getNextDay, getPreviousDay, getToday } = useDayName();
   const router = useRouter();
-  console.log("day", day);
 
   const handleClick = (newDay: DayName) => {
-    console.log("handleClick", newDay);
-
     if (redirectTo) {
       router.push(`${redirectTo}?day=${newDay}`);
     } else {
