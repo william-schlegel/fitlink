@@ -357,7 +357,7 @@ function PricingForm() {
             {...register("description", {
               required: t("pricing.description-mandatory") ?? true,
             })}
-            rows={3}
+            className="field-sizing-content"
           />
           {errors.description ? (
             <p className="text-sm text-error">{errors.description.message}</p>

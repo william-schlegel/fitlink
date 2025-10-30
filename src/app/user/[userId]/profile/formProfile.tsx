@@ -8,13 +8,11 @@ import {
   useWatch,
 } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import Image from "next/image";
 
 import { inferProcedureOutput } from "@trpc/server";
 
+import { UploadButton } from "@/components/uploadthing";
 import ButtonIcon from "@/components/ui/buttonIcon";
-import { formatSize } from "@/lib/formatNumber";
 import { AppRouter } from "@/server/api/root";
 import { trpc } from "@/lib/trpc/client";
 import { toast } from "@/lib/toast";
@@ -24,18 +22,24 @@ type FormValues = {
   email: string;
   phone: string;
   address: string;
-  image?: FileList;
   imageUrl?: string;
   deleteImage: boolean;
 };
-const MAX_SIZE_IMAGE = 512 * 1024;
 
 export default function FormProfile({
   userData,
 }: {
   userData: inferProcedureOutput<AppRouter["users"]["getUserById"]>;
 }) {
-  const form = useForm<FormValues>();
+  const form = useForm<FormValues>({
+    defaultValues: {
+      name: userData.name,
+      email: userData.email,
+      phone: userData.phone ?? "",
+      address: userData.address ?? "",
+      imageUrl: userData.profileImageUrl ?? "",
+    },
+  });
   const t = useTranslations("auth");
 
   const utils = trpc.useUtils();
@@ -48,19 +52,15 @@ export default function FormProfile({
       toast.error(error.message);
     },
   });
-  // const saveImage = useWriteFileDirect(userData.id, MAX_SIZE_IMAGE);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    // let imageId: string | undefined = undefined;
-    // if (data.image?.[0])
-    //   imageId = (await saveImage(data.image[0])) ?? undefined;
     updateUser.mutate({
       id: userData.id!,
       name: data.name,
       email: data.email,
       phone: data.phone,
       address: data.address,
-      // profileImageId: imageId,
+      profileImageUrl: data.imageUrl,
     });
     form.reset();
   };
@@ -100,7 +100,10 @@ export default function FormProfile({
             className="input-bordered input w-full"
           />
           <label className="place-self-start">{t("profile.address")}</label>
-          <textarea {...form.register("address")} rows={2} />
+          <textarea
+            {...form.register("address")}
+            className="field-sizing-content"
+          />
           <label>{t("profile.account-provider")}</label>
           <div className="flex gap-2">
             {!userData?.accounts?.length ? (
@@ -119,7 +122,7 @@ export default function FormProfile({
             )}
           </div>
         </section>
-        <ProfileImage imageUrl={userData.profileImageUrl} />
+        <ProfileImage />
         <button
           className="btn-primary btn col-span-2 w-fit"
           disabled={updateUser.isPending}
@@ -131,52 +134,35 @@ export default function FormProfile({
   );
 }
 
-function ProfileImage({ imageUrl }: { imageUrl: string | null }) {
-  const [imagePreview, setImagePreview] = useState(imageUrl);
-  const { register, control, setValue } = useFormContext();
+function ProfileImage() {
+  const { control, setValue } = useFormContext();
   const t = useTranslations("auth");
 
-  const fields = useWatch({ control: control });
-  useEffect(() => {
-    if (fields.image?.[0]) {
-      if (fields.image[0].size > MAX_SIZE_IMAGE) {
-        toast.error(
-          t("image-size-error", { size: formatSize(MAX_SIZE_IMAGE) }),
-        );
-        setValue("image", undefined);
-        return;
-      }
-
-      const src = URL.createObjectURL(fields.image[0]);
-      setImagePreview(src);
-    }
-  }, [fields.image, t, setValue]);
+  const imageUrl = useWatch({ control: control, name: "imageUrl" });
 
   const handleDeleteImage = () => {
-    setImagePreview("");
     setValue("deleteImage", true);
     setValue("image", undefined);
   };
 
   return (
     <section>
-      <div className="col-span-2 flex flex-col items-center justify-start gap-4">
-        <div className="w-full ">
-          <label>{t("profile.profile-image")}</label>
-          <input
-            type="file"
-            className="file-input-bordered file-input-primary file-input w-full"
-            {...register("image")}
-            accept="image/*"
+      <div className="col-span-2 flex items-center justify-start gap-4">
+        <div>
+          <UploadButton
+            endpoint="profilePicture"
+            onClientUploadComplete={(result) =>
+              setValue("imageUrl", result[0].ufsUrl)
+            }
+            className="ut-button:btn-primary ut-button:btn"
+            buttonText={t("profile.profile-image")}
           />
-          <p className="col-span-2 text-sm text-gray-500">
-            {t("image-size", { size: formatSize(MAX_SIZE_IMAGE) })}
-          </p>
         </div>
-        {imagePreview ? (
-          <div className="relative w-60 max-w-full">
-            <Image
-              src={imagePreview}
+        {imageUrl ? (
+          <div className="relative w-30 max-w-full">
+            {/* eslint-disable-next-line @next/next/no-img-element*/}
+            <img
+              src={imageUrl}
               alt="profile image"
               className="aspect-square rounded-full object-cover"
               width={100}

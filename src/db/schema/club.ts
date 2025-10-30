@@ -44,23 +44,16 @@ export const club = pgTable(
     address: text("address").notNull(),
     managerId: text("manager_id").notNull(),
     pageStyle: text("page_style").default("light"),
-    logoId: text("logo_id").unique(),
+    logoUrl: text("logo_url").unique(),
     chatGroupId: text("chat_group_id"),
   },
-  (table) => [
-    index("club_manager_idx").on(table.managerId),
-    index("club_logo_idx").on(table.logoId),
-  ],
+  (table) => [index("club_manager_idx").on(table.managerId)],
 );
 
 export const clubRelations = relations(club, ({ one, many }) => ({
   manager: one(userManager, {
     fields: [club.managerId],
     references: [userManager.userId],
-  }),
-  logo: one(userDocument, {
-    fields: [club.logoId],
-    references: [userDocument.id],
   }),
   sites: many(site),
   activities: many(activity),

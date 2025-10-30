@@ -151,9 +151,7 @@ export const userDocumentRelations = relations(
       fields: [userDocument.userId],
       references: [user.id],
     }),
-    certification: one(coachCertification),
     pageSectionElements: many(pageSectionElementDocuments),
-    club: one(club),
     event: one(event),
   }),
 );

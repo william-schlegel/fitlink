@@ -2,6 +2,7 @@ import {
   boolean,
   index,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   real,
@@ -17,7 +18,7 @@ import {
   packModeEnum,
 } from "./enums";
 import { activityGroup, club, site } from "./club";
-import { userCoach, userDocument } from "./user";
+import { userCoach } from "./user";
 
 /* Coaching prices */
 
@@ -161,7 +162,7 @@ export const coachCertification = pgTable(
     id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     obtainedIn: timestamp("obtained_in").notNull(),
-    documentId: text("document_id").unique(),
+    documentUrl: text("document_url").unique(),
     coachId: text("coach_id").notNull(),
     manualModule: text("manual_module"),
   },
@@ -171,11 +172,6 @@ export const coachCertification = pgTable(
 export const certificationRelations = relations(
   coachCertification,
   ({ one, many }) => ({
-    document: one(userDocument, {
-      fields: [coachCertification.documentId],
-      references: [userDocument.id],
-    }),
-
     coach: one(userCoach, {
       fields: [coachCertification.coachId],
       references: [userCoach.userId],
@@ -186,20 +182,33 @@ export const certificationRelations = relations(
   }),
 );
 
-export const selectedModuleForCoach = pgTable("SelectedModuleForCoach", {
-  coachId: text("coach_id")
-    .notNull()
-    .references(() => userCoach.id),
-  certificationId: text("certification_id")
-    .notNull()
-    .references(() => coachCertification.id),
-  certificationModuleId: text("certification_module_id")
-    .notNull()
-    .references(() => certificationModule.id),
-  certificationOrganismId: text("certification_organism_id")
-    .notNull()
-    .references(() => certificationOrganism.id),
-});
+export const selectedModuleForCoach = pgTable(
+  "SelectedModuleForCoach",
+  {
+    coachId: text("coach_id")
+      .notNull()
+      .references(() => userCoach.id),
+    certificationId: text("certification_id")
+      .notNull()
+      .references(() => coachCertification.id),
+    certificationModuleId: text("certification_module_id")
+      .notNull()
+      .references(() => certificationModule.id),
+    certificationOrganismId: text("certification_organism_id")
+      .notNull()
+      .references(() => certificationOrganism.id),
+  },
+  (table) => [
+    primaryKey({
+      columns: [
+        table.coachId,
+        table.certificationId,
+        table.certificationModuleId,
+        table.certificationOrganismId,
+      ],
+    }),
+  ],
+);
 
 export const selectedModuleForCoachRelations = relations(
   selectedModuleForCoach,

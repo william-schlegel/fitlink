@@ -10,25 +10,16 @@ export const useWriteFile = (
 
   async function writeFile(file: File | undefined) {
     if (!file) return undefined;
+    console.log("file", file);
 
-    uploadFile.mutate(
-      {
-        userId,
-        fileType: file.type,
-        documentType,
-        fileName: file.name,
-        maxSize,
-        file,
-      },
-      {
-        onSuccess: (data) => {
-          return data.documentId;
-        },
-        onError: (error) => {
-          throw error;
-        },
-      },
-    );
+    const f = await uploadFile.mutateAsync({
+      userId,
+      documentType,
+      maxSize,
+      file,
+    });
+    return f.documentId;
   }
+
   return writeFile;
 };

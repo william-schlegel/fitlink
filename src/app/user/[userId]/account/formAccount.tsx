@@ -187,10 +187,14 @@ export default function FormAccount({
               <textarea
                 id="description"
                 {...register("description")}
-                rows={3}
+                className="field-sizing-content"
               />
               <label htmlFor="aboutMe">{t("account.about-me")}</label>
-              <textarea id="aboutMe" {...register("aboutMe")} rows={6} />
+              <textarea
+                id="aboutMe"
+                {...register("aboutMe")}
+                className="field-sizing-content"
+              />
               <label htmlFor="publicActivities">
                 {t("account.public-activities")}
               </label>

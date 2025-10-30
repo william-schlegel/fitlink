@@ -316,7 +316,10 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
             className="input-bordered input w-full"
           />
           <label>{t("hero.description")}</label>
-          <textarea {...register("description")} rows={4} />
+          <textarea
+            {...register("description")}
+            className="field-sizing-content"
+          />
           <label>{t("hero.button-cta")}</label>
           <input
             {...register("cta")}

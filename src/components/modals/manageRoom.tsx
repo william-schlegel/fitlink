@@ -10,9 +10,12 @@ import {
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { roomReservationEnum } from "@/db/schema/enums";
 import Modal, { TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
+import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import { RESERVATIONS } from "@/lib/data";
 import { trpc } from "@/lib/trpc/client";
@@ -37,9 +40,11 @@ export const CreateRoom = ({
 }: CreateRoomProps) => {
   const t = useTranslations("club");
   const utils = trpc.useUtils();
+  const router = useRouter();
   const createRoom = trpc.sites.createRoom.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       utils.sites.getRoomsForSite.invalidate(siteId);
+      router.push(createLink({ roomId: data[0].id }));
       form.reset();
       toast.success(t("room.created"));
     },

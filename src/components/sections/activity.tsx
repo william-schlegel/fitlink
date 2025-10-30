@@ -468,7 +468,10 @@ function ActivityForm({
           {...register("subtitle")}
         />
         <label className="self-start">{t("activity.description")}</label>
-        <textarea {...register("description")} rows={4} />
+        <textarea
+          {...register("description")}
+          className="field-sizing-content"
+        />
       </div>
       <div>
         <label>{t("activity.activity-group")}</label>

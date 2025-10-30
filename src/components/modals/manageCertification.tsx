@@ -10,8 +10,8 @@ import { useRouter } from "next/navigation";
 import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
 import ButtonIcon, { ButtonSize } from "../ui/buttonIcon";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import { useWriteFile } from "@/lib/useManageFile";
 import Confirmation from "../ui/confirmation";
+import { UploadButton } from "../uploadthing";
 import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
@@ -47,9 +47,9 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
   const [obtentionDate, setObtentionDate] = useState<Date>(
     new Date(Date.now()),
   );
-  const [file, setFile] = useState<File>();
+  const [documentUrl, setDocumentUrl] = useState("");
 
-  const writeFile = useWriteFile(userId, "CERTIFICATION");
+  // const writeFile = useWriteFile(userId, "CERTIFICATION");
 
   const utils = trpc.useUtils();
 
@@ -91,7 +91,7 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
   }
 
   const onSubmit = async () => {
-    const documentId = await writeFile(file);
+    // const documentId = await writeFile(file);
 
     addCertification.mutate({
       userId,
@@ -103,7 +103,7 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
       modules: Array.from(moduleIds.values())
         .filter((m) => m.selected)
         .map((m) => m.id),
-      documentId,
+      documentUrl,
     });
   };
 
@@ -144,10 +144,6 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
       act.selected = !act.selected;
       setActivityIds(new Map(activityIds));
     }
-  };
-
-  const onFileChange = (e: React.FormEvent<HTMLInputElement>) => {
-    setFile(e.currentTarget.files?.[0]);
   };
 
   return (
@@ -229,11 +225,13 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
           />
         </div>
         <div className="flex flex-col">
-          <label>{t("document")}</label>
-          <input
-            type="file"
-            className="file-input-bordered file-input-primary file-input w-full"
-            onChange={onFileChange}
+          <UploadButton
+            endpoint="document"
+            onClientUploadComplete={(result) =>
+              setDocumentUrl(result[0].ufsUrl)
+            }
+            className="ut-button:btn-primary ut-button:btn"
+            buttonText={t("document")}
           />
         </div>
       </form>

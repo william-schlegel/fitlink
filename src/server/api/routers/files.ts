@@ -31,6 +31,17 @@ export async function getDocUrl(userId: string, documentId: string) {
   return fileUrl.ufsUrl;
 }
 
+export async function uploadFile(file: File) {
+  const uploadedFile = await utapi.uploadFiles(file);
+  if (uploadedFile.error) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Failed to upload file",
+    });
+  }
+  return uploadedFile.data;
+}
+
 export const fileRouter = createTRPCRouter({
   uploadFile: protectedProcedure
     .input(
@@ -40,10 +51,8 @@ export const fileRouter = createTRPCRouter({
           .number()
           .optional()
           .default(1024 * 1024),
-        fileType: z.string(),
-        fileName: z.string(),
         documentType: z.enum(userDocumentTypeEnum.enumValues),
-        file: z.instanceof(File),
+        file: z.file(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -67,8 +76,8 @@ export const fileRouter = createTRPCRouter({
         .values({
           userId,
           documentType: input.documentType,
-          fileType: input.fileType,
-          fileName: input.fileName,
+          fileType: input.file.type,
+          fileName: input.file.name,
           fileKey,
         })
         .returning();

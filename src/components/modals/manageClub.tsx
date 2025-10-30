@@ -7,20 +7,19 @@ import {
   useWatch,
 } from "react-hook-form";
 import MapComponent, { Marker } from "react-map-gl/mapbox";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Image from "next/image";
 import Link from "next/link";
 
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import CollapsableGroup from "../ui/collapsableGroup";
-import { useWriteFile } from "@/lib/useManageFile";
 import AddressSearch from "../ui/addressSearch";
-import { formatSize } from "@/lib/formatNumber";
 import FindCoach from "../sections/findCoach";
 import Confirmation from "../ui/confirmation";
+import { UploadButton } from "../uploadthing";
 import { useUser } from "@/lib/auth/client";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
@@ -30,8 +29,6 @@ import { toast } from "@/lib/toast";
 import Rating from "../ui/rating";
 import Modal from "../ui/modal";
 import { env } from "@/env";
-
-const MAX_SIZE_LOGO = 1024 * 1024;
 
 export const CreateClub = () => {
   const { data: user } = useUser();
@@ -50,13 +47,7 @@ export const CreateClub = () => {
       toast.error(error.message);
     },
   });
-  const saveLogo = useWriteFile(user?.id ?? "", "IMAGE", MAX_SIZE_LOGO);
-
   const onSubmit = async (data: ClubFormValues) => {
-    let logoId: string | undefined = undefined;
-    if (data.logo?.[0]) logoId = await saveLogo(data.logo[0]);
-    console.log("logoId", logoId);
-    console.log("data", data);
     createClub.mutate({
       userId: user?.id ?? "",
       name: data.name,
@@ -65,7 +56,7 @@ export const CreateClub = () => {
       latitude: data.latitude ?? LATITUDE,
       longitude: data.longitude ?? LONGITUDE,
       searchAddress: data.searchAddress ?? "",
-      logoId,
+      logoUrl: data.logoUrl ?? undefined,
     });
     setCloseModal(true);
   };
@@ -108,17 +99,12 @@ export const UpdateClub = ({ clubId }: PropsUpdateDelete) => {
       setInitialData({
         address: queryClub.data.address ?? "",
         name: queryClub.data.name ?? "",
-        logoUrl: queryClub.data.logoUrl,
+        logoUrl: queryClub.data.logoUrl ?? undefined,
         deleteLogo: false,
       });
     }
   }, [queryClub.data]);
 
-  const saveLogo = useWriteFile(
-    queryClub.data?.managerId ?? "",
-    "IMAGE",
-    MAX_SIZE_LOGO,
-  );
   const updateClub = trpc.clubs.updateClub.useMutation({
     onSuccess: () => {
       utils.clubs.getClubsForManager.invalidate(user?.id ?? "");
@@ -131,13 +117,11 @@ export const UpdateClub = ({ clubId }: PropsUpdateDelete) => {
   });
 
   const onSubmit = async (data: ClubFormValues) => {
-    let logoId: string | null = null;
-    if (data.logo?.[0]) logoId = (await saveLogo(data.logo[0])) ?? null;
     updateClub.mutate({
       id: clubId,
       name: data.name,
       address: data.address,
-      logoId,
+      logoUrl: data.logoUrl ?? null,
     });
     setInitialData(undefined);
     setCloseModal(true);
@@ -176,7 +160,6 @@ type ClubFormValues = {
   searchAddress?: string;
   longitude?: number;
   latitude?: number;
-  logo?: FileList;
   logoUrl?: string;
   deleteLogo: boolean;
 };
@@ -201,40 +184,30 @@ function ClubForm({ onSubmit, onCancel, update, initialData }: ClubFormProps) {
     setValue,
   } = useForm<ClubFormValues>({
     defaultValues: {
-      isSite: true,
+      logoUrl: initialData?.logoUrl ?? undefined,
+      address: initialData?.address ?? "",
+      name: initialData?.name ?? "",
+      isSite: initialData?.isSite ?? true,
+      searchAddress: initialData?.searchAddress ?? "",
+      longitude: initialData?.longitude ?? LONGITUDE,
+      latitude: initialData?.latitude ?? LATITUDE,
+      deleteLogo: initialData?.deleteLogo ?? false,
     },
   });
-  const [imagePreview, setImagePreview] = useState("");
   const fields = useWatch({ control });
 
   useEffect(() => {
     reset(initialData);
-    setImagePreview(initialData?.logoUrl ?? "");
   }, [initialData, reset]);
 
-  useEffect(() => {
-    if (fields.logo?.[0]) {
-      if (fields.logo[0].size > MAX_SIZE_LOGO) {
-        toast.error(t("image-size-error", { size: formatSize(MAX_SIZE_LOGO) }));
-        setValue("logo", undefined);
-        return;
-      }
-
-      const src = URL.createObjectURL(fields.logo[0]);
-      setImagePreview(src);
-    }
-  }, [fields.logo, t, setValue]);
-
   const handleDeleteImage = () => {
-    setImagePreview("");
     setValue("deleteLogo", true);
-    setValue("logo", undefined);
+    setValue("logoUrl", undefined);
   };
 
   const onSubmitForm: SubmitHandler<ClubFormValues> = (data) => {
     onSubmit(data);
     reset();
-    setImagePreview("");
   };
 
   const onError: SubmitErrorHandler<ClubFormValues> = (errors) => {
@@ -291,21 +264,18 @@ function ClubForm({ onSubmit, onCancel, update, initialData }: ClubFormProps) {
         </div>
         <div className="col-span-2 flex flex-col items-center justify-start gap-4">
           <div className="w-full ">
-            <label>{t("club.logo")}</label>
-            <input
-              type="file"
-              className="file-input-bordered file-input-primary file-input w-full"
-              {...register("logo")}
-              accept="image/*"
+            <UploadButton
+              endpoint="imageAttachment"
+              onClientUploadComplete={(result) =>
+                setValue("logoUrl", result[0].ufsUrl)
+              }
+              buttonText={t("club.logo")}
             />
-            <p className="col-span-2 text-sm text-gray-500">
-              {t("club.logo-size", { size: formatSize(MAX_SIZE_LOGO) })}
-            </p>
           </div>
-          {imagePreview ? (
+          {fields.logoUrl ? (
             <div className="relative w-40 max-w-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imagePreview} alt="" />
+              <img src={fields.logoUrl} alt="" />
               <button
                 onClick={handleDeleteImage}
                 className="absolute right-2 bottom-2 z-10"
@@ -487,7 +457,7 @@ export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              rows={5}
+              className="field-sizing-content"
               placeholder={t("coach.message-placeholder") ?? ""}
               required
             />

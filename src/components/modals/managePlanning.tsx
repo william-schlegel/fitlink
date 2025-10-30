@@ -10,10 +10,13 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { isDate } from "date-fns";
 
+import { useRouter } from "next/navigation";
+
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import Modal, { TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { useUser } from "@/lib/auth/client";
+import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
@@ -41,11 +44,13 @@ export const CreatePlanning = ({
   const utils = trpc.useUtils();
   const t = useTranslations("planning");
   const { data: user } = useUser();
+  const router = useRouter();
   const userId = user?.id ?? "";
   const createPlanning = trpc.plannings.createPlanningForClub.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       utils.plannings.getPlanningsForClub.invalidate(clubId);
       toast.success(t("planning-created"));
+      router.push(createLink({ clubId, planningId: data[0].id }));
     },
     onError(error) {
       toast.error(error.message);

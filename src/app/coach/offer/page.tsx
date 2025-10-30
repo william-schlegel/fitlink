@@ -14,6 +14,7 @@ import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
+import { isCUID } from "@/lib/utils";
 
 export default async function CoachOffer({
   searchParams,
@@ -77,7 +78,9 @@ async function OfferContent({ userId, offerId }: OfferContentProps) {
   const t = await getTranslations("coach");
   const caller = await createTrpcCaller();
   if (!caller) return null;
-  const offerQuery = await caller.coachs.getOfferById(offerId);
+  const offerQuery = isCUID(offerId)
+    ? await caller.coachs.getOfferById(offerId)
+    : null;
   if (!offerQuery) return null;
   return (
     <div className="w-full space-y-4">

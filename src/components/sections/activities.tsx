@@ -521,7 +521,10 @@ function ActivityGroupForm({
           {...register("subtitle")}
         />
         <label className="self-start">{t("activity-group.description")}</label>
-        <textarea {...register("description")} rows={4} />
+        <textarea
+          {...register("description")}
+          className="field-sizing-content"
+        />
       </div>
       <div className="col-span-full mt-4 flex items-center justify-end gap-2">
         <button

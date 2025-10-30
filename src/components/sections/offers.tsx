@@ -440,7 +440,10 @@ function OfferForm({
           {...register("subtitle")}
         />
         <label className="self-start">{t("offer.description")}</label>
-        <textarea {...register("description")} rows={4} />
+        <textarea
+          {...register("description")}
+          className="field-sizing-content"
+        />
         <label>{t("offer.offer")}</label>
         <select defaultValue={getValues("offerId")} {...register("offerId")}>
           {offers.data?.map((offer) => (

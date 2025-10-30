@@ -450,7 +450,10 @@ function PlanningForm({
           {...register("subtitle")}
         />
         <label className="self-start">{t("pages.planning.description")}</label>
-        <textarea {...register("description")} rows={4} />
+        <textarea
+          {...register("description")}
+          className="field-sizing-content"
+        />
       </div>
       <div>
         <label>{t("pages.planning.sites")}</label>

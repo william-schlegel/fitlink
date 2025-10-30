@@ -104,7 +104,7 @@ export default async function ManageCertifications({
                   ))}
                 </div>
                 <div className="mt-4 flex items-center gap-4 border-t border-base-200 pt-4">
-                  <DocButton documentId={certification.documentId ?? ""} />
+                  <DocButton documentUrl={certification.documentUrl ?? ""} />
                 </div>
                 <div className="card-actions justify-end">
                   <UpdateCertification

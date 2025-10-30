@@ -403,12 +403,15 @@ function EventForm({
             {...register("brief", {
               required: t("event.brief-mandatory") ?? true,
             })}
-            rows={3}
+            className="field-sizing-content"
           />
           <TextError err={errors?.brief?.message} />
         </div>
         <label className="self-start">{t("event.description")}</label>
-        <textarea {...register("description")} rows={5} />
+        <textarea
+          {...register("description")}
+          className="field-sizing-content"
+        />
       </div>
       <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">
         <label className="required">{t("event.start-date")}</label>

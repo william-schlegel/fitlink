@@ -242,7 +242,10 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
             className="input-bordered input w-full"
           />
           <label>{t("coach.description")}</label>
-          <textarea {...form.register("description")} rows={4} />
+          <textarea
+            {...form.register("description")}
+            className="field-sizing-content"
+          />
           <div className="form-control col-span-2">
             <div className="label cursor-pointer justify-start gap-4">
               <input

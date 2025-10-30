@@ -253,7 +253,10 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
             className="input-bordered input w-full"
           />
           <label>{t("title.description")}</label>
-          <textarea {...register("description")} rows={4} />
+          <textarea
+            {...register("description")}
+            className="field-sizing-content"
+          />
 
           <div className="col-span-2 flex justify-between">
             <button className="btn btn-primary" type="submit">

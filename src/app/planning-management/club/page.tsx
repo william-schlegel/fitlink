@@ -1,6 +1,7 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { CreatePlanning } from "@/components/modals/managePlanning";
 import { getPlanningsForClub } from "@/server/api/routers/planning";
 import { PlanningName } from "@/components/planningName";
 import { LayoutPage } from "@/components/layoutPage";
@@ -61,6 +62,7 @@ export default async function ClubPlanning({
       title={t("planning-management")}
       titleComponents={<SelectClub clubs={queryClubs} clubId={clubId} />}
     >
+      <CreatePlanning clubId={clubId} />
       <LayoutPage.Main>
         <LayoutPage.List
           list={planningList}

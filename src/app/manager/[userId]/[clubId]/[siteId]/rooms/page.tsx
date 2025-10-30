@@ -1,6 +1,5 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { twMerge } from "tailwind-merge";
 import Link from "next/link";
 
 import {
@@ -13,11 +12,13 @@ import {
   DeleteRoom,
   UpdateRoom,
 } from "@/components/modals/manageRoom";
+import { CreateRoomCalendar } from "@/components/modals/manageCalendar";
 import createLink, { createHref } from "@/lib/createLink";
+import CalendarWeek from "@/components/calendarWeek";
+import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { RESERVATIONS } from "@/lib/data";
 import { getHref } from "@/lib/getHref";
-import Title from "@/components/title";
 import { isCUID } from "@/lib/utils";
 
 export default async function ManageRooms({
@@ -60,70 +61,42 @@ export default async function ManageRooms({
       </div>
     );
 
+  const roomList = roomQuery.map((room) => ({
+    id: room.id,
+    name: room.name,
+    link: createLink({ roomId: room.id }, href),
+  }));
+
   return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title
-        title={t("club.room.manage-my-rooms", {
-          count: roomQuery?.length ?? 0,
-        })}
-      />
-      <div className="mb-4 flex flex-row items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="flex items-center gap-4">
-            {t("club.room.manage-my-rooms", {
-              count: roomQuery?.length ?? 0,
-            })}
-            <span className="text-secondary">{siteQuery?.name}</span>
-          </h1>
+    <LayoutPage
+      preTitle={siteQuery?.name}
+      title={t("club.room.manage-my-rooms", {
+        count: roomQuery?.length ?? 0,
+      })}
+      titleComponents={
+        <div className="flex flex-wrap items-center gap-4">
           <CreateRoom siteId={siteId} variant={"Primary"} />
+          <Link
+            className="btn-outline btn btn-primary"
+            href={createHref(href, ["manager", userId, "clubs"], { clubId })}
+          >
+            {t("club.room.back-to-sites")}
+          </Link>
         </div>
-        <Link
-          className="btn-outline btn btn-primary"
-          // onClick={() => {
-          //   const path = `/manager/${sessionData?.user?.id}/${clubId}/sites?siteId=${siteId}`;
-          //   router.push(path);
-          // }}
-          href={createHref(href, ["manager", userId, clubId, "sites"], {
-            siteId: siteId,
-          })}
-        >
-          {t("club.room.back-to-sites")}
-        </Link>
-      </div>
-      <div className="flex gap-4">
-        <ul className="menu w-1/4 overflow-hidden rounded bg-base-100">
-          {roomQuery?.map((room) => (
-            <li key={room.id}>
-              <Link
-                href={createLink({ roomId: room.id }, href)}
-                className={twMerge(
-                  "flex items-center justify-between",
-                  roomId === room.id && "badge badge-primary",
-                )}
-              >
-                <span>{room.name}</span>
-                <span>
-                  {room.reservation === "MANDATORY" && (
-                    <i className="bx bx-calendar-exclamation bx-sm text-secondary" />
-                  )}
-                  {room.reservation === "POSSIBLE" && (
-                    <i className="bx bx-calendar-alt bx-sm text-secondary" />
-                  )}
-                  {room.unavailable ? (
-                    <span className="badge-error badge">
-                      {t("club.room.closed")}
-                    </span>
-                  ) : null}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-        {roomId === "" ? null : (
+      }
+    >
+      <LayoutPage.Main>
+        <LayoutPage.List
+          list={roomList}
+          itemId={siteId}
+          noItemsText={t("club.room.no-rooms")}
+        />
+
+        {siteId === "" ? null : (
           <RoomContent clubId={clubId} roomId={roomId} siteId={siteId} />
         )}
-      </div>
-    </div>
+      </LayoutPage.Main>
+    </LayoutPage>
   );
 }
 
@@ -140,14 +113,13 @@ export async function RoomContent({
 }: RoomContentProps) {
   if (!isCUID(roomId) || !isCUID(siteId) || !isCUID(clubId)) return null;
   const roomQuery = await getRoomById(roomId);
-  // const calendarQuery = trpc.calendars.getCalendarForRoom.useQuery(
-  //   {
-  //     roomId,
-  //     siteId,
-  //     clubId,
-  //   },
-  //   { enabled: isCUID(roomId) && isCUID(siteId) && isCUID(clubId) }
-  // );
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const calendarQuery = await caller.calendars.getCalendarForRoom({
+    roomId,
+    siteId,
+    clubId,
+  });
   const t = await getTranslations("club");
 
   return (
@@ -162,14 +134,11 @@ export async function RoomContent({
         ) : null}
         <div className="flex items-center gap-2">
           <UpdateRoom siteId={siteId} roomId={roomId} />
-          {/* <CreateRoomCalendar roomId={roomId} clubId={clubId} siteId={siteId} /> */}
+          <CreateRoomCalendar roomId={roomId} clubId={clubId} siteId={siteId} />
           <DeleteRoom roomId={roomId} siteId={siteId} />
         </div>
       </div>
-      {/* <CalendarWeek
-        calendar={calendarQuery.data}
-        isLoading={calendarQuery.isLoading}
-      /> */}
+      <CalendarWeek calendar={calendarQuery} isLoading={false} />
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <label className="label">{t("room.reservation")}</label>

@@ -18,9 +18,9 @@ import { TUserFilter } from "@/app/admin/users/userFilter";
 import { featureEnum, roleEnum } from "@/db/schema/enums";
 import { reservation } from "@/db/schema/planning";
 import { isAdmin } from "@/server/lib/userTools";
+import { getDocUrl, uploadFile } from "./files";
 import { auth } from "@/lib/auth/server";
 import { user } from "@/db/schema/auth";
-import { getDocUrl } from "./files";
 import { db } from "@/db";
 
 const UserFilter = z
@@ -332,7 +332,8 @@ export const userRouter = createTRPCRouter({
         pricingId: z.cuid2().optional(),
         monthlyPayment: z.boolean().optional(),
         cancelationDate: z.date().optional(),
-        profileImageId: z.string().optional(),
+        // profileImageId: z.string().optional(),
+        profileImageUrl: z.string().optional(),
         // coach data
         longitude: z.number().optional(),
         latitude: z.number().optional(),
@@ -366,30 +367,8 @@ export const userRouter = createTRPCRouter({
             publicName: input.publicName,
             aboutMe: input.aboutMe,
             description: input.description,
-            // coachingActivities: Array.isArray(input.coachingActivities)
-            //   ? {
-            //       create: input.coachingActivities?.map((a) => ({ name: a })),
-            //     }
-            //   : undefined,
           });
-          // create: {
-          //   userId: input.id,
-          //   longitude: input.longitude,
-          //   latitude: input.latitude,
-          //   searchAddress: input.searchAddress,
-          //   range: input.range,
-          //   publicName: input.publicName,
-          //   aboutMe: input.aboutMe,
-          //   description: input.description,
-          //   coachingActivities: Array.isArray(input.coachingActivities)
-          //     ? {
-          //         create: input.coachingActivities?.map((a) => ({ name: a })),
-          //       }
-          //     : undefined,
-          // },
-          // });
         }
-
         return tx
           .update(user)
           .set({
@@ -398,10 +377,11 @@ export const userRouter = createTRPCRouter({
             phone: input.phone,
             address: input.address,
             internalRole: input.internalRole,
-            profileImageId: input.profileImageId,
             pricingId: input.pricingId,
             monthlyPayment: input.monthlyPayment,
             cancelationDate: input.cancelationDate,
+            // profileImageId: input.profileImageId,
+            image: input.profileImageUrl,
           })
           .where(eq(user.id, input.id))
           .returning();

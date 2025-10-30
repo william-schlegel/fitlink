@@ -56,14 +56,9 @@ export const clubRouter = createTRPCRouter({
           },
 
           activities: { with: { group: true } },
-          logo: true,
         },
       });
-      let logoUrl = "";
-      if (myClub?.logoId) {
-        logoUrl = await getDocUrl(myClub.managerId, myClub.logoId);
-      }
-      return { ...myClub, logoUrl };
+      return myClub;
     }),
   getClubPagesForNavByClubId: publicProcedure
     .input(z.string())
@@ -79,11 +74,7 @@ export const clubRouter = createTRPCRouter({
           },
         },
       });
-      let logoUrl = "";
-      if (myClub?.logoId) {
-        logoUrl = await getDocUrl(myClub.managerId, myClub.logoId);
-      }
-      if (!myClub) return { pages: [], logoUrl };
+      if (!myClub) return { pages: [], logoUrl: "" };
       return {
         pages: myClub.pages.map((p) => ({
           id: p.id,
@@ -95,7 +86,7 @@ export const clubRouter = createTRPCRouter({
             title: s.title,
           })),
         })),
-        logoUrl,
+        logoUrl: myClub.logoUrl,
       };
     }),
   getClubsForManager: protectedProcedure
@@ -137,7 +128,7 @@ export const clubRouter = createTRPCRouter({
         searchAddress: z.string(),
         longitude: z.number(),
         latitude: z.number(),
-        logoId: z.cuid2().optional(),
+        logoUrl: z.string().optional(),
         isSite: z.boolean(),
       }),
     )
@@ -161,7 +152,7 @@ export const clubRouter = createTRPCRouter({
             name: input.name,
             address: input.address,
             managerId: input.userId,
-            logoId: input.logoId ? input.logoId : undefined,
+            logoUrl: input.logoUrl,
             chatGroupId: chatChannel?.id,
           })
           .returning();
@@ -186,7 +177,7 @@ export const clubRouter = createTRPCRouter({
         id: z.cuid2(),
         name: z.string(),
         address: z.string(),
-        logoId: z.cuid2().nullable(),
+        logoUrl: z.string().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -208,15 +199,14 @@ export const clubRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
           message: "You are not authorized to modify this club",
         });
-      const initialLogoId = club?.logoId;
       const data: {
         name: string;
         address: string;
-        logoId: string | null;
+        logoUrl: string | null;
       } = {
         name: input.name,
         address: input.address,
-        logoId: input.logoId,
+        logoUrl: input.logoUrl,
       };
 
       const updated = await db
@@ -224,9 +214,9 @@ export const clubRouter = createTRPCRouter({
         .set(data)
         .where(eq(club.id, input.id))
         .returning();
-      if (initialLogoId && !input.logoId) {
-        await db.delete(userDocument).where(eq(userDocument.id, initialLogoId));
-      }
+      // if (initialLogoId && !input.logoId) {
+      //   await db.delete(userDocument).where(eq(userDocument.id, initialLogoId));
+      // }
 
       // if (initialClub) {
       //   // create the channel for the club

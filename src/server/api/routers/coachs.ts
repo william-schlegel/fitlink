@@ -38,7 +38,7 @@ const CertificationData = z.object({
   id: z.cuid2(),
   name: z.string(),
   obtainedIn: z.date(),
-  documentId: z.cuid2().optional(),
+  documentUrl: z.string().optional(),
   userId: z.string(),
   modules: z.array(z.cuid2()),
   activityGroups: z.array(z.cuid2()),
@@ -198,6 +198,7 @@ export const coachRouter = createTRPCRouter({
             name: input.name,
             obtainedIn: input.obtainedIn,
             coachId: input.userId,
+            documentUrl: input.documentUrl,
           })
           .returning();
 
@@ -235,14 +236,14 @@ export const coachRouter = createTRPCRouter({
         //   },
         // },
 
-        if (input.documentId) {
-          await tx
-            .update(coachCertification)
-            .set({
-              documentId: input.documentId,
-            })
-            .where(eq(coachCertification.id, certifId));
-        }
+        // if (input.documentId) {
+        //   await tx
+        //     .update(coachCertification)
+        //     .set({
+        //       documentId: input.documentId,
+        //     })
+        //     .where(eq(coachCertification.id, certifId));
+        // }
         return certif;
       });
     }),
@@ -354,15 +355,35 @@ export const coachRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const coach = await db.query.userCoach.findFirst({
         where: eq(userCoach.userId, input),
+        columns: {
+          id: true,
+          userId: true,
+          publicName: true,
+          description: true,
+          aboutMe: true,
+          searchAddress: true,
+          latitude: true,
+          longitude: true,
+          range: true,
+          facebookLink: true,
+          twitterLink: true,
+          youtubeLink: true,
+          instagramLink: true,
+          rating: true,
+          pageStyle: true,
+        },
+      });
+      if (!coach) return null;
+
+      const certifications = await db.query.coachCertification.findMany({
+        where: eq(coachCertification.coachId, input),
         with: {
-          certifications: {
+          selectedModuleForCoach: {
             with: {
-              selectedModuleForCoach: {
+              module: {
                 with: {
-                  module: {
-                    with: {
-                      activityGroups: { with: { activityGroup: true } },
-                    },
+                  activityGroups: {
+                    with: { activityGroup: true },
                   },
                 },
               },
@@ -370,17 +391,18 @@ export const coachRouter = createTRPCRouter({
           },
         },
       });
-      if (!coach) return coach;
-      const certifications = (coach.certifications ?? []).map((c) => ({
+
+      const certificationsWithModules = certifications.map((c) => ({
         ...c,
         modules: (c.selectedModuleForCoach ?? []).map((cm) => cm.module),
         activityGroups: (c.selectedModuleForCoach ?? [])
           .flatMap((cm) => cm.module.activityGroups.map((g) => g.activityGroup))
           .filter((v, i, a) => a.findIndex((x) => x.id === v.id) === i),
       }));
+
       return {
         ...coach,
-        certifications,
+        certifications: certificationsWithModules,
       };
     }),
 

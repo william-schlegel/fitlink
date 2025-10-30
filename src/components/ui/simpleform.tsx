@@ -147,6 +147,7 @@ export default function SimpleForm<T extends FieldValues>({
                         )}
                         disabled={field.disabled}
                         rows={field.rows}
+                        className="field-sizing-content"
                       />
                     ) : (
                       <input

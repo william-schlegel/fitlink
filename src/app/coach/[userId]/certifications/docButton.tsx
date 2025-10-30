@@ -1,38 +1,25 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 import ButtonIcon from "@/components/ui/buttonIcon";
-import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
-import { toast } from "@/lib/toast";
 
-export default function DocButton({ documentId }: { documentId: string }) {
+export default function DocButton({ documentUrl }: { documentUrl: string }) {
   const t = useTranslations("coach");
-  const [docId, setDocId] = useState(documentId);
-  const queryDoc = trpc.files.getDocumentUrlById.useQuery(docId, {
-    enabled: isCUID(docId),
-  });
-  useEffect(() => {
-    if (queryDoc.data) {
-      if (queryDoc.data.url)
-        if (queryDoc.data.fileType === "application/pdf") {
-          setDocId("");
-          window.open(queryDoc.data.url, "_blank");
-        } else {
-          toast.error(t("type-invalid"));
-        }
-    }
-  }, [queryDoc.data, t]);
 
-  return documentId ? (
+  const handleViewDocument = () => {
+    if (documentUrl) {
+      window.open(documentUrl, "_blank");
+    }
+  };
+
+  return documentUrl ? (
     <>
       <div className="rounded-full bg-info px-4 py-1 text-center text-info-content">
         {t("document-ok")}
       </div>
 
-      <button onClick={() => setDocId(documentId ?? "")}>
+      <button onClick={handleViewDocument}>
         <ButtonIcon
           iconComponent={<i className="bx bx-show bx-sm" />}
           title={t("view-document")}

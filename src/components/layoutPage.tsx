@@ -21,7 +21,7 @@ function LayoutPage({
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">
       {variant === "main" ? <Title title={title} /> : null}
-      <header className="mb-4 flex flex-row items-center gap-4">
+      <header className="mb-4 flex flex-row flex-wrap items-center gap-4">
         {variant === "main" ? (
           <h1>
             {Boolean(preTitle) ? (
