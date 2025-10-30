@@ -1,5 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
+import { redirect, RedirectType } from "next/navigation";
+
 import CreateClub from "@/components/modals/manageClub";
 import LockedButton from "@/components/ui/lockedButton";
 import { LayoutPage } from "@/components/layoutPage";
@@ -39,6 +41,12 @@ export default async function ManageClubs({
     },
   });
   const href = await getHref();
+
+  if (!clubId && clubQuery?.length)
+    redirect(
+      createLink({ clubId: clubQuery[0]?.id }, href),
+      RedirectType.replace,
+    );
 
   const listClubs = clubQuery?.map((club) => ({
     id: club.id,

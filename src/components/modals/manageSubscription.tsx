@@ -10,6 +10,8 @@ import {
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
+import { useRouter } from "next/navigation";
+
 import {
   SubscriptionModeEnum,
   SubscriptionRestrictionEnum,
@@ -18,6 +20,7 @@ import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import Modal, { TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { useUser } from "@/lib/auth/client";
+import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -52,14 +55,16 @@ export const CreateSubscription = ({ clubId }: CreateSubscriptionProps) => {
     },
   });
   const utils = trpc.useUtils();
+  const router = useRouter();
   const t = useTranslations("club");
   const { data: user } = useUser();
   const userId = user?.id ?? "";
   const createSubscription = trpc.subscriptions.createSubscription.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       utils.clubs.getClubById.invalidate({ clubId, userId });
       utils.subscriptions.getSubscriptionsForClub.invalidate(clubId);
       toast.success(t("subscription.created"));
+      router.push(createLink({ subscriptionId: data[0].id }));
     },
     onError(error) {
       toast.error(error.message);

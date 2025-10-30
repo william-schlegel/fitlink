@@ -9,10 +9,13 @@ import {
 import { useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
+import { useRouter } from "next/navigation";
+
 import { pageSectionModelEnum, pageTargetEnum } from "@/db/schema/enums";
 import { getButtonSize, TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { ButtonSize } from "../ui/buttonIcon";
+import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -128,10 +131,12 @@ export const CreatePage = ({
   variant = "Primary",
 }: CreatePageProps) => {
   const utils = trpc.useUtils();
+  const router = useRouter();
   const createPage = trpc.pages.createPage.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       utils.pages.getPagesForClub.invalidate(clubId);
       toast.success(t("club.page-created"));
+      router.push(createLink({ clubId, pageId: data[0].id }));
     },
     onError(error) {
       toast.error(error.message);

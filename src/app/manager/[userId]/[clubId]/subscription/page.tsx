@@ -73,13 +73,13 @@ export default async function ManageSubscriptions({
           noItemsText={t("subscription.no-subscription")}
         />
 
-        {subscriptionId === "" ? null : (
+        {Boolean(subscriptionId) ? (
           <SubscriptionContent
             userId={userId}
             clubId={clubId}
             subscriptionId={subscriptionId}
           />
-        )}
+        ) : null}
       </LayoutPage.Main>
     </LayoutPage>
   );

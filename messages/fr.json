@@ -802,7 +802,8 @@
       "page-deletion-message": "Voulez-vous réellement supprimer cette page ?|Cette action est irréversible",
       "page-deletion-confirmation": "Confirmer la suppression",
       "page-name": "Nom de la page",
-      "page-target": "Cible de la page"
+      "page-target": "Cible de la page",
+      "no-page": "Aucune page"
     },
     "target": {
       "home": "Page d'accueil",

@@ -243,6 +243,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
               setValue("imageUrl", result[0].ufsUrl)
             }
             buttonText={t("hero.image")}
+            className="col-span-2"
           />
           {imagePreview ? (
             <div className="col-span-2 flex items-center justify-center gap-2">

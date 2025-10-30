@@ -119,9 +119,9 @@ export const pageRouter = createTRPCRouter({
   getPagesForClub: protectedProcedure
     .input(z.cuid2())
     .query(({ input }) => getPagesForClub(input)),
-  getPageForCoach: protectedProcedure
-    .input(z.cuid2())
-    .query(async ({ input }) => getPageForCoach(input)),
+  getPageForCoach: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input }) => getPageForCoach(input.userId)),
   getPageById: protectedProcedure.input(z.cuid2()).query(({ input }) =>
     db.query.page.findFirst({
       where: eq(page.id, input),

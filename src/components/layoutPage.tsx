@@ -54,7 +54,7 @@ function List<
     link?: string;
     onClick?: () => void;
     badgeColor?: string;
-    badgeText?: string;
+    badgeText?: string | React.ReactNode;
     badgeIcon?: string;
   },
 >({
@@ -93,11 +93,15 @@ function List<
                   item.name
                 )}
                 <div className="flex items-center gap-2">
-                  {item.badgeText && (
-                    <span className={`${item.badgeColor} badge`}>
-                      {item.badgeText}
-                    </span>
-                  )}
+                  {item.badgeText &&
+                    (typeof item.badgeText === "string" ? (
+                      <span className={`${item.badgeColor} badge`}>
+                        {item.badgeText}
+                      </span>
+                    ) : (
+                      <>{item.badgeText}</>
+                    ))}
+
                   {item.badgeIcon && <i className={item.badgeIcon} />}
                 </div>
               </Link>

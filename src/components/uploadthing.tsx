@@ -5,6 +5,8 @@ import {
 
 import { ComponentProps } from "react";
 
+import { twMerge } from "tailwind-merge";
+
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
 
 const MyUploadButton = generateUploadButton<OurFileRouter>();
@@ -16,7 +18,10 @@ export const UploadButton = (
   return (
     <MyUploadButton
       {...props}
-      className="ut-button:btn-primary ut-button:btn"
+      className={twMerge(
+        "ut-button:btn-primary ut-button:btn",
+        props.className,
+      )}
       content={{
         button() {
           return props.buttonText ?? "Téléchargement...";

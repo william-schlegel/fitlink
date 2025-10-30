@@ -86,6 +86,7 @@ export const clubRouter = createTRPCRouter({
             title: s.title,
           })),
         })),
+        managerId: myClub.managerId,
         logoUrl: myClub.logoUrl,
       };
     }),

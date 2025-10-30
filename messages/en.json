@@ -794,7 +794,8 @@
       "page-deletion-message": "Do you really want to delete this page?|This action is irreversible",
       "page-deletion-confirmation": "Confirm deletion",
       "page-name": "Page name",
-      "page-target": "Page target"
+      "page-target": "Page target",
+      "no-page": "No page"
     },
     "target": {
       "home": "Homepage",
