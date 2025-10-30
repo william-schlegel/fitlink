@@ -42,7 +42,7 @@ const PageSectionObject = z.object({
 
 const PageSectionElementObject = z.object({
   id: z.cuid2(),
-  images: z.array(z.cuid2()).optional().default([]),
+  images: z.array(z.string()).optional().default([]),
   title: z.string().optional(),
   subTitle: z.string().optional(),
   elementType: z.enum(pageSectionElementTypeEnum.enumValues),
@@ -258,9 +258,6 @@ export const pageRouter = createTRPCRouter({
       db.insert(pageSectionElement).values({
         content: input.content,
         elementType: input.elementType,
-        // images: {
-        //   connect: input.images.map((imageId) => ({ id: imageId })),
-        // },
         link: input.link,
         pageId: input.pageId,
         pageSection: input.pageSection,

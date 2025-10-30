@@ -149,12 +149,6 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
     }
   };
 
-  useEffect(() => {
-    if (fields.imageUrl) {
-      setImagePreview(fields.imageUrl);
-    }
-  }, [fields.imageUrl, t, form]);
-
   const handleDeleteImage = () => {
     setImagePreview("");
     form.setValue("imageUrl", undefined);
@@ -174,9 +168,10 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
             <div className="flex-1">
               <UploadButton
                 endpoint="imageAttachment"
-                onClientUploadComplete={(result) =>
-                  form.setValue("imageUrl", result[0].ufsUrl)
-                }
+                onClientUploadComplete={(result) => {
+                  form.setValue("imageUrl", result[0].ufsUrl);
+                  setImagePreview(result[0].ufsUrl);
+                }}
                 buttonText={t("hero.image")}
               />
             </div>
@@ -200,7 +195,9 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
           </div>
           <label>{t("coach.name")}</label>
           <div className="flex items-center gap-2">
-            <span>{queryCoach.data?.coachData?.publicName ?? ""}</span>
+            <span>
+              {queryCoach.data?.coachData?.publicName ?? t("undefined")}
+            </span>
             <span className="tooltip" data-tip={t("coach.your-public-name")}>
               <i className="bx bx-info-circle bx-xs" />
             </span>

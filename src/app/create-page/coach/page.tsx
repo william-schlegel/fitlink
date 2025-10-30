@@ -13,9 +13,10 @@ export default async function CoachPage({
 }: {
   params: Promise<{ userId: string }>;
 }) {
-  const { userId } = await params;
   const user = await getActualUser();
   if (!user) redirect("/", RedirectType.replace);
+  const paramsValue = await params;
+  const userId = paramsValue.userId ?? user.id;
   if (
     user.internalRole !== "COACH" &&
     user.internalRole !== "ADMIN" &&
@@ -23,7 +24,7 @@ export default async function CoachPage({
   )
     redirect("/", RedirectType.replace);
   const t = await getTranslations("pages");
-  const queryPage = await getPageForCoach(userId ?? user.id);
+  const queryPage = await getPageForCoach(userId);
 
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">

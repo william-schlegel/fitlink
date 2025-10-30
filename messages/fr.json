@@ -261,7 +261,6 @@
     "name-mandatory": "Le nom est obligatoire",
     "address-mandatory": "L'adresse est obligatoire",
     "image-size-error": "L'image sélectionnée est trop grande (maximum autorisé: {size})",
-
     "club": {
       "manage-my-club": "{count, plural, =0 {Je n'ai encore aucun club} =1 {Gérer mon club} other {Gérer mes clubs}}",
       "no-club": "Aucun club trouvé",
@@ -724,7 +723,6 @@
     "search-radius": "Rayon de recherche",
     "search-club": "Rechercher les clubs",
     "error-fetching-clubs": "Erreur lors de la récupération des clubs",
-
     "search-coach": "Rechercher les coachs",
     "club": "Club",
     "site": "Site",
@@ -965,7 +963,8 @@
     "style-saved": "Style de la page enregistré",
     "page-preview": "Prévisualiser la page dans une nouvelle fenêtre",
     "save-style": "Enregistrer le style",
-    "publish-page": "Publication de la page"
+    "publish-page": "Publication de la page",
+    "undefined": "Non défini"
   },
   "planning": {
     "planning-management": "Gestion des plannings",
