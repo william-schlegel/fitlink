@@ -896,7 +896,8 @@
       "deletion-message": "This activity group deletion is irreversible|Do you confirm?",
       "deletion-confirm": "Delete",
       "more-details": "Learn more",
-      "delete-image": "Delete image"
+      "delete-image": "Delete image",
+      "deleted": "The activity group has been deleted"
     },
     "activity": {
       "image": "Illustration image",

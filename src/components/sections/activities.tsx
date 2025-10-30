@@ -7,12 +7,10 @@ import Link from "next/link";
 
 import { PageSectionElementTypeEnum } from "@/db/schema/enums";
 import ThemeSelector, { TThemes } from "../themeSelector";
-import { useWriteFile } from "@/lib/useManageFile";
 import Modal, { getButtonSize } from "../ui/modal";
-import { formatSize } from "@/lib/formatNumber";
 import Confirmation from "../ui/confirmation";
+import { UploadButton } from "../uploadthing";
 import { TextError } from "../ui/simpleform";
-import { useUser } from "@/lib/auth/client";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -30,13 +28,11 @@ type ActivityGroupForm = {
 };
 
 type ActivityForm = {
-  images?: FileList;
+  imageUrls?: string[];
   title: string;
   subtitle: string;
   description: string;
 };
-
-const MAX_SIZE = 1024 * 1024;
 
 export const ActivityGroupCreation = ({
   clubId,
@@ -238,7 +234,6 @@ function AddActivityGroup({ pageId, sectionId }: ActivityProps) {
   const utils = trpc.useUtils();
   const t = useTranslations("pages");
   const [close, setClose] = useState(false);
-  const user = useUser();
 
   const createAG = trpc.pages.createPageSectionElement.useMutation({
     onSuccess: () => {
@@ -252,11 +247,8 @@ function AddActivityGroup({ pageId, sectionId }: ActivityProps) {
       toast.error(error.message);
     },
   });
-  const saveImage = useWriteFile(user?.data?.id ?? "", "IMAGE", MAX_SIZE);
 
   async function handleSubmit(data: ActivityForm) {
-    let documentId: string | undefined = undefined;
-    if (data.images?.[0]) documentId = await saveImage(data.images[0]);
     createAG.mutate({
       pageId,
       sectionId,
@@ -264,7 +256,7 @@ function AddActivityGroup({ pageId, sectionId }: ActivityProps) {
       title: data.title,
       subTitle: data.subtitle,
       content: data.description,
-      images: documentId ? [documentId] : undefined,
+      images: data.imageUrls,
     });
     setClose(true);
   }
@@ -297,7 +289,6 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
   const utils = trpc.useUtils();
   const t = useTranslations("pages");
   const [close, setClose] = useState(false);
-  const user = useUser();
   const [initialData, setInitialData] = useState<ActivityForm | undefined>();
   const queryActivity = trpc.pages.getPageSectionElementById.useQuery(
     activityId,
@@ -313,7 +304,7 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
       title: queryActivity.data?.title ?? "",
       subtitle: queryActivity.data?.subTitle ?? "",
       description: queryActivity.data?.content ?? "",
-      images: undefined,
+      imageUrls: queryActivity.data?.images ?? [],
     });
   }, [queryActivity.data]);
 
@@ -329,18 +320,15 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
       toast.error(error.message);
     },
   });
-  const saveImage = useWriteFile(user?.data?.id ?? "", "IMAGE", MAX_SIZE);
 
   async function handleSubmit(data: ActivityForm) {
-    let documentId: string | undefined = undefined;
-    if (data.images?.[0]) documentId = await saveImage(data.images[0]);
     updateAG.mutate({
       id: activityId,
       pageId,
       title: data.title,
       subTitle: data.subtitle,
       content: data.description,
-      images: documentId ? [documentId] : undefined,
+      images: data.imageUrls,
     });
     setClose(true);
   }
@@ -362,7 +350,6 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
         onSubmit={(data) => handleSubmit(data)}
         onCancel={() => setClose(true)}
         initialValues={initialData}
-        initialImageUrl={queryActivity.data?.images?.[0]}
       />
     </Modal>
   );
@@ -402,7 +389,6 @@ function DeleteActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
 type ActivityGroupFormProps = {
   onSubmit: (data: ActivityForm) => void;
   initialValues?: ActivityForm;
-  initialImageUrl?: string;
   onCancel: () => void;
   update?: boolean;
 };
@@ -411,15 +397,15 @@ const defaultValues: ActivityForm = {
   title: "",
   subtitle: "",
   description: "",
-  images: undefined,
+  imageUrls: [],
 };
 
 function ActivityGroupForm({
   onSubmit,
   initialValues,
   onCancel,
-  initialImageUrl,
 }: ActivityGroupFormProps) {
+  const tCommon = useTranslations("common");
   const t = useTranslations("pages");
   const {
     handleSubmit,
@@ -431,35 +417,14 @@ function ActivityGroupForm({
   } = useForm<ActivityForm>({
     defaultValues,
   });
-  const fields = useWatch({ control, defaultValue: defaultValues });
-  const [imagePreview, setImagePreview] = useState(initialImageUrl);
+  const imageUrls = useWatch({ control, name: "imageUrls" });
 
   useEffect(() => {
     if (initialValues) reset(initialValues);
   }, [initialValues, reset]);
 
-  useEffect(() => {
-    if (initialImageUrl) setImagePreview(initialImageUrl);
-  }, [initialImageUrl]);
-
-  useEffect(() => {
-    if (fields.images?.length) {
-      const image = fields.images[0];
-      if (!image) return;
-      if (image.size > MAX_SIZE) {
-        toast.error(t("image-size-error", { size: formatSize(MAX_SIZE) }));
-        setValue("images", undefined);
-        return;
-      }
-
-      const src = URL.createObjectURL(image);
-      setImagePreview(src);
-    }
-  }, [fields.images, t, setValue]);
-
   const handleDeleteImage = () => {
-    setImagePreview("");
-    setValue("images", undefined);
+    setValue("imageUrls", []);
   };
 
   const onSuccess: SubmitHandler<ActivityForm> = (data) => {
@@ -470,23 +435,23 @@ function ActivityGroupForm({
   return (
     <form onSubmit={handleSubmit(onSuccess)}>
       <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">
-        <label className="self-start">{t("activity-group.image")}</label>
-        <div>
-          <input
-            type="file"
-            className="file-input-bordered file-input-primary file-input w-full"
-            {...register("images")}
-            accept="image/*"
-          />
-          <p className="col-span-2 text-sm text-gray-500">
-            {t("image-size", { size: formatSize(MAX_SIZE) })}
-          </p>
-        </div>
-        {imagePreview ? (
+        <UploadButton
+          endpoint="imageAttachment"
+          onClientUploadComplete={(result) =>
+            setValue(
+              "imageUrls",
+              result.map((r) => r.ufsUrl),
+            )
+          }
+          buttonText={t("activity-group.image")}
+          className="col-span-2"
+        />
+
+        {imageUrls && imageUrls.length > 0 ? (
           <div className="relative col-span-full flex gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={imagePreview}
+              src={imageUrls[0]}
               alt=""
               className="max-h-[10rem] w-full object-contain"
             />
@@ -537,10 +502,10 @@ function ActivityGroupForm({
             onCancel();
           }}
         >
-          {t("common:cancel")}
+          {tCommon("cancel")}
         </button>
         <button className="btn btn-primary" type="submit">
-          {t("common:save")}
+          {tCommon("save")}
         </button>
       </div>
     </form>

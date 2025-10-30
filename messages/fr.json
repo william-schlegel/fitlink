@@ -904,7 +904,8 @@
       "deletion-message": "La suppression de ce groupe d'activité est irréversible|Confirmez-vous ?",
       "deletion-confirm": "Supprimer",
       "more-details": "En savoir plus",
-      "delete-image": "Supprimer l'image"
+      "delete-image": "Supprimer l'image",
+      "deleted": "Le groupe d'activité a été supprimé"
     },
     "activity": {
       "image": "Image d'illustration",

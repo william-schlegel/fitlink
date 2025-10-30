@@ -6,12 +6,10 @@ import { useEffect, useState } from "react";
 
 import { PageSectionElementTypeEnum } from "@/db/schema/enums";
 import ThemeSelector, { TThemes } from "../themeSelector";
-import { useWriteFile } from "@/lib/useManageFile";
 import Modal, { getButtonSize } from "../ui/modal";
-import { formatSize } from "@/lib/formatNumber";
 import Confirmation from "../ui/confirmation";
+import { UploadButton } from "../uploadthing";
 import { TextError } from "../ui/simpleform";
-import { useUser } from "@/lib/auth/client";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -24,14 +22,12 @@ type ActivityCreationProps = {
 };
 
 type ActivityForm = {
-  images?: FileList;
+  imageUrls?: string[];
   title: string;
   subtitle: string;
   description: string;
   activityGroups: string[];
 };
-
-const MAX_SIZE = 1024 * 1024;
 
 export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
   const t = useTranslations("pages");
@@ -144,7 +140,6 @@ function AddActivity({ pageId, sectionId }: ActivityProps) {
   const utils = trpc.useUtils();
   const t = useTranslations("pages");
   const [close, setClose] = useState(false);
-  const user = useUser();
 
   const createActivity = trpc.pages.createPageSectionElement.useMutation({
     onSuccess: () => {
@@ -158,11 +153,8 @@ function AddActivity({ pageId, sectionId }: ActivityProps) {
       toast.error(error.message);
     },
   });
-  const saveImage = useWriteFile(user?.data?.id ?? "", "IMAGE", MAX_SIZE);
 
   async function handleSubmit(data: ActivityForm) {
-    let documentId: string | undefined = undefined;
-    if (data.images?.[0]) documentId = await saveImage(data.images[0]);
     createActivity.mutate({
       pageId,
       sectionId,
@@ -170,7 +162,7 @@ function AddActivity({ pageId, sectionId }: ActivityProps) {
       title: data.title,
       subTitle: data.subtitle,
       content: data.description,
-      images: documentId ? [documentId] : undefined,
+      images: data.imageUrls,
       optionValue: JSON.stringify(data.activityGroups),
     });
     setClose(true);
@@ -205,7 +197,6 @@ function UpdateActivity({ pageId, activityId }: UpdateActivityProps) {
   const utils = trpc.useUtils();
   const t = useTranslations("pages");
   const [close, setClose] = useState(false);
-  const user = useUser();
   const [initialData, setInitialData] = useState<ActivityForm | undefined>();
   const queryActivity = trpc.pages.getPageSectionElementById.useQuery(
     activityId,
@@ -221,7 +212,7 @@ function UpdateActivity({ pageId, activityId }: UpdateActivityProps) {
       title: queryActivity.data?.title ?? "",
       subtitle: queryActivity.data?.subTitle ?? "",
       description: queryActivity.data?.content ?? "",
-      images: undefined,
+      imageUrls: queryActivity.data?.images ?? [],
       activityGroups: JSON.parse(queryActivity.data?.optionValue ?? "[]"),
     });
   }, [queryActivity.data]);
@@ -238,18 +229,15 @@ function UpdateActivity({ pageId, activityId }: UpdateActivityProps) {
       toast.error(error.message);
     },
   });
-  const saveImage = useWriteFile(user?.data?.id ?? "", "IMAGE", MAX_SIZE);
 
   async function handleSubmit(data: ActivityForm) {
-    let documentId: string | undefined = undefined;
-    if (data.images?.[0]) documentId = await saveImage(data.images[0]);
     updateAG.mutate({
       id: activityId,
       pageId,
       title: data.title,
       subTitle: data.subtitle,
       content: data.description,
-      images: documentId ? [documentId] : undefined,
+      images: data.imageUrls,
       optionValue: JSON.stringify(data.activityGroups),
     });
     setClose(true);
@@ -324,7 +312,7 @@ const defaultValues: ActivityForm = {
   title: "",
   subtitle: "",
   description: "",
-  images: undefined,
+  imageUrls: [],
   activityGroups: [],
 };
 
@@ -332,7 +320,6 @@ function ActivityForm({
   onSubmit,
   initialValues,
   onCancel,
-  initialImageUrl,
   pageId,
 }: ActivityFormProps) {
   const tCommon = useTranslations("common");
@@ -347,8 +334,7 @@ function ActivityForm({
   } = useForm<ActivityForm>({
     defaultValues,
   });
-  const fields = useWatch({ control, defaultValue: defaultValues });
-  const [imagePreview, setImagePreview] = useState(initialImageUrl);
+  const imageUrls = useWatch({ control, name: "imageUrls" });
   const groups = trpc.pages.getPageSectionElements.useQuery(
     {
       pageId,
@@ -379,28 +365,8 @@ function ActivityForm({
     if (initialValues) reset(initialValues);
   }, [initialValues, reset]);
 
-  useEffect(() => {
-    if (initialImageUrl) setImagePreview(initialImageUrl);
-  }, [initialImageUrl]);
-
-  useEffect(() => {
-    if (fields.images?.length) {
-      const image = fields.images[0];
-      if (!image) return;
-      if (image.size > MAX_SIZE) {
-        toast.error(t("image-size-error", { size: formatSize(MAX_SIZE) }));
-        setValue("images", undefined);
-        return;
-      }
-
-      const src = URL.createObjectURL(image);
-      setImagePreview(src);
-    }
-  }, [fields.images, t, setValue]);
-
   const handleDeleteImage = () => {
-    setImagePreview("");
-    setValue("images", undefined);
+    setValue("imageUrls", []);
   };
 
   const onSuccess: SubmitHandler<ActivityForm> = (data) => {
@@ -417,23 +383,23 @@ function ActivityForm({
       className="grid grid-cols-[3fr_2fr] gap-2"
     >
       <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">
-        <label className="self-start">{t("activity.image")}</label>
-        <div>
-          <input
-            type="file"
-            className="file-input-bordered file-input-primary file-input w-full"
-            {...register("images")}
-            accept="image/*"
-          />
-          <p className="col-span-2 text-sm text-gray-500">
-            {t("image-size", { size: formatSize(MAX_SIZE) })}
-          </p>
-        </div>
-        {imagePreview ? (
+        <UploadButton
+          endpoint="imageAttachment"
+          onClientUploadComplete={(result) =>
+            setValue(
+              "imageUrls",
+              result.map((r) => r.ufsUrl),
+            )
+          }
+          buttonText={t("activity.image")}
+          className="col-span-2"
+        />
+
+        {imageUrls && imageUrls.length > 0 ? (
           <div className="relative col-span-full flex gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={imagePreview}
+              src={imageUrls[0]}
               alt=""
               className="max-h-[10rem] w-full object-contain"
             />

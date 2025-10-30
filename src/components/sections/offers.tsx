@@ -7,12 +7,12 @@ import Link from "next/link";
 
 import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
 import { PageSectionElementTypeEnum } from "@/db/schema/enums";
-import { formatMoney, formatSize } from "@/lib/formatNumber";
 import ThemeSelector, { TThemes } from "../themeSelector";
-import { useWriteFile } from "@/lib/useManageFile";
 import Modal, { getButtonSize } from "../ui/modal";
 import { List } from "@/app/member/[userId]/list";
+import { formatMoney } from "@/lib/formatNumber";
 import Confirmation from "../ui/confirmation";
+import { UploadButton } from "../uploadthing";
 import { TextError } from "../ui/simpleform";
 import { useUser } from "@/lib/auth/client";
 import ButtonIcon from "../ui/buttonIcon";
@@ -27,14 +27,12 @@ type OfferCreationProps = {
 };
 
 type OfferFormValues = {
-  images?: FileList;
+  imageUrls?: string[];
   title: string;
   subtitle: string;
   description: string;
   offerId: string;
 };
-
-const MAX_SIZE = 1024 * 1024;
 
 export const OfferCreation = ({ clubId, pageId }: OfferCreationProps) => {
   const t = useTranslations("pages");
@@ -140,7 +138,6 @@ function AddOffer({ clubId, pageId, sectionId }: OfferProps) {
   const utils = trpc.useUtils();
   const t = useTranslations("pages");
   const [close, setClose] = useState(false);
-  const user = useUser();
 
   const createOffer = trpc.pages.createPageSectionElement.useMutation({
     onSuccess: () => {
@@ -154,11 +151,8 @@ function AddOffer({ clubId, pageId, sectionId }: OfferProps) {
       toast.error(error.message);
     },
   });
-  const saveImage = useWriteFile(user?.data?.id ?? "", "IMAGE", MAX_SIZE);
 
   async function handleSubmit(data: OfferFormValues) {
-    let documentId: string | undefined = undefined;
-    if (data.images?.[0]) documentId = await saveImage(data.images[0]);
     createOffer.mutate({
       pageId,
       sectionId,
@@ -166,7 +160,7 @@ function AddOffer({ clubId, pageId, sectionId }: OfferProps) {
       title: data.title,
       subTitle: data.subtitle,
       content: data.description,
-      images: documentId ? [documentId] : undefined,
+      images: data.imageUrls,
       optionValue: data.offerId,
     });
     setClose(true);
@@ -202,7 +196,6 @@ function UpdateOffer({ clubId, pageId, offerId }: UpdateOfferProps) {
   const utils = trpc.useUtils();
   const t = useTranslations("pages");
   const [close, setClose] = useState(false);
-  const user = useUser();
   const [initialData, setInitialData] = useState<OfferFormValues | undefined>();
   const queryOffer = trpc.pages.getPageSectionElementById.useQuery(offerId, {
     enabled: isCUID(offerId),
@@ -215,7 +208,7 @@ function UpdateOffer({ clubId, pageId, offerId }: UpdateOfferProps) {
         title: queryOffer.data?.title ?? "",
         subtitle: queryOffer.data?.subTitle ?? "",
         description: queryOffer.data?.content ?? "",
-        images: undefined,
+        imageUrls: queryOffer.data?.images ?? [],
         offerId: queryOffer.data?.optionValue ?? "",
       });
     }
@@ -233,18 +226,15 @@ function UpdateOffer({ clubId, pageId, offerId }: UpdateOfferProps) {
       toast.error(error.message);
     },
   });
-  const saveImage = useWriteFile(user?.data?.id ?? "", "IMAGE", MAX_SIZE);
 
   async function handleSubmit(data: OfferFormValues) {
-    let documentId: string | undefined = undefined;
-    if (data.images?.[0]) documentId = await saveImage(data.images[0]);
     updateAG.mutate({
       id: offerId,
       pageId,
       title: data.title,
       subTitle: data.subtitle,
       content: data.description,
-      images: documentId ? [documentId] : undefined,
+      images: data.imageUrls,
       optionValue: data.offerId,
     });
     setClose(true);
@@ -320,15 +310,14 @@ const defaultValues: OfferFormValues = {
   title: "",
   subtitle: "",
   description: "",
-  images: undefined,
   offerId: "",
+  imageUrls: [],
 };
 
 function OfferForm({
   onSubmit,
   initialValues,
   onCancel,
-  initialImageUrl,
   clubId,
 }: OfferFormProps) {
   const t = useTranslations();
@@ -337,15 +326,16 @@ function OfferForm({
     handleSubmit,
     register,
     formState: { errors },
-    control,
     reset,
+    control,
     getValues,
     setValue,
   } = useForm<OfferFormValues>({
     defaultValues,
   });
-  const fields = useWatch({ control, defaultValue: defaultValues });
-  const [imagePreview, setImagePreview] = useState(initialImageUrl);
+
+  const imageUrls = useWatch({ control, name: "imageUrls" });
+
   const offers = trpc.subscriptions.getSubscriptionsForClub.useQuery(clubId, {
     enabled: isCUID(clubId),
     refetchOnWindowFocus: false,
@@ -355,30 +345,8 @@ function OfferForm({
     if (initialValues) reset(initialValues);
   }, [initialValues, reset]);
 
-  useEffect(() => {
-    if (initialImageUrl) setImagePreview(initialImageUrl);
-  }, [initialImageUrl]);
-
-  useEffect(() => {
-    if (fields.images?.length) {
-      const image = fields.images[0];
-      if (!image) return;
-      if (image.size > MAX_SIZE) {
-        toast.error(
-          t("pages.image-size-error", { size: formatSize(MAX_SIZE) }),
-        );
-        setValue("images", undefined);
-        return;
-      }
-
-      const src = URL.createObjectURL(image);
-      setImagePreview(src);
-    }
-  }, [fields.images, t, setValue]);
-
   const handleDeleteImage = () => {
-    setImagePreview("");
-    setValue("images", undefined);
+    setValue("imageUrls", []);
   };
 
   const onSuccess: SubmitHandler<OfferFormValues> = (data) => {
@@ -389,23 +357,23 @@ function OfferForm({
   return (
     <form onSubmit={handleSubmit(onSuccess)}>
       <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1 space-y-2">
-        <label className="self-start">{t("offer.image")}</label>
-        <div>
-          <input
-            type="file"
-            className="file-input-bordered file-input-primary file-input w-full"
-            {...register("images")}
-            accept="image/*"
-          />
-          <p className="col-span-2 text-sm text-gray-500">
-            {t("image-size", { size: formatSize(MAX_SIZE) })}
-          </p>
-        </div>
-        {imagePreview ? (
+        <UploadButton
+          endpoint="imageAttachment"
+          onClientUploadComplete={(result) =>
+            setValue(
+              "imageUrls",
+              result.map((r) => r.ufsUrl),
+            )
+          }
+          buttonText={t("offer.image")}
+          className="col-span-2"
+        />
+
+        {imageUrls && imageUrls.length > 0 ? (
           <div className="relative col-span-full flex gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={imagePreview}
+              src={imageUrls[0]}
               alt=""
               className="max-h-[10rem] w-full object-contain"
             />
