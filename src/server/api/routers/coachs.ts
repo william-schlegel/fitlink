@@ -31,7 +31,6 @@ import { isAdmin } from "@/server/lib/userTools";
 import { userCoach } from "@/db/schema/user";
 import { user } from "@/db/schema/auth";
 import { isCUID } from "@/lib/utils";
-import { getDocUrl } from "./files";
 import { db } from "@/db";
 
 const CertificationData = z.object({
@@ -110,9 +109,6 @@ export const coachRouter = createTRPCRouter({
         sections: {
           with: {
             elements: {
-              with: {
-                images: true,
-              },
               where: eq(pageSectionElement.elementType, "HERO_CONTENT"),
             },
           },
@@ -123,11 +119,9 @@ export const coachRouter = createTRPCRouter({
     });
 
     const imageData = pages[0];
-    const imgData = imageData?.sections?.[0]?.elements?.[0]?.images?.[0];
-    let imageUrl = coach.image;
-    if (imgData) {
-      imageUrl = await getDocUrl(input, imgData.id);
-    }
+    const imgData = imageData?.sections?.[0]?.elements?.[0]?.imageUrls?.[0];
+    const imageUrl = imgData ?? coach.image ?? "/images/dummy.jpg";
+
     const certificationModules = coach.coachData?.certifications?.map(
       (cert) => ({
         id: cert.id,
@@ -817,11 +811,7 @@ export const coachRouter = createTRPCRouter({
                 with: {
                   sections: {
                     with: {
-                      elements: {
-                        with: {
-                          images: true,
-                        },
-                      },
+                      elements: true,
                     },
                   },
                 },
@@ -835,12 +825,10 @@ export const coachRouter = createTRPCRouter({
         },
       });
       const pageImage =
-        offer?.coach.page?.sections?.[0]?.elements?.[0]?.images?.[0]?.id;
-      let imageUrl = offer?.coach.user.image ?? "/images/dummy.jpg";
-      if (pageImage) {
-        const img = await getDocUrl(offer?.coach.user.id, pageImage);
-        if (img) imageUrl = img;
-      }
+        offer?.coach.page?.sections?.[0]?.elements?.[0]?.imageUrls?.[0];
+      const imageUrl =
+        pageImage ?? offer?.coach.user.image ?? "/images/dummy.jpg";
+
       return { ...offer, imageUrl };
     }),
   getCoachOffers: protectedProcedure.input(z.string()).query(({ input }) =>

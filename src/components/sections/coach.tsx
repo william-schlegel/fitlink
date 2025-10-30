@@ -39,7 +39,6 @@ type CoachCreationForm = {
 export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
   const t = useTranslations("pages");
   const form = useForm<CoachCreationForm>();
-  const [imagePreview, setImagePreview] = useState("");
   const queryCoach = trpc.users.getUserById.useQuery(
     { id: userId, options: { withMemberData: true } },
     {
@@ -78,7 +77,6 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
       (e) => e.elementType === "OPTION",
     );
 
-    if (hc?.images?.[0]) setImagePreview(hc.images[0]);
     const resetData: CoachCreationForm = {
       description: hc?.content ?? "",
       subtitle: hc?.subTitle ?? "",
@@ -87,6 +85,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
       withCertifications:
         options.find((o) => o.title === "certifications")?.optionValue ===
         "yes",
+      imageUrl: hc?.images?.[0] ?? undefined,
     };
     form.reset(resetData);
   }, [querySection.data, form]);
@@ -150,7 +149,6 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
   };
 
   const handleDeleteImage = () => {
-    setImagePreview("");
     form.setValue("imageUrl", undefined);
   };
 
@@ -170,15 +168,14 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
                 endpoint="imageAttachment"
                 onClientUploadComplete={(result) => {
                   form.setValue("imageUrl", result[0].ufsUrl);
-                  setImagePreview(result[0].ufsUrl);
                 }}
                 buttonText={t("hero.image")}
               />
             </div>
-            {imagePreview ? (
+            {fields.imageUrl ? (
               <div className="relative w-40 max-w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imagePreview} alt="" />
+                <img src={fields.imageUrl} alt="" />
                 <button
                   onClick={handleDeleteImage}
                   className="absolute right-2 bottom-2 z-10"
@@ -266,7 +263,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
           </h3>
           <div data-theme={previewTheme} className="pt-4">
             <PhotoSection
-              imageSrc={imagePreview}
+              imageSrc={fields.imageUrl}
               userName={queryCoach.data?.coachData?.publicName}
               info={fields.subtitle}
               description={fields.description}

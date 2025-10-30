@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
+import { useRouter } from "next/navigation";
+
 import { trpc } from "@/lib/trpc/client";
 import { toast } from "@/lib/toast";
 
@@ -14,11 +16,13 @@ export default function PublishPageButton({
   checked: boolean;
   pageId: string;
 }) {
+  const router = useRouter();
   const utils = trpc.useUtils();
   const t = useTranslations("pages");
   const publishPage = trpc.pages.updatePagePublication.useMutation({
     onSuccess(data) {
       utils.pages.getPageForCoach.invalidate(userId);
+      router.refresh();
       toast.success(
         t(data[0].published ? "page-published" : "page-unpublished"),
       );

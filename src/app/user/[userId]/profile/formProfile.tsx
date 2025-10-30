@@ -11,6 +11,8 @@ import { useTranslations } from "next-intl";
 
 import { inferProcedureOutput } from "@trpc/server";
 
+import { useRouter } from "next/navigation";
+
 import { UploadButton } from "@/components/uploadthing";
 import ButtonIcon from "@/components/ui/buttonIcon";
 import { AppRouter } from "@/server/api/root";
@@ -41,12 +43,13 @@ export default function FormProfile({
     },
   });
   const t = useTranslations("auth");
-
+  const router = useRouter();
   const utils = trpc.useUtils();
   const updateUser = trpc.users.updateUser.useMutation({
     onSuccess() {
       utils.users.getUserById.invalidate({ id: userData.id });
       toast.success(t("user-updated"));
+      router.refresh();
     },
     onError(error) {
       toast.error(error.message);

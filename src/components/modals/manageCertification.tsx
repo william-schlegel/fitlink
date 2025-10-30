@@ -91,8 +91,6 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
     selectedActivities.set(a.id, a);
   }
 
-  console.log("selectedActivities", Array.from(selectedActivities.values()));
-
   const onSubmit = async () => {
     addCertification.mutate({
       userId,

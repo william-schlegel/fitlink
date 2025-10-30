@@ -54,14 +54,6 @@ const PageSectionElementObject = z.object({
   optionValue: z.string().optional(),
 });
 
-// type GetCoachDataForPageReturn = {
-//   certifications: { id: string; name: string }[];
-//   activities: { id: string; name: string }[];
-//   offers: (CoachingPrice & {
-//     coachingLevel: CoachingLevel[];
-//   })[];
-// };
-
 export function getPagesForClub(clubId: string) {
   if (!isCUID(clubId)) return [];
   return db.query.page.findMany({
@@ -265,6 +257,7 @@ export const pageRouter = createTRPCRouter({
         subTitle: input.subTitle,
         sectionId: input.sectionId,
         optionValue: input.optionValue,
+        imageUrls: input.images,
       }),
     ),
   updatePageSectionElement: protectedProcedure
@@ -276,9 +269,7 @@ export const pageRouter = createTRPCRouter({
         .update(pageSectionElement)
         .set({
           content: input.content,
-          // images: {
-          //   connect: input.images.map((imageId) => ({ id: imageId })),
-          // },
+          imageUrls: input.images,
           link: input.link,
           pageId: input.pageId,
           pageSection: input.pageSection,

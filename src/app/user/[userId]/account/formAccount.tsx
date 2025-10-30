@@ -143,9 +143,6 @@ export default function FormAccount({
     },
   );
 
-  console.log("userData", userData);
-  console.log("fields", fields);
-
   return (
     <form
       className={`flex flex-col gap-4 xl:grid xl:grid-cols-2 xl:items-start`}
