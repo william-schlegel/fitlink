@@ -3,7 +3,6 @@ import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 
 import { channelTypeEnum, messageTypeEnum, reactionTypeEnum } from "./enums";
-import { userDocument } from "./user";
 import { user } from "./auth";
 
 // Enums local to chat schema
@@ -15,7 +14,7 @@ export const channel = pgTable(
     id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     type: channelTypeEnum("type").default("PRIVATE").notNull(),
-    imageDocumentId: text("image_document_id"),
+    imageUrls: text("image_urls").array().default([]),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     createdByUserId: text("created_by_user_id"),
   },
@@ -151,10 +150,6 @@ export const messageRelations = relations(message, ({ one, many }) => ({
   author: one(user, {
     fields: [message.userId],
     references: [user.id],
-  }),
-  image: one(userDocument, {
-    fields: [message.imageDocumentId],
-    references: [userDocument.id],
   }),
   parent: one(message, {
     fields: [message.replyToMessageId],

@@ -6,12 +6,10 @@ import { useEffect, useState } from "react";
 
 import { PageSectionElementTypeEnum } from "@/db/schema/enums";
 import ThemeSelector, { TThemes } from "../themeSelector";
-import { useWriteFile } from "@/lib/useManageFile";
 import Modal, { getButtonSize } from "../ui/modal";
-import { formatSize } from "@/lib/formatNumber";
 import Confirmation from "../ui/confirmation";
+import { UploadButton } from "../uploadthing";
 import { TextError } from "../ui/simpleform";
-import { useUser } from "@/lib/auth/client";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -24,14 +22,12 @@ type PlanningCreationProps = {
 };
 
 type PlanningFormValues = {
-  images?: FileList;
+  imageUrls?: string[];
   title: string;
   subtitle: string;
   description: string;
   sites: string[];
 };
-
-const MAX_SIZE = 1024 * 1024;
 
 export const PlanningCreation = ({ clubId, pageId }: PlanningCreationProps) => {
   const t = useTranslations("pages");
@@ -129,7 +125,6 @@ function AddPlanning({ clubId, pageId, sectionId }: PlanningProps) {
   const utils = trpc.useUtils();
   const t = useTranslations("pages");
   const [close, setClose] = useState(false);
-  const user = useUser();
 
   const createPlanning = trpc.pages.createPageSectionElement.useMutation({
     onSuccess: () => {
@@ -143,11 +138,8 @@ function AddPlanning({ clubId, pageId, sectionId }: PlanningProps) {
       toast.error(error.message);
     },
   });
-  const saveImage = useWriteFile(user?.data?.id ?? "", "IMAGE", MAX_SIZE);
 
   async function handleSubmit(data: PlanningFormValues) {
-    let documentId: string | undefined = undefined;
-    if (data.images?.[0]) documentId = await saveImage(data.images[0]);
     createPlanning.mutate({
       pageId,
       sectionId,
@@ -155,7 +147,7 @@ function AddPlanning({ clubId, pageId, sectionId }: PlanningProps) {
       title: data.title,
       subTitle: data.subtitle,
       content: data.description,
-      images: documentId ? [documentId] : undefined,
+      images: data.imageUrls,
       optionValue: JSON.stringify(data.sites),
     });
     setClose(true);
@@ -192,7 +184,6 @@ function UpdatePlanning({ clubId, pageId, planningId }: UpdatePlanningProps) {
   const utils = trpc.useUtils();
   const t = useTranslations("pages");
   const [close, setClose] = useState(false);
-  const user = useUser();
   const [initialData, setInitialData] = useState<
     PlanningFormValues | undefined
   >();
@@ -209,7 +200,7 @@ function UpdatePlanning({ clubId, pageId, planningId }: UpdatePlanningProps) {
       title: queryPlanning.data?.title ?? "",
       subtitle: queryPlanning.data?.subTitle ?? "",
       description: queryPlanning.data?.content ?? "",
-      images: undefined,
+      imageUrls: queryPlanning.data?.images ?? [],
       sites: JSON.parse(queryPlanning.data?.optionValue ?? "[]"),
     });
   }, [queryPlanning.data, setInitialData]);
@@ -226,18 +217,15 @@ function UpdatePlanning({ clubId, pageId, planningId }: UpdatePlanningProps) {
       toast.error(error.message);
     },
   });
-  const saveImage = useWriteFile(user?.data?.id ?? "", "IMAGE", MAX_SIZE);
 
   async function handleSubmit(data: PlanningFormValues) {
-    let documentId: string | undefined = undefined;
-    if (data.images?.[0]) documentId = await saveImage(data.images[0]);
     updateAG.mutate({
       id: planningId,
       pageId,
       title: data.title,
       subTitle: data.subtitle,
       content: data.description,
-      images: documentId ? [documentId] : undefined,
+      images: data.imageUrls,
       optionValue: JSON.stringify(data.sites),
     });
     setClose(true);
@@ -261,7 +249,6 @@ function UpdatePlanning({ clubId, pageId, planningId }: UpdatePlanningProps) {
         onSubmit={(data) => handleSubmit(data)}
         onCancel={() => setClose(true)}
         initialValues={initialData}
-        initialImageUrl={queryPlanning.data?.images?.[0]}
         pageId={pageId}
         clubId={clubId}
       />
@@ -303,7 +290,6 @@ function DeletePlanning({ pageId, planningId }: UpdatePlanningProps) {
 type PlanningFormProps = {
   onSubmit: (data: PlanningFormValues) => void;
   initialValues?: PlanningFormValues;
-  initialImageUrl?: string;
   onCancel: () => void;
   update?: boolean;
   pageId: string;
@@ -314,7 +300,7 @@ const defaultValues: PlanningFormValues = {
   title: "",
   subtitle: "",
   description: "",
-  images: undefined,
+  imageUrls: [],
   sites: [],
 };
 
@@ -322,7 +308,6 @@ function PlanningForm({
   onSubmit,
   initialValues,
   onCancel,
-  initialImageUrl,
   clubId,
 }: PlanningFormProps) {
   const t = useTranslations();
@@ -336,8 +321,7 @@ function PlanningForm({
   } = useForm<PlanningFormValues>({
     defaultValues,
   });
-  const fields = useWatch({ control, defaultValue: defaultValues });
-  const [imagePreview, setImagePreview] = useState(initialImageUrl);
+  const imageUrls = useWatch({ control, name: "imageUrls" });
   const [planningGroups, setPlanningGroups] = useState<boolean[]>([]);
   const sites = trpc.sites.getSitesForClub.useQuery(clubId, {
     enabled: isCUID(clubId),
@@ -359,30 +343,8 @@ function PlanningForm({
     if (initialValues) reset(initialValues);
   }, [initialValues, reset]);
 
-  useEffect(() => {
-    if (initialImageUrl) setImagePreview(initialImageUrl);
-  }, [initialImageUrl]);
-
-  useEffect(() => {
-    if (fields.images?.length) {
-      const image = fields.images[0];
-      if (!image) return;
-      if (image.size > MAX_SIZE) {
-        toast.error(
-          t("pages.image-size-error", { size: formatSize(MAX_SIZE) }),
-        );
-        setValue("images", undefined);
-        return;
-      }
-
-      const src = URL.createObjectURL(image);
-      setImagePreview(src);
-    }
-  }, [fields.images, t, setValue]);
-
   const handleDeleteImage = () => {
-    setImagePreview("");
-    setValue("images", undefined);
+    setValue("imageUrls", []);
   };
 
   const onSuccess: SubmitHandler<PlanningFormValues> = (data) => {
@@ -399,23 +361,23 @@ function PlanningForm({
       className="grid grid-cols-[3fr_2fr] gap-2"
     >
       <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">
-        <label className="self-start">{t("pages.planning.image")}</label>
-        <div>
-          <input
-            type="file"
-            className="file-input-bordered file-input-primary file-input w-full"
-            {...register("images")}
-            accept="image/*"
-          />
-          <p className="col-span-2 text-sm text-gray-500">
-            {t("pages.image-size", { size: formatSize(MAX_SIZE) })}
-          </p>
-        </div>
-        {imagePreview ? (
+        <UploadButton
+          endpoint="imageAttachment"
+          onClientUploadComplete={(result) =>
+            setValue(
+              "imageUrls",
+              result.map((r) => r.ufsUrl),
+            )
+          }
+          buttonText={t("pages.planning.image")}
+          className="col-span-2"
+        />
+
+        {imageUrls && imageUrls.length > 0 ? (
           <div className="relative col-span-full flex gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={imagePreview}
+              src={imageUrls[0]}
               alt=""
               className="max-h-[10rem] w-full object-contain"
             />

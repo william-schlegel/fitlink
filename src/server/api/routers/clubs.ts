@@ -9,12 +9,11 @@ import {
 } from "@/lib/trpc/server";
 import { activity, club, clubCoachs, site } from "@/db/schema/club";
 import { openingCalendarClubs } from "@/db/schema/planning";
-import { userCoach, userDocument } from "@/db/schema/user";
 import { createChannelService } from "@/server/lib/chat";
+import { userCoach } from "@/db/schema/user";
 import { page } from "@/db/schema/page";
 import { user } from "@/db/schema/auth";
 import { isCUID } from "@/lib/utils";
-import { getDocUrl } from "./files";
 import { db } from "@/db";
 
 export const clubRouter = createTRPCRouter({

@@ -32,7 +32,7 @@ import {
   planningActivity,
   reservation,
 } from "./planning";
-import { userCoach, userDocument, userManager, userMember } from "./user";
+import { userCoach, userManager, userMember } from "./user";
 import { roomReservationEnum } from "./enums";
 import { page } from "./page";
 
@@ -138,7 +138,7 @@ export const event = pgTable(
     endDisplay: timestamp("end_display").notNull(),
     bannerText: text("banner_text").notNull(),
     cancelled: boolean("cancelled").notNull(),
-    documentId: text("document_id").unique(),
+    imageUrls: text("image_urls").array(),
     price: real("price").notNull(),
     free: boolean("free").notNull(),
     address: text("address").notNull(),
@@ -160,10 +160,6 @@ export const eventRelations = relations(event, ({ one }) => ({
   page: one(page, {
     fields: [event.pageId],
     references: [page.id],
-  }),
-  document: one(userDocument, {
-    fields: [event.documentId],
-    references: [userDocument.id],
   }),
 }));
 

@@ -144,14 +144,6 @@ export const userDocument = pgTable(
   (table) => [index("user_document_user_idx").on(table.userId)],
 );
 
-export const userDocumentRelations = relations(userDocument, ({ one }) => ({
-  user: one(user, {
-    fields: [userDocument.userId],
-    references: [user.id],
-  }),
-  event: one(event),
-}));
-
 export const userNotification = pgTable(
   "UserNotification",
   {

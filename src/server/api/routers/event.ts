@@ -18,7 +18,7 @@ const eventObject = z.object({
   endDisplay: z.date(),
   bannerText: z.string(),
   cancelled: z.boolean(),
-  documentId: z.cuid2().optional(),
+  imageUrls: z.array(z.string()).optional().default([]),
   price: z.number(),
   free: z.boolean(),
   address: z.string(),
@@ -33,14 +33,7 @@ export const eventRouter = createTRPCRouter({
       where: eq(event.id, input),
       with: { club: { with: { manager: true } } },
     });
-    if (!eventData) return null;
-    let imageUrl = "";
-    if (eventData.documentId)
-      imageUrl = await getDocUrl(
-        eventData.club.managerId,
-        eventData.documentId,
-      );
-    return { ...eventData, imageUrl };
+    return eventData ?? null;
   }),
   getEventsForClub: protectedProcedure.input(z.cuid2()).query(({ input }) => {
     return db.query.event.findMany({

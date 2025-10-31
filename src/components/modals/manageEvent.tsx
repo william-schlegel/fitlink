@@ -1,6 +1,12 @@
 "use client";
 
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import {
+  FormProvider,
+  SubmitHandler,
+  useForm,
+  useFormContext,
+  useWatch,
+} from "react-hook-form";
 import MapComponent, { Marker } from "react-map-gl/mapbox";
 import { isDate, startOfToday } from "date-fns";
 import { useTranslations } from "next-intl";
@@ -9,15 +15,17 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { isSameDay } from "date-fns";
 import { format } from "date-fns";
 
+import { useRouter } from "next/navigation";
+
 import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
 import AddressSearch, { AddressData } from "../ui/addressSearch";
-import { formatMoney, formatSize } from "@/lib/formatNumber";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import ButtonIcon, { ButtonSize } from "../ui/buttonIcon";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { formatDateLocalized } from "@/lib/formatDate";
-import { useWriteFile } from "@/lib/useManageFile";
+import { formatMoney } from "@/lib/formatNumber";
 import Confirmation from "../ui/confirmation";
+import { UploadButton } from "../uploadthing";
 import { TextError } from "../ui/simpleform";
 import { useUser } from "@/lib/auth/client";
 import { trpc } from "@/lib/trpc/client";
@@ -43,10 +51,8 @@ type EventFormValues = {
   searchAddress?: string | null;
   longitude: number;
   latitude: number;
-  images?: FileList;
+  imageUrls?: string[];
 };
-
-const MAX_SIZE = 1024 * 1024;
 
 type CreateEventProps = {
   clubId: string;
@@ -57,21 +63,19 @@ export const CreateEvent = ({ clubId }: CreateEventProps) => {
   const t = useTranslations("club");
   const [close, setClose] = useState(false);
   const { data: user } = useUser();
-
+  const router = useRouter();
   const createEvent = trpc.events.createEvent.useMutation({
     onSuccess: () => {
       utils.dashboards.getManagerDataForUserId.invalidate(user?.id);
       toast.success(t("event.created"));
+      router.refresh();
     },
     onError(error) {
       toast.error(error.message);
     },
   });
-  const saveImage = useWriteFile(user?.id ?? "", "IMAGE", MAX_SIZE);
 
   async function handleSubmit(data: EventFormValues) {
-    let documentId: string | undefined = undefined;
-    if (data.images?.[0]) documentId = await saveImage(data.images[0]);
     createEvent.mutate({
       clubId,
       name: data.name,
@@ -89,7 +93,7 @@ export const CreateEvent = ({ clubId }: CreateEventProps) => {
       startDisplay: new Date(data.startDisplay),
       endDisplay: new Date(data.endDisplay),
       price: isNaN(data.price) ? 0 : Number(data.price),
-      documentId,
+      imageUrls: data.imageUrls,
     });
     setClose(true);
   }
@@ -145,10 +149,9 @@ export const UpdateEvent = ({
       searchAddress: queryEvent.data?.searchAddress ?? "",
       longitude: queryEvent.data?.longitude ?? LONGITUDE,
       latitude: queryEvent.data?.latitude ?? LATITUDE,
-      images: undefined,
+      imageUrls: queryEvent.data?.imageUrls ?? [],
     });
   }, [queryEvent.data]);
-  const saveImage = useWriteFile(user?.id ?? "", "IMAGE", MAX_SIZE);
 
   const updateEvent = trpc.events.updateEvent.useMutation({
     onSuccess: () => {
@@ -161,8 +164,6 @@ export const UpdateEvent = ({
   });
 
   const onSubmit = async (data: EventFormValues) => {
-    let documentId: string | undefined = undefined;
-    if (data.images?.[0]) documentId = await saveImage(data.images[0]);
     updateEvent.mutate({
       id: eventId,
       name: data.name,
@@ -180,7 +181,7 @@ export const UpdateEvent = ({
       startDisplay: new Date(data.startDisplay),
       endDisplay: new Date(data.endDisplay),
       price: isNaN(data.price) ? 0 : Number(data.price),
-      documentId,
+      imageUrls: data.imageUrls,
     });
     setInitialData(undefined);
     setCloseModal(true);
@@ -206,7 +207,6 @@ export const UpdateEvent = ({
           initialValues={initialData}
           onSubmit={onSubmit}
           onCancel={() => setCloseModal(true)}
-          initialImageUrl={queryEvent.data?.imageUrl ?? ""}
         />
       ) : (
         <Spinner />
@@ -263,7 +263,6 @@ export const DeleteEvent = ({
 type EventFormProps = {
   onSubmit: (data: EventFormValues) => void;
   initialValues?: EventFormValues;
-  initialImageUrl?: string;
   onCancel: () => void;
   update?: boolean;
 };
@@ -287,267 +286,235 @@ const defaultValues = {
   images: undefined,
 };
 
-function EventForm({
-  onSubmit,
-  initialValues,
-  onCancel,
-  initialImageUrl,
-}: EventFormProps) {
+function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
   const tCommon = useTranslations("common");
   const t = useTranslations("club");
-  const {
-    handleSubmit,
-    register,
-    formState: { errors },
-    control,
-    reset,
-    setValue,
-  } = useForm<EventFormValues>({
+  const form = useForm<EventFormValues>({
     defaultValues,
   });
-  const fields = useWatch({ control, defaultValue: defaultValues });
-  const [imagePreview, setImagePreview] = useState(initialImageUrl);
-
-  useEffect(() => {
-    if (initialValues) reset(initialValues);
-  }, [initialValues, reset]);
-
-  useEffect(() => {
-    if (initialImageUrl) setImagePreview(initialImageUrl);
-  }, [initialImageUrl]);
-
-  useEffect(() => {
-    if (fields.images?.length) {
-      const image = fields.images[0];
-      if (!image) return;
-      if (image.size > MAX_SIZE) {
-        toast.error(t("event.image-size", { size: formatSize(MAX_SIZE) }));
-        setValue("images", undefined);
-        return;
-      }
-
-      const src = URL.createObjectURL(image);
-      setImagePreview(src);
-    }
-  }, [fields.images, t, setValue]);
+  const imageUrls = useWatch({ control: form.control, name: "imageUrls" });
+  const free = useWatch({ control: form.control, name: "free" });
 
   const handleDeleteImage = () => {
-    setImagePreview("");
-    setValue("images", undefined);
+    form.setValue("imageUrls", []);
   };
 
   const onSuccess: SubmitHandler<EventFormValues> = (data) => {
     onSubmit(data);
-    reset();
+    form.reset();
   };
 
   function setAddress(adr: AddressData) {
-    setValue("searchAddress", adr.address);
-    setValue("longitude", adr.lng);
-    setValue("latitude", adr.lat);
+    form.setValue("searchAddress", adr.address);
+    form.setValue("longitude", adr.lng);
+    form.setValue("latitude", adr.lat);
   }
 
   return (
-    <form onSubmit={handleSubmit(onSuccess)} className="grid grid-cols-2 gap-2">
-      <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">
-        <label className="self-start">{t("event.image")}</label>
-        <div>
-          <input
-            type="file"
-            className="file-input-bordered file-input-primary file-input w-full"
-            {...register("images")}
-            accept="image/*"
+    <FormProvider {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSuccess)}
+        className="grid grid-cols-2 gap-2"
+      >
+        <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">
+          <UploadButton
+            endpoint="imageAttachment"
+            onClientUploadComplete={(result) =>
+              form.setValue(
+                "imageUrls",
+                result.map((r) => r.ufsUrl),
+              )
+            }
+            buttonText={t("event.image")}
+            className="col-span-2"
           />
-          <p className="col-span-2 text-sm text-gray-500">
-            {t("event.image-size", { size: formatSize(MAX_SIZE) })}
-          </p>
-        </div>
-        {imagePreview ? (
-          <div className="relative col-span-full flex gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={imagePreview}
-              alt=""
-              className="max-h-[10rem] w-full object-cover"
-            />
-            <button
-              className="absolute right-2 bottom-2"
-              type="button"
-              onClick={handleDeleteImage}
-            >
-              <ButtonIcon
-                iconComponent={<i className="bx bx-trash" />}
-                title={t("event.delete-image")}
-                buttonVariant="Icon-Outlined-Secondary"
-                buttonSize="md"
-              />
-            </button>
-          </div>
-        ) : null}
 
-        <label className="required">{t("event.name")}</label>
-        <div>
-          <input
-            className="input-bordered input w-full"
-            {...register("name", {
-              required: t("event.name-mandatory") ?? true,
-            })}
-          />
-          {errors.name ? (
-            <p className="text-xs text-error">{errors.name.message}</p>
+          {imageUrls && imageUrls.length > 0 ? (
+            <div className="relative col-span-full flex gap-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imageUrls[0]}
+                alt=""
+                className="max-h-[10rem] w-full object-cover"
+              />
+              <button
+                className="absolute right-2 bottom-2"
+                type="button"
+                onClick={handleDeleteImage}
+              >
+                <ButtonIcon
+                  iconComponent={<i className="bx bx-trash" />}
+                  title={t("event.delete-image")}
+                  buttonVariant="Icon-Outlined-Secondary"
+                  buttonSize="md"
+                />
+              </button>
+            </div>
           ) : null}
-        </div>
-        <label className="required self-start">{t("event.brief")}</label>
-        <div>
+
+          <label className="required">{t("event.name")}</label>
+          <div>
+            <input
+              className="input-bordered input w-full"
+              {...form.register("name", {
+                required: t("event.name-mandatory") ?? true,
+              })}
+            />
+            {form.formState.errors.name ? (
+              <p className="text-xs text-error">
+                {form.formState.errors.name.message}
+              </p>
+            ) : null}
+          </div>
+          <label className="required self-start">{t("event.brief")}</label>
+          <div>
+            <textarea
+              {...form.register("brief", {
+                required: t("event.brief-mandatory") ?? true,
+              })}
+              className="field-sizing-content"
+              rows={4}
+            />
+            <TextError err={form.formState.errors?.brief?.message} />
+          </div>
+          <label className="self-start">{t("event.description")}</label>
           <textarea
-            {...register("brief", {
-              required: t("event.brief-mandatory") ?? true,
-            })}
+            {...form.register("description")}
             className="field-sizing-content"
             rows={4}
           />
-          <TextError err={errors?.brief?.message} />
         </div>
-        <label className="self-start">{t("event.description")}</label>
-        <textarea
-          {...register("description")}
-          className="field-sizing-content"
-          rows={4}
-        />
-      </div>
-      <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">
-        <label className="required">{t("event.start-date")}</label>
-        <div>
-          <input
-            type="datetime-local"
-            className="input-bordered input w-full"
-            {...register("startDate", {
-              required: t("event.date-mandatory") ?? true,
-            })}
-          />
-          <TextError err={errors?.startDate?.message} />
-        </div>
-        <label className="required">{t("event.end-date")}</label>
-        <div>
-          <input
-            type="datetime-local"
-            className="input-bordered input w-full"
-            {...register("endDate", {
-              required: t("event.date-mandatory") ?? true,
-            })}
-          />
-          <TextError err={errors?.endDate?.message} />
-        </div>
-        <label className="required">{t("event.start-display")}</label>
-        <div>
-          <input
-            type="datetime-local"
-            className="input-bordered input w-full"
-            {...register("startDisplay", {
-              required: t("event.date-mandatory") ?? true,
-            })}
-          />
-          <TextError err={errors?.startDisplay?.message} />
-        </div>
-        <label className="required">{t("event.end-display")}</label>
-        <div>
-          <input
-            type="datetime-local"
-            className="input-bordered input w-full"
-            {...register("endDisplay", {
-              required: t("event.date-mandatory") ?? true,
-            })}
-          />
-          <TextError err={errors?.endDisplay?.message} />
-        </div>
-        <label>{t("event.banner")}</label>
-        <input
-          className="input-bordered input w-full"
-          {...register("bannerText")}
-        />
-        <div className="form-control col-span-full">
-          <label className="label cursor-pointer justify-start gap-4">
+        <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">
+          <label className="required">{t("event.start-date")}</label>
+          <div>
             <input
-              type="checkbox"
-              className="checkbox-primary checkbox"
-              {...register("cancelled")}
-              defaultChecked={false}
+              type="datetime-local"
+              className="input-bordered input w-full"
+              {...form.register("startDate", {
+                required: t("event.date-mandatory") ?? true,
+              })}
             />
-            <span className="label-text">{t("event.cancelled")}</span>
-          </label>
-        </div>
-        <div className="form-control col-span-full">
-          <label className="label cursor-pointer justify-start gap-4">
+            <TextError err={form.formState.errors?.startDate?.message} />
+          </div>
+          <label className="required">{t("event.end-date")}</label>
+          <div>
             <input
-              type="checkbox"
-              className="checkbox-primary checkbox"
-              {...register("free")}
-              defaultChecked={false}
+              type="datetime-local"
+              className="input-bordered input w-full"
+              {...form.register("endDate", {
+                required: t("event.date-mandatory") ?? true,
+              })}
             />
-            <span className="label-text">{t("event.free")}</span>
-          </label>
-        </div>
-        {fields.free ? null : (
-          <>
-            <label>{t("event.price")}</label>
-            <div className="input-group">
+            <TextError err={form.formState.errors?.endDate?.message} />
+          </div>
+          <label className="required">{t("event.start-display")}</label>
+          <div>
+            <input
+              type="datetime-local"
+              className="input-bordered input w-full"
+              {...form.register("startDisplay", {
+                required: t("event.date-mandatory") ?? true,
+              })}
+            />
+            <TextError err={form.formState.errors?.startDisplay?.message} />
+          </div>
+          <label className="required">{t("event.end-display")}</label>
+          <div>
+            <input
+              type="datetime-local"
+              className="input-bordered input w-full"
+              {...form.register("endDisplay", {
+                required: t("event.date-mandatory") ?? true,
+              })}
+            />
+            <TextError err={form.formState.errors?.endDisplay?.message} />
+          </div>
+          <label>{t("event.banner")}</label>
+          <input
+            className="input-bordered input w-full"
+            {...form.register("bannerText")}
+          />
+          <div className="form-control col-span-full">
+            <label className="label cursor-pointer justify-start gap-4">
               <input
-                type="number"
-                className="input-bordered input w-full"
-                {...register("price")}
+                type="checkbox"
+                className="checkbox-primary checkbox"
+                {...form.register("cancelled")}
+                defaultChecked={false}
               />
+              <span className="label-text">{t("event.cancelled")}</span>
+            </label>
+          </div>
+          <div className="form-control col-span-full">
+            <label className="label cursor-pointer justify-start gap-4">
+              <input
+                type="checkbox"
+                className="checkbox-primary checkbox"
+                {...form.register("free")}
+                defaultChecked={false}
+              />
+              <span className="label-text">{t("event.free")}</span>
+            </label>
+          </div>
+          {free ? null : (
+            <>
+              <label>{t("event.price")}</label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  className="input-bordered input w-full"
+                  {...form.register("price")}
+                />
 
-              <span>€</span>
-            </div>
-          </>
-        )}
-        <label>{t("event.address")}</label>
-        <input
-          className="input-bordered input w-full"
-          {...register("address")}
-        />
-        <label>{t("event.location")}</label>
-        <AddressSearch
-          defaultAddress={initialValues?.searchAddress ?? ""}
-          iconSearch
-          onSearch={(adr) => setAddress(adr)}
-        />
-      </div>
-      <DisplayEventCard imageUrl={imagePreview ?? ""} fields={fields} />
-      <div className="col-span-full flex items-center justify-end gap-2">
-        <button
-          type="button"
-          className="btn btn-outline btn-secondary"
-          onClick={(e) => {
-            e.preventDefault();
-            reset();
-            onCancel();
-          }}
-        >
-          {tCommon("cancel")}
-        </button>
-        <button className="btn btn-primary" type="submit">
-          {tCommon("save")}
-        </button>
-      </div>
-    </form>
+                <span>€</span>
+              </div>
+            </>
+          )}
+          <label>{t("event.address")}</label>
+          <input
+            className="input-bordered input w-full"
+            {...form.register("address")}
+          />
+          <label>{t("event.location")}</label>
+          <AddressSearch
+            defaultAddress={initialValues?.searchAddress ?? ""}
+            iconSearch
+            onSearch={(adr) => setAddress(adr)}
+          />
+        </div>
+        <DisplayEventCard />
+        <div className="col-span-full flex items-center justify-end gap-2">
+          <button
+            type="button"
+            className="btn btn-outline btn-secondary"
+            onClick={(e) => {
+              e.preventDefault();
+              form.reset();
+              onCancel();
+            }}
+          >
+            {tCommon("cancel")}
+          </button>
+          <button className="btn btn-primary" type="submit">
+            {tCommon("save")}
+          </button>
+        </div>
+      </form>
+    </FormProvider>
   );
 }
 
-type DisplayEventCard = {
-  imageUrl: string;
-  fields: Partial<EventFormValues>;
-};
-
-function DisplayEventCard({ imageUrl, fields }: DisplayEventCard) {
+function DisplayEventCard() {
   const [showMap, setShowMap] = useState(false);
   const t = useTranslations("club");
+  const { control } = useFormContext();
+  const fields = useWatch({ control });
 
   return (
     <div
       className="relative col-span-full aspect-[4_/_1] w-full rounded border border-primary p-2 text-center text-white"
       style={{
-        backgroundImage: `${imageUrl ? `url(${imageUrl})` : "unset"}`,
+        backgroundImage: `${fields.imageUrls?.[0] ? `url(${fields.imageUrls?.[0]})` : "unset"}`,
         backgroundColor: "rgb(0 0 0 / 0.5)",
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -627,9 +594,12 @@ export function ShowEventCard({ eventId }: { eventId: string }) {
   const event = trpc.events.getEventById.useQuery(eventId, {
     enabled: isCUID(eventId),
   });
+
+  const form = useForm<EventFormValues>();
+
   useEffect(() => {
     if (!event.data) return;
-    setFields({
+    form.reset({
       name: event.data.name,
       brief: event.data.brief,
       description: event.data.description,
@@ -645,6 +615,7 @@ export function ShowEventCard({ eventId }: { eventId: string }) {
       searchAddress: event.data.searchAddress,
       longitude: event.data.longitude ?? LONGITUDE,
       latitude: event.data.latitude ?? LATITUDE,
+      imageUrls: event.data.imageUrls ?? [],
     });
   }, [event.data]);
   const t = useTranslations("club");
@@ -660,10 +631,9 @@ export function ShowEventCard({ eventId }: { eventId: string }) {
       {event.isLoading ? (
         <Spinner />
       ) : fields ? (
-        <DisplayEventCard
-          imageUrl={event.data?.imageUrl ?? ""}
-          fields={fields}
-        />
+        <FormProvider {...form}>
+          <DisplayEventCard />
+        </FormProvider>
       ) : (
         <p>{t("event.no-event")}</p>
       )}
