@@ -320,7 +320,8 @@ function OfferForm({
   onCancel,
   clubId,
 }: OfferFormProps) {
-  const t = useTranslations();
+  const tCommon = useTranslations("common");
+  const t = useTranslations("pages");
 
   const {
     handleSubmit,
@@ -432,10 +433,10 @@ function OfferForm({
             onCancel();
           }}
         >
-          {t("common.cancel")}
+          {tCommon("cancel")}
         </button>
         <button className="btn btn-primary" type="submit">
-          {t("common.save")}
+          {tCommon("save")}
         </button>
       </div>
     </form>

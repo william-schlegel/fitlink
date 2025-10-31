@@ -5,14 +5,11 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import ThemeSelector, { TThemes } from "../themeSelector";
-import { useWriteFile } from "@/lib/useManageFile";
-import { formatSize } from "@/lib/formatNumber";
 import Confirmation from "../ui/confirmation";
-import { useUser } from "@/lib/auth/client";
+import { UploadButton } from "../uploadthing";
 import { getButtonSize } from "../ui/modal";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
 
@@ -22,28 +19,17 @@ type TitleCreationProps = {
 };
 
 type TitleCreationForm = {
-  images?: string[];
+  imageUrls?: string[];
   title: string;
   subtitle: string;
   description: string;
 };
 
-const MAX_SIZE = 1024 * 1024;
-
 export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
   const t = useTranslations("pages");
   const { register, handleSubmit, control, setValue, reset } =
     useForm<TitleCreationForm>();
-  const [imagePreview, setImagePreview] = useState("");
-  const { data: user } = useUser();
-  const userId = user?.id ?? "";
-  const clubQuery = trpc.clubs.getClubById.useQuery(
-    { clubId, userId },
-    {
-      enabled: isCUID(clubId),
-      refetchOnWindowFocus: false,
-    },
-  );
+  const imageUrls = useWatch({ control, name: "imageUrls" });
   const fields = useWatch({ control });
   const utils = trpc.useUtils();
   const [updating, setUpdating] = useState(false);
@@ -64,51 +50,32 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
     const hc = querySection.data?.elements.find(
       (e) => e.elementType === "HERO_CONTENT",
     );
-    setImagePreview(hc?.images?.[0] ?? "");
 
     const resetData: TitleCreationForm = {
       description: hc?.content ?? "",
       title: hc?.title ?? "",
       subtitle: hc?.subTitle ?? "",
+      imageUrls: hc?.images ?? [],
     };
     reset(resetData);
     setUpdating(true);
-  }, [querySection.data, setUpdating, reset, setImagePreview]);
+  }, [querySection.data, setUpdating, reset]);
 
-  const writeFile = useWriteFile(
-    clubQuery.data?.managerId ?? "",
-    "PAGE_IMAGE",
-    MAX_SIZE,
-  );
   const createSection = trpc.pages.createPageSection.useMutation({
     onSuccess() {
       toast.success(t("section-created"));
       utils.pages.getPageSection.invalidate({ pageId, section: "TITLE" });
       reset();
-      setImagePreview("");
     },
     onError(error) {
       toast.error(error.message);
     },
   });
-  const deleteSectionElement = trpc.pages.deletePageSectionElement.useMutation({
-    // onSuccess(data) {
-    //   Promise.all(
-    //     data.images.map((doc) =>
-    //       deleteUserDocument.mutate({ userId: doc.userId, documentId: doc.id })
-    //     )
-    //   );
-    // },
-  });
   const deleteSection = trpc.pages.deletePageSection.useMutation({
-    onSuccess(data) {
-      // Promise.all(
-      //   data.elements.map((elem) => deleteSectionElement.mutateAsync(elem.id))
-      // );
+    onSuccess() {
       toast.success(t("section-deleted"));
       utils.pages.getPageSection.invalidate({ pageId, section: "TITLE" });
       reset();
-      setImagePreview("");
     },
     onError(error) {
       toast.error(error.message);
@@ -126,7 +93,6 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
       toast.error(error.message);
     },
   });
-  const deleteUserDocument = trpc.files.deleteUserDocument.useMutation();
   const updatePageStyle = trpc.pages.updatePageStyleForClub.useMutation({
     onSuccess() {
       toast.success(t("style-saved"));
@@ -147,7 +113,7 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
           title: data.title,
           subTitle: data.subtitle,
           content: data.description,
-          images: data.images?.[0] ? [data.images[0]] : undefined,
+          images: data.imageUrls ? data.imageUrls : undefined,
         });
       }
     } else {
@@ -161,21 +127,13 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
         title: data.title,
         subTitle: data.subtitle,
         content: data.description,
-        images: data.images?.[0] ? [data.images[0]] : undefined,
+        images: data.imageUrls ? data.imageUrls : undefined,
       });
     }
   };
 
-  useEffect(() => {
-    if (fields.images?.length) {
-      setImagePreview(fields.images[0]);
-      setValue("images", [fields.images[0]]);
-    }
-  }, [fields.images, setValue]);
-
   const handleDeleteImage = () => {
-    setImagePreview("");
-    setValue("images", undefined);
+    setValue("imageUrls", []);
   };
 
   const handleDeleteSection = () => {
@@ -193,21 +151,23 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
           className="grid grid-cols-[auto_1fr] gap-2 rounded border border-primary p-2"
           onSubmit={handleSubmit(onSubmit)}
         >
-          <label>{t("title.image")}</label>
-          <input
-            type="file"
-            className="file-input-bordered file-input-primary file-input w-full"
-            {...register("images")}
-            accept="image/*"
+          <UploadButton
+            endpoint="imageAttachment"
+            onClientUploadComplete={(result) =>
+              setValue(
+                "imageUrls",
+                result.map((r) => r.ufsUrl),
+              )
+            }
+            buttonText={t("title.image")}
+            className="col-span-2"
           />
-          <p className="col-span-2 text-sm text-gray-500">
-            {t("image-size", { size: formatSize(MAX_SIZE) })}
-          </p>
-          {imagePreview ? (
+
+          {imageUrls && imageUrls.length > 0 ? (
             <div className="col-span-2 flex items-center justify-center gap-2">
               <div className="relative w-60 max-w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imagePreview} alt="" />
+                <img src={imageUrls[0]} alt="" />
                 <button
                   onClick={handleDeleteImage}
                   className="absolute right-2 bottom-2 z-10"
@@ -271,7 +231,7 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
         </h3>
         <div data-theme={previewTheme}>
           <TitleContent
-            imageSrc={imagePreview}
+            imageSrc={imageUrls?.[0] ?? undefined}
             title={fields.title}
             subtitle={fields.subtitle}
             description={fields.description}

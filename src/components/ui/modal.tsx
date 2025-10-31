@@ -27,6 +27,7 @@ type Props = {
   onCloseModal?: () => void;
   variant?: TModalVariant;
   className?: string;
+  buttonClassName?: string;
   buttonSize?: ButtonSize;
   closeModal?: boolean;
 };
@@ -43,6 +44,7 @@ export default function Modal({
   onOpenModal,
   variant = "Primary",
   className = "",
+  buttonClassName = "",
   buttonSize = "md",
   closeModal,
   onCloseModal,
@@ -100,7 +102,10 @@ export default function Modal({
 
   return (
     <>
-      <div className={iconOnly ? "tooltip" : ""} data-tip={title}>
+      <div
+        className={twMerge(buttonClassName, iconOnly && "tooltip")}
+        data-tip={title}
+      >
         <label
           htmlFor={modalId}
           className={`${color} ${outlined} gap-2 py-0 btn-${buttonSize} `}

@@ -82,7 +82,7 @@ export default async function ClubPage({
           itemId={pageId}
           noItemsText={t("club.no-page")}
         >
-          <CreatePage clubId={clubId} />
+          <CreatePage clubId={clubId} className="mb-4" />
         </LayoutPage.List>
 
         {pageId ? <PageContent clubId={clubId} pageId={pageId} /> : null}

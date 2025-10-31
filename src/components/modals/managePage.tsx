@@ -26,6 +26,7 @@ import Modal from "../ui/modal";
 type CreatePageProps = {
   clubId: string;
   variant?: TModalVariant;
+  className?: string;
 };
 
 export type PageTarget = (typeof pageTargetEnum.enumValues)[number];
@@ -129,6 +130,7 @@ type CreatePageFormValues = {
 export const CreatePage = ({
   clubId,
   variant = "Primary",
+  className,
 }: CreatePageProps) => {
   const utils = trpc.useUtils();
   const router = useRouter();
@@ -168,6 +170,7 @@ export const CreatePage = ({
       title={t("club.create-new-page")}
       variant={variant}
       handleSubmit={handleSubmit(onSubmit, onError)}
+      buttonClassName={className}
     >
       <h3>{t("club.create-new-page")}</h3>
       <SimpleForm
