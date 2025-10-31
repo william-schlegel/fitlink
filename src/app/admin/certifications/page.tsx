@@ -61,7 +61,7 @@ type CGContentProps = {
   cgId: string;
 };
 
-export async function CGContent({ cgId }: CGContentProps) {
+async function CGContent({ cgId }: CGContentProps) {
   const caller = await createTrpcCaller();
   if (!caller || !isCUID(cgId)) return null;
   const cgQuery = await caller.coachs.getCertificationOrganismById(cgId);

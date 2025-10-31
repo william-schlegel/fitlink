@@ -16,12 +16,16 @@ export default async function ClubPresentation({
   params: Promise<{ clubId: string; pageId: string }>;
 }) {
   const { clubId, pageId } = await params;
+  console.log({ clubId, pageId });
   const caller = await createTrpcCaller();
   if (!caller) return null;
   if (!isCUID(clubId) || !isCUID(pageId)) return notFound();
   const queryPage = await caller.pages.getClubPage(pageId);
 
   const queryClub = await caller.clubs.getClubPagesForNavByClubId(clubId);
+
+  console.log(queryPage);
+  console.log(queryClub);
 
   return (
     <div data-theme={queryPage?.theme ?? "light"}>

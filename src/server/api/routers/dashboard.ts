@@ -1,5 +1,4 @@
 import { asc, eq, gte } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
 import { startOfToday } from "date-fns";
 import { z } from "zod";
 
@@ -131,6 +130,6 @@ export const dashboardRouter = createTRPCRouter({
     .query(({ input }) => getManagerDataForUserId(input)),
   getCoachDataForUserId: protectedProcedure
     .input(z.string())
-    .query(async ({ ctx, input }) => {}),
+    .query(async () => {}),
   getAdminData: protectedProcedure.query(async () => getAdminData()),
 });

@@ -204,7 +204,6 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
             onClientUploadComplete={(result) =>
               setDocumentUrl(result[0].ufsUrl)
             }
-            className="ut-button:btn-primary ut-button:btn"
             buttonText={t("document")}
           />
         </div>

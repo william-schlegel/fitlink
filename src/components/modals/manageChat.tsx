@@ -4,8 +4,6 @@ import { useTranslations } from "next-intl";
 import { ChannelTypeEnum, ReactionTypeEnum } from "@/db/schema/enums";
 import Confirmation from "@/components/ui/confirmation";
 import ButtonIcon from "@/components/ui/buttonIcon";
-import { useWriteFile } from "@/lib/useManageFile";
-import { formatSize } from "@/lib/formatNumber";
 import Spinner from "@/components/ui/spinner";
 import Modal from "@/components/ui/modal";
 import { toast } from "@/lib/toast";
@@ -19,10 +17,9 @@ import {
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
+import { UploadButton } from "../uploadthing";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-
-const MAX_SIZE_LOGO = 1024 * 1024;
 
 type CreateGroupProps = {
   userId: string;
@@ -31,7 +28,6 @@ type CreateGroupProps = {
 export function CreateGroup({ userId }: CreateGroupProps) {
   const t = useTranslations("message");
   const [closeModal, setCloseModal] = useState(false);
-  const saveLogo = useWriteFile(userId, "IMAGE", MAX_SIZE_LOGO);
   const utils = trpc.useUtils();
   const createGroup = trpc.chat.createChannel.useMutation({
     onSuccess() {
@@ -41,13 +37,11 @@ export function CreateGroup({ userId }: CreateGroupProps) {
   });
 
   const onSubmit = async (data: GroupFormValues) => {
-    let groupImageId: string | undefined = "";
-    if (data.groupImage?.[0]) groupImageId = await saveLogo(data.groupImage[0]);
     createGroup.mutate({
       name: data.name,
       createdByUserId: userId,
       type: "GROUP",
-      imageDocumentId: groupImageId,
+      imageUrls: data.groupImageUrl ? [data.groupImageUrl] : undefined,
       users: data.users.filter((u) => Boolean(u.id)).map((u) => u.id!),
     });
     setCloseModal(true);
@@ -81,7 +75,7 @@ function GroupUser({ users, setUsers }: GroupUserProps) {
   const t = useTranslations("message");
   const [searchUser, setSearchUser] = useState<string>("");
   const [userList, setUserList] = useState<UserForGroup[]>([]);
-  const [nbUser, setNbUser] = useState(0);
+  const [nbUser] = useState(0);
   const [debouncedUser] = useDebounceValue<string>(searchUser, 500);
   const getUsers = trpc.users.getAllUsers.useQuery(
     {
@@ -189,7 +183,6 @@ export const UpdateGroup = ({ userId, groupId }: UpdateGroupProps) => {
       enabled: isCUID(groupId),
     },
   );
-  const saveImage = useWriteFile(userId, "IMAGE", MAX_SIZE_LOGO);
   const updateGroup = trpc.chat.updateChannel.useMutation({
     onSuccess: () => {
       utils.chat.getChannelsForUser.invalidate({ userId });
@@ -199,25 +192,12 @@ export const UpdateGroup = ({ userId, groupId }: UpdateGroupProps) => {
       toast.error(error.message);
     },
   });
-  const deleteImage = trpc.files.deleteUserDocument.useMutation();
 
   const onSubmit = async (data: GroupFormValues) => {
-    let imageId: string | undefined =
-      queryGroup.data?.imageDocumentId ?? undefined;
-    if (
-      data.deleteImage &&
-      isCUID(userId) &&
-      isCUID(queryGroup.data?.imageDocumentId)
-    )
-      await deleteImage.mutateAsync({
-        userId,
-        documentId: queryGroup.data?.imageDocumentId ?? "",
-      });
-    if (data.groupImage?.[0]) imageId = await saveImage(data.groupImage[0]);
     updateGroup.mutate({
       id: groupId,
       name: data.name,
-      imageDocumentId: imageId,
+      imageUrls: data.groupImageUrl ? [data.groupImageUrl] : undefined,
     });
     setInitialData(undefined);
     setCloseModal(true);
@@ -258,7 +238,7 @@ type GroupFormProps = {
 
 type GroupFormValues = {
   name: string;
-  groupImage?: FileList;
+  groupImageUrl?: string;
   users: UserForGroup[];
   deleteImage: boolean;
 };
@@ -280,35 +260,19 @@ function GroupForm({
     setValue,
   } = useForm<GroupFormValues>();
   const fields = useWatch({ control });
-  const [imagePreview, setImagePreview] = useState("");
 
   useEffect(() => {
     reset(initialData);
   }, [initialData, reset]);
 
-  useEffect(() => {
-    if (fields.groupImage?.[0]) {
-      if (fields.groupImage[0].size > MAX_SIZE_LOGO) {
-        toast.error(t("image-size-error", { size: formatSize(MAX_SIZE_LOGO) }));
-        setValue("groupImage", undefined);
-        return;
-      }
-
-      const src = URL.createObjectURL(fields.groupImage[0]);
-      setImagePreview(src);
-    }
-  }, [fields.groupImage, t, setValue]);
-
   const handleDeleteImage = () => {
-    setImagePreview("");
     setValue("deleteImage", true);
-    setValue("groupImage", undefined);
+    setValue("groupImageUrl", undefined);
   };
 
   const onSubmitForm: SubmitHandler<GroupFormValues> = (data) => {
     onSubmit(data);
     reset();
-    setImagePreview("");
   };
 
   const onError: SubmitErrorHandler<GroupFormValues> = (errors) => {
@@ -332,21 +296,19 @@ function GroupForm({
       </div>
       <div className="col-span-2 flex flex-col items-center justify-start gap-4">
         <div className="w-full ">
-          <label>{t("image")}</label>
-          <input
-            type="file"
-            className="file-input-bordered file-input-primary file-input w-full"
-            {...register("groupImage")}
-            accept="image/*"
+          <UploadButton
+            endpoint="imageAttachment"
+            onClientUploadComplete={(result) =>
+              setValue("groupImageUrl", result[0].ufsUrl)
+            }
+            className="col-span-2"
+            buttonText={t("image")}
           />
-          <p className="col-span-2 text-sm text-gray-500">
-            {t("image-size", { size: formatSize(MAX_SIZE_LOGO) })}
-          </p>
         </div>
-        {imagePreview ? (
+        {fields.groupImageUrl ? (
           <div className="flex items-center gap-4">
             <Image
-              src={imagePreview}
+              src={fields.groupImageUrl}
               alt=""
               className="aspect-square w-32 rounded-full"
             />

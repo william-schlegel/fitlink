@@ -21,7 +21,7 @@ export default function PublishPageButton({
   const t = useTranslations("pages");
   const publishPage = trpc.pages.updatePagePublication.useMutation({
     onSuccess(data) {
-      utils.pages.getPageForCoach.invalidate(userId);
+      utils.pages.getPageForCoach.invalidate({ userId });
       router.refresh();
       toast.success(
         t(data[0].published ? "page-published" : "page-unpublished"),

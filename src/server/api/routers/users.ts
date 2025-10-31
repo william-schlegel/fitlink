@@ -18,7 +18,6 @@ import { TUserFilter } from "@/app/admin/users/userFilter";
 import { featureEnum, roleEnum } from "@/db/schema/enums";
 import { reservation } from "@/db/schema/planning";
 import { isAdmin } from "@/server/lib/userTools";
-import { getDocUrl, uploadFile } from "./files";
 import { auth } from "@/lib/auth/server";
 import { user } from "@/db/schema/auth";
 import { db } from "@/db";
@@ -192,10 +191,8 @@ export const userRouter = createTRPCRouter({
           message: "User not found",
         });
       }
-      let profileImageUrl: string = u?.image ?? "/images/dummy.jpg";
-      if (input.options?.withImage && u.profileImageId) {
-        profileImageUrl = await getDocUrl(u.id, u.profileImageId);
-      }
+      const profileImageUrl: string = u?.image ?? "/images/dummy.jpg";
+
       let extraData: Awaited<ReturnType<typeof getMemberData>> | null = null;
 
       if (input.options?.withMemberData) extraData = await getMemberData(u.id);

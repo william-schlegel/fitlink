@@ -15,10 +15,10 @@ import Subscription from "./subscription";
 export default async function MemberDashboard({
   params,
 }: {
-  params: { userId: string };
+  params: Promise<{ userId: string }>;
 }) {
   const user = await getActualUser();
-  const userId = params.userId;
+  const userId = (await params).userId;
   if (
     !user ||
     (user.internalRole !== "MEMBER" && user.internalRole !== "ADMIN")

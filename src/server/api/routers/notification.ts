@@ -4,7 +4,6 @@ import z from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 import { notificationTypeEnum } from "@/db/schema/enums";
 import { userNotification } from "@/db/schema/user";
-import { getDocUrl } from "./files";
 import { db } from "@/db";
 
 export type GetNotificationByIdReturn =
@@ -96,18 +95,9 @@ export async function getNotificationById(
       .returning();
     notification.viewDate = viewDate!;
   }
-  let urlFrom = notification?.userFrom?.image;
-  if (notification?.userFrom && notification.userFrom.profileImageId)
-    urlFrom = await getDocUrl(
-      notification.userFrom.id,
-      notification.userFrom.profileImageId,
-    );
-  let urlTo = notification?.userTo?.image;
-  if (notification?.userTo && notification.userTo.profileImageId)
-    urlTo = await getDocUrl(
-      notification.userTo.id,
-      notification.userTo.profileImageId,
-    );
+  const urlFrom = notification?.userFrom?.image;
+
+  const urlTo = notification?.userTo?.image;
 
   if (!notification) return null;
   return {

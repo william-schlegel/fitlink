@@ -383,15 +383,15 @@ const AddCoachToClubSteps = [
 type AddCoachToClubProps = { clubId: string; userId: string };
 
 export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
-  // const createNotifications =
-  //   trpc.notifications.createNotificationToUsers.useMutation({
-  //     onSuccess() {
-  //       toast.success(t("coach.notification-success"));
-  //     },
-  //     onError(error) {
-  //       toast.error(error.message);
-  //     },
-  //   });
+  const createNotifications =
+    trpc.notifications.createNotificationToUsers.useMutation({
+      onSuccess() {
+        toast.success(t("coach.notification-success"));
+      },
+      onError(error) {
+        toast.error(error.message);
+      },
+    });
   const [closeModal, setCloseModal] = useState(false);
   const t = useTranslations("club");
   const [step, setStep] = useState(0);
@@ -399,14 +399,14 @@ export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
   const [coachIds, setCoachIds] = useState<string[]>([]);
 
   function handleSendMessage() {
-    // if (coachIds.length > 0 && message)
-    //   createNotifications.mutate({
-    //     type: "SEARCH_COACH",
-    //     from: userId,
-    //     to: coachIds,
-    //     message: message,
-    //     data: JSON.stringify({ clubId }),
-    //   });
+    if (coachIds.length > 0 && message)
+      createNotifications.mutate({
+        type: "SEARCH_COACH",
+        from: userId,
+        to: coachIds,
+        message: message,
+        data: JSON.stringify({ clubId }),
+      });
     setCloseModal(true);
     setStep(0);
   }

@@ -84,7 +84,7 @@ type CoachContentProps = {
   coachId: string;
 };
 
-export async function CoachContent({ coachId, clubId }: CoachContentProps) {
+async function CoachContent({ coachId, clubId }: CoachContentProps) {
   const t = await getTranslations("club");
   const caller = await createTrpcCaller();
   if (!caller) return null;

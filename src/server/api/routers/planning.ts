@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, lte } from "drizzle-orm";
+import { and, asc, eq, lte } from "drizzle-orm";
 import z from "zod";
 
 import {
@@ -9,10 +9,8 @@ import {
 import { planning, planningActivity, reservation } from "@/db/schema/planning";
 import { activity, club, room, site } from "@/db/schema/club";
 import { dayNameEnum } from "@/db/schema/enums";
-import { getDayName } from "@/lib/dates/days";
 import { userCoach } from "@/db/schema/user";
 import { DayName } from "@/lib/dates/data";
-import { user } from "@/db/schema/auth";
 import { isCUID } from "@/lib/utils";
 import { db } from "@/db";
 
@@ -276,37 +274,37 @@ export const planningRouter = createTRPCRouter({
         date: z.date(),
       }),
     )
-    .query(async ({ input }) => {
-      const userData = await db.query.user.findFirst({
-        where: eq(user.id, input.memberId),
-        with: {
-          memberData: {
-            with: {
-              clubs: true,
-              // subscriptions: {
-              //   with: {
-              //     activityGroups: true,
-              //     activities: true,
-              //     rooms: true,
-              //     sites: true,
-              //   },
-              // },
-            },
-          },
-        },
-      });
+    .query(async () => {
+      // const userData = await db.query.user.findFirst({
+      //   where: eq(user.id, input.memberId),
+      //   with: {
+      //     memberData: {
+      //       with: {
+      //         clubs: true,
+      //         // subscriptions: {
+      //         //   with: {
+      //         //     activityGroups: true,
+      //         //     activities: true,
+      //         //     rooms: true,
+      //         //     sites: true,
+      //         //   },
+      //         // },
+      //       },
+      //     },
+      //   },
+      // });
 
-      const clubIds = Array.from(
-        new Set(userData?.memberData?.clubs.map((c) => c.clubId)),
-      );
+      // const clubIds = Array.from(
+      //   new Set(userData?.memberData?.clubs.map((c) => c.clubId)),
+      // );
 
-      const planningClubs = await db.query.planning.findMany({
-        where: and(
-          lte(planning.startDate, new Date(Date.now())),
-          inArray(planning.clubId, clubIds),
-        ),
-        with: { club: true },
-      });
+      // const planningClubs = await db.query.planning.findMany({
+      //   where: and(
+      //     lte(planning.startDate, new Date(Date.now())),
+      //     inArray(planning.clubId, clubIds),
+      //   ),
+      //   with: { club: true },
+      // });
 
       const planningData: (typeof planning & {
         club: typeof club;
@@ -328,7 +326,7 @@ export const planningRouter = createTRPCRouter({
         })[];
       })[] = [];
 
-      const dayName = getDayName(input.date);
+      // const dayName = getDayName(input.date);
 
       // for (const planningClub of planningClubs) {
       //   const sub = user?.memberData?.subscriptions.filter(

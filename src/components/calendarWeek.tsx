@@ -1,6 +1,5 @@
 import { inferRouterOutputs } from "@trpc/server";
 import { useTranslations } from "next-intl";
-import { Fragment } from "react";
 
 import { AppRouter } from "@/server/api/root";
 import { DAYS } from "@/lib/dates/data";

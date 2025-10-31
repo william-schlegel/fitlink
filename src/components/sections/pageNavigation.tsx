@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 
+import { Fragment } from "react";
+
 import { PageSectionModel, PageTarget } from "../modals/managePage";
 
 type PageProps = {
@@ -75,7 +77,7 @@ function PageMenu({ menus, clubId }: { menus: PageProps[]; clubId: string }) {
       {menus.map((menu) => {
         if (menu.target === "HOME") {
           return (
-            <>
+            <Fragment key={menu.id}>
               {menu.sections
                 .filter((s) => s.title)
                 .map((s) => (
@@ -87,7 +89,7 @@ function PageMenu({ menus, clubId }: { menus: PageProps[]; clubId: string }) {
                     </Link>
                   </li>
                 ))}
-            </>
+            </Fragment>
           );
         }
         return (

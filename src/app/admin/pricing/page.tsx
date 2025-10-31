@@ -93,7 +93,7 @@ type PricingContentProps = {
   pricingId: string;
 };
 
-export async function PricingContent({ pricingId }: PricingContentProps) {
+async function PricingContent({ pricingId }: PricingContentProps) {
   const pricingQuery = await getPricingById(pricingId);
   if (!pricingQuery) return null;
   return (

@@ -6,7 +6,7 @@ export async function createChannelService(input: {
   name: string;
   createdByUserId: string;
   type: ChannelTypeEnum;
-  imageDocumentId?: string;
+  imageUrls?: string[];
   users?: string[];
 }) {
   return await db.transaction(async (tx) => {
@@ -16,7 +16,7 @@ export async function createChannelService(input: {
         name: input.name,
         createdByUserId: input.createdByUserId,
         type: input.type,
-        imageDocumentId: input.imageDocumentId,
+        imageUrls: input.imageUrls,
       })
       .returning();
     if (input.users) {

@@ -103,7 +103,7 @@ export const subscriptionRouter = createTRPCRouter({
         activities: z.array(z.cuid2()),
       }),
     )
-    .mutation(({ input }) => {
+    .mutation(() => {
       return null;
       // return db.query.subscription.update({
       //   where: eq(subscription.id, input.subscriptionId),

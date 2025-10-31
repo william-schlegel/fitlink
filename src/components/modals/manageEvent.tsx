@@ -303,6 +303,9 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
     onSubmit(data);
     form.reset();
   };
+  useEffect(() => {
+    if (initialValues) form.reset(initialValues);
+  }, [initialValues, form]);
 
   function setAddress(adr: AddressData) {
     form.setValue("searchAddress", adr.address);
@@ -590,7 +593,6 @@ function DisplayEventCard() {
 }
 
 export function ShowEventCard({ eventId }: { eventId: string }) {
-  const [fields, setFields] = useState<EventFormValues | undefined>(undefined);
   const event = trpc.events.getEventById.useQuery(eventId, {
     enabled: isCUID(eventId),
   });
@@ -617,7 +619,7 @@ export function ShowEventCard({ eventId }: { eventId: string }) {
       latitude: event.data.latitude ?? LATITUDE,
       imageUrls: event.data.imageUrls ?? [],
     });
-  }, [event.data]);
+  }, [event.data, form]);
   const t = useTranslations("club");
 
   return (
@@ -630,7 +632,7 @@ export function ShowEventCard({ eventId }: { eventId: string }) {
     >
       {event.isLoading ? (
         <Spinner />
-      ) : fields ? (
+      ) : event.data ? (
         <FormProvider {...form}>
           <DisplayEventCard />
         </FormProvider>

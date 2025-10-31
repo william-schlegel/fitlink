@@ -106,11 +106,7 @@ type RoomContentProps = {
   roomId: string;
 };
 
-export async function RoomContent({
-  clubId,
-  siteId,
-  roomId,
-}: RoomContentProps) {
+async function RoomContent({ clubId, siteId, roomId }: RoomContentProps) {
   if (!isCUID(roomId) || !isCUID(siteId) || !isCUID(clubId)) return null;
   const roomQuery = await getRoomById(roomId);
   const caller = await createTrpcCaller();

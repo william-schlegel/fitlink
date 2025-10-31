@@ -119,8 +119,7 @@ export const message = pgTable(
     userId: text("user_id").notNull(),
     type: messageTypeEnum("type").default("TEXT").notNull(),
     content: text("content"),
-    // Optional image stored via UserDocument when type === IMAGE
-    imageDocumentId: text("image_document_id"),
+    imageUrls: text("image_urls").array().default([]),
     replyToMessageId: text("reply_to_message_id"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     editedAt: timestamp("edited_at"),

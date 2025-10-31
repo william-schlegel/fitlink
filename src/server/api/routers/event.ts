@@ -3,7 +3,6 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 import { event } from "@/db/schema/club";
-import { getDocUrl } from "./files";
 import { db } from "@/db";
 
 const eventObject = z.object({

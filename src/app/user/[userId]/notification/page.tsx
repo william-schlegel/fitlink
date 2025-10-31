@@ -186,7 +186,7 @@ type NotificationContentProps = {
   fromTo: FromTo;
 };
 
-export async function NotificationContent({
+async function NotificationContent({
   notificationId,
   fromTo,
 }: NotificationContentProps) {

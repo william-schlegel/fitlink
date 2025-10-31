@@ -6,7 +6,6 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { pricing, pricingFeature } from "@/db/schema/subscription";
 import { calculateBBox, calculateDistance } from "@/lib/distance";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { roomReservationEnum } from "@/db/schema/enums";

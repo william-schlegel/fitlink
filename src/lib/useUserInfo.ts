@@ -3,7 +3,7 @@
 import { differenceInDays, isDate } from "date-fns";
 import { useEffect, useState } from "react";
 
-import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
+import { FeatureEnum } from "@/db/schema/enums";
 import { useSession } from "./auth/client";
 import { trpc } from "./trpc/client";
 

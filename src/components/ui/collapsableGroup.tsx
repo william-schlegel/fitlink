@@ -1,4 +1,4 @@
-import { HTMLInputTypeAttribute, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 type Props = {
   groupName: string;

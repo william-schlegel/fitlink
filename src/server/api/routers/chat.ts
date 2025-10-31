@@ -24,7 +24,7 @@ export const chatRouter = createTRPCRouter({
         name: z.string(),
         createdByUserId: z.string(),
         type: z.enum(channelTypeEnum.enumValues),
-        imageDocumentId: z.cuid2().optional(),
+        imageUrls: z.array(z.string()).optional(),
         users: z.array(z.string()).optional(),
       }),
     )
@@ -36,13 +36,13 @@ export const chatRouter = createTRPCRouter({
       z.object({
         id: z.cuid2(),
         name: z.string(),
-        imageDocumentId: z.cuid2().optional(),
+        imageUrls: z.array(z.string()).optional(),
       }),
     )
     .mutation(async ({ input }) => {
       return db
         .update(channel)
-        .set({ name: input.name, imageDocumentId: input.imageDocumentId })
+        .set({ name: input.name, imageUrls: input.imageUrls })
         .where(eq(channel.id, input.id))
         .returning();
     }),
@@ -139,7 +139,7 @@ export const chatRouter = createTRPCRouter({
         userId: z.string(),
         type: z.enum(messageTypeEnum.enumValues).optional(),
         replyToMessageId: z.string().optional(),
-        imageDocumentId: z.string().optional(),
+        imageUrls: z.array(z.string()).optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -151,7 +151,7 @@ export const chatRouter = createTRPCRouter({
           userId: input.userId,
           type: input.type,
           replyToMessageId: input.replyToMessageId,
-          imageDocumentId: input.imageDocumentId,
+          imageUrls: input.imageUrls,
         })
         .returning();
     }),

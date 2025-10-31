@@ -1,5 +1,5 @@
-import { fr, enUS } from "date-fns/locale";
 import { formatDistance } from "date-fns";
+import { fr } from "date-fns/locale";
 
 // import { getLocale } from "@/lib/locale";
 

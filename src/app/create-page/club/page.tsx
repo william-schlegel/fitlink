@@ -1,6 +1,5 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
 import { CreatePage } from "@/components/modals/managePage";
 import { getPagesForClub } from "@/server/api/routers/page";
@@ -11,7 +10,6 @@ import { getActualUser } from "@/lib/auth/server";
 import SelectClub from "@/components/selectClub";
 import { getHref } from "@/lib/getHref";
 import PageContent from "./pageContent";
-import Title from "@/components/title";
 import TargetName from "./targetName";
 
 export default async function ClubPage({

@@ -11,21 +11,20 @@ import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 
 import {
-  activityGroup,
-  club,
-  clubCoachs,
-  clubMembers,
-  coachingActivity,
-  event,
-} from "./club";
-import {
   coachCertification,
   coachingPrice,
   coachMarketPlace,
   coachOrganisms,
 } from "./coach";
-import { notificationTypeEnum, userDocumentTypeEnum } from "./enums";
+import {
+  activityGroup,
+  club,
+  clubCoachs,
+  clubMembers,
+  coachingActivity,
+} from "./club";
 import { planning, planningActivity } from "./planning";
+import { notificationTypeEnum } from "./enums";
 import { subscription } from "./subscription";
 import { page } from "./page";
 import { user } from "./auth";
@@ -130,19 +129,6 @@ export const userManagerRelations = relations(userManager, ({ one, many }) => ({
   }),
   managedClubs: many(club),
 }));
-
-export const userDocument = pgTable(
-  "UserDocument",
-  {
-    id: text("id").primaryKey().$defaultFn(createId),
-    userId: text("user_id").notNull(),
-    documentType: userDocumentTypeEnum("document_type").default("DOCUMENT"),
-    fileType: text("file_type").notNull(),
-    fileName: text("file_name"),
-    fileKey: text("file_key").notNull(),
-  },
-  (table) => [index("user_document_user_idx").on(table.userId)],
-);
 
 export const userNotification = pgTable(
   "UserNotification",
