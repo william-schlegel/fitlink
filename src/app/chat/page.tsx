@@ -1,67 +1,57 @@
-import { redirect, RedirectType } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+"use client";
 
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+
+import { useTranslations } from "next-intl";
+
+import { Id } from "../../../convex/_generated/dataModel";
 import { LayoutPage } from "@/components/layoutPage";
-import { createTrpcCaller } from "@/lib/trpc/caller";
-import { getActualUser } from "@/lib/auth/server";
-import { createHref } from "@/lib/createLink";
-import { getHref } from "@/lib/getHref";
-import ChatContent from "./chatContent";
-import { isCUID } from "@/lib/utils";
+import { MessageInput } from "./MessageInput";
+import { useUser } from "@/lib/auth/client";
+import { MessageList } from "./MessageList";
+import { RoomList } from "./RoomList";
 
-const Chat = async ({
-  searchParams,
-}: {
-  searchParams: Promise<{ channelId: string }>;
-}) => {
-  const t = await getTranslations("message");
-  const user = await getActualUser();
-  const { channelId } = await searchParams;
+export default function ConvexChat() {
+  const searchParams = useSearchParams();
+  const { data: user } = useUser();
   const userId = user?.id ?? "";
+  const roomIdParam = searchParams.get("roomId");
+  const [replyToMessageId, setReplyToMessageId] =
+    useState<Id<"messages"> | null>(null);
+  const t = useTranslations("message");
+  const roomId = roomIdParam as Id<"chatRooms"> | null;
 
-  if (!user) redirect("/", RedirectType.replace);
-
-  const caller = await createTrpcCaller();
-  if (!caller) return null;
-
-  const channels = await caller.chat.getChannelsForUser({ userId });
-
-  const href = await getHref();
-  if (!isCUID(channelId) && channels?.length)
-    redirect(
-      createHref(href, ["chat"], { channelId: channels[0].id }),
-      RedirectType.replace,
-    );
-
-  const messages = isCUID(channelId)
-    ? await caller.chat.getMessagesForChannel({ channelId })
-    : [];
-
-  const listChannels = channels?.map((channel) => ({
-    id: channel.id,
-    name: channel.name,
-    link: createHref(href, ["chat"], { channelId: channel.id }),
-  }));
+  if (!userId) {
+    return <div>Please log in to use chat</div>;
+  }
 
   return (
     <LayoutPage title={t("my-chat")}>
-      <LayoutPage.Main>
-        <LayoutPage.List
-          list={listChannels}
-          itemId={channelId}
-          noItemsText={t("no-channel")}
-        />
-
-        {channelId === "" ? null : (
-          <ChatContent
-            userId={userId}
-            channelId={channelId}
-            messages={messages}
-          />
-        )}
+      <LayoutPage.Main className="min-h-[calc(100vh-15rem)]">
+        <RoomList userId={userId} currentRoomId={roomId ?? undefined} />
+        <div className="flex flex-col">
+          {roomId ? (
+            <>
+              <div className="flex-1 overflow-y-auto">
+                <MessageList roomId={roomId} userId={userId} />
+              </div>
+              <div className="border-t border-base-300">
+                <MessageInput
+                  roomId={roomId}
+                  userId={userId}
+                  replyToMessageId={replyToMessageId}
+                  onReplyCancel={() => setReplyToMessageId(null)}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-full text-base-content/60">
+              Select a room to start chatting
+            </div>
+          )}
+        </div>
       </LayoutPage.Main>
     </LayoutPage>
   );
-};
-
-export default Chat;
+}

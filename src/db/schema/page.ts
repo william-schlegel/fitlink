@@ -23,7 +23,7 @@ export const pageSectionElement = pgTable(
     pageSection: pageSectionModelEnum("page_section"),
     sectionId: text("section_id").notNull(),
     optionValue: text("option_value"),
-    imageUrls: text("image_urls").array(),
+    imageUrls: text("image_urls").array().default([]),
   },
   (table) => [index("page_section_element_section_idx").on(table.sectionId)],
 );

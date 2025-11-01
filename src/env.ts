@@ -25,6 +25,9 @@ export const env = createEnv({
     SMTP_FROM_NAME: z.string(),
     UPLOADTHING_SECRET: z.string(),
     UPLOADTHING_TOKEN: z.string(),
+    // Convex Configuration
+    CONVEX_URL: z.url().optional(),
+    CONVEX_DEPLOY_KEY: z.string().optional(),
   },
 
   /**
@@ -37,6 +40,7 @@ export const env = createEnv({
     NEXT_PUBLIC_BETA: z.enum(["true", "false"]).default("false"),
     NEXT_PUBLIC_MAPBOX_TOKEN: z.string(),
     NEXT_PUBLIC_MAPQUEST_KEY: z.string(),
+    NEXT_PUBLIC_CONVEX_URL: z.url().optional(),
   },
 
   /**
@@ -55,11 +59,14 @@ export const env = createEnv({
     AWS_SECRET_ACCESS_KEY_WSC: process.env.AWS_SECRET_ACCESS_KEY_WSC,
     UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
+    CONVEX_URL: process.env.CONVEX_URL,
+    CONVEX_DEPLOY_KEY: process.env.CONVEX_DEPLOY_KEY,
 
     NEXT_PUBLIC_HOSTNAME: process.env.NEXT_PUBLIC_HOSTNAME,
     NEXT_PUBLIC_BETA: process.env.NEXT_PUBLIC_BETA,
     NEXT_PUBLIC_MAPBOX_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
     NEXT_PUBLIC_MAPQUEST_KEY: process.env.NEXT_PUBLIC_MAPQUEST_KEY,
+    NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
     // SMTP Email Configuration
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_PORT: process.env.SMTP_PORT,

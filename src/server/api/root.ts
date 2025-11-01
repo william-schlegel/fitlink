@@ -12,7 +12,6 @@ import { userRouter } from "./routers/users";
 import { siteRouter } from "./routers/sites";
 import { clubRouter } from "./routers/clubs";
 import { pageRouter } from "./routers/page";
-import { chatRouter } from "./routers/chat";
 
 /**
  * This is the primary router for your server.
@@ -27,7 +26,6 @@ export const appRouter = createTRPCRouter({
   events: eventRouter,
   dashboards: dashboardRouter,
   clubs: clubRouter,
-  chat: chatRouter,
   calendars: calendarRouter,
   activities: activityRouter,
   plannings: planningRouter,

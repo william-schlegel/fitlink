@@ -2,6 +2,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 
 import { TRPCProvider } from "@/lib/trpc/provider";
+import { ConvexClientProvider } from "@/lib/convex/provider";
 import { getActualUser } from "@/lib/auth/server";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
@@ -34,13 +35,15 @@ export default async function RootLayout({
       </head>
       <body className={`scroll-smooth antialiased`}>
         <NextIntlClientProvider messages={messages}>
-          <TRPCProvider>
-            <div className="bg-base-200 grid min-h-screen grid-rows-[auto_1fr_auto]">
-              <Navbar userId={user?.id} internalRole={user?.internalRole} />
-              <main>{children}</main>
-              <Footer />
-            </div>
-          </TRPCProvider>
+          <ConvexClientProvider>
+            <TRPCProvider>
+              <div className="bg-base-200 grid min-h-screen grid-rows-[auto_1fr_auto]">
+                <Navbar userId={user?.id} internalRole={user?.internalRole} />
+                <main>{children}</main>
+                <Footer />
+              </div>
+            </TRPCProvider>
+          </ConvexClientProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -21,6 +21,7 @@ import { isAdmin } from "@/server/lib/userTools";
 import { auth } from "@/lib/auth/server";
 import { user } from "@/db/schema/auth";
 import { db } from "@/db";
+import { createCoachRoomInConvex } from "@/lib/convex/server";
 
 const UserFilter = z
   .object({
@@ -349,13 +350,13 @@ export const userRouter = createTRPCRouter({
           message: "Only an admin user can give admin access",
         });
 
-      db.transaction(async (tx) => {
+      const result = await db.transaction(async (tx) => {
         if (
           input.internalRole === "COACH" ||
           input.internalRole === "MANAGER_COACH"
         ) {
           await tx.delete(userCoach).where(eq(userCoach.userId, input.id));
-          await tx.insert(userCoach).values({
+          const coachRecord = await tx.insert(userCoach).values({
             userId: input.id,
             longitude: input.longitude,
             latitude: input.latitude,
@@ -364,7 +365,22 @@ export const userRouter = createTRPCRouter({
             publicName: input.publicName,
             aboutMe: input.aboutMe,
             description: input.description,
-          });
+          }).returning();
+          
+          // Create Convex room for coach
+          const coachName = input.publicName ?? input.name ?? "Coach";
+          const convexRoomId = await createCoachRoomInConvex(
+            input.id,
+            coachName,
+          );
+          
+          // Update coach record with Convex room ID
+          if (convexRoomId && coachRecord[0]) {
+            await tx
+              .update(userCoach)
+              .set({ convexRoomId: String(convexRoomId) })
+              .where(eq(userCoach.userId, input.id));
+          }
         }
         return tx
           .update(user)
@@ -383,6 +399,7 @@ export const userRouter = createTRPCRouter({
           .where(eq(user.id, input.id))
           .returning();
       });
+      return result;
     }),
   deleteUser: protectedProcedure
     .input(z.string())

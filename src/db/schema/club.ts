@@ -45,7 +45,7 @@ export const club = pgTable(
     managerId: text("manager_id").notNull(),
     pageStyle: text("page_style").default("light"),
     logoUrl: text("logo_url").unique(),
-    chatGroupId: text("chat_group_id"),
+    convexRoomId: text("convex_room_id"),
   },
   (table) => [index("club_manager_idx").on(table.managerId)],
 );
@@ -138,7 +138,7 @@ export const event = pgTable(
     endDisplay: timestamp("end_display").notNull(),
     bannerText: text("banner_text").notNull(),
     cancelled: boolean("cancelled").notNull(),
-    imageUrls: text("image_urls").array(),
+    imageUrls: text("image_urls").array().default([]),
     price: real("price").notNull(),
     free: boolean("free").notNull(),
     address: text("address").notNull(),

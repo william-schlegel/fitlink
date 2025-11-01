@@ -8,8 +8,8 @@ import {
   publicProcedure,
 } from "@/lib/trpc/server";
 import { activity, club, clubCoachs, site } from "@/db/schema/club";
+import { createClubRoomInConvex } from "@/lib/convex/server";
 import { openingCalendarClubs } from "@/db/schema/planning";
-import { createChannelService } from "@/server/lib/chat";
 import { userCoach } from "@/db/schema/user";
 import { page } from "@/db/schema/page";
 import { user } from "@/db/schema/auth";
@@ -140,12 +140,7 @@ export const clubRouter = createTRPCRouter({
         });
 
       const newClub = await db.transaction(async (tx) => {
-        // create the channel for the club via shared service
-        const chatChannel = await createChannelService({
-          name: input.name,
-          createdByUserId: input.userId,
-          type: "CLUB",
-        });
+        // create the channel for the club via shared service (legacy)
         const clb = await tx
           .insert(club)
           .values({
@@ -153,9 +148,24 @@ export const clubRouter = createTRPCRouter({
             address: input.address,
             managerId: input.userId,
             logoUrl: input.logoUrl,
-            chatGroupId: chatChannel?.id,
           })
           .returning();
+
+        // create Convex room for real-time chat (after club is created so we have clubId)
+        const convexRoomId = await createClubRoomInConvex(
+          clb[0].id,
+          input.name,
+          input.userId,
+        );
+
+        // Update club with Convex room ID
+        if (convexRoomId) {
+          await tx
+            .update(club)
+            .set({ convexRoomId: String(convexRoomId) })
+            .where(eq(club.id, clb[0].id));
+          clb[0].convexRoomId = String(convexRoomId);
+        }
         if (input.isSite) {
           await tx.insert(site).values({
             clubId: clb[0].id,
@@ -199,39 +209,32 @@ export const clubRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
           message: "You are not authorized to modify this club",
         });
+
+      let convexRoomId: string | null | undefined;
+      if (initialClub && !initialClub.convexRoomId) {
+        convexRoomId = await createClubRoomInConvex(
+          initialClub.id,
+          initialClub.name,
+          initialClub.managerId,
+        );
+      }
       const data: {
         name: string;
         address: string;
         logoUrl: string | null;
+        convexRoomId?: string;
       } = {
         name: input.name,
         address: input.address,
         logoUrl: input.logoUrl,
+        convexRoomId: convexRoomId ?? undefined,
       };
-
       const updated = await db
         .update(club)
         .set(data)
         .where(eq(club.id, input.id))
         .returning();
-      // if (initialLogoId && !input.logoId) {
-      //   await db.delete(userDocument).where(eq(userDocument.id, initialLogoId));
-      // }
 
-      // if (initialClub) {
-      //   // create the channel for the club
-      //   let token = initialClub.manager.user.chatToken;
-      //   if (!token) {
-      //     token = createToken(initialClub.managerId);
-      //     await db.update(user).set({ chatToken: token }).where(eq(user.id, initialClub.managerId));
-      //   }
-      //   await streamchatClient.connectUser({ id: club.managerId }, token);
-      //   const channel = streamchatClient.channel("messaging", club.id, {
-      //     name: input.name,
-      //     created_by_id: club.managerId,
-      //   });
-      //   await channel.create();
-      // }
       return updated;
     }),
   updateClubCalendar: protectedProcedure

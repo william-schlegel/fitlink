@@ -11,15 +11,17 @@ function LayoutPage({
   title,
   titleComponents,
   variant = "main",
+  className,
 }: {
   preTitle?: string;
   children: React.ReactNode;
   title: string;
   titleComponents?: React.ReactNode;
   variant?: "main" | "section";
+  className?: string;
 }) {
   return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
+    <div className={twMerge("container mx-auto my-2 space-y-2 p-2", className)}>
       {variant === "main" ? <Title title={title} /> : null}
       <header className="mb-4 flex flex-row flex-wrap items-center gap-4">
         {variant === "main" ? (
@@ -41,9 +43,17 @@ function LayoutPage({
   );
 }
 
-function Main({ children }: { children: React.ReactNode }) {
+function Main({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <section className="grid grid-cols-[1fr_3fr] gap-4">{children}</section>
+    <section className={twMerge("grid grid-cols-[1fr_3fr] gap-4", className)}>
+      {children}
+    </section>
   );
 }
 

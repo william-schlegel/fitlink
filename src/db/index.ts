@@ -9,7 +9,6 @@ import * as coach from "./schema/coach";
 import * as user from "./schema/user";
 import * as page from "./schema/page";
 import * as club from "./schema/club";
-import * as chat from "./schema/chat";
 import * as auth from "./schema/auth";
 import { env } from "@/env";
 
@@ -30,7 +29,6 @@ export const schema = {
   ...planning,
   ...subscription,
   ...user,
-  ...chat,
 };
 
 export const db = drizzle(pool, {

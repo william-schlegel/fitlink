@@ -47,6 +47,7 @@ export const userCoach = pgTable(
     instagramLink: text("instagram_link"),
     rating: real("rating").default(0),
     pageStyle: text("page_style").default("light"),
+    convexRoomId: text("convex_room_id"),
   },
   (table) => [index("user_coach_user_idx").on(table.userId)],
 );
