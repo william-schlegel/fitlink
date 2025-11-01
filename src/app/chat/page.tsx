@@ -23,7 +23,7 @@ export default function ConvexChat() {
   const roomId = roomIdParam as Id<"chatRooms"> | null;
 
   if (!userId) {
-    return <div>Please log in to use chat</div>;
+    return <div>{t("login-to-use-chat")}</div>;
   }
 
   return (
@@ -47,7 +47,7 @@ export default function ConvexChat() {
             </>
           ) : (
             <div className="flex items-center justify-center h-full text-base-content/60">
-              Select a room to start chatting
+              {t("no-room-selected")}
             </div>
           )}
         </div>

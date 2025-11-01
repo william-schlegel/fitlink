@@ -4,9 +4,12 @@ import { useState } from "react";
 
 import Image from "next/image";
 
+import { useTranslations } from "next-intl";
+
 import { Id } from "../../../convex/_generated/dataModel";
 import { UploadButton } from "@/components/uploadthing";
 import { api } from "../../../convex/_generated/api";
+import ButtonIcon from "@/components/ui/buttonIcon";
 import { useMutation } from "convex/react";
 
 type MessageInputProps = {
@@ -25,6 +28,7 @@ export function MessageInput({
   const [content, setContent] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const sendMessage = useMutation(api.messages.sendMessage);
+  const t = useTranslations("message");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,29 +67,50 @@ export function MessageInput({
           )}
         </div>
       )}
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         <input
           type="text"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Type a message..."
+          placeholder={t("message-placeholder")}
           className="input input-bordered flex-1"
         />
-        <UploadButton
-          endpoint="messageAttachment"
-          onClientUploadComplete={(res) => {
-            if (res) {
-              setImageUrls((prev) => [...prev, ...res.map((file) => file.url)]);
-            }
-          }}
-          onUploadError={(error) => {
-            console.error("Upload error:", error);
-            alert("Failed to upload image");
-          }}
-        />
-        <button type="submit" className="btn btn-primary">
-          Send
+        <button type="submit">
+          <ButtonIcon
+            iconComponent={<i className="bx bx-send" />}
+            title={t("send")}
+          />
         </button>
+
+        <div className="dropdown dropdown-top dropdown-end">
+          <div tabIndex={0} role="button" className="m-1">
+            <ButtonIcon
+              iconComponent={<i className="bx bx-image" />}
+              title={t("image-upload")}
+            />
+          </div>
+          <div
+            tabIndex={-1}
+            className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+          >
+            <UploadButton
+              buttonText={t("image-upload")}
+              endpoint="messageAttachment"
+              onClientUploadComplete={(res) => {
+                if (res) {
+                  setImageUrls((prev) => [
+                    ...prev,
+                    ...res.map((file) => file.url),
+                  ]);
+                }
+              }}
+              onUploadError={(error) => {
+                console.error("Upload error:", error);
+                alert("Failed to upload image");
+              }}
+            />
+          </div>
+        </div>
       </div>
       {imageUrls.length > 0 && (
         <div className="flex gap-2 flex-wrap">

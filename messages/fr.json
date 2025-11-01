@@ -1013,7 +1013,7 @@
     "my-chat": "Ma messagerie",
     "no-message-yet": "Pas encore de message",
     "group-name": "Nom du groupe",
-    "no-channel": "Aucun canal trouvé",
+    "no-channel": "Aucun canal de discussion trouvé",
     "name-mandatory": "Le nom est obligatoire",
     "new-group": "Nouveau groupe de discussion",
     "new-message": "Votre message",
@@ -1023,6 +1023,10 @@
     "group-users": "Invités",
     "and-n-more": "{count, plural, =1 {Et un autre} other {Et # autres}}",
     "delete-user": "Supprimer",
+    "delete-message": "Supprimer",
+    "deleted-message": "Message supprimé",
+    "deleted-message-message": "Vous allez supprimer ce message.|Cette action est irréversible. Confirmez-vous ?",
+    "deleted-message-confirmation": "Supprimer",
     "update-group": "Modifier le groupe",
     "group-updated": "Groupe mis à jour",
     "group-created": "Nouveau groupe créé",
@@ -1033,22 +1037,10 @@
     "react": "Réagir",
     "reply": "Répondre",
     "reply-to": "Réponse au message",
-    "channel": {
-      "club": "Club",
-      "coach": "Coach",
-      "group": "Groupe",
-      "private": "Privé"
-    },
-    "reaction": {
-      "CHECK": "Top là",
-      "GRRR": "Grrrrr",
-      "LIKE": "J'aime",
-      "LOL": "Ha ha ha",
-      "LOVE": "J'adore !",
-      "SAD": "Snif",
-      "WOAH": "Whaou",
-      "STRENGTH": "Force",
-      "FIST": "Check"
-    }
+    "send": "Envoyer",
+    "image-upload": "Télécharger une image",
+    "message-placeholder": "Tapez votre message...",
+    "no-room-selected": "Sélectionnez une salle pour commencer à discuter",
+    "login-to-use-chat": "Veuillez vous connecter pour utiliser la messagerie"
   }
 }

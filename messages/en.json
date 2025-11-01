@@ -1003,7 +1003,7 @@
   "message": {
     "my-chat": "My chat",
     "no-message-yet": "No message yet",
-    "no-channel": "No channel found",
+    "no-channel": "No chat channel found",
     "group-name": "Group name",
     "name-mandatory": "Name is required",
     "new-group": "New group",
@@ -1025,16 +1025,10 @@
     "react": "React",
     "reply": "Reply",
     "reply-to": "Reply to message",
-    "reaction": {
-      "CHECK": "TOP",
-      "GRRR": "GRRR",
-      "LIKE": "Like",
-      "LOL": "LOL",
-      "LOVE": "I love !",
-      "SAD": "Sad",
-      "WOAH": "WOAH",
-      "STRENGTH": "Strength",
-      "FIST": "Check"
-    }
+    "send": "Send",
+    "image-upload": "Upload image",
+    "message-placeholder": "Type your message...",
+    "no-room-selected": "Select a room to start chatting",
+    "login-to-use-chat": "Please login to use chat"
   }
 }

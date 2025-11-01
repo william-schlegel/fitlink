@@ -1,10 +1,20 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import React, { useRef } from "react";
+
+import ButtonIcon from "@/components/ui/buttonIcon";
+
 import Image from "next/image";
 
+import { createPortal } from "react-dom";
+
 import { Id } from "../../../convex/_generated/dataModel";
+import Confirmation from "@/components/ui/confirmation";
 import { api } from "../../../convex/_generated/api";
+import Spinner from "@/components/ui/spinner";
 import { useMutation } from "convex/react";
+import { trpc } from "@/lib/trpc/client";
 
 type MessageItemProps = {
   message: {
@@ -31,10 +41,10 @@ export function MessageItem({ message, userId }: MessageItemProps) {
 
   const addReaction = useMutation(api.messages.addReaction);
   const deleteMessage = useMutation(api.messages.deleteMessage);
+  const msgRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("message");
 
-  // Get user info for message author
-  // Note: In a real implementation, you'd fetch user data from your database
-  // For now, we'll just show the userId
+  const userInfo = trpc.users.getUserById.useQuery({ id: message.userId });
 
   const handleReaction = async (emoji: string) => {
     await addReaction({
@@ -46,16 +56,12 @@ export function MessageItem({ message, userId }: MessageItemProps) {
   };
 
   const handleDelete = async () => {
-    if (confirm("Are you sure you want to delete this message?")) {
-      await deleteMessage({
-        messageId: message._id,
-        userId,
-        isAdmin: false, // Should check actual admin status
-      });
-    }
+    await deleteMessage({
+      messageId: message._id,
+      userId,
+      isAdmin: false, // Should check actual admin status
+    });
   };
-
-  const commonEmojis = ["👍", "❤️", "😂", "😮", "😢", "😡"];
 
   return (
     <div
@@ -65,31 +71,37 @@ export function MessageItem({ message, userId }: MessageItemProps) {
     >
       <div className="chat-header">
         <span className="text-xs opacity-50">
-          User {message.userId.slice(0, 8)}
+          {userInfo.isLoading ? <Spinner size={12} /> : userInfo.data?.name}
         </span>
         <time className="text-xs opacity-50">
-          {new Date(message.createdAt).toLocaleTimeString()}
+          {userInfo.isLoading ? (
+            <Spinner />
+          ) : (
+            new Date(message.createdAt).toLocaleTimeString()
+          )}
         </time>
       </div>
-      <div className="chat-bubble bg-base-300 text-base-content relative">
-        {message.replyToMessageId && (
-          <div className="text-xs opacity-70 mb-1 border-l-2 pl-2">
-            Replying to message
-          </div>
-        )}
+      <div
+        className="chat-bubble bg-base-300 text-base-content relative"
+        ref={msgRef}
+      >
         {message.content && <p>{message.content}</p>}
         {message.imageUrls.length > 0 && (
           <div className="flex flex-col gap-2 mt-2">
-            {message.imageUrls.map((url, idx) => (
-              <Image
-                key={idx}
-                src={url}
-                alt={`Message image ${idx + 1}`}
-                width={300}
-                height={300}
-                className="rounded-lg"
-              />
-            ))}
+            {userInfo.isLoading ? (
+              <Spinner />
+            ) : (
+              message.imageUrls.map((url, idx) => (
+                <Image
+                  key={idx}
+                  src={url}
+                  alt={`Message image ${idx + 1}`}
+                  width={300}
+                  height={300}
+                  className="rounded-lg"
+                />
+              ))
+            )}
           </div>
         )}
         {message.editedAt && (
@@ -97,7 +109,7 @@ export function MessageItem({ message, userId }: MessageItemProps) {
         )}
       </div>
       {message.reactions.length > 0 && (
-        <div className="flex gap-1 mt-1">
+        <div className="flex gap-1 mt-1 absolute -bottom-3 right-6">
           {message.reactions.map((reaction) => (
             <span key={reaction._id} className="text-sm">
               {reaction.emoji}
@@ -106,26 +118,51 @@ export function MessageItem({ message, userId }: MessageItemProps) {
         </div>
       )}
       {showReactionPicker && (
-        <div className="absolute bottom-full mb-2 left-0 flex gap-1 bg-base-100 p-2 rounded-lg shadow-lg z-10">
-          {commonEmojis.map((emoji) => (
-            <button
-              key={emoji}
-              type="button"
-              onClick={() => handleReaction(emoji)}
-              className="hover:scale-125 transition-transform text-lg"
-            >
-              {emoji}
-            </button>
-          ))}
-        </div>
+        <EmojiPicker handleReaction={handleReaction} msgRef={msgRef} />
       )}
       {isMyMessage && (
-        <button onClick={handleDelete} className="btn btn-ghost btn-xs mt-1">
-          Delete
-        </button>
+        <div className="absolute -right-3 bottom-3 z-10">
+          <Confirmation
+            message={t("deleted-message-message")}
+            title={t("deleted-message")}
+            onConfirm={handleDelete}
+            buttonIcon={<i className="bx bx-trash" />}
+            variant="Icon-Only-Secondary"
+            buttonSize="xs"
+          />
+        </div>
       )}
     </div>
   );
 }
 
-import React from "react";
+const EmojiPicker = ({
+  msgRef,
+  handleReaction,
+}: {
+  msgRef: React.RefObject<HTMLDivElement | null>;
+  handleReaction: (emoji: string) => void;
+}) => {
+  const commonEmojis = ["👍", "❤️", "😂", "😮", "😢", "😡"];
+  if (!msgRef.current) return null;
+  const portalTarget = msgRef.current.getBoundingClientRect();
+
+  return createPortal(
+    <div
+      className="absolute mb-2 flex gap-1 bg-base-100 p-2 rounded-lg shadow-lg z-10"
+      style={{ top: portalTarget.bottom, left: portalTarget.left }}
+    >
+      {commonEmojis.map((emoji) => (
+        <button
+          key={emoji}
+          type="button"
+          onClick={() => handleReaction(emoji)}
+          className="hover:scale-125 transition-transform text-lg"
+        >
+          {emoji}
+        </button>
+      ))}
+    </div>,
+    document.body,
+  );
+};
