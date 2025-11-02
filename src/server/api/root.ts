@@ -1,5 +1,4 @@
 import { subscriptionRouter } from "./routers/subscription";
-import { notificationRouter } from "./routers/notification";
 import { activityRouter } from "./routers/activities";
 import { dashboardRouter } from "./routers/dashboard";
 import { createTRPCRouter } from "@/lib/trpc/server";
@@ -31,7 +30,6 @@ export const appRouter = createTRPCRouter({
   plannings: planningRouter,
   pages: pageRouter,
   subscriptions: subscriptionRouter,
-  notifications: notificationRouter,
 });
 
 // export type definition of API

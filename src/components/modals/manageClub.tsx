@@ -22,7 +22,8 @@ import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { useUser } from "@/lib/auth/client";
 import ButtonIcon from "../ui/buttonIcon";
-import { trpc } from "@/lib/trpc/client";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
@@ -383,30 +384,32 @@ const AddCoachToClubSteps = [
 type AddCoachToClubProps = { clubId: string; userId: string };
 
 export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
-  const createNotifications =
-    trpc.notifications.createNotificationToUsers.useMutation({
-      onSuccess() {
-        toast.success(t("coach.notification-success"));
-      },
-      onError(error) {
-        toast.error(error.message);
-      },
-    });
+  const createNotifications = useMutation(api.notifications.createNotifications);
   const [closeModal, setCloseModal] = useState(false);
   const t = useTranslations("club");
   const [step, setStep] = useState(0);
   const [message, setMessage] = useState("");
   const [coachIds, setCoachIds] = useState<string[]>([]);
 
-  function handleSendMessage() {
-    if (coachIds.length > 0 && message)
-      createNotifications.mutate({
-        type: "SEARCH_COACH",
-        from: userId,
-        to: coachIds,
-        message: message,
-        data: JSON.stringify({ clubId }),
-      });
+  async function handleSendMessage() {
+    if (coachIds.length > 0 && message) {
+      try {
+        await createNotifications({
+          notifications: coachIds.map((coachId) => ({
+            userId: coachId,
+            userFromId: userId,
+            type: "SEARCH_COACH",
+            message: message,
+            data: { clubId },
+          })),
+        });
+        toast.success(t("coach.notification-success"));
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to send notification",
+        );
+      }
+    }
     setCloseModal(true);
     setStep(0);
   }

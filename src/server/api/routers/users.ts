@@ -14,6 +14,10 @@ import {
   userNotification,
 } from "@/db/schema/user";
 import { pricing, subscription } from "@/db/schema/subscription";
+import {
+  createCoachRoomInConvex,
+  createNotificationInConvex,
+} from "@/lib/convex/server";
 import { TUserFilter } from "@/app/admin/users/userFilter";
 import { featureEnum, roleEnum } from "@/db/schema/enums";
 import { reservation } from "@/db/schema/planning";
@@ -21,7 +25,6 @@ import { isAdmin } from "@/server/lib/userTools";
 import { auth } from "@/lib/auth/server";
 import { user } from "@/db/schema/auth";
 import { db } from "@/db";
-import { createCoachRoomInConvex } from "@/lib/convex/server";
 
 const UserFilter = z
   .object({
@@ -326,7 +329,7 @@ export const userRouter = createTRPCRouter({
         email: z.email().optional(),
         phone: z.string().optional(),
         address: z.string().optional(),
-        internalRole: z.enum(roleEnum.enumValues).optional(),
+        internalRole: z.enum(roleEnum.enumValues),
         pricingId: z.cuid2().optional(),
         monthlyPayment: z.boolean().optional(),
         cancelationDate: z.date().optional(),
@@ -351,35 +354,45 @@ export const userRouter = createTRPCRouter({
         });
 
       const result = await db.transaction(async (tx) => {
+        console.log("input", input);
         if (
           input.internalRole === "COACH" ||
           input.internalRole === "MANAGER_COACH"
         ) {
-          await tx.delete(userCoach).where(eq(userCoach.userId, input.id));
-          const coachRecord = await tx.insert(userCoach).values({
-            userId: input.id,
-            longitude: input.longitude,
-            latitude: input.latitude,
-            searchAddress: input.searchAddress,
-            range: input.range,
-            publicName: input.publicName,
-            aboutMe: input.aboutMe,
-            description: input.description,
-          }).returning();
-          
+          const initialCoach = (await tx.query.userCoach.findFirst({
+            where: eq(userCoach.userId, input.id),
+          })) ?? { convexRoomId: undefined };
+          console.log("initialCoach", initialCoach);
+          const coachRecord = await tx
+            .update(userCoach)
+            .set({
+              ...initialCoach,
+              userId: input.id,
+              longitude: input.longitude,
+              latitude: input.latitude,
+              searchAddress: input.searchAddress,
+              range: input.range,
+              publicName: input.publicName,
+              aboutMe: input.aboutMe,
+              description: input.description,
+            })
+            .returning();
+
           // Create Convex room for coach
-          const coachName = input.publicName ?? input.name ?? "Coach";
-          const convexRoomId = await createCoachRoomInConvex(
-            input.id,
-            coachName,
-          );
-          
-          // Update coach record with Convex room ID
-          if (convexRoomId && coachRecord[0]) {
-            await tx
-              .update(userCoach)
-              .set({ convexRoomId: String(convexRoomId) })
-              .where(eq(userCoach.userId, input.id));
+          if (!initialCoach?.convexRoomId) {
+            const coachName = input.publicName ?? input.name ?? "Coach";
+            const convexRoomId = await createCoachRoomInConvex(
+              input.id,
+              coachName,
+            );
+
+            // Update coach record with Convex room ID
+            if (convexRoomId && coachRecord[0]) {
+              await tx
+                .update(userCoach)
+                .set({ convexRoomId: String(convexRoomId) })
+                .where(eq(userCoach.userId, input.id));
+            }
           }
         }
         return tx
@@ -393,7 +406,6 @@ export const userRouter = createTRPCRouter({
             pricingId: input.pricingId,
             monthlyPayment: input.monthlyPayment,
             cancelationDate: input.cancelationDate,
-            // profileImageId: input.profileImageId,
             image: input.profileImageUrl,
           })
           .where(eq(user.id, input.id))
@@ -441,17 +453,17 @@ export const userRouter = createTRPCRouter({
       });
       const managerId = sub?.club.managerId;
       if (managerId) {
-        await db.insert(userNotification).values({
-          userFromId: input.userId,
-          userToId: managerId,
-          type: "NEW_SUBSCRIPTION",
-          message: "",
-          data: {
+        await createNotificationInConvex(
+          managerId,
+          input.userId,
+          "NEW_SUBSCRIPTION",
+          "",
+          {
             subscriptionId: input.subscriptionId,
             monthly: input.monthly,
             online: input.online,
           },
-        });
+        );
       }
       // const member = await ctx.prisma.userMember.findFirst({
       //   where: { userId: input.userId },

@@ -1029,6 +1029,7 @@
     "image-upload": "Upload image",
     "message-placeholder": "Type your message...",
     "no-room-selected": "Select a room to start chatting",
-    "login-to-use-chat": "Please login to use chat"
+    "login-to-use-chat": "Please login to use chat",
+    "no-messages": "No messages yet, start chatting!"
   }
 }

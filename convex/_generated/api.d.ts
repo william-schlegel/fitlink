@@ -11,6 +11,7 @@
 import type * as actions from "../actions.js";
 import type * as messages from "../messages.js";
 import type * as moderation from "../moderation.js";
+import type * as notifications from "../notifications.js";
 
 import type {
   ApiFromModules,
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   actions: typeof actions;
   messages: typeof messages;
   moderation: typeof moderation;
+  notifications: typeof notifications;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

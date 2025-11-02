@@ -2,12 +2,11 @@ import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
-import { getNotificationToUser } from "@/server/api/routers/notification";
-import { formatMessage } from "@/lib/getNotifications";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { RoleEnum } from "@/db/schema/enums";
 import ThemeButton from "./themeButton";
 import UserButton from "./userButton";
+import NotificationIcon from "./notificationIcon";
 import { env } from "@/env";
 import Menu from "./menu";
 
@@ -21,10 +20,6 @@ export default async function Navbar({
   internalRole: RoleEnum | undefined | null;
 }) {
   const t = await getTranslations();
-
-  const notificationsQuery = await getNotificationToUser(userId);
-  const unread = notificationsQuery.unread;
-  const notifications = notificationsQuery.notifications;
 
   const caller = await createTrpcCaller();
   if (!caller) return null;
@@ -73,61 +68,11 @@ export default async function Navbar({
         <ThemeButton />
         {userId ? (
           <>
-            {notifications.length ? (
-              <div className="dropdown dropdown-end">
-                <label tabIndex={0} className="btn-ghost btn-circle btn">
-                  <div className="w-10 rounded-full">
-                    {unread ? (
-                      <div className="indicator ">
-                        <i className="bx bx-bell bx-md text-primary" />
-                        <span className="badge-secondary badge badge-sm indicator-item">
-                          {unread}
-                        </span>
-                      </div>
-                    ) : (
-                      <i className="bx bx-bell bx-md text-primary" />
-                    )}
-                  </div>
-                </label>
-                <ul
-                  tabIndex={0}
-                  className="dropdown-content menu rounded-box menu-compact mt-3 w-52 bg-base-100 p-2 shadow"
-                >
-                  {notifications.map(async (notification) => (
-                    <li
-                      key={notification.id}
-                      className={`max-w-full overflow-hidden truncate text-ellipsis ${
-                        notification.viewDate ? "" : "font-bold text-secondary"
-                      }`}
-                    >
-                      <Link
-                        href={`/user/${notification.userToId}/notification?notificationId=${notification.id}`}
-                      >
-                        <span>{await formatMessage(notification)}</span>
-                      </Link>
-                    </li>
-                  ))}
-                  <div className="divider my-1"></div>
-                  <li>
-                    <Link href={`/user/${user?.id}/notification`}>
-                      <span>{t("common.navigation.my-notifications")}</span>
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            ) : (
-              <i className="bx bx-bell bx-md text-base-300" />
-            )}{" "}
-            {userId ? (
-              <>
-                <span className="badge badge-primary">
-                  {t(`common.roles.${internalRole}`)}
-                </span>
-                <UserButton />
-              </>
-            ) : (
-              <Link href="/user/signin">{t("auth.signin.connect")}</Link>
-            )}
+            <NotificationIcon userId={userId} />
+            <span className="badge badge-primary">
+              {t(`common.roles.${internalRole}`)}
+            </span>
+            <UserButton />
           </>
         ) : (
           <ul className="menu menu-horizontal p-0">

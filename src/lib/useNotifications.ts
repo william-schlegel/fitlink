@@ -1,32 +1,35 @@
+"use client";
+
+import { useQuery } from "convex/react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { api } from "../../convex/_generated/api";
 
-import { userNotification } from "@/db/schema/user";
-import { trpc } from "./trpc/client";
-
-type UserNotification = typeof userNotification.$inferSelect;
+type Notification = {
+  _id: string;
+  userId: string;
+  userFromId: string;
+  type: string;
+  message: string;
+  data?: unknown;
+  viewedAt?: number;
+  createdAt: number;
+  answeredAt?: number;
+  answer?: string;
+  linkedNotification?: string;
+};
 
 function useNotifications(userId: string | undefined | null) {
-  const [notifications, setNotifications] = useState<UserNotification[]>([]);
-  const [unread, setUnread] = useState(0);
   const t = useTranslations("common");
 
-  const getNotifications = trpc.notifications.getNotificationToUser.useQuery(
-    { userToId: userId ?? "" },
-    {
-      enabled: Boolean(userId),
-      refetchInterval: 1 * 60 * 1000, // 1'
-    },
+  const notificationsData = useQuery(
+    api.notifications.getNotificationsForUser,
+    userId ? { userId } : "skip",
   );
 
-  useEffect(() => {
-    if (getNotifications.data) {
-      setNotifications(getNotifications.data.notifications);
-      setUnread(getNotifications.data.unread);
-    }
-  }, [getNotifications.data]);
+  const notifications = notificationsData?.notifications ?? [];
+  const unread = notificationsData?.unread ?? 0;
 
-  function formatMessage(notification: UserNotification) {
+  function formatMessage(notification: Notification) {
     if (notification.type === "NEW_SUBSCRIPTION")
       return t("api.new-subscription");
     if (notification.type === "SUBSCRIPTION_VALIDATED")
@@ -37,7 +40,7 @@ function useNotifications(userId: string | undefined | null) {
   }
 
   return {
-    isLoading: getNotifications.isLoading,
+    isLoading: notificationsData === undefined,
     notifications,
     unread,
     formatMessage,

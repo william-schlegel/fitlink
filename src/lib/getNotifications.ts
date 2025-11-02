@@ -1,16 +1,17 @@
-import { getTranslations } from "next-intl/server";
+// This file is kept for backwards compatibility but is no longer used.
+// Notification formatting is now handled in individual components using Convex notification types.
 
-import { userNotification } from "@/db/schema/user";
-
-type UserNotification = typeof userNotification.$inferSelect;
-
-export async function formatMessage(notification: UserNotification) {
-  const t = await getTranslations("common");
-  if (notification.type === "NEW_SUBSCRIPTION")
-    return t("api.new-subscription");
-  if (notification.type === "SUBSCRIPTION_VALIDATED")
-    return t("api.subscription-accepted");
-  if (notification.type === "SUBSCRIPTION_REJECTED")
-    return t("api.subscription-rejected");
-  return notification.message;
-}
+// Convex notification type (for reference)
+export type ConvexNotification = {
+  _id: string;
+  userId: string;
+  userFromId: string;
+  type: string;
+  message: string;
+  data?: unknown;
+  viewedAt?: number;
+  createdAt: number;
+  answeredAt?: number;
+  answer?: string;
+  linkedNotification?: string;
+};

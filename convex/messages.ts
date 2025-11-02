@@ -1,6 +1,5 @@
-import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
+import { v } from "convex/values";
 
 // Queries
 export const getMessages = query({
@@ -12,9 +11,7 @@ export const getMessages = query({
     const limit = args.limit ?? 50;
     const messages = await ctx.db
       .query("messages")
-      .withIndex("by_roomId_createdAt", (q) =>
-        q.eq("roomId", args.roomId),
-      )
+      .withIndex("by_roomId_createdAt", (q) => q.eq("roomId", args.roomId))
       .order("desc")
       .take(limit);
 
@@ -108,9 +105,7 @@ export const getUnreadCount = query({
 
     const unreadMessages = await ctx.db
       .query("messages")
-      .withIndex("by_roomId_createdAt", (q) =>
-        q.eq("roomId", args.roomId),
-      )
+      .withIndex("by_roomId_createdAt", (q) => q.eq("roomId", args.roomId))
       .filter((q) => q.gt(q.field("createdAt"), lastReadAt))
       .collect();
 
@@ -142,10 +137,7 @@ export const sendMessage = mutation({
 
     if (membership.isBanned) {
       const now = Date.now();
-      if (
-        membership.bannedUntil &&
-        membership.bannedUntil > now
-      ) {
+      if (membership.bannedUntil && membership.bannedUntil > now) {
         throw new Error("User is banned from this room");
       }
       // Ban expired, unban
@@ -329,4 +321,3 @@ export const getRoomByCoachId = query({
       .first();
   },
 });
-

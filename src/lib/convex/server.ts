@@ -111,3 +111,64 @@ export async function createDirectMessageRoomInConvex(
     return null;
   }
 }
+
+export async function createNotificationInConvex(
+  userId: string,
+  userFromId: string,
+  type: string,
+  message: string,
+  data?: unknown,
+  linkedNotification?: string,
+) {
+  if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
+    console.warn("CONVEX_URL not set, skipping Convex notification creation");
+    return null;
+  }
+
+  try {
+    const notificationId = await convexHttpClient.mutation(
+      api.notifications.createNotification,
+      {
+        userId,
+        userFromId,
+        type,
+        message,
+        data,
+        linkedNotification,
+      },
+    );
+    return notificationId;
+  } catch (error) {
+    console.error("Error creating Convex notification:", error);
+    return null;
+  }
+}
+
+export async function createNotificationsInConvex(
+  notifications: Array<{
+    userId: string;
+    userFromId: string;
+    type: string;
+    message: string;
+    data?: unknown;
+    linkedNotification?: string;
+  }>,
+) {
+  if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
+    console.warn("CONVEX_URL not set, skipping Convex notifications creation");
+    return null;
+  }
+
+  try {
+    const notificationIds = await convexHttpClient.mutation(
+      api.notifications.createNotifications,
+      {
+        notifications,
+      },
+    );
+    return notificationIds;
+  } catch (error) {
+    console.error("Error creating Convex notifications:", error);
+    return null;
+  }
+}

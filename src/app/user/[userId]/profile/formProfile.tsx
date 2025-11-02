@@ -64,6 +64,7 @@ export default function FormProfile({
       phone: data.phone,
       address: data.address,
       profileImageUrl: data.imageUrl,
+      internalRole: userData.internalRole ?? "MEMBER",
     });
     form.reset();
   };

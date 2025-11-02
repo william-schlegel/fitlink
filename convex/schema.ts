@@ -61,5 +61,21 @@ export default defineSchema({
     bannedAt: v.number(),
   })
     .index("by_userId", ["userId"]),
+
+  notifications: defineTable({
+    userId: v.string(), // recipient user ID
+    userFromId: v.string(), // sender user ID
+    type: v.string(), // notification type enum values
+    message: v.string(), // notification message
+    data: v.optional(v.any()), // additional JSON data
+    viewedAt: v.optional(v.number()), // timestamp when viewed
+    createdAt: v.number(), // creation timestamp
+    answeredAt: v.optional(v.number()), // timestamp when answered
+    answer: v.optional(v.string()), // answer text
+    linkedNotification: v.optional(v.string()), // linked notification ID
+  })
+    .index("by_userId", ["userId"])
+    .index("by_userId_createdAt", ["userId", "createdAt"])
+    .index("by_userFromId", ["userFromId"]),
 });
 

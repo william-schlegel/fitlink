@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
 
+import { useTranslations } from "next-intl";
+
 import { Id } from "../../../convex/_generated/dataModel";
 import { api } from "../../../convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
@@ -14,7 +16,7 @@ type MessageListProps = {
 export function MessageList({ roomId, userId }: MessageListProps) {
   const messages = useQuery(api.messages.getMessages, { roomId });
   const markAsRead = useMutation(api.messages.markAsRead);
-
+  const t = useTranslations("message");
   // Mark as read when component mounts or roomId changes
   React.useEffect(() => {
     if (roomId) {
@@ -29,7 +31,7 @@ export function MessageList({ roomId, userId }: MessageListProps) {
   if (messages.length === 0) {
     return (
       <div className="flex items-center justify-center h-full text-base-content/60">
-        No messages yet. Start the conversation!
+        {t("no-messages")}
       </div>
     );
   }
