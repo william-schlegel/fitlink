@@ -1030,6 +1030,15 @@
     "message-placeholder": "Type your message...",
     "no-room-selected": "Select a room to start chatting",
     "login-to-use-chat": "Please login to use chat",
-    "no-messages": "No messages yet, start chatting!"
+    "no-messages": "No messages yet, start chatting!",
+    "conversations": "Conversations",
+    "search-users": "Search users",
+    "search-placeholder": "Search by name...",
+    "no-users-found": "No users found",
+    "close": "Close",
+    "deleted-message": "Delete message",
+    "deleted-message-message": "Do you want to delete this message?",
+    "direct-messages": "Direct messages",
+    "group-rooms": "Message groups"
   }
 }

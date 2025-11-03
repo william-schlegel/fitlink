@@ -1042,6 +1042,13 @@
     "message-placeholder": "Tapez votre message...",
     "no-room-selected": "Sélectionnez une salle pour commencer à discuter",
     "login-to-use-chat": "Veuillez vous connecter pour utiliser la messagerie",
-    "no-messages": "Aucun message pour le moment, commencez à discuter !"
+    "no-messages": "Aucun message pour le moment, commencez à discuter !",
+    "conversations": "Conversations",
+    "search-users": "Rechercher des utilisateurs",
+    "search-placeholder": "Rechercher par nom...",
+    "no-users-found": "Aucun utilisateur trouvé",
+    "close": "Fermer",
+    "direct-messages": "Messages directs",
+    "group-rooms": "Groupes de messages"
   }
 }

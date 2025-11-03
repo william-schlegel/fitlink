@@ -11,18 +11,34 @@ import { MessageItem } from "./MessageItem";
 type MessageListProps = {
   roomId: Id<"chatRooms">;
   userId: string;
+  isAdmin?: boolean;
 };
 
-export function MessageList({ roomId, userId }: MessageListProps) {
+export function MessageList({
+  roomId,
+  userId,
+  isAdmin = false,
+}: MessageListProps) {
   const messages = useQuery(api.messages.getMessages, { roomId });
+  const membershipInfo = useQuery(api.messages.hasRoomMembership, {
+    roomId,
+    userId,
+  });
   const markAsRead = useMutation(api.messages.markAsRead);
   const t = useTranslations("message");
   // Mark as read when component mounts or roomId changes
+  // For admin users: only mark as read if they have membership OR it's a direct message to them
   React.useEffect(() => {
-    if (roomId) {
-      markAsRead({ roomId, userId }).catch(console.error);
+    if (roomId && membershipInfo) {
+      const shouldMarkAsRead = isAdmin
+        ? membershipInfo.hasMembership || membershipInfo.isDirectMessageToUser
+        : membershipInfo.hasMembership;
+
+      if (shouldMarkAsRead) {
+        markAsRead({ roomId, userId }).catch(console.error);
+      }
     }
-  }, [roomId, userId, markAsRead]);
+  }, [roomId, userId, markAsRead, membershipInfo, isAdmin]);
 
   if (!messages) {
     return <div className="loading loading-spinner mx-auto"></div>;

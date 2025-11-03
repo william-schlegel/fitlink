@@ -57,17 +57,17 @@ function Main({
   );
 }
 
-function List<
-  T extends {
-    id: string;
-    name: string | React.ReactNode;
-    link?: string;
-    onClick?: () => void;
-    badgeColor?: string;
-    badgeText?: string | React.ReactNode;
-    badgeIcon?: string;
-  },
->({
+type ListItem = {
+  id: string;
+  name: string | React.ReactNode;
+  link?: string;
+  onClick?: () => void;
+  badgeColor?: string;
+  badgeText?: string | React.ReactNode;
+  badgeIcon?: string;
+};
+
+function List<T extends ListItem>({
   children,
   list,
   itemId,
@@ -123,16 +123,7 @@ function List<
   );
 }
 
-function Lists<
-  T extends {
-    id: string;
-    name: string | React.ReactNode;
-    link: string;
-    badgeColor?: string;
-    badgeText?: string;
-    badgeIcon?: string;
-  },
->({
+function Lists<T extends ListItem>({
   children,
   lists,
   itemId,
@@ -166,7 +157,8 @@ function Lists<
                       itemId === item.id &&
                         "border border-primary bg-primary/10",
                     )}
-                    href={item.link}
+                    href={item.link ?? ""}
+                    onClick={item.onClick}
                   >
                     {typeof item.name === "string" ? (
                       <span>{item.name}</span>

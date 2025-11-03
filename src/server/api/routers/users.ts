@@ -13,11 +13,11 @@ import {
   userMember,
   userNotification,
 } from "@/db/schema/user";
-import { pricing, subscription } from "@/db/schema/subscription";
 import {
   createCoachRoomInConvex,
   createNotificationInConvex,
 } from "@/lib/convex/server";
+import { pricing, subscription } from "@/db/schema/subscription";
 import { TUserFilter } from "@/app/admin/users/userFilter";
 import { featureEnum, roleEnum } from "@/db/schema/enums";
 import { reservation } from "@/db/schema/planning";
@@ -320,6 +320,27 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .query(({ input }) => getAllUsers(input)),
+  searchUsers: protectedProcedure
+    .input(
+      z.object({
+        query: z.string().min(1),
+        limit: z.number().min(1).max(50).default(20),
+      }),
+    )
+    .query(async ({ input }) => {
+      const users = await db
+        .select({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+        })
+        .from(user)
+        .where(ilike(user.name, `%${input.query}%`))
+        .limit(input.limit);
+
+      return users;
+    }),
 
   updateUser: protectedProcedure
     .input(

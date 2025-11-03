@@ -37,8 +37,46 @@ export const getMessages = query({
 export const getRoomsForUser = query({
   args: {
     userId: v.string(),
+    isAdmin: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    // If admin, return all rooms (excluding DIRECT rooms)
+    if (args.isAdmin) {
+      const allRooms = await ctx.db
+        .query("chatRooms")
+        .filter((q) => q.neq(q.field("type"), "DIRECT"))
+        .collect();
+
+      const rooms = await Promise.all(
+        allRooms.map(async (room) => {
+          // Get membership if exists
+          const membership = await ctx.db
+            .query("roomMembers")
+            .withIndex("by_roomId_userId", (q) =>
+              q.eq("roomId", room._id).eq("userId", args.userId),
+            )
+            .first();
+
+          // Get unread count
+          const lastRead = membership?.lastReadAt ?? 0;
+          const unreadMessages = await ctx.db
+            .query("messages")
+            .withIndex("by_roomId_createdAt", (q) => q.eq("roomId", room._id))
+            .filter((q) => q.gt(q.field("createdAt"), lastRead))
+            .collect();
+
+          return {
+            ...room,
+            membership: membership ?? null,
+            unreadCount: unreadMessages.length,
+          };
+        }),
+      );
+
+      return rooms;
+    }
+
+    // Non-admin: return only rooms where user has membership
     const memberships = await ctx.db
       .query("roomMembers")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
@@ -83,6 +121,32 @@ export const getRoomMembers = query({
       .query("roomMembers")
       .withIndex("by_roomId", (q) => q.eq("roomId", args.roomId))
       .collect();
+  },
+});
+
+export const hasRoomMembership = query({
+  args: {
+    roomId: v.id("chatRooms"),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const membership = await ctx.db
+      .query("roomMembers")
+      .withIndex("by_roomId_userId", (q) =>
+        q.eq("roomId", args.roomId).eq("userId", args.userId),
+      )
+      .first();
+
+    const room = await ctx.db.get(args.roomId);
+    const isDirectMessage = room?.type === "DIRECT";
+    const isDirectMessageToUser =
+      isDirectMessage && room?.userIds?.includes(args.userId);
+
+    return {
+      hasMembership: !!membership,
+      isDirectMessage,
+      isDirectMessageToUser,
+    };
   },
 });
 
@@ -165,6 +229,74 @@ export const sendMessage = mutation({
       replyToMessageId: args.replyToMessageId,
       createdAt: Date.now(),
     });
+
+    // Get room to check if it's a direct message
+    const room = await ctx.db.get(args.roomId);
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    // Get all room members except the sender
+    const allMembers = await ctx.db
+      .query("roomMembers")
+      .withIndex("by_roomId", (q) => q.eq("roomId", args.roomId))
+      .filter((q) =>
+        q.and(
+          q.neq(q.field("userId"), args.userId),
+          q.eq(q.field("isBanned"), false),
+        ),
+      )
+      .collect();
+
+    // Determine recipients to notify
+    let recipientsToNotify: string[] = [];
+
+    if (room.type === "DIRECT" && room.userIds) {
+      // For direct messages, notify the other user if they're not banned
+      const otherUserId = room.userIds.find((id) => id !== args.userId);
+      if (otherUserId) {
+        // Check if other user is banned
+        const otherMembership = await ctx.db
+          .query("roomMembers")
+          .withIndex("by_roomId_userId", (q) =>
+            q.eq("roomId", args.roomId).eq("userId", otherUserId),
+          )
+          .first();
+
+        if (!otherMembership || !otherMembership.isBanned) {
+          recipientsToNotify.push(otherUserId);
+        }
+      }
+    } else {
+      // For group rooms, notify all non-banned members
+      recipientsToNotify = allMembers.map((m) => m.userId);
+    }
+
+    // Create notifications for recipients
+    if (recipientsToNotify.length > 0) {
+      const notificationMessage =
+        room.type === "DIRECT"
+          ? "New direct message"
+          : `New message in ${room.name}`;
+
+      const now = Date.now();
+      await Promise.all(
+        recipientsToNotify.map((recipientId) =>
+          ctx.db.insert("notifications", {
+            userId: recipientId,
+            userFromId: args.userId,
+            type: "NEW_MESSAGE",
+            message: notificationMessage,
+            data: {
+              roomId: args.roomId as string,
+              messageId: messageId as string,
+              roomType: room.type,
+            },
+            createdAt: now,
+          }),
+        ),
+      );
+    }
 
     return messageId;
   },
@@ -295,6 +427,30 @@ export const markAsRead = mutation({
     await ctx.db.patch(membership._id, {
       lastReadAt: Date.now(),
     });
+
+    // Mark all unread notifications for this room and user as viewed
+    const unreadNotifications = await ctx.db
+      .query("notifications")
+      .withIndex("by_userId_createdAt", (q) => q.eq("userId", args.userId))
+      .filter((q) => q.eq(q.field("type"), "NEW_MESSAGE"))
+      .filter((q) => q.eq(q.field("viewedAt"), undefined))
+      .collect();
+
+    const now = Date.now();
+    const roomIdString = args.roomId;
+    await Promise.all(
+      unreadNotifications
+        .filter((notification) => {
+          // Check if notification is for this room
+          const data = notification.data as { roomId?: string } | undefined;
+          return data?.roomId === roomIdString;
+        })
+        .map((notification) =>
+          ctx.db.patch(notification._id, {
+            viewedAt: now,
+          }),
+        ),
+    );
   },
 });
 
@@ -319,5 +475,149 @@ export const getRoomByCoachId = query({
       .query("chatRooms")
       .withIndex("by_coachId", (q) => q.eq("coachId", args.coachId))
       .first();
+  },
+});
+
+export const getDirectConversations = query({
+  args: {
+    userId: v.string(),
+    isAdmin: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    // If admin, return all direct message rooms
+    if (args.isAdmin) {
+      const allDirectRooms = await ctx.db
+        .query("chatRooms")
+        .withIndex("by_type", (q) => q.eq("type", "DIRECT"))
+        .collect();
+
+      const directRooms = await Promise.all(
+        allDirectRooms.map(async (room) => {
+          // Get the other user's ID (or first user if current user is not in the room)
+          const otherUserId =
+            room.userIds?.find((id) => id !== args.userId) ?? room.userIds?.[0];
+          if (!otherUserId) return null;
+
+          // Get membership if exists
+          const membership = await ctx.db
+            .query("roomMembers")
+            .withIndex("by_roomId_userId", (q) =>
+              q.eq("roomId", room._id).eq("userId", args.userId),
+            )
+            .first();
+
+          // Get the last message in this room
+          const lastMessage = await ctx.db
+            .query("messages")
+            .withIndex("by_roomId_createdAt", (q) => q.eq("roomId", room._id))
+            .order("desc")
+            .first();
+
+          // Get unread count
+          const lastReadAt = membership?.lastReadAt ?? 0;
+          const unreadMessages = await ctx.db
+            .query("messages")
+            .withIndex("by_roomId_createdAt", (q) => q.eq("roomId", room._id))
+            .filter((q) => q.gt(q.field("createdAt"), lastReadAt))
+            .collect();
+
+          return {
+            roomId: room._id,
+            otherUserId,
+            lastMessage: lastMessage
+              ? {
+                  content: lastMessage.content,
+                  createdAt: lastMessage.createdAt,
+                  userId: lastMessage.userId,
+                }
+              : null,
+            unreadCount: unreadMessages.length,
+            lastReadAt: membership?.lastReadAt,
+          };
+        }),
+      );
+
+      return directRooms.filter((room) => room !== null);
+    }
+
+    // Non-admin: Get all direct message rooms where the user is a member
+    const memberships = await ctx.db
+      .query("roomMembers")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .filter((q) => q.eq(q.field("isBanned"), false))
+      .collect();
+
+    const directRooms = await Promise.all(
+      memberships.map(async (membership) => {
+        const room = await ctx.db.get(membership.roomId);
+        if (!room || room.type !== "DIRECT") return null;
+
+        // Get the other user's ID
+        const otherUserId = room.userIds?.find((id) => id !== args.userId);
+        if (!otherUserId) return null;
+
+        // Get the last message in this room
+        const lastMessage = await ctx.db
+          .query("messages")
+          .withIndex("by_roomId_createdAt", (q) =>
+            q.eq("roomId", membership.roomId),
+          )
+          .order("desc")
+          .first();
+
+        // Get unread count
+        const lastReadAt = membership.lastReadAt ?? 0;
+        const unreadMessages = await ctx.db
+          .query("messages")
+          .withIndex("by_roomId_createdAt", (q) =>
+            q.eq("roomId", membership.roomId),
+          )
+          .filter((q) => q.gt(q.field("createdAt"), lastReadAt))
+          .collect();
+
+        return {
+          roomId: room._id,
+          otherUserId,
+          lastMessage: lastMessage
+            ? {
+                content: lastMessage.content,
+                createdAt: lastMessage.createdAt,
+                userId: lastMessage.userId,
+              }
+            : null,
+          unreadCount: unreadMessages.length,
+          lastReadAt: membership.lastReadAt,
+        };
+      }),
+    );
+
+    return directRooms.filter((room) => room !== null);
+  },
+});
+
+export const getOrCreateDirectRoom = query({
+  args: {
+    userId1: v.string(),
+    userId2: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Check if room already exists
+    const rooms = await ctx.db
+      .query("chatRooms")
+      .withIndex("by_type", (q) => q.eq("type", "DIRECT"))
+      .collect();
+
+    const existing = rooms.find(
+      (room) =>
+        room.userIds?.includes(args.userId1) &&
+        room.userIds?.includes(args.userId2),
+    );
+
+    if (existing) {
+      return existing._id;
+    }
+
+    // Room doesn't exist, return null (frontend will create it via action)
+    return null;
   },
 });

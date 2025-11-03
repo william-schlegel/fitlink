@@ -1,6 +1,5 @@
-import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
+import { v } from "convex/values";
 
 // Helper mutation to create a room (used by actions)
 export const createRoom = mutation({
@@ -233,4 +232,3 @@ export const canModerate = query({
     return membership?.isAdmin ?? false;
   },
 });
-
