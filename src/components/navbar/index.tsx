@@ -3,10 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { createTrpcCaller } from "@/lib/trpc/caller";
+import NotificationIcon from "./notificationIcon";
 import { RoleEnum } from "@/db/schema/enums";
 import ThemeButton from "./themeButton";
 import UserButton from "./userButton";
-import NotificationIcon from "./notificationIcon";
 import { env } from "@/env";
 import Menu from "./menu";
 
@@ -23,14 +23,6 @@ export default async function Navbar({
 
   const caller = await createTrpcCaller();
   if (!caller) return null;
-  const user = userId
-    ? await caller.users.getUserById({
-        id: userId,
-        options: {
-          withFeatures: true,
-        },
-      })
-    : undefined;
 
   return (
     <div className="navbar bg-base-100">

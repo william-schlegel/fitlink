@@ -8,6 +8,7 @@ import { LayoutPage } from "../../components/layoutPage";
 import { api } from "../../../convex/_generated/api";
 import { trpc } from "@/lib/trpc/client";
 import { useQuery } from "convex/react";
+import { isCUID } from "@/lib/utils";
 
 type RoomListProps = {
   userId: string;
@@ -62,10 +63,13 @@ function DirectConversationItem({ conv }: DirectConversationItemProps) {
   );
 }
 function RoomItem({ clubId, userId }: { clubId: string; userId: string }) {
-  const { data: club } = trpc.clubs.getClubById.useQuery({
-    clubId: clubId,
-    userId: userId,
-  });
+  const { data: club } = trpc.clubs.getClubById.useQuery(
+    {
+      clubId: clubId,
+      userId: userId,
+    },
+    { enabled: isCUID(clubId) && Boolean(userId) },
+  );
 
   return (
     <div className="flex items-center gap-2 flex-1 min-w-0">
