@@ -4,6 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { CreatePage } from "@/components/modals/managePage";
 import { getPagesForClub } from "@/server/api/routers/page";
 import createLink, { createHref } from "@/lib/createLink";
+import { getDefaultSection } from "@/lib/sections/data";
+import { PageSectionModel } from "@/lib/sections/data";
 import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
@@ -11,7 +13,6 @@ import SelectClub from "@/components/selectClub";
 import { getHref } from "@/lib/getHref";
 import PageContent from "./pageContent";
 import TargetName from "./targetName";
-
 export default async function ClubPage({
   searchParams,
 }: {
@@ -19,6 +20,7 @@ export default async function ClubPage({
     userId: string;
     clubId: string;
     pageId: string;
+    section?: PageSectionModel;
   }>;
 }) {
   const t = await getTranslations("pages");
@@ -32,9 +34,8 @@ export default async function ClubPage({
   )
     redirect("/", RedirectType.replace);
 
-  const { userId, clubId, pageId } = await searchParams;
+  const { userId, clubId, pageId, section } = await searchParams;
   const href = await getHref();
-
   const caller = await createTrpcCaller();
   if (!caller) return null;
   const queryClubs = await caller.clubs.getClubsForManager(userId ?? user.id);
@@ -49,6 +50,8 @@ export default async function ClubPage({
 
   if (queryPages.length && !pageId)
     redirect(createLink({ clubId, pageId: queryPages[0]?.id }, href));
+
+  const target = queryPages.find((p) => p.id === pageId)?.target ?? "HOME";
 
   const listPages = queryPages.map((page) => ({
     id: page.id,
@@ -83,7 +86,13 @@ export default async function ClubPage({
           <CreatePage clubId={clubId} className="mb-4" />
         </LayoutPage.List>
 
-        {pageId ? <PageContent clubId={clubId} pageId={pageId} /> : null}
+        {pageId ? (
+          <PageContent
+            clubId={clubId}
+            pageId={pageId}
+            section={section ?? getDefaultSection(target)}
+          />
+        ) : null}
       </LayoutPage.Main>
     </LayoutPage>
   );

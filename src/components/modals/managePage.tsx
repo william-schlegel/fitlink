@@ -6,12 +6,17 @@ import {
   SubmitHandler,
   useForm,
 } from "react-hook-form";
-import { useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { pageSectionModelEnum, pageTargetEnum } from "@/db/schema/enums";
+import {
+  PAGE_TARGET_LIST,
+  PageTarget,
+  TARGET_SECTIONS,
+} from "@/lib/sections/data";
+import { usePageSection } from "@/lib/sections/useGetSection";
 import { getButtonSize, TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { ButtonSize } from "../ui/buttonIcon";
@@ -28,99 +33,6 @@ type CreatePageProps = {
   variant?: TModalVariant;
   className?: string;
 };
-
-export type PageTarget = (typeof pageTargetEnum.enumValues)[number];
-export type PageSectionModel = (typeof pageSectionModelEnum.enumValues)[number];
-
-const PAGE_TARGET_LIST: {
-  value: PageTarget;
-  label: string;
-}[] = [
-  { value: "HOME", label: "target.home" },
-  { value: "ACTIVITIES", label: "target.activities" },
-  { value: "OFFERS", label: "target.offers" },
-  { value: "TEAM", label: "target.team" },
-  { value: "PLANNING", label: "target.planning" },
-  { value: "VIDEOS", label: "target.videos" },
-  { value: "EVENTS", label: "target.events" },
-] as const;
-
-const PAGE_SECTION_LIST: {
-  value: PageSectionModel;
-  label: string;
-}[] = [
-  { value: "HERO", label: "section.hero" },
-  { value: "TITLE", label: "section.title" },
-  { value: "PLANNINGS", label: "section.plannings" },
-  { value: "ACTIVITY_GROUPS", label: "section.activity-groups" },
-  { value: "ACTIVITIES", label: "section.activity-details" },
-  { value: "OFFERS", label: "section.offers" },
-  { value: "VIDEO", label: "section.video" },
-  { value: "LOCATION", label: "section.location" },
-  { value: "CONTACT", label: "section.contact" },
-  { value: "SOCIAL", label: "section.social" },
-  { value: "TEAMMATES", label: "section.teammates" },
-  { value: "FOOTER", label: "section.footer" },
-] as const;
-
-const TARGET_SECTIONS: {
-  target: PageTarget;
-  sections: PageSectionModel[];
-}[] = [
-  {
-    target: "HOME",
-    sections: ["HERO", "ACTIVITY_GROUPS", "ACTIVITIES", "CONTACT", "LOCATION"],
-  },
-  {
-    target: "OFFERS",
-    sections: ["TITLE", "OFFERS"],
-  },
-  {
-    target: "ACTIVITIES",
-    sections: ["TITLE", "ACTIVITY_GROUPS", "ACTIVITIES"],
-  },
-  { target: "PLANNING", sections: ["TITLE", "PLANNINGS"] },
-  { target: "TEAM", sections: ["TITLE", "TEAMMATES"] },
-];
-
-export function usePageSection() {
-  const t = useTranslations("pages");
-  const getTargetName = useCallback(
-    (target: (typeof pageTargetEnum.enumValues)[number] | undefined) => {
-      if (!target) return "?";
-      const tg = PAGE_TARGET_LIST.find((t) => t.value === target);
-      if (tg) return t(tg.label);
-      return "?";
-    },
-    [t],
-  );
-
-  const getSectionName = useCallback(
-    (section: PageSectionModel | undefined) => {
-      if (!section) return "?";
-      const sc = PAGE_SECTION_LIST.find((s) => s.value === section);
-      if (sc) return t(sc.label);
-      return "?";
-    },
-    [t],
-  );
-
-  const defaultSection = useCallback(
-    (target: PageTarget | undefined): PageSectionModel => {
-      if (!target) return "HERO";
-      const ts = TARGET_SECTIONS.find((ts) => ts.target === target);
-      return ts?.sections?.[0] ?? "HERO";
-    },
-    [],
-  );
-
-  const getSections = useCallback((target: PageTarget): PageSectionModel[] => {
-    const ts = TARGET_SECTIONS.find((ts) => ts.target === target);
-    return ts?.sections ?? [];
-  }, []);
-
-  return { getTargetName, getSectionName, defaultSection, getSections };
-}
 
 type CreatePageFormValues = {
   name: string;

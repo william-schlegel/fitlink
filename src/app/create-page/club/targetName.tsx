@@ -1,5 +1,7 @@
 "use client";
-import { PageTarget, usePageSection } from "@/components/modals/managePage";
+
+import { usePageSection } from "@/lib/sections/useGetSection";
+import { PageTarget } from "@/lib/sections/data";
 
 export default function TargetName({ target }: { target: PageTarget }) {
   const { getTargetName } = usePageSection();

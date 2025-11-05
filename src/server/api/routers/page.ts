@@ -139,6 +139,7 @@ export const pageRouter = createTRPCRouter({
       z.object({
         pageId: z.cuid2(),
         section: z.enum(pageSectionModelEnum.enumValues),
+        createIfNone: z.boolean().optional().default(false),
       }),
     )
     .query(async ({ input }) => {
@@ -152,7 +153,26 @@ export const pageRouter = createTRPCRouter({
           page: { with: { club: true } },
         },
       });
-      if (!section) return null;
+      if (!section) {
+        if (input.createIfNone) {
+          const newSection = await db
+            .insert(pageSection)
+            .values({
+              pageId: input.pageId,
+              model: input.section,
+              title: "Section",
+              subTitle: "",
+            })
+            .returning();
+          return {
+            id: newSection[0].id,
+            title: newSection[0].title,
+            subTitle: newSection[0].subTitle,
+            elements: [],
+          };
+        }
+        return null;
+      }
       return {
         id: section.id,
         title: section.title,

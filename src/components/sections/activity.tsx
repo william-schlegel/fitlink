@@ -1,8 +1,8 @@
 "use client";
 
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { Fragment, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 import { PageSectionElementTypeEnum } from "@/db/schema/enums";
 import ThemeSelector, { TThemes } from "../themeSelector";
@@ -31,25 +31,12 @@ type ActivityForm = {
 
 export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
   const t = useTranslations("pages");
-  const utils = trpc.useUtils();
   const [previewTheme, setPreviewTheme] = useState<TThemes>("cupcake");
 
-  const createSection = trpc.pages.createPageSection.useMutation();
   const querySection = trpc.pages.getPageSection.useQuery(
-    { pageId, section: "ACTIVITIES" },
+    { pageId, section: "ACTIVITIES", createIfNone: true },
     { refetchOnWindowFocus: false },
   );
-
-  useEffect(() => {
-    if (!querySection.data) {
-      createSection.mutate({
-        pageId,
-        model: "ACTIVITIES",
-      });
-      utils.pages.getPageSection.refetch({ pageId, section: "ACTIVITIES" });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [querySection.data, createSection, pageId]);
 
   const updatePageStyle = trpc.pages.updatePageStyleForClub.useMutation({
     onSuccess() {
@@ -71,7 +58,7 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
       <div className="space-y-2">
         <h3>{t("activity.activity-section")}</h3>
         {querySection.data?.id ? (
-          <>
+          <Fragment key={querySection.data.id}>
             <div className="flex flex-wrap gap-2">
               {querySection.data.elements.map((activity) => (
                 <div
@@ -87,7 +74,7 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
               ))}
             </div>
             <AddActivity pageId={pageId} sectionId={querySection.data.id} />
-          </>
+          </Fragment>
         ) : null}
       </div>
       <div className={`space-y-2`}>
@@ -100,7 +87,7 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
         </h3>
         <div data-theme={previewTheme}>
           {groups.data?.map((group) => (
-            <>
+            <Fragment key={group.id}>
               <h2 className="text-center">{group.title}</h2>
               <section id="ACTIVITIES" className={`w-full bg-base-200 p-4`}>
                 <div className={`container mx-auto p-4`}>
@@ -123,7 +110,7 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
                   </div>
                 </div>
               </section>
-            </>
+            </Fragment>
           ))}
         </div>
       </div>
@@ -455,7 +442,6 @@ function ActivityForm({
                     ags[idx] = e.target.checked;
                     setActivityGroups(ags);
                   }}
-                  defaultChecked={false}
                 />
                 <span className="label-text">{group.title}</span>
               </div>

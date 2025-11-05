@@ -36,26 +36,15 @@ type OfferFormValues = {
 
 export const OfferCreation = ({ clubId, pageId }: OfferCreationProps) => {
   const t = useTranslations("pages");
-  const utils = trpc.useUtils();
   const [previewTheme, setPreviewTheme] = useState<TThemes>("cupcake");
 
-  const createSection = trpc.pages.createPageSection.useMutation();
   const querySection = trpc.pages.getPageSection.useQuery(
-    { pageId, section: "OFFERS" },
+    { pageId, section: "OFFERS", createIfNone: true },
     {
+      enabled: isCUID(pageId),
       refetchOnWindowFocus: false,
     },
   );
-
-  useEffect(() => {
-    if (!querySection.data) {
-      createSection.mutate({
-        pageId,
-        model: "OFFERS",
-      });
-      utils.pages.getPageSection.refetch({ pageId, section: "OFFERS" });
-    }
-  }, [querySection.data, createSection, utils, pageId]);
 
   const updatePageStyle = trpc.pages.updatePageStyleForClub.useMutation({
     onSuccess() {

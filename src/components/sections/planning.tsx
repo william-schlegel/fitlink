@@ -31,25 +31,14 @@ type PlanningFormValues = {
 
 export const PlanningCreation = ({ clubId, pageId }: PlanningCreationProps) => {
   const t = useTranslations("pages");
-  const utils = trpc.useUtils();
   const [previewTheme, setPreviewTheme] = useState<TThemes>("cupcake");
 
-  const createSection = trpc.pages.createPageSection.useMutation();
   const querySection = trpc.pages.getPageSection.useQuery(
-    { pageId, section: "PLANNINGS" },
+    { pageId, section: "PLANNINGS", createIfNone: true },
     {
       refetchOnWindowFocus: false,
     },
   );
-  useEffect(() => {
-    if (!querySection.data) {
-      createSection.mutate({
-        pageId,
-        model: "PLANNINGS",
-      });
-      utils.pages.getPageSection.refetch({ pageId, section: "PLANNINGS" });
-    }
-  }, [querySection.data, createSection, utils, pageId]);
 
   const updatePageStyle = trpc.pages.updatePageStyleForClub.useMutation({
     onSuccess() {

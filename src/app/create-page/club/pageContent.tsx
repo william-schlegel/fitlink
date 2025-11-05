@@ -4,19 +4,19 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-import {
-  DeletePage,
-  PageSectionModel,
-  UpdatePage,
-  usePageSection,
-} from "@/components/modals/managePage";
+import { useRouter } from "next/navigation";
+
+import { DeletePage, UpdatePage } from "@/components/modals/managePage";
 import { ActivityGroupCreation } from "@/components/sections/activities";
 import { PlanningCreation } from "@/components/sections/planning";
 import { ActivityCreation } from "@/components/sections/activity";
+import { usePageSection } from "@/lib/sections/useGetSection";
 import { OfferCreation } from "@/components/sections/offers";
 import { TitleCreation } from "@/components/sections/title";
 import { HeroCreation } from "@/components/sections/hero";
+import { PageSectionModel } from "@/lib/sections/data";
 import Spinner from "@/components/ui/spinner";
+import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import { toast } from "@/lib/toast";
@@ -24,26 +24,29 @@ import { toast } from "@/lib/toast";
 type PageContentProps = {
   pageId: string;
   clubId: string;
+  section?: PageSectionModel;
 };
 
-export default function PageContent({ pageId, clubId }: PageContentProps) {
+export default function PageContent({
+  pageId,
+  clubId,
+  section,
+}: PageContentProps) {
   const queryPage = trpc.pages.getPageById.useQuery(pageId, {
     enabled: isCUID(pageId),
     refetchOnWindowFocus: false,
   });
   const { getSectionName, getSections, defaultSection } = usePageSection();
+  const router = useRouter();
 
   useEffect(() => {
     if (!queryPage.data) return;
-    console.log("queryPage.data", queryPage.data);
     if (queryPage.data?.target) {
       setSections(getSections(queryPage.data.target));
-      setSection(defaultSection(queryPage.data.target));
     }
-  }, [queryPage.data, getSections, defaultSection]);
+  }, [queryPage.data, getSections]);
 
   const [sections, setSections] = useState<PageSectionModel[]>([]);
-  const [section, setSection] = useState<PageSectionModel>("HERO");
   const t = useTranslations("pages");
   const utils = trpc.useUtils();
 
@@ -57,9 +60,9 @@ export default function PageContent({ pageId, clubId }: PageContentProps) {
     },
   });
 
-  console.log("section", section);
-
   if (queryPage.isLoading) return <Spinner />;
+  const target = queryPage.data?.target ?? "HOME";
+
   return (
     <article className="flex grow flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between">
@@ -102,9 +105,11 @@ export default function PageContent({ pageId, clubId }: PageContentProps) {
           <button
             key={sec}
             className={`btn btn-primary flex-1 ${
-              sec === section ? "" : "btn-outline"
+              sec === (section ?? defaultSection(target)) ? "" : "btn-outline"
             }`}
-            onClick={() => setSection(sec)}
+            onClick={() =>
+              router.push(createLink({ clubId, pageId, section: sec }))
+            }
           >
             {getSectionName(sec)}
           </button>

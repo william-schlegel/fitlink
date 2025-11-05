@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
+import { usePageSection } from "@/lib/sections/useGetSection";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { PageSectionModelEnum } from "@/db/schema/enums";
-import { usePageSection } from "../modals/managePage";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { getButtonSize } from "../ui/modal";
@@ -438,7 +438,7 @@ function HeroContent({
   return (
     <div
       className={`cover flex ${
-        preview ? "aspect-[4/3]" : "min-h-screen"
+        preview ? "aspect-4/3" : "min-h-screen"
       } w-full flex-col items-center justify-center gap-4`}
       style={{
         backgroundImage: `${imageSrc ? `url(${imageSrc})` : "unset"}`,
