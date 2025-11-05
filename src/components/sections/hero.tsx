@@ -53,6 +53,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
   );
 
   useEffect(() => {
+    console.log("querySection", querySection.data);
     if (!querySection.data) {
       setUpdating(false);
       return;
@@ -78,6 +79,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
       title: hc?.title ?? "",
       subtitle: hc?.subTitle ?? "",
     };
+    console.log("resetData", resetData);
     reset(resetData);
     setUpdating(true);
   }, [querySection.data, reset, setUpdating]);
@@ -90,8 +92,8 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
     onSuccess() {
       toast.success(t("section-created"));
       utils.pages.getPageSection.invalidate({ pageId, section: "HERO" });
-      reset();
-      setImagePreview("");
+      // reset();
+      // setImagePreview("");
     },
     onError(error) {
       toast.error(error.message);
@@ -264,37 +266,42 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
               </div>
             </div>
           ) : null}
-          <label>{t("hero.title")}</label>
+          <label htmlFor="title">{t("hero.title")}</label>
           <input
             {...register("title")}
+            id="title"
             type="text"
             className="input-bordered input w-full"
           />
-          <label>{t("hero.subtitle")}</label>
+          <label htmlFor="subtitle">{t("hero.subtitle")}</label>
           <input
             {...register("subtitle")}
+            id="subtitle"
             type="text"
             className="input-bordered input w-full"
           />
-          <label>{t("hero.description")}</label>
+          <label htmlFor="description">{t("hero.description")}</label>
           <textarea
             {...register("description")}
+            id="description"
             className="field-sizing-content"
             rows={4}
           />
           <label>{t("hero.button-cta")}</label>
           <input
             {...register("cta")}
+            id="cta"
             type="text"
             className="input-bordered input w-full"
           />
           {fields.cta ? (
             <>
-              <label>{t("hero.linked-page")}</label>
+              <label htmlFor="linkedPage">{t("hero.linked-page")}</label>
               <div className="grid grid-cols-2 gap-2">
                 <select
                   defaultValue={getValues("linkedPage")}
                   {...register("linkedPage")}
+                  id="linkedPage"
                 >
                   {queryPages.data?.map((page) => (
                     <option key={page.id} value={page.id}>
@@ -306,6 +313,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
                 <select
                   defaultValue={getValues("pageSection")}
                   {...register("pageSection")}
+                  id="pageSection"
                 >
                   {sections.map((sec) => (
                     <option key={sec} value={sec}>
@@ -318,10 +326,10 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
           ) : null}
           {fields.cta && fields.linkedPage === "url" ? (
             <>
-              <label className="label">
+              <label className="label" htmlFor="protocol">
                 <span>{t("hero.external-url")}</span>
               </label>
-              <label className="input-group">
+              <label className="input-group" htmlFor="protocol">
                 <select
                   defaultValue={"https:"}
                   {...register("protocol")}
@@ -331,6 +339,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
                   <option value="http:">http://</option>
                 </select>
                 <input
+                  id="url"
                   type="text"
                   {...register("url")}
                   className="input-bordered input w-full"

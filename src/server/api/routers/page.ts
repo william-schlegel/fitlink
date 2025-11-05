@@ -37,7 +37,7 @@ const PageSectionObject = z.object({
   model: z.enum(pageSectionModelEnum.enumValues),
   pageId: z.cuid2(),
   title: z.string().optional(),
-  subtitle: z.string().optional(),
+  subTitle: z.string().optional(),
 });
 
 const PageSectionElementObject = z.object({
@@ -250,12 +250,14 @@ export const pageRouter = createTRPCRouter({
     .mutation(({ input }) => db.insert(pageSection).values(input).returning()),
   updatePageSection: protectedProcedure
     .input(PageSectionObject.partial())
-    .mutation(({ input }) =>
-      db
+    .mutation(({ input }) => {
+      console.log("input", input);
+      return db
         .update(pageSection)
         .set(input)
-        .where(eq(pageSection.id, input.id ?? "")),
-    ),
+        .where(eq(pageSection.id, input.id ?? ""))
+        .returning();
+    }),
   deletePageSection: protectedProcedure
     .input(z.object({ pageId: z.cuid2(), sectionId: z.cuid2() }))
     .mutation(async ({ input }) => {
@@ -267,18 +269,21 @@ export const pageRouter = createTRPCRouter({
   createPageSectionElement: protectedProcedure
     .input(PageSectionElementObject.omit({ id: true }))
     .mutation(({ input }) =>
-      db.insert(pageSectionElement).values({
-        content: input.content,
-        elementType: input.elementType,
-        link: input.link,
-        pageId: input.pageId,
-        pageSection: input.pageSection,
-        title: input.title,
-        subTitle: input.subTitle,
-        sectionId: input.sectionId,
-        optionValue: input.optionValue,
-        imageUrls: input.images,
-      }),
+      db
+        .insert(pageSectionElement)
+        .values({
+          content: input.content,
+          elementType: input.elementType,
+          link: input.link,
+          pageId: input.pageId,
+          pageSection: input.pageSection,
+          title: input.title,
+          subTitle: input.subTitle,
+          sectionId: input.sectionId,
+          optionValue: input.optionValue,
+          imageUrls: input.images,
+        })
+        .returning(),
     ),
   updatePageSectionElement: protectedProcedure
     .input(
@@ -297,7 +302,8 @@ export const pageRouter = createTRPCRouter({
           subTitle: input.subTitle,
           optionValue: input.optionValue,
         })
-        .where(eq(pageSectionElement.id, input.id)),
+        .where(eq(pageSectionElement.id, input.id))
+        .returning(),
     ),
   deletePageSectionElement: protectedProcedure
     .input(z.string())

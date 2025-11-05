@@ -29,7 +29,7 @@ type OfferCreationProps = {
 type OfferFormValues = {
   imageUrls?: string[];
   title: string;
-  subtitle: string;
+  subTitle: string;
   description: string;
   offerId: string;
 };
@@ -147,7 +147,7 @@ function AddOffer({ clubId, pageId, sectionId }: OfferProps) {
       sectionId,
       elementType: "CARD",
       title: data.title,
-      subTitle: data.subtitle,
+      subTitle: data.subTitle,
       content: data.description,
       images: data.imageUrls,
       optionValue: data.offerId,
@@ -195,7 +195,7 @@ function UpdateOffer({ clubId, pageId, offerId }: UpdateOfferProps) {
     if (queryOffer.data) {
       setInitialData({
         title: queryOffer.data?.title ?? "",
-        subtitle: queryOffer.data?.subTitle ?? "",
+        subTitle: queryOffer.data?.subTitle ?? "",
         description: queryOffer.data?.content ?? "",
         imageUrls: queryOffer.data?.images ?? [],
         offerId: queryOffer.data?.optionValue ?? "",
@@ -204,12 +204,19 @@ function UpdateOffer({ clubId, pageId, offerId }: UpdateOfferProps) {
   }, [queryOffer.data, setInitialData]);
 
   const updateAG = trpc.pages.updatePageSectionElement.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       utils.pages.getPageSection.invalidate({
         pageId,
         section: "OFFERS",
       });
       toast.success(t("offer.offer-updated"));
+      setInitialData({
+        title: data[0].title ?? "",
+        subTitle: data[0].subTitle ?? "",
+        description: data[0].content ?? "",
+        imageUrls: data[0].imageUrls ?? [],
+        offerId: data[0].optionValue ?? "",
+      });
     },
     onError(error) {
       toast.error(error.message);
@@ -221,7 +228,7 @@ function UpdateOffer({ clubId, pageId, offerId }: UpdateOfferProps) {
       id: offerId,
       pageId,
       title: data.title,
-      subTitle: data.subtitle,
+      subTitle: data.subTitle,
       content: data.description,
       images: data.imageUrls,
       optionValue: data.offerId,
@@ -295,14 +302,6 @@ type OfferFormProps = {
   clubId: string;
 };
 
-const defaultValues: OfferFormValues = {
-  title: "",
-  subtitle: "",
-  description: "",
-  offerId: "",
-  imageUrls: [],
-};
-
 function OfferForm({
   onSubmit,
   initialValues,
@@ -321,7 +320,13 @@ function OfferForm({
     getValues,
     setValue,
   } = useForm<OfferFormValues>({
-    defaultValues,
+    defaultValues: {
+      title: initialValues?.title ?? "",
+      subTitle: initialValues?.subTitle ?? "",
+      description: initialValues?.description ?? "",
+      imageUrls: initialValues?.imageUrls ?? [],
+      offerId: initialValues?.offerId ?? "",
+    },
   });
 
   const imageUrls = useWatch({ control, name: "imageUrls" });
@@ -341,7 +346,13 @@ function OfferForm({
 
   const onSuccess: SubmitHandler<OfferFormValues> = (data) => {
     onSubmit({ ...data });
-    reset();
+    reset({
+      title: data.title,
+      subTitle: data.subTitle,
+      description: data.description,
+      imageUrls: data.imageUrls,
+      offerId: data.offerId,
+    });
   };
 
   return (
@@ -365,7 +376,7 @@ function OfferForm({
             <img
               src={imageUrls[0]}
               alt=""
-              className="max-h-[10rem] w-full object-contain"
+              className="max-h-40 w-full object-contain"
             />
             <button
               className="absolute right-2 bottom-2"
@@ -395,7 +406,7 @@ function OfferForm({
         <label>{t("offer.subtitle")}</label>
         <input
           className="input-bordered input w-full"
-          {...register("subtitle")}
+          {...register("subTitle")}
         />
         <label className="self-start">{t("offer.description")}</label>
         <textarea

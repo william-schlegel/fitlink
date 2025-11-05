@@ -24,13 +24,13 @@ type ActivityGroupCreationProps = {
 
 type ActivityGroupForm = {
   title: string;
-  subtitle: string;
+  subTitle: string;
 };
 
 type ActivityForm = {
   imageUrls?: string[];
   title: string;
-  subtitle: string;
+  subTitle: string;
   description: string;
 };
 
@@ -60,32 +60,38 @@ export const ActivityGroupCreation = ({
     }
     reset({
       title: querySection.data?.title ?? "",
-      subtitle: querySection.data?.subTitle ?? "",
+      subTitle: querySection.data?.subTitle ?? "",
     });
     setUpdating(true);
   }, [querySection.data, reset, setUpdating]);
 
   const createSection = trpc.pages.createPageSection.useMutation({
-    onSuccess() {
+    onSuccess(data) {
       toast.success(t("section-created"));
       utils.pages.getPageSection.invalidate({
         pageId,
         section: "ACTIVITY_GROUPS",
       });
-      reset();
+      reset({
+        title: data[0].title ?? "",
+        subTitle: data[0].subTitle ?? "",
+      });
     },
     onError(error) {
       toast.error(error.message);
     },
   });
   const updateSection = trpc.pages.updatePageSection.useMutation({
-    onSuccess() {
+    onSuccess(data) {
       toast.success(t("section-created"));
       utils.pages.getPageSection.invalidate({
         pageId,
         section: "ACTIVITY_GROUPS",
       });
-      reset();
+      reset({
+        title: data[0].title ?? "",
+        subTitle: data[0].subTitle ?? "",
+      });
     },
     onError(error) {
       toast.error(error.message);
@@ -116,16 +122,19 @@ export const ActivityGroupCreation = ({
   });
 
   const onSubmit: SubmitHandler<ActivityGroupForm> = (data) => {
+    console.log("data", data);
     if (updating) {
       updateSection.mutate({
         ...querySection.data,
-        ...data,
+        title: data.title,
+        subTitle: data.subTitle,
       });
     } else {
       createSection.mutate({
         model: "ACTIVITY_GROUPS",
         pageId,
-        ...data,
+        title: data.title,
+        subTitle: data.subTitle,
       });
     }
   };
@@ -144,15 +153,17 @@ export const ActivityGroupCreation = ({
           className="grid grid-cols-[auto_1fr] gap-2 rounded border border-primary p-2"
           onSubmit={handleSubmit(onSubmit)}
         >
-          <label>{t("activity-group.title")}</label>
+          <label htmlFor="title">{t("activity-group.title")}</label>
           <input
             {...register("title")}
+            id="title"
             type="text"
             className="input-bordered input w-full"
           />
-          <label>{t("activity-group.subtitle")}</label>
+          <label htmlFor="subtitle">{t("activity-group.subtitle")}</label>
           <input
-            {...register("subtitle")}
+            {...register("subTitle")}
+            id="subtitle"
             type="text"
             className="input-bordered input w-full"
           />
@@ -215,7 +226,7 @@ export const ActivityGroupCreation = ({
         <div data-theme={previewTheme}>
           <ActivityGroupContentCard
             title={fields.title}
-            subtitle={fields.subtitle}
+            subtitle={fields.subTitle}
             elements={querySection.data?.elements}
             preview
           />
@@ -254,7 +265,7 @@ function AddActivityGroup({ pageId, sectionId }: ActivityProps) {
       sectionId,
       elementType: "CARD",
       title: data.title,
-      subTitle: data.subtitle,
+      subTitle: data.subTitle,
       content: data.description,
       images: data.imageUrls,
     });
@@ -302,7 +313,7 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
     if (!queryActivity.data) return;
     setInitialData({
       title: queryActivity.data?.title ?? "",
-      subtitle: queryActivity.data?.subTitle ?? "",
+      subTitle: queryActivity.data?.subTitle ?? "",
       description: queryActivity.data?.content ?? "",
       imageUrls: queryActivity.data?.images ?? [],
     });
@@ -326,7 +337,7 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
       id: activityId,
       pageId,
       title: data.title,
-      subTitle: data.subtitle,
+      subTitle: data.subTitle,
       content: data.description,
       images: data.imageUrls,
     });
@@ -395,7 +406,7 @@ type ActivityGroupFormProps = {
 
 const defaultValues: ActivityForm = {
   title: "",
-  subtitle: "",
+  subTitle: "",
   description: "",
   imageUrls: [],
 };
@@ -453,7 +464,7 @@ function ActivityGroupForm({
             <img
               src={imageUrls[0]}
               alt=""
-              className="max-h-[10rem] w-full object-contain"
+              className="max-h-40 w-full object-contain"
             />
             <button
               className="absolute right-2 bottom-2"
@@ -483,7 +494,7 @@ function ActivityGroupForm({
         <label>{t("activity-group.subtitle")}</label>
         <input
           className="input-bordered input w-full"
-          {...register("subtitle")}
+          {...register("subTitle")}
         />
         <label className="self-start">{t("activity-group.description")}</label>
         <textarea
@@ -564,7 +575,7 @@ function ActivityGroupContentCard({
     <section
       id="ACTIVITY_GROUPS"
       className={`${
-        preview ? "aspect-[4/3]" : "min-h-screen"
+        preview ? "aspect-4/3" : "min-h-screen"
       } w-full bg-primary p-4`}
     >
       <div className={`container mx-auto p-4 ${preview ? "py-2" : "py-48"}`}>
