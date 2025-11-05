@@ -2,12 +2,13 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
-import { api } from "../../../../../convex/_generated/api";
+import { useEffect } from "react";
+
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { NotificationMessage } from "./notificationMessage";
+import { api } from "../../../../../convex/_generated/api";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { FromTo } from "./types";
-import { useEffect } from "react";
 
 type NotificationContentProps = {
   notificationId: string;
@@ -28,7 +29,6 @@ export function NotificationContent({
     notificationId
       ? {
           notificationId: notificationId as Id<"notifications">,
-          updateViewDate: true,
         }
       : "skip",
   );
@@ -59,7 +59,9 @@ export function NotificationContent({
     viewDate: notification.viewedAt ? new Date(notification.viewedAt) : null,
     date: new Date(notification.createdAt),
     data: notification.data,
-    answered: notification.answeredAt ? new Date(notification.answeredAt) : null,
+    answered: notification.answeredAt
+      ? new Date(notification.answeredAt)
+      : null,
     answer: notification.answer ?? null,
     linkedNotification: notification.linkedNotification ?? null,
     userFromId: notification.userFromId,
@@ -81,13 +83,10 @@ export function NotificationContent({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={
-                (fromTo === "to"
-                  ? userFrom.imageUrl
-                  : userTo.imageUrl) ?? "/images/dummy.jpg"
+                (fromTo === "to" ? userFrom.imageUrl : userTo.imageUrl) ??
+                "/images/dummy.jpg"
               }
-              alt={
-                (fromTo === "to" ? userFrom.name : userTo.name) ?? ""
-              }
+              alt={(fromTo === "to" ? userFrom.name : userTo.name) ?? ""}
             />
           </div>
         </div>
@@ -123,4 +122,3 @@ export function NotificationContent({
     </div>
   );
 }
-

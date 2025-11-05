@@ -1,5 +1,6 @@
-import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+
+import { mutation, query } from "./_generated/server";
 
 // Queries
 export const getNotificationsForUser = query({
@@ -65,21 +66,12 @@ export const getUnreadCount = query({
 export const getNotificationById = query({
   args: {
     notificationId: v.id("notifications"),
-    updateViewDate: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const notification = await ctx.db.get(args.notificationId);
 
     if (!notification) {
       return null;
-    }
-
-    // Mark as viewed if requested
-    if (args.updateViewDate && !notification.viewedAt) {
-      await ctx.db.patch(args.notificationId, {
-        viewedAt: Date.now(),
-      });
-      notification.viewedAt = Date.now();
     }
 
     return notification;
@@ -155,6 +147,28 @@ export const markAsViewed = mutation({
   },
 });
 
+export const getNotificationByIdAndMarkAsViewed = mutation({
+  args: {
+    notificationId: v.id("notifications"),
+  },
+  handler: async (ctx, args) => {
+    const notification = await ctx.db.get(args.notificationId);
+    if (!notification) {
+      return null;
+    }
+
+    // Mark as viewed if not already viewed
+    if (!notification.viewedAt) {
+      await ctx.db.patch(args.notificationId, {
+        viewedAt: Date.now(),
+      });
+      notification.viewedAt = Date.now();
+    }
+
+    return notification;
+  },
+});
+
 export const updateNotification = mutation({
   args: {
     notificationId: v.id("notifications"),
@@ -187,4 +201,3 @@ export const updateNotification = mutation({
     await ctx.db.patch(args.notificationId, updates);
   },
 });
-

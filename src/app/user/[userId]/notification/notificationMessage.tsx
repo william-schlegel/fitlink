@@ -41,10 +41,6 @@ export function NotificationMessage({
       toast.error(t(json.error));
     } else if (json.success) {
       toast.success(t(json.success));
-      if (notification)
-        utils.notifications.getNotificationById.invalidate({
-          notificationId: notification.id,
-        });
     }
   }
   const Elem: React.ReactNode[] = [];

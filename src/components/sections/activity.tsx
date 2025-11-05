@@ -388,7 +388,7 @@ function ActivityForm({
             <img
               src={imageUrls[0]}
               alt=""
-              className="max-h-[10rem] w-full object-contain"
+              className="max-h-40 w-full object-contain"
             />
             <button
               className="absolute right-2 bottom-2"

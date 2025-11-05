@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 
-import { Fragment } from "react";
+import { PageSectionModel, PageTarget } from "@/lib/sections/data";
 
-import { PageSectionModel, PageTarget } from "../modals/managePage";
+import { Fragment } from "react";
 
 type PageProps = {
   id: string;

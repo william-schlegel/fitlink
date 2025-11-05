@@ -14,16 +14,18 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import Image from "next/image";
 import Link from "next/link";
 
+import { useMutation } from "convex/react";
+
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import CollapsableGroup from "../ui/collapsableGroup";
+import { api } from "../../../convex/_generated/api";
 import AddressSearch from "../ui/addressSearch";
 import FindCoach from "../sections/findCoach";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { useUser } from "@/lib/auth/client";
 import ButtonIcon from "../ui/buttonIcon";
-import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
@@ -384,7 +386,9 @@ const AddCoachToClubSteps = [
 type AddCoachToClubProps = { clubId: string; userId: string };
 
 export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
-  const createNotifications = useMutation(api.notifications.createNotifications);
+  const createNotifications = useMutation(
+    api.notifications.createNotifications,
+  );
   const [closeModal, setCloseModal] = useState(false);
   const t = useTranslations("club");
   const [step, setStep] = useState(0);
@@ -406,7 +410,9 @@ export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
         toast.success(t("coach.notification-success"));
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : "Failed to send notification",
+          error instanceof Error
+            ? error.message
+            : "Failed to send notification",
         );
       }
     }
