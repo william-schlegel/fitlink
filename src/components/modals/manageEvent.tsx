@@ -340,7 +340,7 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
               <img
                 src={imageUrls[0]}
                 alt=""
-                className="max-h-[10rem] w-full object-cover"
+                className="max-h-40 w-full object-cover"
               />
               <button
                 className="absolute right-2 bottom-2"
@@ -517,7 +517,7 @@ function DisplayEventCard() {
 
   return (
     <div
-      className="relative col-span-full aspect-[4_/_1] w-full rounded border border-primary p-2 text-center text-white"
+      className="relative col-span-full aspect-4/1 w-full rounded border border-primary p-2 text-center text-white"
       style={{
         backgroundImage: `${fields.imageUrls?.[0] ? `url(${fields.imageUrls?.[0]})` : "unset"}`,
         backgroundColor: "rgb(0 0 0 / 0.5)",
