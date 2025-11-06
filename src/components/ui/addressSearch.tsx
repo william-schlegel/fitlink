@@ -1,6 +1,6 @@
+import { startTransition, useEffect, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 import { env } from "@/env";
 
@@ -35,13 +35,25 @@ const AddressSearch = ({
   const t = useTranslations("common");
 
   useEffect(() => {
-    if (defaultAddress) setAddress(defaultAddress);
+    if (defaultAddress) {
+      startTransition(() => {
+        setAddress(defaultAddress);
+      });
+    }
   }, [defaultAddress]);
 
   useEffect(() => {
     if (debouncedAddress) {
-      searchAddresses(debouncedAddress).then((found) => setAddresses(found));
-    } else setAddresses([]);
+      searchAddresses(debouncedAddress).then((found) => {
+        startTransition(() => {
+          setAddresses(found);
+        });
+      });
+    } else {
+      startTransition(() => {
+        setAddresses([]);
+      });
+    }
   }, [debouncedAddress]);
 
   function handleSelect(value: string) {

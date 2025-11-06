@@ -1,8 +1,8 @@
 "use client";
 
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
@@ -193,12 +193,15 @@ function UpdateOffer({ clubId, pageId, offerId }: UpdateOfferProps) {
 
   useEffect(() => {
     if (queryOffer.data) {
-      setInitialData({
-        title: queryOffer.data?.title ?? "",
-        subTitle: queryOffer.data?.subTitle ?? "",
-        description: queryOffer.data?.content ?? "",
-        imageUrls: queryOffer.data?.images ?? [],
-        offerId: queryOffer.data?.optionValue ?? "",
+      const data = queryOffer.data;
+      startTransition(() => {
+        setInitialData({
+          title: data.title ?? "",
+          subTitle: data.subTitle ?? "",
+          description: data.content ?? "",
+          imageUrls: data.images ?? [],
+          offerId: data.optionValue ?? "",
+        });
       });
     }
   }, [queryOffer.data, setInitialData]);

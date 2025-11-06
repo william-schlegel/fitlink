@@ -1,7 +1,7 @@
 "use client";
 
+import { Fragment, startTransition, useEffect, useState } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
-import { Fragment, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { PageSectionElementTypeEnum } from "@/db/schema/enums";
@@ -195,12 +195,15 @@ function UpdateActivity({ pageId, activityId }: UpdateActivityProps) {
 
   useEffect(() => {
     if (!queryActivity.data) return;
-    setInitialData({
-      title: queryActivity.data?.title ?? "",
-      subtitle: queryActivity.data?.subTitle ?? "",
-      description: queryActivity.data?.content ?? "",
-      imageUrls: queryActivity.data?.images ?? [],
-      activityGroups: JSON.parse(queryActivity.data?.optionValue ?? "[]"),
+    const activityData = queryActivity.data;
+    startTransition(() => {
+      setInitialData({
+        title: activityData.title ?? "",
+        subtitle: activityData.subTitle ?? "",
+        description: activityData.content ?? "",
+        imageUrls: activityData.images ?? [],
+        activityGroups: JSON.parse(activityData.optionValue ?? "[]"),
+      });
     });
   }, [queryActivity.data]);
 
@@ -332,6 +335,7 @@ function ActivityForm({
       refetchOnWindowFocus: false,
     },
   );
+  const [activityGroups, setActivityGroups] = useState<boolean[]>([]);
 
   useEffect(() => {
     if (!groups.data) return;
@@ -340,13 +344,11 @@ function ActivityForm({
       for (const ag of groups.data) {
         ags.push(initialValues?.activityGroups.includes(ag.id) ?? false);
       }
-      setActivityGroups(ags);
+      startTransition(() => {
+        setActivityGroups(ags);
+      });
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groups.data]);
-
-  const [activityGroups, setActivityGroups] = useState<boolean[]>([]);
+  }, [groups.data, initialValues?.activityGroups]);
 
   useEffect(() => {
     if (initialValues) reset(initialValues);

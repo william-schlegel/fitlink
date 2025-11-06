@@ -16,8 +16,7 @@ export default async function UserContent({ userId }: UserContentProps) {
   const t = await getTranslations();
 
   const isInTrial =
-    userQuery?.trialUntil &&
-    new Date(userQuery.trialUntil) > new Date(Date.now());
+    userQuery?.trialUntil && new Date(userQuery.trialUntil) > new Date();
 
   const managerCount = userQuery?.managerData?.managedClubs?.reduce(
     (acc, c) => {

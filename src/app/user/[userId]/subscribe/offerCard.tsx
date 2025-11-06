@@ -1,7 +1,6 @@
 "use client";
 
 import { inferProcedureOutput } from "@trpc/server";
-import { useTranslations } from "next-intl";
 
 import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
 import { List } from "@/app/member/[userId]/list";
@@ -16,17 +15,16 @@ export default function OfferCard({
   >;
   clubName: string;
 }) {
-  if (!offer) return null;
   const { shortInfo, sites, rooms, activityGroups, activities } =
     useDisplaySubscriptionInfo(
-      offer.mode ?? undefined,
+      offer?.mode ?? undefined,
       offer?.restriction ?? undefined,
       offer?.activitieGroups.map((ag) => ag.activityGroupId) ?? [],
       offer?.activities.map((ag) => ag.activityId) ?? [],
       offer?.sites.map((ag) => ag.siteId) ?? [],
       offer?.rooms.map((ag) => ag.roomId) ?? [],
     );
-  const t = useTranslations("club");
+  if (!offer) return null;
 
   return (
     <div className="card w-96 max-w-full bg-base-100 shadow-xl">

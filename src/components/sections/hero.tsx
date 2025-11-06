@@ -1,9 +1,9 @@
 "use client";
 
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { startTransition, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 import { usePageSection } from "@/lib/sections/useGetSection";
 import ThemeSelector, { TThemes } from "../themeSelector";
@@ -54,7 +54,9 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
 
   useEffect(() => {
     if (!querySection.data) {
-      setUpdating(false);
+      startTransition(() => {
+        setUpdating(false);
+      });
       return;
     }
     const hc = querySection.data?.elements.find(
@@ -63,8 +65,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
     const cta = querySection.data?.elements.find(
       (e) => e.elementType === "CTA",
     );
-    setImagePreview(hc?.images?.[0] ?? "");
-
+    const imageUrl = hc?.images?.[0] ?? "";
     const linkUrl = cta?.link
       ? new URL(cta.link)
       : { protocol: "https:", host: "", pathname: "" };
@@ -79,8 +80,11 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
       subtitle: hc?.subTitle ?? "",
     };
     reset(resetData);
-    setUpdating(true);
-  }, [querySection.data, reset, setUpdating]);
+    startTransition(() => {
+      setImagePreview(imageUrl);
+      setUpdating(true);
+    });
+  }, [querySection.data, reset]);
 
   const [sections, setSections] = useState<PageSectionModelEnum[]>([]);
   const queryPages = trpc.pages.getPagesForClub.useQuery(clubId, {
@@ -203,19 +207,28 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
   };
 
   useEffect(() => {
-    setSections([]);
-    if (!isCUID(fields.linkedPage)) return;
+    if (!isCUID(fields.linkedPage)) {
+      startTransition(() => {
+        setSections([]);
+      });
+      return;
+    }
     const page = queryPages?.data?.find((p) => p.id === fields.linkedPage);
     if (page) {
-      setSections(getSections(page.target ?? "HOME"));
+      startTransition(() => {
+        setSections(getSections(page.target ?? "HOME"));
+      });
     }
   }, [fields.linkedPage, queryPages?.data, getSections]);
 
   useEffect(() => {
     if (fields.imageUrl) {
-      setImagePreview(fields.imageUrl);
+      const imageUrl = fields.imageUrl;
+      startTransition(() => {
+        setImagePreview(imageUrl);
+      });
     }
-  }, [fields.imageUrl, t, setValue]);
+  }, [fields.imageUrl]);
 
   const handleDeleteImage = () => {
     setImagePreview("");

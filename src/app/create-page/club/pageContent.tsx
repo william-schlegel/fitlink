@@ -1,13 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 
 import { useRouter } from "next/navigation";
 
-import { DeletePage, UpdatePage } from "@/components/modals/managePage";
 import { ActivityGroupCreation } from "@/components/sections/activities";
+import { DeletePage, UpdatePage } from "@/components/modals/managePage";
 import { PlanningCreation } from "@/components/sections/planning";
 import { ActivityCreation } from "@/components/sections/activity";
 import { usePageSection } from "@/lib/sections/useGetSection";
@@ -39,14 +39,11 @@ export default function PageContent({
   const { getSectionName, getSections, defaultSection } = usePageSection();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!queryPage.data) return;
-    if (queryPage.data?.target) {
-      setSections(getSections(queryPage.data.target));
-    }
+  const sections = useMemo(() => {
+    if (!queryPage.data?.target) return [];
+    return getSections(queryPage.data.target);
   }, [queryPage.data, getSections]);
 
-  const [sections, setSections] = useState<PageSectionModel[]>([]);
   const t = useTranslations("pages");
   const utils = trpc.useUtils();
 

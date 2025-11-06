@@ -1,7 +1,7 @@
 "use client";
 
+import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { DayName, DAYS } from "@/lib/dates/data";
@@ -44,7 +44,11 @@ function useFormCalendar(initialCalendar?: CalendarFormSchema) {
   };
   const [calendar, setCalendar] = useState(calendarDefaultValues);
   useEffect(() => {
-    if (initialCalendar) setCalendar(initialCalendar);
+    if (initialCalendar) {
+      startTransition(() => {
+        setCalendar(initialCalendar);
+      });
+    }
   }, [initialCalendar]);
 
   function updateCalendar(cal: CalendarFormSchema) {
@@ -69,7 +73,7 @@ function FormCalendar({ calendarValues, onCalendarChange }: FormCalendarProps) {
   };
   return (
     <>
-      <div className="mb-2 grid grid-cols-[max-content,_1fr] gap-4">
+      <div className="mb-2 grid grid-cols-[max-content,1fr] gap-4">
         <label>{t("start-date")}</label>
         <input
           type="date"

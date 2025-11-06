@@ -1,8 +1,8 @@
 "use client";
 
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { PageSectionElementTypeEnum } from "@/db/schema/enums";
@@ -55,15 +55,19 @@ export const ActivityGroupCreation = ({
 
   useEffect(() => {
     if (!querySection.data) {
-      setUpdating(false);
+      startTransition(() => {
+        setUpdating(false);
+      });
       return;
     }
     reset({
       title: querySection.data?.title ?? "",
       subTitle: querySection.data?.subTitle ?? "",
     });
-    setUpdating(true);
-  }, [querySection.data, reset, setUpdating]);
+    startTransition(() => {
+      setUpdating(true);
+    });
+  }, [querySection.data, reset]);
 
   const createSection = trpc.pages.createPageSection.useMutation({
     onSuccess(data) {
@@ -310,11 +314,14 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
 
   useEffect(() => {
     if (!queryActivity.data) return;
-    setInitialData({
-      title: queryActivity.data?.title ?? "",
-      subTitle: queryActivity.data?.subTitle ?? "",
-      description: queryActivity.data?.content ?? "",
-      imageUrls: queryActivity.data?.images ?? [],
+    const activityData = queryActivity.data;
+    startTransition(() => {
+      setInitialData({
+        title: activityData.title ?? "",
+        subTitle: activityData.subTitle ?? "",
+        description: activityData.content ?? "",
+        imageUrls: activityData.images ?? [],
+      });
     });
   }, [queryActivity.data]);
 

@@ -1,6 +1,13 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  startTransition,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { twMerge } from "tailwind-merge";
@@ -45,9 +52,7 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
   const [activityIds, setActivityIds] = useState<Map<string, OptionItem>>(
     new Map(),
   );
-  const [obtentionDate, setObtentionDate] = useState<Date>(
-    new Date(Date.now()),
-  );
+  const [obtentionDate, setObtentionDate] = useState<Date>(new Date());
   const [documentUrl, setDocumentUrl] = useState("");
   const utils = trpc.useUtils();
   const router = useRouter();
@@ -58,13 +63,15 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
     if (queryOrganisms.data) {
       if (organismId === "" && queryOrganisms.data.length > 0) {
         const grpId = queryOrganisms.data[0]?.id || "";
-        setOrganismId(grpId);
         const mIds = new Map<string, OptionItem>();
         for (const m of queryOrganisms.data?.find((g) => g.id === grpId)
           ?.modules ?? []) {
           mIds.set(m.id, { id: m.id, selected: false });
         }
-        setModuleIds(mIds);
+        startTransition(() => {
+          setOrganismId(grpId);
+          setModuleIds(mIds);
+        });
       }
     }
   }, [queryOrganisms.data, organismId]);
@@ -465,14 +472,17 @@ export function UpdateCertificationGroup({
 
   useEffect(() => {
     if (queryGroup.data) {
-      setData({
-        name: queryGroup.data?.name ?? "",
-        modules:
-          queryGroup.data?.modules.map((m) => ({
-            dbId: m.id,
-            name: m.name,
-            activityIds: m.activities.map((g) => g.id),
-          })) ?? [],
+      const groupData = queryGroup.data;
+      startTransition(() => {
+        setData({
+          name: groupData.name ?? "",
+          modules:
+            groupData.modules.map((m) => ({
+              dbId: m.id,
+              name: m.name,
+              activityIds: m.activities.map((g) => g.id),
+            })) ?? [],
+        });
       });
     }
   }, [queryGroup.data]);
@@ -597,7 +607,7 @@ function CertificationGroupForm({
 
   function addModule(mod?: CertificationModuleForm) {
     if (!mod) return;
-    const mods = data.modules;
+    const mods = [...data.modules];
     if (!selectedModule) {
       mod.dbId = `MOD-${data.modules.length + 1}`;
       mods.push(mod);

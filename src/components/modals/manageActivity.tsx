@@ -1,8 +1,8 @@
 "use client";
 
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -37,8 +37,11 @@ const AddActivity = ({
   );
 
   useEffect(() => {
-    if (groupId === "" && queryGroups?.data && queryGroups.data.length > 0)
-      setGroupId(queryGroups.data[0].id || "");
+    if (groupId === "" && queryGroups?.data && queryGroups.data.length > 0) {
+      startTransition(() => {
+        setGroupId(queryGroups.data[0].id || "");
+      });
+    }
   }, [queryGroups.data, groupId]);
 
   const queryClubActivities = trpc.activities.getActivitiesForClub.useQuery(
@@ -433,11 +436,18 @@ export function UpdateGroup({
   const groupQuery = trpc.activities.getActivityGroupById.useQuery(groupId, {
     enabled: isCUID(groupId),
   });
+  const [name, setName] = useState("");
+  const [defaultGroup, setDefaultGroup] = useState(false);
+  const [error, setError] = useState(false);
+  const t = useTranslations("club");
 
   useEffect(() => {
     if (!groupQuery.data) return;
-    setName(groupQuery.data.name ?? "");
-    setDefaultGroup(groupQuery.data.default ?? false);
+    const data = groupQuery.data;
+    startTransition(() => {
+      setName(data.name ?? "");
+      setDefaultGroup(data.default ?? false);
+    });
   }, [groupQuery.data]);
 
   const updateGroup = trpc.activities.updateGroup.useMutation({
@@ -450,10 +460,6 @@ export function UpdateGroup({
       toast.error(error.message);
     },
   });
-  const [name, setName] = useState("");
-  const [defaultGroup, setDefaultGroup] = useState(false);
-  const [error, setError] = useState(false);
-  const t = useTranslations("club");
 
   function update() {
     if (name === "") {

@@ -6,10 +6,10 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
+import { startTransition, useEffect, useState } from "react";
 import MapComponent, { Marker } from "react-map-gl/mapbox";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
@@ -87,12 +87,15 @@ export const UpdateSite = ({ siteId, clubId }: UpdateSiteProps) => {
 
   useEffect(() => {
     if (querySite.data) {
-      setInitialData({
-        name: querySite.data.name,
-        address: querySite.data.address,
-        latitude: querySite.data.latitude ?? LATITUDE,
-        longitude: querySite.data.longitude ?? LONGITUDE,
-        searchAddress: querySite.data.searchAddress ?? "",
+      const data = querySite.data;
+      startTransition(() => {
+        setInitialData({
+          name: data.name,
+          address: data.address,
+          latitude: data.latitude ?? LATITUDE,
+          longitude: data.longitude ?? LONGITUDE,
+          searchAddress: data.searchAddress ?? "",
+        });
       });
     }
   }, [querySite.data]);

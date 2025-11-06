@@ -5,8 +5,8 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
+import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 import { useCoachingLevel, useCoachingTarget } from "@/lib/offers/useOffers";
 import { COACHING_LEVEL, COACHING_TARGET } from "@/lib/offers/data";
@@ -111,32 +111,34 @@ export const UpdateOffer = ({ userId, offerId }: PropsUpdateDelete) => {
         (l) =>
           !!queryOffer.data?.coachingLevel?.find((cl) => cl.level === l.value),
       );
-      setInitialData({
-        name: queryOffer.data?.name ?? "",
-        description: queryOffer.data?.description ?? "",
-        target: queryOffer.data?.target ?? "INDIVIDUAL",
-        excludingTaxes: queryOffer.data?.excludingTaxes ?? false,
-        startDate: formatDateAsYYYYMMDD(
-          queryOffer.data?.startDate ?? new Date(Date.now()),
-        ),
-        inHouse: queryOffer.data?.inHouse ?? false,
-        physical: queryOffer.data?.physical ?? false,
-        webcam: queryOffer.data?.webcam ?? false,
-        myPlace: queryOffer.data?.myPlace ?? false,
-        publicPlace: queryOffer.data?.publicPlace ?? false,
-        perHourPhysical: queryOffer.data?.perHourPhysical ?? 0,
-        perDayPhysical: queryOffer.data?.perDayPhysical ?? 0,
-        perHourWebcam: queryOffer.data?.perHourWebcam ?? 0,
-        perDayWebcam: queryOffer.data?.perDayWebcam ?? 0,
-        travelFee: queryOffer.data?.travelFee ?? 0,
-        travelLimit: queryOffer.data?.travelLimit ?? 0,
-        freeHours: queryOffer.data?.freeHours ?? 0,
-        levels,
-        packs:
-          queryOffer.data?.packs?.map((p) => ({
-            nbHours: p.nbHours ?? 0,
-            packPrice: p.packPrice ?? 0,
-          })) ?? [],
+      startTransition(() => {
+        setInitialData({
+          name: queryOffer.data?.name ?? "",
+          description: queryOffer.data?.description ?? "",
+          target: queryOffer.data?.target ?? "INDIVIDUAL",
+          excludingTaxes: queryOffer.data?.excludingTaxes ?? false,
+          startDate: formatDateAsYYYYMMDD(
+            queryOffer.data?.startDate ?? new Date(Date.now()),
+          ),
+          inHouse: queryOffer.data?.inHouse ?? false,
+          physical: queryOffer.data?.physical ?? false,
+          webcam: queryOffer.data?.webcam ?? false,
+          myPlace: queryOffer.data?.myPlace ?? false,
+          publicPlace: queryOffer.data?.publicPlace ?? false,
+          perHourPhysical: queryOffer.data?.perHourPhysical ?? 0,
+          perDayPhysical: queryOffer.data?.perDayPhysical ?? 0,
+          perHourWebcam: queryOffer.data?.perHourWebcam ?? 0,
+          perDayWebcam: queryOffer.data?.perDayWebcam ?? 0,
+          travelFee: queryOffer.data?.travelFee ?? 0,
+          travelLimit: queryOffer.data?.travelLimit ?? 0,
+          freeHours: queryOffer.data?.freeHours ?? 0,
+          levels,
+          packs:
+            queryOffer.data?.packs?.map((p) => ({
+              nbHours: p.nbHours ?? 0,
+              packPrice: p.packPrice ?? 0,
+            })) ?? [],
+        });
       });
     }
   }, [queryOffer.data]);
@@ -235,7 +237,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
 
   const [pack, setPack] = useState<TPack>({ nbHours: 0, packPrice: 0 });
   const defaultValues: OfferFormValues = {
-    startDate: formatDateAsYYYYMMDD(new Date(Date.now())),
+    startDate: formatDateAsYYYYMMDD(new Date()),
     name: "",
     target: "INDIVIDUAL",
     excludingTaxes: false,

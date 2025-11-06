@@ -1,8 +1,8 @@
 "use client";
 
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 import ThemeSelector, { TThemes } from "../themeSelector";
 import Confirmation from "../ui/confirmation";
@@ -44,7 +44,9 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
 
   useEffect(() => {
     if (!querySection.data) {
-      setUpdating(false);
+      startTransition(() => {
+        setUpdating(false);
+      });
       return;
     }
     const hc = querySection.data?.elements.find(
@@ -58,7 +60,9 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
       imageUrls: hc?.images ?? [],
     };
     reset(resetData);
-    setUpdating(true);
+    startTransition(() => {
+      setUpdating(true);
+    });
   }, [querySection.data, setUpdating, reset]);
 
   const createSection = trpc.pages.createPageSection.useMutation({
@@ -292,7 +296,7 @@ function TitleContent({
   return (
     <div
       className={`cover flex ${
-        preview ? "aspect-[4/1]" : "min-h-[30vh]"
+        preview ? "aspect-4/1" : "min-h-[30vh]"
       } w-full flex-col items-center justify-center gap-4`}
       style={{
         backgroundImage: `${imageSrc ? `url(${imageSrc})` : "unset"}`,

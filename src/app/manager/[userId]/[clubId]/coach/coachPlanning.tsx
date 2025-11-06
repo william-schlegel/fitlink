@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
 import { useDayName } from "@/lib/dates/useDayName";
 import Spinner from "@/components/ui/spinner";
@@ -33,7 +33,6 @@ export function CoachPlanning({
   clubId: string;
 }) {
   const t = useTranslations("club");
-  const [weekData, setWeekData] = useState<ClubData>();
   const { getName, getDayNumber } = useDayName();
 
   const planning = trpc.plannings.getCoachPlanningForClub.useQuery(
@@ -43,8 +42,8 @@ export function CoachPlanning({
     },
   );
 
-  useEffect(() => {
-    if (!planning.data) return;
+  const weekData = useMemo(() => {
+    if (!planning.data) return undefined;
     const week: ClubData = {
       id: planning.data.clubId,
       name: planning.data.name ?? "",
@@ -63,8 +62,8 @@ export function CoachPlanning({
       });
     }
     week.activities = wa.sort((a, b) => a.dayOrder - b.dayOrder);
-    setWeekData(week);
-  }, [planning.data, getDayNumber, getName]);
+    return week;
+  }, [planning.data, getDayNumber]);
 
   if (planning.isLoading) return <Spinner />;
   if (!planning.data || !weekData) return <div>{t("coach.no-planning")}</div>;

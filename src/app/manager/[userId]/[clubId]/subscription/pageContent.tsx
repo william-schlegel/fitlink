@@ -1,7 +1,7 @@
 "use client";
 
+import { startTransition, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 import {
   DeleteSubscription,
@@ -36,30 +36,79 @@ export function SubscriptionContent({
 
   const { getModeName } = useSubscriptionMode();
   const { getRestrictionName } = useSubscriptionRestriction();
-  const [selectedSites, setSelectedSites] = useState<string[]>([]);
-  const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
-  const [selectedActivityGroups, setSelectedActivityGroups] = useState<
-    string[]
-  >([]);
-  const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const subQuery = trpc.subscriptions.getSubscriptionById.useQuery(
     subscriptionId,
     {
       enabled: isCUID(subscriptionId),
     },
   );
-  useEffect(() => {
-    if (subQuery.data) {
-      setSelectedSites(subQuery.data?.sites.map((s) => s.siteId) ?? []);
-      setSelectedRooms(subQuery.data?.rooms.map((s) => s.roomId) ?? []);
-      setSelectedActivityGroups(
-        subQuery.data?.activitieGroups.map((s) => s.activityGroupId) ?? [],
-      );
-      setSelectedActivities(
-        subQuery.data?.activities.map((s) => s.activityId) ?? [],
-      );
+
+  const initialSelections = useMemo(() => {
+    if (!subQuery.data) {
+      return {
+        sites: [],
+        rooms: [],
+        activityGroups: [],
+        activities: [],
+      };
     }
+    return {
+      sites: subQuery.data.sites.map((s) => s.siteId) ?? [],
+      rooms: subQuery.data.rooms.map((s) => s.roomId) ?? [],
+      activityGroups:
+        subQuery.data.activitieGroups.map((s) => s.activityGroupId) ?? [],
+      activities: subQuery.data.activities.map((s) => s.activityId) ?? [],
+    };
   }, [subQuery.data]);
+
+  const [selections, setSelections] = useState(() => initialSelections);
+
+  // Sync selections with query data when subscription changes
+  // Using startTransition to mark this as a non-urgent update
+  useEffect(() => {
+    startTransition(() => {
+      setSelections(initialSelections);
+    });
+  }, [subscriptionId, initialSelections]);
+
+  const selectedSites = selections.sites;
+  const selectedRooms = selections.rooms;
+  const selectedActivityGroups = selections.activityGroups;
+  const selectedActivities = selections.activities;
+
+  const setSelectedSites = (
+    value: string[] | ((prev: string[]) => string[]),
+  ) => {
+    setSelections((prev) => ({
+      ...prev,
+      sites: typeof value === "function" ? value(prev.sites) : value,
+    }));
+  };
+  const setSelectedRooms = (
+    value: string[] | ((prev: string[]) => string[]),
+  ) => {
+    setSelections((prev) => ({
+      ...prev,
+      rooms: typeof value === "function" ? value(prev.rooms) : value,
+    }));
+  };
+  const setSelectedActivityGroups = (
+    value: string[] | ((prev: string[]) => string[]),
+  ) => {
+    setSelections((prev) => ({
+      ...prev,
+      activityGroups:
+        typeof value === "function" ? value(prev.activityGroups) : value,
+    }));
+  };
+  const setSelectedActivities = (
+    value: string[] | ((prev: string[]) => string[]),
+  ) => {
+    setSelections((prev) => ({
+      ...prev,
+      activities: typeof value === "function" ? value(prev.activities) : value,
+    }));
+  };
 
   const { info } = useDisplaySubscriptionInfo(
     subQuery.data?.mode ?? "ALL_INCLUSIVE",

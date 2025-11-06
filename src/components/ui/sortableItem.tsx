@@ -6,6 +6,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 import type {
+  DraggableAttributes,
   DraggableSyntheticListeners,
   UniqueIdentifier,
 } from "@dnd-kit/core";
@@ -17,16 +18,14 @@ interface Props {
 }
 
 interface Context {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attributes: Record<string, any>;
+  attributes: DraggableAttributes;
   listeners: DraggableSyntheticListeners;
   ref(node: HTMLElement | null): void;
 }
 
 const SortableItemContext = createContext<Context>({
-  attributes: {},
+  attributes: {} as DraggableAttributes,
   listeners: undefined,
-
   ref() {},
 });
 

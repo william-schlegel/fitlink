@@ -1,7 +1,7 @@
 "use client";
 
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import React, { useRef } from "react";
 
 import ButtonIcon from "@/components/ui/buttonIcon";
 
@@ -9,11 +9,12 @@ import Image from "next/image";
 
 import { createPortal } from "react-dom";
 
+import { useMutation } from "convex/react";
+
 import { Id } from "../../../convex/_generated/dataModel";
 import Confirmation from "@/components/ui/confirmation";
 import { api } from "../../../convex/_generated/api";
 import Spinner from "@/components/ui/spinner";
-import { useMutation } from "convex/react";
 import { trpc } from "@/lib/trpc/client";
 
 type MessageItemProps = {
@@ -144,13 +145,41 @@ const EmojiPicker = ({
   handleReaction: (emoji: string) => void;
 }) => {
   const commonEmojis = ["👍", "❤️", "😂", "😮", "😢", "😡"];
-  if (!msgRef.current) return null;
-  const portalTarget = msgRef.current.getBoundingClientRect();
+  const [position, setPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const element = msgRef.current;
+    if (!element) return;
+
+    const updatePosition = () => {
+      const rect = element.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom,
+        left: rect.left,
+      });
+    };
+
+    updatePosition();
+
+    // Update position on scroll/resize
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [msgRef]);
+
+  if (!position) return null;
 
   return createPortal(
     <div
       className="absolute mb-2 flex gap-1 bg-base-100 p-2 rounded-lg shadow-lg z-10"
-      style={{ top: portalTarget.bottom, left: portalTarget.left }}
+      style={{ top: position.top, left: position.left }}
     >
       {commonEmojis.map((emoji) => (
         <button

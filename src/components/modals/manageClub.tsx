@@ -6,10 +6,10 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
+import { startTransition, useEffect, useState } from "react";
 import MapComponent, { Marker } from "react-map-gl/mapbox";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Image from "next/image";
 import Link from "next/link";
@@ -99,11 +99,14 @@ export const UpdateClub = ({ clubId }: PropsUpdateDelete) => {
   );
   useEffect(() => {
     if (queryClub.data) {
-      setInitialData({
-        address: queryClub.data.address ?? "",
-        name: queryClub.data.name ?? "",
-        logoUrl: queryClub.data.logoUrl ?? undefined,
-        deleteLogo: false,
+      const data = queryClub.data;
+      startTransition(() => {
+        setInitialData({
+          address: data.address ?? "",
+          name: data.name ?? "",
+          logoUrl: data.logoUrl ?? undefined,
+          deleteLogo: false,
+        });
       });
     }
   }, [queryClub.data]);

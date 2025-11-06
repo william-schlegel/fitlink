@@ -1,16 +1,29 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+import next from "eslint-config-next";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// Flat-config for ESLint v9+. Using Next's official flat config avoids
+// legacy/config-compat validation that was causing a circular JSON issue
+// (plugins.react -> configs.flat -> plugins ...). Do not attach plugin
+// objects manually here.
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+const config = [
+  // Next.js base + Core Web Vitals rules, TypeScript/React aware
+  ...next,
 
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  // Project-specific tweaks can go here
+  {
+    name: "project-overrides",
+    ignores: [
+      "convex/_generated/**",
+      "drizzle/meta/**",
+      "node_modules/**",
+      ".next/**",
+      "out/**",
+    ],
+    rules: {
+      // Example: customize as you like
+      // "no-console": ["warn", { allow: ["warn", "error"] }],
+    },
+  },
 ];
 
-export default eslintConfig;
+export default config;

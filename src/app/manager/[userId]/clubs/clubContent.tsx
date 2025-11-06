@@ -10,7 +10,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, ReactNode, startTransition } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -39,11 +39,17 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
       enabled: isCUID(clubId),
     },
   );
+  const [groups, setGroups] = useState<(typeof activityGroup.$inferSelect)[]>(
+    [],
+  );
+
   useEffect(() => {
-    const groups = new Map();
+    const groupsMap = new Map();
     for (const act of clubQuery.data?.activities || [])
-      groups.set(act.group.id, act.group);
-    setGroups(Array.from(groups.values()));
+      groupsMap.set(act.group.id, act.group);
+    startTransition(() => {
+      setGroups(Array.from(groupsMap.values()));
+    });
   }, [clubQuery.data]);
 
   const calendarQuery = trpc.calendars.getCalendarForClub.useQuery(clubId, {
@@ -59,9 +65,6 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
       utils.clubs.getClubById.invalidate({ clubId, userId });
     },
   });
-  const [groups, setGroups] = useState<(typeof activityGroup.$inferSelect)[]>(
-    [],
-  );
   const utils = trpc.useUtils();
   const t = useTranslations("club");
   const { features } = useUserInfo(userId);
@@ -137,10 +140,12 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
           />
         </Link>
       </div>
-      <CalendarWeek
-        calendar={calendarQuery.data}
-        isLoading={calendarQuery.isLoading}
-      />
+      {calendarQuery.data ? (
+        <CalendarWeek
+          calendar={calendarQuery.data}
+          isLoading={calendarQuery.isLoading}
+        />
+      ) : null}
       <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 rounded border border-primary p-4 ">

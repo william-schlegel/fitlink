@@ -235,13 +235,13 @@ export function PlanningContent({
                 </div>
               </div>
             </div>
-            <div className="flex max-w-full gap-[1px] overflow-auto">
+            <div className="flex max-w-full gap-px overflow-auto">
               {DAYS.map((day) => (
                 <div key={day.value} className="shrink-0">
                   <div className="w-max-fit flex shrink-0 flex-col">
                     <DayLabel day={day.label} />
                     <div
-                      className={`grid gap-[1px]`}
+                      className="grid gap-px"
                       style={{
                         gridTemplateColumns: `repeat(${
                           queryClub.data?.sites?.length ?? 1
@@ -250,7 +250,7 @@ export function PlanningContent({
                     >
                       {queryClub.data?.sites?.map((site) => (
                         <div key={site.id}>
-                          <div className="h-6 w-[12rem] shrink-0 overflow-hidden text-ellipsis whitespace-nowrap bg-secondary px-2 text-center leading-6 text-secondary-content">
+                          <div className="h-6 w-48 shrink-0 overflow-hidden text-ellipsis whitespace-nowrap bg-secondary px-2 text-center leading-6 text-secondary-content">
                             {site.name}
                           </div>
                           <DropSite
@@ -306,39 +306,38 @@ function PlanningActivities({
   activities,
   onActivatePopup,
 }: PlanningActivitiesProps) {
-  const HSlots =
-    useMemo(() => {
-      if (!activities) return [];
-      const hs = activities.map((activity) => ({
-        activity,
-        position: 0,
-        nbPosition: 1,
-      }));
+  const HSlots = useMemo(() => {
+    if (!activities) return [];
+    const hs = activities.map((activity) => ({
+      activity,
+      position: 0,
+      nbPosition: 1,
+    }));
 
-      for (let a = 0; a < hs.length; a++) {
-        const hmA = hs[a]?.activity.startTime.split(":") ?? ["0", "0"];
-        const startA = Number(hmA[0]) + Number(hmA[1]) / 60;
-        const durationA = (hs[a]?.activity.duration ?? 0) / 60;
-        for (let b = a + 1; b < hs.length; b++) {
-          const hmB = hs[b]?.activity.startTime.split(":") ?? ["0", "0"];
-          const startB = Number(hmB[0]) + Number(hmB[1]) / 60;
-          const durationB = (hs[b]?.activity.duration ?? 0) / 60;
-          if (
-            (startB >= startA && startB < startA + durationA) ||
-            (startB <= startA && startA < startB + durationB)
-          ) {
-            const elemB = hs[b];
-            const elemA = hs[a];
-            if (elemB && elemA) {
-              elemB.position += 1;
-              elemB.nbPosition += 1;
-              elemA.nbPosition += 1;
-            }
+    for (let a = 0; a < hs.length; a++) {
+      const hmA = hs[a]?.activity.startTime.split(":") ?? ["0", "0"];
+      const startA = Number(hmA[0]) + Number(hmA[1]) / 60;
+      const durationA = (hs[a]?.activity.duration ?? 0) / 60;
+      for (let b = a + 1; b < hs.length; b++) {
+        const hmB = hs[b]?.activity.startTime.split(":") ?? ["0", "0"];
+        const startB = Number(hmB[0]) + Number(hmB[1]) / 60;
+        const durationB = (hs[b]?.activity.duration ?? 0) / 60;
+        if (
+          (startB >= startA && startB < startA + durationA) ||
+          (startB <= startA && startA < startB + durationB)
+        ) {
+          const elemB = hs[b];
+          const elemA = hs[a];
+          if (elemB && elemA) {
+            elemB.position += 1;
+            elemB.nbPosition += 1;
+            elemA.nbPosition += 1;
           }
         }
       }
-      return hs;
-    }, [activities]) ?? [];
+    }
+    return hs;
+  }, [activities]);
 
   return (
     <>

@@ -1,7 +1,7 @@
 "use client";
 
+import { startTransition, useEffect, useState } from "react";
 import { differenceInDays, isDate } from "date-fns";
-import { useEffect, useState } from "react";
 
 import { FeatureEnum } from "@/db/schema/enums";
 import { useSession } from "./auth/client";
@@ -23,12 +23,15 @@ export default function useUserInfo(userId?: string | null) {
 
   useEffect(() => {
     if (u.data) {
-      setRemainTrial(
-        isDate(u.data.trialUntil)
-          ? differenceInDays(u.data.trialUntil, new Date())
-          : 0,
-      );
-      setFeatures(u.data.features ?? []);
+      const userData = u.data;
+      startTransition(() => {
+        setRemainTrial(
+          isDate(userData.trialUntil)
+            ? differenceInDays(userData.trialUntil, new Date())
+            : 0,
+        );
+        setFeatures(userData.features ?? []);
+      });
     }
   }, [u.data]);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
 import { DeleteGroup, UpdateGroup } from "@/components/modals/manageActivity";
 import { trpc } from "@/lib/trpc/client";
@@ -22,10 +22,6 @@ export function AGContent({ agId }: AGContentProps) {
     enabled: isCUID(agId),
   });
 
-  useEffect(() => {
-    if (agQuery.data) setClubs([]);
-  }, [agQuery.data]);
-
   const activitiesQuery = trpc.activities.getAllActivitiesForGroup.useQuery(
     agId,
     {
@@ -33,8 +29,8 @@ export function AGContent({ agId }: AGContentProps) {
     },
   );
 
-  useEffect(() => {
-    if (!activitiesQuery.data) return;
+  const clubs = useMemo(() => {
+    if (!activitiesQuery.data) return [];
 
     const cg = new Map<string, ClubGroup>();
     for (const ac of activitiesQuery.data) {
@@ -48,10 +44,9 @@ export function AGContent({ agId }: AGContentProps) {
           activities: 1,
         });
     }
-    setClubs(Array.from(cg.values()));
+    return Array.from(cg.values());
   }, [activitiesQuery.data]);
 
-  const [clubs, setClubs] = useState<ClubGroup[]>([]);
   const t = useTranslations("admin");
 
   return (

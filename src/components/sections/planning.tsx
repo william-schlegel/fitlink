@@ -1,8 +1,8 @@
 "use client";
 
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 import { PageSectionElementTypeEnum } from "@/db/schema/enums";
 import ThemeSelector, { TThemes } from "../themeSelector";
@@ -185,12 +185,15 @@ function UpdatePlanning({ clubId, pageId, planningId }: UpdatePlanningProps) {
   );
   useEffect(() => {
     if (!queryPlanning.data) return;
-    setInitialData({
-      title: queryPlanning.data?.title ?? "",
-      subtitle: queryPlanning.data?.subTitle ?? "",
-      description: queryPlanning.data?.content ?? "",
-      imageUrls: queryPlanning.data?.images ?? [],
-      sites: JSON.parse(queryPlanning.data?.optionValue ?? "[]"),
+    const planningData = queryPlanning.data;
+    startTransition(() => {
+      setInitialData({
+        title: planningData.title ?? "",
+        subtitle: planningData.subTitle ?? "",
+        description: planningData.content ?? "",
+        imageUrls: planningData.images ?? [],
+        sites: JSON.parse(planningData.optionValue ?? "[]"),
+      });
     });
   }, [queryPlanning.data, setInitialData]);
 
@@ -324,7 +327,9 @@ function PlanningForm({
       for (const st of sites.data) {
         sts.push(initialValues?.sites.includes(st.id) ?? false);
       }
-      setPlanningGroups(sts);
+      startTransition(() => {
+        setPlanningGroups(sts);
+      });
     }
   }, [sites.data, initialValues, setPlanningGroups]);
 
@@ -368,7 +373,7 @@ function PlanningForm({
             <img
               src={imageUrls[0]}
               alt=""
-              className="max-h-[10rem] w-full object-contain"
+              className="max-h-40 w-full object-contain"
             />
             <button
               className="absolute right-2 bottom-2"
@@ -511,7 +516,7 @@ function PlanningContentCard({
       </h2>
       <div
         className={`cover flex ${
-          preview ? "aspect-[4/3]" : "min-h-[90vh]"
+          preview ? "aspect-4/3" : "min-h-[90vh]"
         } w-full flex-col items-center justify-center gap-4`}
         style={{
           backgroundImage: `${

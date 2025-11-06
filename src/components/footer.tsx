@@ -14,7 +14,7 @@ export default function Footer() {
           <br />
           {t("tag-line")}
           <br />
-          &copy; {format(new Date(Date.now()), "yyyy")}
+          &copy; {format(new Date(), "yyyy")}
         </p>
       </div>
       <div>

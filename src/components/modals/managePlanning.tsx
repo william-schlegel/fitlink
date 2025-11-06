@@ -6,8 +6,8 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
+import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { isDate } from "date-fns";
 
 import { useRouter } from "next/navigation";
@@ -219,8 +219,10 @@ export function UpdatePlanning({
       siteId: queryPlanning.data?.siteId,
       roomId: queryPlanning.data?.roomId,
     });
-    setSiteName(queryPlanning.data?.site?.name ?? "");
-    setRoomName(queryPlanning.data?.room?.name ?? "");
+    startTransition(() => {
+      setSiteName(queryPlanning.data?.site?.name ?? "");
+      setRoomName(queryPlanning.data?.room?.name ?? "");
+    });
   }, [queryPlanning.data, reset]);
 
   const updatePlanning = trpc.plannings.updatePlanningForClub.useMutation({

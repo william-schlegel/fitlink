@@ -271,7 +271,6 @@ function moveProgressBar(element: HTMLElement, duration: number) {
  * @param mixed element
  *
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function removeWindToast(element: any) {
   const target = element.target;
   // Get target parent element

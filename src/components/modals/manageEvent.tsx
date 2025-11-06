@@ -7,10 +7,10 @@ import {
   useFormContext,
   useWatch,
 } from "react-hook-form";
+import { startTransition, useEffect, useState } from "react";
 import MapComponent, { Marker } from "react-map-gl/mapbox";
 import { isDate, startOfToday } from "date-fns";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { isSameDay } from "date-fns";
 import { format } from "date-fns";
@@ -133,23 +133,25 @@ export const UpdateEvent = ({
 
   useEffect(() => {
     if (!queryEvent.data) return;
-    setInitialData({
-      name: queryEvent.data?.name ?? "",
-      brief: queryEvent.data?.brief ?? "",
-      description: queryEvent.data?.description ?? "",
-      startDate: formatDateAsYYYYMMDD(queryEvent.data?.startDate, true),
-      endDate: formatDateAsYYYYMMDD(queryEvent.data?.endDate, true),
-      startDisplay: formatDateAsYYYYMMDD(queryEvent.data?.startDisplay, true),
-      endDisplay: formatDateAsYYYYMMDD(queryEvent.data?.endDisplay, true),
-      bannerText: queryEvent.data?.bannerText ?? "",
-      cancelled: !!queryEvent.data?.cancelled,
-      price: queryEvent.data?.price ?? 0,
-      free: !!queryEvent.data?.free,
-      address: queryEvent.data?.address ?? "",
-      searchAddress: queryEvent.data?.searchAddress ?? "",
-      longitude: queryEvent.data?.longitude ?? LONGITUDE,
-      latitude: queryEvent.data?.latitude ?? LATITUDE,
-      imageUrls: queryEvent.data?.imageUrls ?? [],
+    startTransition(() => {
+      setInitialData({
+        name: queryEvent.data?.name ?? "",
+        brief: queryEvent.data?.brief ?? "",
+        description: queryEvent.data?.description ?? "",
+        startDate: formatDateAsYYYYMMDD(queryEvent.data?.startDate, true),
+        endDate: formatDateAsYYYYMMDD(queryEvent.data?.endDate, true),
+        startDisplay: formatDateAsYYYYMMDD(queryEvent.data?.startDisplay, true),
+        endDisplay: formatDateAsYYYYMMDD(queryEvent.data?.endDisplay, true),
+        bannerText: queryEvent.data?.bannerText ?? "",
+        cancelled: !!queryEvent.data?.cancelled,
+        price: queryEvent.data?.price ?? 0,
+        free: !!queryEvent.data?.free,
+        address: queryEvent.data?.address ?? "",
+        searchAddress: queryEvent.data?.searchAddress ?? "",
+        longitude: queryEvent.data?.longitude ?? LONGITUDE,
+        latitude: queryEvent.data?.latitude ?? LATITUDE,
+        imageUrls: queryEvent.data?.imageUrls ?? [],
+      });
     });
   }, [queryEvent.data]);
 
