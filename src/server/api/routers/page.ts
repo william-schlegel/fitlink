@@ -251,7 +251,6 @@ export const pageRouter = createTRPCRouter({
   updatePageSection: protectedProcedure
     .input(PageSectionObject.partial())
     .mutation(({ input }) => {
-      console.log("input", input);
       return db
         .update(pageSection)
         .set(input)

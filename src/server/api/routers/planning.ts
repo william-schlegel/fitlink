@@ -1,5 +1,7 @@
-import { and, asc, eq, lte } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, lte, or } from "drizzle-orm";
 import z from "zod";
+
+import { endOfDay, startOfDay } from "date-fns";
 
 import {
   createTRPCRouter,
@@ -7,10 +9,12 @@ import {
   publicProcedure,
 } from "@/lib/trpc/server";
 import { planning, planningActivity, reservation } from "@/db/schema/planning";
-import { activity, club, room, site } from "@/db/schema/club";
-import { dayNameEnum } from "@/db/schema/enums";
+import { dayNameEnum, roomReservationEnum } from "@/db/schema/enums";
+import { getDayName } from "@/lib/dates/days";
 import { userCoach } from "@/db/schema/user";
+import { activity } from "@/db/schema/club";
 import { DayName } from "@/lib/dates/data";
+import { user } from "@/db/schema/auth";
 import { isCUID } from "@/lib/utils";
 import { db } from "@/db";
 
@@ -274,190 +278,279 @@ export const planningRouter = createTRPCRouter({
         date: z.date(),
       }),
     )
-    .query(async () => {
-      // const userData = await db.query.user.findFirst({
-      //   where: eq(user.id, input.memberId),
-      //   with: {
-      //     memberData: {
-      //       with: {
-      //         clubs: true,
-      //         // subscriptions: {
-      //         //   with: {
-      //         //     activityGroups: true,
-      //         //     activities: true,
-      //         //     rooms: true,
-      //         //     sites: true,
-      //         //   },
-      //         // },
-      //       },
-      //     },
-      //   },
-      // });
+    .query(async ({ input }) => {
+      const userData = await db.query.user.findFirst({
+        where: eq(user.id, input.memberId),
+        with: {
+          memberData: {
+            with: {
+              clubs: true,
+              subscriptions: {
+                with: {
+                  subscription: {
+                    with: {
+                      activitieGroups: true,
+                      activities: true,
+                      rooms: true,
+                      sites: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
 
-      // const clubIds = Array.from(
-      //   new Set(userData?.memberData?.clubs.map((c) => c.clubId)),
-      // );
+      const clubIds = Array.from(
+        new Set(userData?.memberData?.clubs.map((c) => c.clubId)),
+      );
 
-      // const planningClubs = await db.query.planning.findMany({
-      //   where: and(
-      //     lte(planning.startDate, new Date(Date.now())),
-      //     inArray(planning.clubId, clubIds),
-      //   ),
-      //   with: { club: true },
-      // });
+      const planningClubs = await db.query.planning.findMany({
+        where: and(
+          lte(planning.startDate, new Date(Date.now())),
+          inArray(planning.clubId, clubIds),
+        ),
+        with: { club: true },
+      });
 
-      const planningData: (typeof planning & {
-        club: typeof club;
-        activities: (typeof planningActivity & {
-          site: typeof site;
-          room: typeof room | null;
-          activity: typeof activity;
-          coach: typeof userCoach | null;
-          reservations: { id: string; date: Date }[];
-        })[];
-        withNoCalendar: (typeof activity & {
-          rooms: {
-            id: string;
-            name: string;
-            capacity: number;
-            // reservation: typeof roomReservation;
-          }[];
-          reservations: { id: string; date: Date; roomName: string }[];
-        })[];
-      })[] = [];
+      // Infer types from actual query results
+      type PlanningWithClub = (typeof planningClubs)[number];
 
-      // const dayName = getDayName(input.date);
+      const planningData: Array<
+        PlanningWithClub & {
+          activities: Array<
+            Omit<
+              NonNullable<
+                Awaited<ReturnType<typeof db.query.planningActivity.findMany>>
+              >[number],
+              "reservations"
+            > & {
+              activity: NonNullable<
+                Awaited<ReturnType<typeof db.query.activity.findFirst>>
+              >;
+              site: NonNullable<
+                Awaited<ReturnType<typeof db.query.site.findFirst>>
+              >;
+              room: NonNullable<
+                Awaited<ReturnType<typeof db.query.room.findFirst>>
+              > | null;
+              coach: typeof userCoach.$inferSelect | null;
+              reservations: Array<{ id: string; date: Date }>;
+            }
+          >;
+          withNoCalendar: Array<
+            Omit<
+              NonNullable<
+                Awaited<ReturnType<typeof db.query.activity.findMany>>
+              >[number],
+              "reservations" | "rooms"
+            > & {
+              rooms: Array<{
+                id: string;
+                name: string;
+                capacity: number;
+                reservation: (typeof roomReservationEnum.enumValues)[number];
+              }>;
+              reservations: Array<{ id: string; date: Date; roomName: string }>;
+            }
+          >;
+        }
+      > = [];
 
-      // for (const planningClub of planningClubs) {
-      //   const sub = user?.memberData?.subscriptions.filter(
-      //     (s) => s.clubId === planningClub.clubId
-      //   );
+      const dayName = getDayName(input.date);
 
-      //   type TIn = { in: string[] };
-      //   type TFilter = {
-      //     activityId?: TIn;
-      //     activity?: { groupId: TIn };
-      //     siteId?: TIn;
-      //     roomId?: TIn;
-      //   };
-      //   const where: {
-      //     day: DayName;
-      //     planningId: string;
-      //     OR?: TFilter[];
-      //   } = {
-      //     day: dayName,
-      //     planningId: planningClub.id,
-      //   };
-      //   type TFilterNC = {
-      //     id?: TIn;
-      //     groupId?: TIn;
-      //   };
+      for (const planningClub of planningClubs) {
+        const sub = userData?.memberData?.subscriptions
+          .flatMap((s) => s.subscription)
+          .filter((s) => s.clubId === planningClub.clubId);
 
-      //   const whereNoCal: {
-      //     clubId: string;
-      //     noCalendar: boolean;
-      //     OR?: TFilterNC[];
-      //   } = {
-      //     clubId: planningClub.clubId,
-      //     noCalendar: true,
-      //   };
+        // Build dynamic filters for planningActivity
+        const planningActivityConditions: ReturnType<typeof and>[] = [];
+        const activityConditions: ReturnType<typeof and>[] = [];
 
-      //   for (const s of sub ?? []) {
-      //     let fAct: TIn | null = null;
-      //     let fGAct: TIn | null = null;
-      //     let fSite: TIn | null = null;
-      //     let fRoom: TIn | null = null;
+        for (const s of sub ?? []) {
+          // Build activity/activity group filter
+          const activityFilters: ReturnType<typeof or>[] = [];
 
-      //     if (s.mode === "ACTIVITY_GROUP")
-      //       fGAct = {
-      //         in: s?.activitieGroups.map((ag) => ag.id),
-      //       };
-      //     if (s.mode === "ACTIVITY")
-      //       fAct = {
-      //         in: s.activities.map((a) => a.id),
-      //       };
-      //     if (s.restriction === "SITE") {
-      //       const sites = s.sites.map((s) => s.id);
-      //       fSite = { in: sites };
-      //     }
-      //     if (s.restriction === "ROOM") {
-      //       const rooms = s.rooms.map((s) => s.id);
-      //       fRoom = { in: rooms };
-      //     }
-      //     const filter: TFilter = {};
-      //     if (fGAct) filter.activity = { groupId: fGAct };
-      //     if (fAct) filter.activityId = fAct;
-      //     if (fSite) filter.siteId = fSite;
-      //     if (fRoom) filter.roomId = fRoom;
-      //     if (Object.keys(filter).length) {
-      //       if (!where.OR) where.OR = [];
-      //       where.OR.push(filter);
-      //     }
-      //     const filterNC: TFilterNC = {};
-      //     if (fGAct) filterNC.groupId = fGAct;
-      //     if (fAct) filterNC.id = fAct;
-      //     if (Object.keys(filterNC).length) {
-      //       if (!whereNoCal.OR) whereNoCal.OR = [];
-      //       whereNoCal.OR.push(filterNC);
-      //     }
-      //   }
-      //   const pa = await db.query.planningActivity.findMany({
-      //     where,
-      //     with: {
-      //       activity: true,
-      //       coach: true,
-      //       room: true,
-      //       site: true,
-      //       reservations: {
-      //         where: {
-      //           date: { gte: input.date },
-      //         },
-      //       },
-      //     },
-      //   });
-      //   const withNoCalendar = await db.query.activity.findMany({
-      //     where: whereNoCal,
-      //     with: {
-      //       // sites: { select: { name: true } },
-      //       rooms: {
-      //         select: {
-      //           id: true,
-      //           name: true,
-      //           capacity: true,
-      //           reservation: true,
-      //         },
-      //       },
-      //       reservations: {
-      //         where: {
-      //           date: { gte: input.date },
-      //         },
-      //         with: {
-      //           room: true,
-      //         },
-      //       },
-      //     },
-      //   });
-      //   planning.push({
-      //     ...planningClub,
-      //     activities: pa.map((p) => ({
-      //       ...p,
-      //       reservations: p.reservations
-      //         .filter((r) => isCUID(r.planningActivityId))
-      //         .map((r) => ({ id: r.planningActivityId ?? "", date: r.date })),
-      //     })),
-      //     withNoCalendar: withNoCalendar.map((wnc) => ({
-      //       ...wnc,
-      //       rooms: wnc.rooms ?? [],
-      //       reservations: wnc.reservations
-      //         .filter((r) => isCUID(r.activityId))
-      //         .map((r) => ({
-      //           id: r.activityId ?? "",
-      //           date: r.date,
-      //           roomName: r.room?.name ?? "",
-      //         })),
-      //     })),
-      //   });
-      // }
+          if (s.mode === "ACTIVITY_GROUP" && s.activitieGroups.length > 0) {
+            // Fetch activity IDs for this subscription's activity groups
+            const activityGroupIds = s.activitieGroups.map(
+              (ag) => ag.activityGroupId,
+            );
+            const activitiesFromGroups = await db.query.activity.findMany({
+              where: inArray(activity.groupId, activityGroupIds),
+              columns: { id: true },
+            });
+            const activityIds = activitiesFromGroups.map((a) => a.id);
+            if (activityIds.length > 0) {
+              activityFilters.push(
+                inArray(planningActivity.activityId, activityIds),
+              );
+            }
+          }
+
+          if (s.mode === "ACTIVITY" && s.activities.length > 0) {
+            const activityIds = s.activities.map((a) => a.activityId);
+            activityFilters.push(
+              inArray(planningActivity.activityId, activityIds),
+            );
+          }
+
+          // Build site/room restriction filter
+          const restrictionFilters: ReturnType<typeof or>[] = [];
+          if (s.restriction === "SITE" && s.sites.length > 0) {
+            const siteIds = s.sites.map((site) => site.siteId);
+            restrictionFilters.push(inArray(planningActivity.siteId, siteIds));
+          }
+          if (s.restriction === "ROOM" && s.rooms.length > 0) {
+            const roomIds = s.rooms.map((room) => room.roomId);
+            restrictionFilters.push(inArray(planningActivity.roomId, roomIds));
+          }
+
+          // Combine activity and restriction filters for planningActivity
+          // Each subscription creates an AND condition: (activity OR activityGroup) AND (site OR room)
+          if (activityFilters.length > 0 || restrictionFilters.length > 0) {
+            const combinedFilters: ReturnType<typeof and>[] = [];
+            if (activityFilters.length > 0) {
+              combinedFilters.push(or(...activityFilters));
+            }
+            if (restrictionFilters.length > 0) {
+              combinedFilters.push(or(...restrictionFilters));
+            }
+            if (combinedFilters.length > 0) {
+              planningActivityConditions.push(and(...combinedFilters));
+            }
+          }
+
+          // Build filters for activities without calendar
+          const activityNoCalFilters: ReturnType<typeof or>[] = [];
+          if (s.mode === "ACTIVITY_GROUP" && s.activitieGroups.length > 0) {
+            const activityGroupIds = s.activitieGroups.map(
+              (ag) => ag.activityGroupId,
+            );
+            activityNoCalFilters.push(
+              inArray(activity.groupId, activityGroupIds),
+            );
+          }
+          if (s.mode === "ACTIVITY" && s.activities.length > 0) {
+            const activityIds = s.activities.map((a) => a.activityId);
+            activityNoCalFilters.push(inArray(activity.id, activityIds));
+          }
+
+          if (activityNoCalFilters.length > 0) {
+            activityConditions.push(or(...activityNoCalFilters));
+          }
+        }
+
+        // Build the final where conditions
+        const planningActivityWhereConditions: ReturnType<typeof and>[] = [
+          eq(planningActivity.day, dayName),
+          eq(planningActivity.planningId, planningClub.id),
+        ];
+
+        // If there are subscription filters, add them as OR conditions
+        // This means: show activities that match ANY of the subscriptions
+        if (planningActivityConditions.length > 0) {
+          planningActivityWhereConditions.push(
+            or(...planningActivityConditions),
+          );
+        }
+
+        const activityWhereConditions: ReturnType<typeof and>[] = [
+          eq(activity.clubId, planningClub.clubId),
+          eq(activity.noCalendar, true),
+        ];
+
+        if (activityConditions.length > 0) {
+          activityWhereConditions.push(or(...activityConditions));
+        }
+
+        // Get start and end of the input date for filtering reservation
+        const pa = await db.query.planningActivity.findMany({
+          where: and(...planningActivityWhereConditions),
+          with: {
+            activity: true,
+            coach: true,
+            room: true,
+            site: true,
+            reservations: {
+              where: and(
+                gte(reservation.date, startOfDay(new Date(input.date))),
+                lte(reservation.date, endOfDay(new Date(input.date))),
+              ),
+            },
+          },
+        });
+
+        const withNoCalendar = await db.query.activity.findMany({
+          where: and(...activityWhereConditions),
+          with: {
+            rooms: {
+              with: {
+                room: {
+                  columns: {
+                    id: true,
+                    name: true,
+                    capacity: true,
+                    reservation: true,
+                  },
+                },
+              },
+            },
+            reservations: {
+              where: and(
+                gte(reservation.date, startOfDay(new Date(input.date))),
+                lte(reservation.date, endOfDay(new Date(input.date))),
+              ),
+              with: {
+                room: true,
+              },
+            },
+          },
+        });
+        planningData.push({
+          ...planningClub,
+          activities: pa.map((p) => {
+            // Filter reservations for this specific planning activity and date
+            const allReservations = p.reservations.filter(
+              (r) => r.planningActivityId === p.id,
+            );
+            // Map reservations: use planningActivityId as id for member's reservations
+            return {
+              ...p,
+              reservations: allReservations.map((r) => ({
+                id:
+                  r.userId === input.memberId
+                    ? (r.planningActivityId ?? p.id)
+                    : r.id, // Use planningActivityId for member's reservation, id for others
+                date: r.date,
+              })),
+            };
+          }),
+          withNoCalendar: withNoCalendar.map((wnc) => {
+            // Filter reservations for this specific activity and date
+            const allReservations = (wnc.reservations ?? []).filter(
+              (r) => r.activityId === wnc.id,
+            );
+            return {
+              ...wnc,
+              rooms: (wnc.rooms ?? []).map((ra) => ({
+                id: ra.room.id,
+                name: ra.room.name,
+                capacity: ra.room.capacity,
+                reservation: ra.room.reservation ?? "NONE",
+              })),
+              reservations: allReservations.map((r) => ({
+                id:
+                  r.userId === input.memberId ? (r.activityId ?? wnc.id) : r.id, // Use activityId for member's reservation, id for others
+                date: r.date,
+                roomName: r.room?.name ?? "",
+              })),
+            };
+          }),
+        });
+      }
 
       // TODO: manage exception days
       return planningData;

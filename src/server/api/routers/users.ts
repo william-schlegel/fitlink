@@ -3,20 +3,21 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/lib/trpc/server";
+  addMemberToClubRoomInConvex,
+  createCoachRoomInConvex,
+  createNotificationInConvex,
+} from "@/lib/convex/server";
 import {
   userCoach,
   userManager,
   userMember,
-  userNotification,
+  userMemberToSubscription,
 } from "@/db/schema/user";
 import {
-  createCoachRoomInConvex,
-  createNotificationInConvex,
-} from "@/lib/convex/server";
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/lib/trpc/server";
 import { pricing, subscription } from "@/db/schema/subscription";
 import { TUserFilter } from "@/app/admin/users/userFilter";
 import { featureEnum, roleEnum } from "@/db/schema/enums";
@@ -375,7 +376,6 @@ export const userRouter = createTRPCRouter({
         });
 
       const result = await db.transaction(async (tx) => {
-        console.log("input", input);
         if (
           input.internalRole === "COACH" ||
           input.internalRole === "MANAGER_COACH"
@@ -383,7 +383,6 @@ export const userRouter = createTRPCRouter({
           const initialCoach = (await tx.query.userCoach.findFirst({
             where: eq(userCoach.userId, input.id),
           })) ?? { convexRoomId: undefined };
-          console.log("initialCoach", initialCoach);
           const coachRecord = await tx
             .update(userCoach)
             .set({
@@ -486,49 +485,45 @@ export const userRouter = createTRPCRouter({
           },
         );
       }
-      // const member = await ctx.prisma.userMember.findFirst({
-      //   where: { userId: input.userId },
-      // });
-      // if (!member) {
-      //   return ctx.prisma.userMember.create({
-      //     data: {
-      //       userId: input.userId,
-      //       subscriptions: {
-      //         connect: {
-      //           id: input.subscriptionId,
-      //         },
-      //       },
-      //     },
-      //   });
-      // }
-      // return ctx.prisma.userMember.update({
-      //   where: { userId: input.userId },
-      //   data: {
-      //     subscriptions: {
-      //       connect: {
-      //         id: input.subscriptionId,
-      //       },
-      //     },
-      //   },
-      // });
+      const clubId = sub?.club.id;
+      if (clubId) {
+        await addMemberToClubRoomInConvex(clubId, input.userId);
+      }
+      const member = await db.query.userMember.findFirst({
+        where: eq(userMember.userId, input.userId),
+      });
+      let memberId = member?.id;
+      if (!member) {
+        const newMember = await db
+          .insert(userMember)
+          .values({
+            userId: input.userId,
+          })
+          .returning();
+        memberId = newMember[0].id;
+      }
+      return db.insert(userMemberToSubscription).values({
+        userId: memberId!,
+        subscriptionId: input.subscriptionId,
+      });
     }),
-  // deleteSubscription: protectedProcedure
-  //   .input(z.object({ userId: z.string(), subscriptionId: z.cuid2() }))
-  //   .mutation(({ ctx, input }) =>
-  //     db.update(userMember).set({
-  //         subscriptions: {
-  //           disconnect: {
-  //             id: input.subscriptionId,
-  //           },
-  //         },
-  //       },
-  //     })
-  //   ,
+  deleteSubscription: protectedProcedure
+    .input(z.object({ userId: z.string(), subscriptionId: z.cuid2() }))
+    .mutation(({ input }) =>
+      db
+        .delete(userMemberToSubscription)
+        .where(
+          and(
+            eq(userMemberToSubscription.userId, input.userId),
+            eq(userMemberToSubscription.subscriptionId, input.subscriptionId),
+          ),
+        ),
+    ),
   createUserWithCredentials: publicProcedure
     .input(
       z.object({
         name: z.string(),
-        email: z.string().email(),
+        email: z.email(),
         password: z.string(),
       }),
     )

@@ -702,7 +702,8 @@
       "reserved": "Réservé",
       "delete-reservation": "Supprimer la réservation",
       "reservation-delete-message": "Voules-vous supprimer cette réservation de manière permanente ?",
-      "reservation-deleted": "Réservation supprimée"
+      "reservation-deleted": "Réservation supprimée",
+      "no-reservations": "Aucune réservation pour le moment"
     }
   },
   "home": {

@@ -850,8 +850,6 @@ export const coachRouter = createTRPCRouter({
           },
         },
       });
-      console.log("u", u);
-
       const pricingData = u?.pricing;
       const target: CoachingTargetEnum = pricingData?.features.find(
         (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY",
@@ -859,7 +857,6 @@ export const coachRouter = createTRPCRouter({
         ? input.target
         : "INDIVIDUAL";
 
-      console.log("input", input);
       return db.transaction(async (tx) => {
         const [cp] = await tx
           .insert(coachingPrice)
@@ -884,7 +881,6 @@ export const coachRouter = createTRPCRouter({
             travelLimit: input.travelLimit,
           })
           .returning();
-        console.log("cp", cp);
         if (input.packs.length)
           await tx.insert(coachingPricePack).values(
             input.packs.map((pack) => ({

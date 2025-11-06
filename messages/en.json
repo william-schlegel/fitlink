@@ -694,7 +694,8 @@
       "reserved": "Reserved",
       "delete-reservation": "Delete reservation",
       "reservation-delete-message": "Do you really want to delete this reservation permanently?",
-      "reservation-deleted": "Reservation deleted"
+      "reservation-deleted": "Reservation deleted",
+      "no-reservations": "No reservations for the moment"
     }
   },
   "home": {

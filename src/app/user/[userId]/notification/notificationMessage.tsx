@@ -32,7 +32,6 @@ export function NotificationMessage({
     if (!link) return;
     const sp = new URLSearchParams({ notificationId: id });
     const url = link.concat("?", sp.toString());
-    console.log("url", url);
     const res = await fetch(url);
     const json = await res.json();
     if (json.trpcerror) {

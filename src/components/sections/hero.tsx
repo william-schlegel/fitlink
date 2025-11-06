@@ -53,7 +53,6 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
   );
 
   useEffect(() => {
-    console.log("querySection", querySection.data);
     if (!querySection.data) {
       setUpdating(false);
       return;
@@ -79,7 +78,6 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
       title: hc?.title ?? "",
       subtitle: hc?.subTitle ?? "",
     };
-    console.log("resetData", resetData);
     reset(resetData);
     setUpdating(true);
   }, [querySection.data, reset, setUpdating]);

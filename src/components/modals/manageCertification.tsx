@@ -56,7 +56,6 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
 
   useEffect(() => {
     if (queryOrganisms.data) {
-      console.log("queryOrganisms.data", queryOrganisms.data);
       if (organismId === "" && queryOrganisms.data.length > 0) {
         const grpId = queryOrganisms.data[0]?.id || "";
         setOrganismId(grpId);

@@ -89,6 +89,7 @@ export const userMemberRelations = relations(userMember, ({ one, many }) => ({
 export const userMemberToSubscription = pgTable(
   "UserMemberToSubscription",
   {
+    id: text("id").primaryKey().$defaultFn(createId),
     userId: text("user_id")
       .notNull()
       .references(() => userMember.id),
@@ -97,8 +98,8 @@ export const userMemberToSubscription = pgTable(
       .references(() => subscription.id),
   },
   (table) => [
-    index("user_member_to_subscription_idx").on(
-      table.userId,
+    index("user_member_to_subscription_idx").on(table.userId),
+    index("user_member_to_subscription_subscription_idx").on(
       table.subscriptionId,
     ),
   ],

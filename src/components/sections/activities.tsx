@@ -122,7 +122,6 @@ export const ActivityGroupCreation = ({
   });
 
   const onSubmit: SubmitHandler<ActivityGroupForm> = (data) => {
-    console.log("data", data);
     if (updating) {
       updateSection.mutate({
         ...querySection.data,

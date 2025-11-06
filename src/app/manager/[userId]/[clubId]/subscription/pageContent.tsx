@@ -237,8 +237,6 @@ function SelectRestriction({
   const t = useTranslations("club");
 
   if (club.isLoading) return <Spinner />;
-  console.log("clubId :>> ", clubId);
-  console.log("club?.data :>> ", club?.data);
   return (
     <div className="flex flex-col gap-1">
       <span className="bg-secondary p-2 text-center text-secondary-content">
