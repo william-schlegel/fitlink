@@ -47,20 +47,21 @@ export const calendarRouter = createTRPCRouter({
       with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
     });
   }),
-  getCalendarForClub: protectedProcedure.input(z.cuid2()).query(({ input }) => {
-    const now = endOfDay(new Date());
+  getCalendarForClub: protectedProcedure
+    .input(z.cuid2())
+    .query(async ({ input }) => {
+      const now = endOfDay(new Date());
 
-    return (
-      db.query.openingCalendar.findFirst({
+      const calendarForClub = await db.query.openingCalendar.findFirst({
         where: and(
           eq(openingCalendar.id, input),
           lte(openingCalendar.startDate, now),
         ),
         orderBy: desc(openingCalendar.startDate),
         with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
-      }) ?? null
-    );
-  }),
+      });
+      return calendarForClub ?? null;
+    }),
   getCalendarForSite: protectedProcedure
     .input(
       z.object({
