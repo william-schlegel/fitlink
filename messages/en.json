@@ -696,6 +696,12 @@
       "reservation-delete-message": "Do you really want to delete this reservation permanently?",
       "reservation-deleted": "Reservation deleted",
       "no-reservations": "No reservations for the moment"
+    },
+    "club": {
+      "activity": {
+        "no-slot": "No free slot",
+        "slot": "Booking slot"
+      }
     }
   },
   "home": {

@@ -19,6 +19,7 @@ import { DeleteClub, UpdateClub } from "@/components/modals/manageClub";
 import CollapsableGroup from "@/components/ui/collapsableGroup";
 import AddActivity from "@/components/modals/manageActivity";
 import LockedButton from "@/components/ui/lockedButton";
+import CalendarWeek from "@/components/calendarWeek";
 import ButtonIcon from "@/components/ui/buttonIcon";
 import { activityGroup } from "@/db/schema/club";
 import Spinner from "@/components/ui/spinner";
@@ -45,9 +46,9 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
     setGroups(Array.from(groups.values()));
   }, [clubQuery.data]);
 
-  // const calendarQuery = trpc.calendars.getCalendarForClub.useQuery(clubId, {
-  //   enabled: isCUID(clubId),
-  // });
+  const calendarQuery = trpc.calendars.getCalendarForClub.useQuery(clubId, {
+    enabled: isCUID(clubId),
+  });
   const addActivity = trpc.activities.affectToRoom.useMutation({
     onSuccess() {
       utils.clubs.getClubById.invalidate({ clubId, userId });
@@ -136,10 +137,10 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
           />
         </Link>
       </div>
-      {/* <CalendarWeek
+      <CalendarWeek
         calendar={calendarQuery.data}
         isLoading={calendarQuery.isLoading}
-      /> */}
+      />
       <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 rounded border border-primary p-4 ">

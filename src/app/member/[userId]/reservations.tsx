@@ -12,6 +12,7 @@ import { getButtonSize } from "@/components/ui/modal";
 import Spinner from "@/components/ui/spinner";
 import { AppRouter } from "@/server/api/root";
 import { trpc } from "@/lib/trpc/client";
+import DailyPlanning from "./planning";
 
 export default function PlanningAndReservations({
   userId,
@@ -28,7 +29,7 @@ export default function PlanningAndReservations({
           <h2>{t("member.my-planning")}</h2>
           <SelectDate day={day} onNewDay={(newDay) => setDay(newDay)} />
         </div>
-        {/* <DailyPlanning day={day} memberId={user.id} /> */}
+        <DailyPlanning day={day} memberId={userId} />
       </article>
       <article className="rounded-md border border-primary p-2">
         <h2>{t("member.my-reservations")}</h2>
@@ -97,7 +98,12 @@ function MyReservation({ reservation, memberId, day }: MyReservationProps) {
   return (
     <div className="rounded border border-primary bg-base-100">
       <div className="flex items-center justify-between gap-4 bg-primary px-3 py-1 text-center text-primary-content">
-        <span>{formatDateLocalized(reservation.date, { withDay: true })}</span>
+        <span>
+          {formatDateLocalized(reservation.date, {
+            dateFormat: "short",
+            withDay: "long",
+          })}
+        </span>
         <Confirmation
           message={t("member.reservation-delete-message")}
           title={t("member.delete-reservation")}

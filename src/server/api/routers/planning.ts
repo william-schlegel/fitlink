@@ -274,7 +274,7 @@ export const planningRouter = createTRPCRouter({
   getMemberDailyPlanning: protectedProcedure
     .input(
       z.object({
-        memberId: z.cuid2(),
+        memberId: z.string(),
         date: z.date(),
       }),
     )
@@ -284,7 +284,6 @@ export const planningRouter = createTRPCRouter({
         with: {
           memberData: {
             with: {
-              clubs: true,
               subscriptions: {
                 with: {
                   subscription: {
@@ -293,6 +292,7 @@ export const planningRouter = createTRPCRouter({
                       activities: true,
                       rooms: true,
                       sites: true,
+                      club: true,
                     },
                   },
                 },
@@ -301,11 +301,15 @@ export const planningRouter = createTRPCRouter({
           },
         },
       });
-
+      console.log("userData", userData);
       const clubIds = Array.from(
-        new Set(userData?.memberData?.clubs.map((c) => c.clubId)),
+        new Set(
+          userData?.memberData?.subscriptions.map(
+            (s) => s.subscription.club.id,
+          ),
+        ),
       );
-
+      console.log("clubIds", clubIds);
       const planningClubs = await db.query.planning.findMany({
         where: and(
           lte(planning.startDate, new Date(Date.now())),
@@ -313,7 +317,7 @@ export const planningRouter = createTRPCRouter({
         ),
         with: { club: true },
       });
-
+      console.log("planningClubs", planningClubs);
       // Infer types from actual query results
       type PlanningWithClub = (typeof planningClubs)[number];
 
@@ -558,7 +562,7 @@ export const planningRouter = createTRPCRouter({
   createPlanningReservation: protectedProcedure
     .input(
       z.object({
-        memberId: z.cuid2(),
+        memberId: z.string(),
         planningActivityId: z.cuid2(),
         date: z.date(),
       }),

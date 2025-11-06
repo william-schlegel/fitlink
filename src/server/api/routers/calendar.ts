@@ -1,6 +1,8 @@
 import { and, desc, eq, lte } from "drizzle-orm";
 import { z } from "zod";
 
+import { endOfDay } from "date-fns";
+
 import {
   dayOpeningTime,
   openingCalendar,
@@ -46,24 +48,18 @@ export const calendarRouter = createTRPCRouter({
     });
   }),
   getCalendarForClub: protectedProcedure.input(z.cuid2()).query(({ input }) => {
-    const now = new Date();
-    const dtNow = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      23,
-      59,
-      59,
-      999,
+    const now = endOfDay(new Date());
+
+    return (
+      db.query.openingCalendar.findFirst({
+        where: and(
+          eq(openingCalendar.id, input),
+          lte(openingCalendar.startDate, now),
+        ),
+        orderBy: desc(openingCalendar.startDate),
+        with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
+      }) ?? null
     );
-    return db.query.openingCalendar.findFirst({
-      where: and(
-        eq(openingCalendar.id, input),
-        lte(openingCalendar.startDate, dtNow),
-      ),
-      orderBy: desc(openingCalendar.startDate),
-      with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
-    });
   }),
   getCalendarForSite: protectedProcedure
     .input(
@@ -74,20 +70,11 @@ export const calendarRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const now = new Date();
-      const dtNow = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        23,
-        59,
-        59,
-        999,
-      );
+      const now = endOfDay(new Date());
       const siteCal = await db.query.openingCalendar.findFirst({
         where: and(
           eq(openingCalendar.id, input.siteId),
-          lte(openingCalendar.startDate, dtNow),
+          lte(openingCalendar.startDate, now),
         ),
         orderBy: desc(openingCalendar.startDate),
         with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
@@ -102,7 +89,7 @@ export const calendarRouter = createTRPCRouter({
           return db.query.openingCalendar.findFirst({
             where: and(
               eq(openingCalendar.id, input.clubId),
-              lte(openingCalendar.startDate, dtNow),
+              lte(openingCalendar.startDate, now),
             ),
             orderBy: desc(openingCalendar.startDate),
             with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
@@ -120,20 +107,11 @@ export const calendarRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const now = new Date();
-      const dtNow = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        23,
-        59,
-        59,
-        999,
-      );
+      const now = endOfDay(new Date());
       const roomCal = await db.query.openingCalendar.findFirst({
         where: and(
           eq(openingCalendar.id, input.roomId),
-          lte(openingCalendar.startDate, dtNow),
+          lte(openingCalendar.startDate, now),
         ),
         orderBy: desc(openingCalendar.startDate),
         with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
@@ -146,7 +124,7 @@ export const calendarRouter = createTRPCRouter({
           const siteCal = await db.query.openingCalendar.findFirst({
             where: and(
               eq(openingCalendar.id, input.siteId),
-              lte(openingCalendar.startDate, dtNow),
+              lte(openingCalendar.startDate, now),
             ),
             orderBy: desc(openingCalendar.startDate),
             with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
@@ -160,7 +138,7 @@ export const calendarRouter = createTRPCRouter({
               const clubCal = await db.query.openingCalendar.findFirst({
                 where: and(
                   eq(openingCalendar.id, input.clubId),
-                  lte(openingCalendar.startDate, dtNow),
+                  lte(openingCalendar.startDate, now),
                 ),
 
                 orderBy: desc(openingCalendar.startDate),
@@ -174,7 +152,7 @@ export const calendarRouter = createTRPCRouter({
           const clubCal = await db.query.openingCalendar.findFirst({
             where: and(
               eq(openingCalendar.id, input.clubId),
-              lte(openingCalendar.startDate, dtNow),
+              lte(openingCalendar.startDate, now),
             ),
             orderBy: desc(openingCalendar.startDate),
             with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },

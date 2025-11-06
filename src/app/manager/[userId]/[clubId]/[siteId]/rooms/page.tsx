@@ -65,6 +65,13 @@ export default async function ManageRooms({
     id: room.id,
     name: room.name,
     link: createLink({ roomId: room.id }, href),
+    badgeIcon:
+      room.reservation === "MANDATORY"
+        ? "bx bx-calendar-exclamation bx-sm text-secondary"
+        : room.reservation === "POSSIBLE"
+          ? "bx bx-calendar-alt bx-sm text-secondary"
+          : undefined,
+    badgeText: room.unavailable ? t("club.room.closed") : null,
   }));
 
   return (
@@ -88,7 +95,7 @@ export default async function ManageRooms({
       <LayoutPage.Main>
         <LayoutPage.List
           list={roomList}
-          itemId={siteId}
+          itemId={roomId}
           noItemsText={t("club.room.no-rooms")}
         />
 

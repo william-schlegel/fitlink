@@ -17,7 +17,6 @@ import type { AppRouter } from "@/server/api/root";
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 type MemberDailyPlanning = RouterOutputs["plannings"]["getMemberDailyPlanning"];
 type PlanningData = NonNullable<MemberDailyPlanning>[number];
-type PlanningActivity = PlanningData["activities"][number];
 type ActivityNoCalendar = PlanningData["withNoCalendar"][number];
 
 // Extract nested types from query results
@@ -54,7 +53,9 @@ export default function DailyPlanning({ memberId, day }: DailyPlanningProps) {
     memberId,
   });
   if (planning.isLoading) return <Spinner />;
-  if (!planning.data) return <div>{t("no-planning")}</div>;
+  if (!planning.data || planning.data.length === 0)
+    return <div>{t("no-planning")}</div>;
+  console.log("planning.data", planning.data);
   return (
     <div className="flex flex-col gap-2">
       {planning.data.map((plan) => (
@@ -123,7 +124,7 @@ function MakeReservation({
   day,
 }: MakeReservationProps) {
   const t = useTranslations("dashboard");
-  const utils = trpc.useContext();
+  const utils = trpc.useUtils();
   const createReservation =
     trpc.plannings.createPlanningReservation.useMutation({
       onSuccess() {
@@ -354,7 +355,7 @@ function ReserveDuration({
           onCloseModal={() => setCloseModal(false)}
         >
           <h3>{t("member.reserve")}</h3>
-          <label>{t("club:activity.slot")}</label>
+          <label>{t("club.activity.slot")}</label>
           <AvailableSlots
             workingHours={workingHours}
             duration={activity.reservationDuration ?? 60}
@@ -407,7 +408,8 @@ function AvailableSlots({
 }: AvailableSlotsProps) {
   const t = useTranslations("dashboard");
   const slots: Array<TSlot> = [];
-  if (!workingHours) return <span>{t("club:activity.no-slot")}</span>;
+  if (!workingHours)
+    return <span className="ml-4">{t("club.activity.no-slot")}</span>;
   const [hs, ms] = getHour(workingHours.workingHours[0]?.opening);
   let hStart = (hs ?? 0) + (ms ?? 0) / 60;
   const [he, me] = getHour(workingHours.workingHours[0]?.closing);

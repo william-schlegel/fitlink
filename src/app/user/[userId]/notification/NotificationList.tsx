@@ -1,12 +1,12 @@
 "use client";
 
-import { useQuery } from "convex/react";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { twMerge } from "tailwind-merge";
+import { useQuery } from "convex/react";
+import Link from "next/link";
+
 import { api } from "../../../../../convex/_generated/api";
-import { Id } from "../../../../../convex/_generated/dataModel";
 import { formatDateLocalized } from "@/lib/formatDate";
 import Pagination from "@/components/ui/pagination";
 import { FromTo } from "./types";
@@ -30,12 +30,15 @@ export function NotificationList({
   const searchParams = useSearchParams();
   const t = useTranslations("auth");
 
-  const notificationsData = useQuery(api.notifications.getNotificationsForUser, {
-    userId,
-    userFromId: fromTo === "from" ? userId : undefined,
-    limit: PER_PAGE,
-    skip: page * PER_PAGE,
-  });
+  const notificationsData = useQuery(
+    api.notifications.getNotificationsForUser,
+    {
+      userId,
+      userFromId: fromTo === "from" ? userId : undefined,
+      limit: PER_PAGE,
+      skip: page * PER_PAGE,
+    },
+  );
 
   const notifications = notificationsData?.notifications ?? [];
   const total = notificationsData?.total ?? 0;
@@ -57,9 +60,7 @@ export function NotificationList({
     <div className="w-1/4 space-y-2">
       <div className="grid grid-cols-2 gap-2">
         <Link
-          className={`btn-primary btn ${
-            fromTo === "to" ? "" : "btn-outline"
-          }`}
+          className={`btn-primary btn ${fromTo === "to" ? "" : "btn-outline"}`}
           href={createLinkWithParams({
             notificationId: "",
             page: "0",
@@ -92,8 +93,9 @@ export function NotificationList({
               })}
               className={twMerge(
                 "flex items-center justify-between",
-                notificationId === notification._id && "badge badge-primary",
-                !notification.viewedAt && "font-bold text-secondary",
+                notificationId === notification._id &&
+                  "border border-primary bg-primary/10",
+                !notification.viewedAt && "font-bold",
               )}
             >
               <div>
@@ -147,4 +149,3 @@ export function NotificationList({
     </div>
   );
 }
-

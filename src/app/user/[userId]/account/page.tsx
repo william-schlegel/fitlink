@@ -23,53 +23,10 @@ export default async function Account({
   });
   const t = await getTranslations("auth");
 
-  // const userQuery = trpc.users.getUserById.useQuery(myUserId, {
-  //   enabled: isCUID(myUserId),
-  //   onSuccess: (data) => {
-  //     reset({
-  //       searchAddress: data?.coachData?.searchAddress ?? "",
-  //       longitude: data?.coachData?.longitude ?? LONGITUDE,
-  //       latitude: data?.coachData?.latitude ?? LATITUDE,
-  //       internalRole: data?.internalRole ?? Role.MEMBER,
-  //       range: data?.coachData?.range ?? 10,
-  //       description: data?.coachData?.description ?? "",
-  //       aboutMe: data?.coachData?.aboutMe ?? "",
-  //       publicName: data?.coachData?.publicName ?? "",
-  //       coachingActivities: data?.coachData?.coachingActivities.map(
-  //         (a) => a.name
-  //       ),
-  //       pricingId: "",
-  //       monthlyPayment: true,
-  //       cancelationDate: null,
-  //     });
-  //   },
-  // });
-
-  // const utils = trpc.useContext();
-  // const updateUser = trpc.users.updateUser.useMutation({
-  //   onSuccess() {
-  //     utils.users.getUserById.invalidate(myUserId);
-  //     toast.success(t("user-updated"));
-  //   },
-  //   onError(error) {
-  //     toast.error(error.message);
-  //   },
-  // });
-  // const  t  = useTranslations("auth");
-
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">
       <Title title={t("account.your-account")} />
-      <div className="flex items-center justify-between">
-        <h1>{t("account.your-account")}</h1>
-        {/* <Modal
-          title={t("account.payments")}
-          buttonIcon={<i className="bx bx-euro bx-sm" />}
-          variant="Secondary"
-        >
-          <h3>{t("account.payments")}</h3>
-        </Modal> */}
-      </div>
+      <h1>{t("account.your-account")}</h1>
       <FormAccount userData={userData} />
     </div>
   );

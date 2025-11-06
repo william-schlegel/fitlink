@@ -704,6 +704,12 @@
       "reservation-delete-message": "Voules-vous supprimer cette réservation de manière permanente ?",
       "reservation-deleted": "Réservation supprimée",
       "no-reservations": "Aucune réservation pour le moment"
+    },
+    "club": {
+      "activity": {
+        "no-slot": "Pas de créneau de libre",
+        "slot": "Créneau de réservation"
+      }
     }
   },
   "home": {

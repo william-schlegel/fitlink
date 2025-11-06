@@ -223,21 +223,6 @@ export const coachRouter = createTRPCRouter({
               })),
           );
         }
-
-        // coach: {
-        //   connect: {
-        //     userId: input.userId,
-        //   },
-        // },
-
-        // if (input.documentId) {
-        //   await tx
-        //     .update(coachCertification)
-        //     .set({
-        //       documentId: input.documentId,
-        //     })
-        //     .where(eq(coachCertification.id, certifId));
-        // }
         return certif;
       });
     }),
@@ -257,16 +242,6 @@ export const coachRouter = createTRPCRouter({
             name: input.name,
             obtainedIn: input.obtainedIn,
             coachId: input.userId ?? undefined,
-            // modules: input.modules
-            //   ? {
-            //       connect: input.modules.map((m) => ({ id: m })),
-            //     }
-            //   : undefined,
-            // activityGroups: input.activityGroups
-            //   ? {
-            //       connect: input.activityGroups.map((a) => ({ id: a })),
-            //     }
-            //   : undefined,
           })
           .where(eq(coachCertification.id, certifId))
           .returning();
@@ -471,13 +446,6 @@ export const coachRouter = createTRPCRouter({
         },
       },
     });
-    // const organisms = await db.select()
-    // .from(certificationOrganism)
-    // .leftJoin(certificationModule,
-    //   eq(certificationOrganism.id,
-    //     certificationModule.certificationOrganismId))
-    //     .leftJoin(certificationModuleActivityGroups, eq(certificationModule.id, certificationModuleActivityGroups.certificationModuleId))
-    //     .leftJoin(activityGroup, eq(certificationModuleActivityGroups.activityGroupId, activityGroup.id))
 
     return organisms.map((organism) => ({
       id: organism.id,

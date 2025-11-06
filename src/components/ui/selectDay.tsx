@@ -69,7 +69,7 @@ export function SelectDate({ day, onNewDay }: SelectDateProps) {
         <i className="bx bx-chevron-left bx-sm" />
       </button>
       <span className="btn btn-primary w-32 text-center">
-        {formatDateLocalized(day, { withDay: true })}
+        {formatDateLocalized(day, { dateFormat: "short", withDay: "short" })}
       </span>
       <button
         className="btn btn-primary"
