@@ -666,6 +666,7 @@
     "manager-dashboard": "Manager dashboard",
     "coach-dashboard": "Coach dashboard",
     "admin-dashboard": "Administrator dashboard",
+    "clubs-working-with": "Clubs I'm working with",
     "planning": "Today's planning",
     "chat-members-coachs": "Chat with members and coaches",
     "chat-members": "Chat with members",
@@ -704,7 +705,8 @@
         "no-slot": "No free slot",
         "slot": "Booking slot"
       }
-    }
+    },
+    "view-club": "See the club page"
   },
   "home": {
     "title": "Join the community of sports clubs",

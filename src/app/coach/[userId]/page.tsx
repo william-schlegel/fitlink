@@ -1,5 +1,6 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import Image from "next/image";
 import Link from "next/link";
 
 import { getCoachDataForUserId } from "@/server/api/routers/dashboard";
@@ -7,6 +8,7 @@ import { getCoachDailyPlanning } from "@/server/api/routers/planning";
 import LockedButton from "@/components/ui/lockedButton";
 import { getToday } from "@/lib/dates/serverDayName";
 import { createTrpcCaller } from "@/lib/trpc/caller";
+import ButtonIcon from "@/components/ui/buttonIcon";
 import SelectDay from "@/components/ui/selectDay";
 import { getActualUser } from "@/lib/auth/server";
 import { DayName } from "@/lib/dates/data";
@@ -42,6 +44,8 @@ export default async function CoachDashboard({
   });
 
   const published = coachQuery?.coachData?.page?.published;
+  const clubs = coachQuery?.coachData?.clubs?.map((c) => c.club) ?? [];
+
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">
       <Title title={t("dashboard.coach-dashboard")} />
@@ -121,6 +125,16 @@ export default async function CoachDashboard({
           </div>
         </div>
       </section>
+      {clubs.length > 0 && (
+        <section className="rounded-md border border-primary p-2">
+          <h2>{t("dashboard.clubs-working-with")}</h2>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {clubs.map((club) => (
+              <ClubCard key={club.id} club={club} />
+            ))}
+          </div>
+        </section>
+      )}
       <section className="grid auto-rows-auto gap-2 lg:grid-cols-2">
         <article className="rounded-md border border-primary p-2">
           <div className="flex items-center justify-between">
@@ -143,6 +157,58 @@ export default async function CoachDashboard({
           <h2>{t("dashboard.chat-members")}</h2>
         </article>
       </section>
+    </div>
+  );
+}
+
+async function ClubCard({
+  club,
+}: {
+  club: { id: string; name: string; logoUrl: string | null; address: string };
+}) {
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const t = await getTranslations("dashboard");
+  const clubPages = await caller.clubs.getClubPagesForNavByClubId(club.id);
+  const homePage = clubPages?.pages?.find((p) => p.target === "HOME");
+
+  return (
+    <div className="card card-border bg-base-100">
+      <div className="card-body">
+        <div className="flex items-center gap-3">
+          {club.logoUrl && (
+            <div className="avatar">
+              <div className="w-12 h-12 rounded-full">
+                <Image
+                  src={club.logoUrl}
+                  alt={club.name}
+                  width={48}
+                  height={48}
+                  className="rounded-full object-cover"
+                />
+              </div>
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base truncate p-0">{club.name}</h3>
+            <p className="text-xs text-base-content/70 truncate">
+              {club.address}
+            </p>
+          </div>
+          {homePage && (
+            <Link
+              href={`/presentation-page/club/${club.id}/${homePage.id}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <ButtonIcon
+                iconComponent={<i className="bx bx-link-external" />}
+                title={t("view-club")}
+              />
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

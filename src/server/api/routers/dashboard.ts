@@ -112,7 +112,11 @@ export async function getCoachDataForUserId(userId: string) {
     with: {
       coachData: {
         with: {
-          clubs: true,
+          clubs: {
+            with: {
+              club: true,
+            },
+          },
           certifications: true,
           activityGroups: true,
           page: true,

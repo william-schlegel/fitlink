@@ -674,6 +674,7 @@
     "manager-dashboard": "Dashboard du manager",
     "coach-dashboard": "Dashboard du coach",
     "admin-dashboard": "Dashboard de l'administrateur",
+    "clubs-working-with": "Clubs avec lesquels je travaille",
     "planning": "Planning du jour",
     "chat-members-coachs": "Chat avec les membres et les coachs",
     "chat-members": "Chat avec les membres",
@@ -712,7 +713,8 @@
         "no-slot": "Pas de créneau de libre",
         "slot": "Créneau de réservation"
       }
-    }
+    },
+    "view-club": "Voir la page du club"
   },
   "home": {
     "title": "Rejoignez la communauté des clubs de sport",
