@@ -1,11 +1,12 @@
 "use client";
+import { InferSelectModel } from "drizzle-orm";
 
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { PageSectionElementTypeEnum } from "@/db/schema/enums";
 import ThemeSelector, { TThemes } from "../themeSelector";
+import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
@@ -488,16 +489,7 @@ type PlanningsContentCardProps = {
   planning: PlanningContentElement;
 };
 
-type PlanningContentElement = {
-  id: string;
-  title: string | null;
-  subTitle: string | null;
-  content: string | null;
-  elementType: PageSectionElementTypeEnum | null;
-  link: string | null;
-  optionValue: string | null;
-  images: string[] | null;
-};
+type PlanningContentElement = InferSelectModel<typeof pageSectionElement>;
 
 function PlanningContentCard({
   preview = false,
@@ -520,7 +512,7 @@ function PlanningContentCard({
         } w-full flex-col items-center justify-center gap-4`}
         style={{
           backgroundImage: `${
-            planning?.images?.[0] ? `url(${planning.images[0]})` : "unset"
+            planning?.imageUrls?.[0] ? `url(${planning.imageUrls[0]})` : "unset"
           }`,
           backgroundColor: "rgb(255 255 255 / 0.5)",
           backgroundSize: "cover",

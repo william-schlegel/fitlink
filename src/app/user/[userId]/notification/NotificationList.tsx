@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { twMerge } from "tailwind-merge";
 import { useQuery } from "convex/react";
@@ -9,6 +9,7 @@ import Link from "next/link";
 import { api } from "../../../../../convex/_generated/api";
 import { formatDateLocalized } from "@/lib/formatDate";
 import Pagination from "@/components/ui/pagination";
+import createLink from "@/lib/createLink";
 import { FromTo } from "./types";
 
 const PER_PAGE = 20;
@@ -27,7 +28,6 @@ export function NotificationList({
   page,
 }: NotificationListProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const t = useTranslations("auth");
 
   const notificationsData = useQuery(
@@ -43,25 +43,12 @@ export function NotificationList({
   const notifications = notificationsData?.notifications ?? [];
   const total = notificationsData?.total ?? 0;
 
-  const createLinkWithParams = (updates: {
-    notificationId?: string;
-    page?: string;
-    fromTo?: FromTo;
-  }) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (updates.notificationId !== undefined)
-      params.set("notificationId", updates.notificationId);
-    if (updates.page !== undefined) params.set("page", updates.page);
-    if (updates.fromTo !== undefined) params.set("fromTo", updates.fromTo);
-    return `${window.location.pathname}?${params.toString()}`;
-  };
-
   return (
     <div className="w-1/4 space-y-2">
       <div className="grid grid-cols-2 gap-2">
         <Link
           className={`btn-primary btn ${fromTo === "to" ? "" : "btn-outline"}`}
-          href={createLinkWithParams({
+          href={createLink({
             notificationId: "",
             page: "0",
             fromTo: "to",
@@ -73,7 +60,7 @@ export function NotificationList({
           className={`btn-primary btn ${
             fromTo === "from" ? "" : "btn-outline"
           }`}
-          href={createLinkWithParams({
+          href={createLink({
             notificationId: "",
             page: "0",
             fromTo: "from",
@@ -86,7 +73,7 @@ export function NotificationList({
         {notifications.map((notification) => (
           <li key={notification._id}>
             <Link
-              href={createLinkWithParams({
+              href={createLink({
                 notificationId: notification._id,
                 page: page.toString(),
                 fromTo,
@@ -137,7 +124,7 @@ export function NotificationList({
         count={total}
         onPageClick={(newPage) => {
           router.push(
-            createLinkWithParams({
+            createLink({
               notificationId: "",
               page: newPage.toString(),
               fromTo,

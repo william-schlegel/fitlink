@@ -71,7 +71,7 @@ function FindClub({ address = "" }: FindClubProps) {
   }
 
   const circle = useMemo(() => {
-    return generateCircle(myAddress.lat, myAddress.lng, range);
+    return generateCircle(myAddress.lng, myAddress.lat, range);
   }, [myAddress.lat, myAddress.lng, range]);
 
   function ClubRow({

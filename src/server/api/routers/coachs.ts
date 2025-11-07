@@ -26,9 +26,9 @@ import {
 import { LATITUDE, LONGITUDE, DEFAULT_RANGE } from "@/lib/defaultValues";
 import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { calculateBBox, calculateDistance } from "@/lib/distance";
-import { club, coachingActivity } from "@/db/schema/club";
 import { isAdmin } from "@/server/lib/userTools";
 import { userCoach } from "@/db/schema/user";
+import { club } from "@/db/schema/club";
 import { user } from "@/db/schema/auth";
 import { isCUID } from "@/lib/utils";
 import { db } from "@/db";
@@ -163,7 +163,6 @@ export const coachRouter = createTRPCRouter({
         with: {
           page: true,
           certifications: true,
-          coachingActivities: true,
         },
       });
       return coachs
@@ -704,7 +703,6 @@ export const coachRouter = createTRPCRouter({
     db.query.userCoach.findFirst({
       where: eq(userCoach.userId, input),
       with: {
-        coachingActivities: true,
         coachingPrices: {
           with: {
             packs: true,
@@ -785,7 +783,6 @@ export const coachRouter = createTRPCRouter({
                 },
               },
               user: true,
-              coachingActivities: true,
             },
           },
           coachingLevel: true,
@@ -940,11 +937,28 @@ export const coachRouter = createTRPCRouter({
     .mutation(({ input }) =>
       db.delete(coachingPrice).where(eq(coachingPrice.id, input)),
     ),
-  getOfferActivityByName: publicProcedure.input(z.string()).query(({ input }) =>
-    db
-      .selectDistinctOn([coachingActivity.name])
-      .from(coachingActivity)
-      .where(ilike(coachingActivity.name, `%${input}%`))
-      .limit(25),
-  ),
+  getOfferActivityByName: publicProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const coaches = await db
+        .select({
+          coachingActivities: userCoach.coachingActivities,
+        })
+        .from(userCoach);
+
+      const allActivities = new Set<string>();
+      coaches.forEach((coach) => {
+        if (coach.coachingActivities) {
+          coach.coachingActivities.forEach((activity) => {
+            if (activity.toLowerCase().includes(input.toLowerCase())) {
+              allActivities.add(activity);
+            }
+          });
+        }
+      });
+
+      return Array.from(allActivities)
+        .slice(0, 25)
+        .map((name) => ({ id: name, name }));
+    }),
 });

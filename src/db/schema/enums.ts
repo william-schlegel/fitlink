@@ -21,25 +21,6 @@ export const userDocumentTypeEnum = pgEnum("UserDocumentType", [
   "MEDICAL_CERTIFICAT",
 ]);
 
-export const notificationTypeEnum = pgEnum("NotificationType", [
-  "SEARCH_COACH",
-  "SEARCH_CLUB",
-  "COACH_ACCEPT",
-  "COACH_REFUSE",
-  "CLUB_ACCEPT",
-  "CLUB_REFUSE",
-  "NEW_MESSAGE",
-  "NEW_SUBSCRIPTION",
-  "NEW_REQUEST",
-  "SUBSCRIPTION_VALIDATED",
-  "SUBSCRIPTION_REJECTED",
-  "REQUEST_VALIDATED",
-  "REQUEST_REJECTED",
-]);
-
-export type NotificationTypeEnum =
-  (typeof notificationTypeEnum.enumValues)[number];
-
 export const roomReservationEnum = pgEnum("RoomReservation", [
   "NONE",
   "POSSIBLE",

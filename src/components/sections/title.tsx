@@ -57,7 +57,7 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
       description: hc?.content ?? "",
       title: hc?.title ?? "",
       subtitle: hc?.subTitle ?? "",
-      imageUrls: hc?.images ?? [],
+      imageUrls: hc?.imageUrls ?? [],
     };
     reset(resetData);
     startTransition(() => {
@@ -270,7 +270,7 @@ export const TitleDisplay = ({ pageId }: TitleDisplayProps) => {
 
   return (
     <TitleContent
-      imageSrc={titleContent?.images?.[0]}
+      imageSrc={titleContent?.imageUrls?.[0]}
       title={titleContent?.title ?? ""}
       subtitle={titleContent?.subTitle ?? ""}
       description={titleContent?.content ?? ""}

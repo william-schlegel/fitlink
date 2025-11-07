@@ -437,7 +437,7 @@ export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
     >
       <h3>{t("coach.find")}</h3>
       <div className="grid grid-cols-[auto,1fr] gap-2">
-        <ul className="steps steps-vertical">
+        <ul className="steps">
           {AddCoachToClubSteps.map((s, idx) => (
             <li
               key={idx}

@@ -3,29 +3,34 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
-import { api } from "../../../convex/_generated/api";
 import { useQuery } from "convex/react";
+
+import { api } from "../../../convex/_generated/api";
 
 type NotificationIconProps = {
   userId: string;
 };
 
-function formatMessage(notification: {
-  type: string;
-  message: string;
-  data?: unknown;
-}) {
-  if (notification.type === "NEW_SUBSCRIPTION") return "api.new-subscription";
+function formatMessage(
+  t: ReturnType<typeof useTranslations>,
+  notification: {
+    type: string;
+    message: string;
+    data?: unknown;
+  },
+) {
+  if (notification.type === "NEW_SUBSCRIPTION")
+    return t("common.api.new-subscription");
   if (notification.type === "SUBSCRIPTION_VALIDATED")
-    return "api.subscription-accepted";
+    return t("common.api.subscription-accepted");
   if (notification.type === "SUBSCRIPTION_REJECTED")
-    return "api.subscription-rejected";
+    return t("common.api.subscription-rejected");
   if (notification.type === "NEW_MESSAGE") {
     const data = notification.data as
       | { roomId?: string; roomType?: string }
       | undefined;
     if (data?.roomType === "DIRECT") {
-      return "api.new-message";
+      return t("common.api.new-message");
     }
     return notification.message;
   }
@@ -33,7 +38,7 @@ function formatMessage(notification: {
 }
 
 export default function NotificationIcon({ userId }: NotificationIconProps) {
-  const t = useTranslations("common");
+  const t = useTranslations();
   const notificationsData = useQuery(
     api.notifications.getNotificationsForUser,
     {
@@ -85,7 +90,7 @@ export default function NotificationIcon({ userId }: NotificationIconProps) {
               }`}
             >
               <Link href={href}>
-                <span>{t(formatMessage(notification))}</span>
+                <span>{formatMessage(t, notification)}</span>
               </Link>
             </li>
           );
@@ -93,7 +98,7 @@ export default function NotificationIcon({ userId }: NotificationIconProps) {
         <div className="divider my-1"></div>
         <li>
           <Link href={`/user/${userId}/notification`}>
-            <span>{t("navigation.my-notifications")}</span>
+            <span>{t("common.navigation.my-notifications")}</span>
           </Link>
         </li>
       </ul>

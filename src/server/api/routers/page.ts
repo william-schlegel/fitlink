@@ -1,6 +1,8 @@
+import { and, eq, InferSelectModel } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
 import z from "zod";
+
+import { QueryResult } from "pg";
 
 import {
   pageSectionElementTypeEnum,
@@ -140,6 +142,12 @@ export const pageRouter = createTRPCRouter({
         pageId: z.cuid2(),
         section: z.enum(pageSectionModelEnum.enumValues),
         createIfNone: z.boolean().optional().default(false),
+        createElement: z
+          .object({
+            elementType: z.enum(pageSectionElementTypeEnum.enumValues),
+            title: z.string(),
+          })
+          .optional(),
       }),
     )
     .query(async ({ input }) => {
@@ -164,11 +172,22 @@ export const pageRouter = createTRPCRouter({
               subTitle: "",
             })
             .returning();
+          let newElement: InferSelectModel<typeof pageSectionElement>[] = [];
+          if (input.createElement) {
+            newElement = await db
+              .insert(pageSectionElement)
+              .values({
+                sectionId: newSection[0].id,
+                elementType: input.createElement.elementType,
+                title: input.createElement.title,
+              })
+              .returning();
+          }
           return {
             id: newSection[0].id,
             title: newSection[0].title,
             subTitle: newSection[0].subTitle,
-            elements: [],
+            elements: newElement,
           };
         }
         return null;
@@ -188,7 +207,7 @@ export const pageRouter = createTRPCRouter({
           pageId: e.pageId,
           sectionId: e.sectionId,
           pageSection: e.pageSection,
-          images: e.imageUrls,
+          imageUrls: e.imageUrls,
         })),
       };
     }),
@@ -368,7 +387,6 @@ export const pageRouter = createTRPCRouter({
                 },
               },
             },
-            coachingActivities: true,
             coachingPrices: { with: { coachingLevel: true } },
           },
         },
@@ -388,12 +406,10 @@ export const pageRouter = createTRPCRouter({
         .map((o) => [o.title, o.optionValue]),
     );
     const activities =
-      coachUser?.coachData?.coachingActivities.map(
-        (a: { id: string; name: string }) => ({
-          id: a.id,
-          name: a.name,
-        }),
-      ) ?? [];
+      coachUser?.coachData?.coachingActivities?.map((a, idx) => ({
+        id: `${idx}-${a}`,
+        name: a,
+      })) ?? [];
     const features = (coachUser?.pricing?.features ?? []) as Array<{
       feature: string;
     }>;
@@ -450,7 +466,6 @@ export const pageRouter = createTRPCRouter({
                   },
                 },
               },
-              coachingActivities: true,
               coachingPrices: { with: { coachingLevel: true } },
             },
           },
@@ -481,9 +496,9 @@ export const pageRouter = createTRPCRouter({
       return {
         certifications,
         activities:
-          userData?.coachData?.coachingActivities.map((a) => ({
-            id: a.id,
-            name: a.name,
+          userData?.coachData?.coachingActivities?.map((name, idx) => ({
+            id: `${idx}-${name}`,
+            name,
           })) ?? [],
         offers,
       };

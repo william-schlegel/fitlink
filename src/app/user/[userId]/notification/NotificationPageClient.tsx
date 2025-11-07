@@ -1,11 +1,13 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQuery } from "convex/react";
 import { useEffect } from "react";
+
+import { NotificationContent } from "./NotificationContent";
 import { api } from "../../../../../convex/_generated/api";
 import { NotificationList } from "./NotificationList";
-import { NotificationContent } from "./NotificationContent";
+import createLink from "@/lib/createLink";
 import { FromTo } from "./types";
 
 const PER_PAGE = 20;
@@ -14,19 +16,24 @@ type NotificationPageClientProps = {
   userId: string;
 };
 
-export function NotificationPageClient({ userId }: NotificationPageClientProps) {
+export function NotificationPageClient({
+  userId,
+}: NotificationPageClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromTo = (searchParams.get("fromTo") ?? "to") as FromTo;
   const notificationId = searchParams.get("notificationId") ?? "";
   const page = parseInt(searchParams.get("page") ?? "0", 10);
 
-  const notificationsData = useQuery(api.notifications.getNotificationsForUser, {
-    userId,
-    userFromId: fromTo === "from" ? userId : undefined,
-    limit: PER_PAGE,
-    skip: page * PER_PAGE,
-  });
+  const notificationsData = useQuery(
+    api.notifications.getNotificationsForUser,
+    {
+      userId,
+      userFromId: fromTo === "from" ? userId : undefined,
+      limit: PER_PAGE,
+      skip: page * PER_PAGE,
+    },
+  );
 
   // Redirect to first notification if none selected
   useEffect(() => {
@@ -34,15 +41,15 @@ export function NotificationPageClient({ userId }: NotificationPageClientProps) 
       notificationsData &&
       notificationsData.notifications.length > 0 &&
       !notificationId
-    ) {
-      const href = window.location.pathname;
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("notificationId", notificationsData.notifications[0]?._id ?? "");
-      params.set("page", page.toString());
-      params.set("fromTo", fromTo);
-      router.push(`${href}?${params.toString()}`);
-    }
-  }, [notificationsData, notificationId, page, fromTo, router, searchParams]);
+    )
+      router.push(
+        createLink({
+          notificationId: notificationsData.notifications[0]?._id ?? "",
+          page: page.toString(),
+          fromTo,
+        }),
+      );
+  }, [notificationsData, notificationId, page, fromTo, router]);
 
   return (
     <div className="flex gap-4">
@@ -53,13 +60,8 @@ export function NotificationPageClient({ userId }: NotificationPageClientProps) 
         page={page}
       />
       {notificationId ? (
-        <NotificationContent
-          notificationId={notificationId}
-          fromTo={fromTo}
-          userId={userId}
-        />
+        <NotificationContent notificationId={notificationId} fromTo={fromTo} />
       ) : null}
     </div>
   );
 }
-

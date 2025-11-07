@@ -65,17 +65,21 @@ export default function FormAccount({
       longitude: LONGITUDE,
       latitude: LATITUDE,
       internalRole: userData?.internalRole ?? "MEMBER",
-      coachingActivities: [],
+      coachingActivities: userData?.coachData?.coachingActivities ?? [],
+      pricingId: userData?.pricingId ?? "",
+      monthlyPayment: userData?.monthlyPayment ?? true,
+      searchAddress: userData?.coachData?.searchAddress ?? "",
+      publicName: userData?.coachData?.publicName ?? "",
+      description: userData?.coachData?.description ?? "",
+      aboutMe: userData?.coachData?.aboutMe ?? "",
+      range: userData?.coachData?.range ?? 10,
     },
   });
 
   const fields = useWatch({
     control,
-    defaultValue: {
-      internalRole: userData?.internalRole ?? "MEMBER",
-      coachingActivities: [],
-    },
   });
+
   const t = useTranslations("auth");
   const router = useRouter();
   const updateUser = trpc.users.updateUser.useMutation({
@@ -115,24 +119,27 @@ export default function FormAccount({
 
   const circle = useMemo(() => {
     return generateCircle(
-      fields.latitude ?? LATITUDE,
       fields.longitude ?? LONGITUDE,
+      fields.latitude ?? LATITUDE,
       fields.range ?? 10,
     );
   }, [fields.latitude, fields.longitude, fields.range]);
 
   function handleAddActivity() {
-    if (newActivity)
-      setValue(
-        `coachingActivities.${fields.coachingActivities?.length ?? 0}`,
-        newActivity,
-      );
-    setNewActivity("");
+    if (newActivity.trim()) {
+      const currentActivities = fields.coachingActivities ?? [];
+      setValue("coachingActivities", [
+        ...currentActivities,
+        newActivity.trim(),
+      ]);
+      setNewActivity("");
+    }
   }
   function handleDeleteActivity(idx: number) {
+    const currentActivities = fields.coachingActivities ?? [];
     setValue(
-      `coachingActivities`,
-      fields.coachingActivities?.filter((_, i) => i !== idx) ?? [],
+      "coachingActivities",
+      currentActivities.filter((_, i) => i !== idx),
     );
   }
 
@@ -219,7 +226,10 @@ export default function FormAccount({
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 {fields.coachingActivities?.map((activity, idx) => (
-                  <span key={`ACT-${idx}`} className="pill w-fit space-x-2">
+                  <span
+                    key={`activity-${idx}`}
+                    className="pill w-fit space-x-2"
+                  >
                     <span>{activity}</span>
                     <i
                       className="bx bx-trash bx-xs cursor-pointer text-error"
@@ -236,7 +246,7 @@ export default function FormAccount({
       <section>
         {fields?.internalRole === "COACH" ||
         fields.internalRole === "MANAGER_COACH" ? (
-          <div className={`mb-2 grid  grid-cols-[auto_1fr] gap-2`}>
+          <div className={`mb-2 grid grid-cols-[auto_1fr] gap-2`}>
             <AddressSearch
               label={t("account.google-address")}
               defaultAddress={fields.searchAddress ?? ""}
@@ -247,7 +257,7 @@ export default function FormAccount({
               }}
               className="col-span-2"
             />
-            <div className="col-span-2 flex justify-between">
+            <div className="col-span-2 flex justify-between items-center">
               <label htmlFor="longitude">{t("account.longitude")}</label>
               <input
                 id="longitude"
@@ -263,14 +273,14 @@ export default function FormAccount({
                 disabled
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <label htmlFor="range">{t("account.range")}</label>
               <div className="form-control">
-                <div className="input-group">
+                <div className="input">
                   <input
                     id="range"
                     type="number"
-                    className="input-bordered input"
+                    className="grow"
                     {...register("range")}
                     min={0}
                     max={100}

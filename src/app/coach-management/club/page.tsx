@@ -76,7 +76,7 @@ export default async function CoachManagementForClub({
       title={t("common.navigation.coach-management")}
       titleComponents={
         <div className="flex items-center gap-2 justify-between">
-          <AddCoachToClub clubId={clubId} userId={userId} />
+          <AddCoachToClub clubId={clubId} userId={userId ?? user.id} />
           <SelectClub clubId={clubId} clubs={queryClubs} />
         </div>
       }

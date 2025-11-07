@@ -16,11 +16,12 @@ export default async function Account({
   const userData = await caller.users.getUserById({
     id: userId,
     options: {
-      withImage: false,
-      withMemberData: false,
+      withImage: true,
+      withMemberData: true,
       withPricing: true,
     },
   });
+  console.log(userData);
   const t = await getTranslations("auth");
 
   return (

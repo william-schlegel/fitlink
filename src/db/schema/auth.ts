@@ -9,7 +9,7 @@ import {
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 
-import { userCoach, userManager, userMember, userNotification } from "./user";
+import { userCoach, userManager, userMember } from "./user";
 import { paiement, pricing } from "./subscription";
 import { reservation } from "./planning";
 import { roleEnum } from "./enums";
@@ -63,8 +63,6 @@ export const userRelations = relations(user, ({ one, many }) => ({
   accounts: many(account),
   paiements: many(paiement),
   reservations: many(reservation),
-  notificationsTo: many(userNotification, { relationName: "user-to" }),
-  notificationsFrom: many(userNotification, { relationName: "user-from" }),
 }));
 
 export const session = pgTable("session", {

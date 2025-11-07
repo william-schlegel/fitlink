@@ -437,7 +437,7 @@
       "room": "Salle",
       "new-subscription": "Nouvel abonnement",
       "subscribe": "S'abonner à ce programme",
-      "subscription-added": "Abonnement ajouté à votre compte",
+      "subscription-added": "Abonnement ajouté à votre compte, en attente de validation par le manager du club",
       "cancel": "Annuler",
       "payment": "Paiement",
       "select-monthly": "Paiement {price} tous les mois",
@@ -655,7 +655,8 @@
       "error": "Erreur lors de l'écriture",
       "new-subscription": "Nouveau membre abonné",
       "subscription-accepted": "L'abonnement a été ajouté",
-      "subscription-rejected": "L'abonnement a été refusé"
+      "subscription-rejected": "L'abonnement a été refusé",
+      "new-message": "Nouveau message"
     }
   },
   "dashboard": {

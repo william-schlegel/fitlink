@@ -65,7 +65,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
     const cta = querySection.data?.elements.find(
       (e) => e.elementType === "CTA",
     );
-    const imageUrl = hc?.images?.[0] ?? "";
+    const imageUrl = hc?.imageUrls?.[0] ?? "";
     const linkUrl = cta?.link
       ? new URL(cta.link)
       : { protocol: "https:", host: "", pathname: "" };
@@ -421,7 +421,7 @@ export const HeroDisplay = ({ clubId, pageId }: HeroDisplayProps) => {
 
   return (
     <HeroContent
-      imageSrc={heroContent?.images?.[0]}
+      imageSrc={heroContent?.imageUrls?.[0]}
       title={heroContent?.title ?? ""}
       subtitle={heroContent?.subTitle ?? ""}
       description={heroContent?.content ?? ""}

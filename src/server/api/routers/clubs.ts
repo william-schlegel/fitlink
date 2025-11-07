@@ -1,4 +1,4 @@
-import { asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
 
@@ -305,27 +305,36 @@ export const clubRouter = createTRPCRouter({
       z.object({
         clubId: z.cuid2(),
         coachUserId: z.string(),
+        managerId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const initialClub = await db.query.club.findFirst({
         where: eq(club.id, input.clubId),
       });
+      const managerId = input.managerId ?? initialClub?.managerId;
       if (
         ctx.user.internalRole !== "ADMIN" &&
-        ctx.user.id !== initialClub?.managerId
+        managerId !== initialClub?.managerId
       )
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to modify this club",
         });
+      const existing = await db.query.clubCoachs.findFirst({
+        where: and(
+          eq(clubCoachs.clubId, input.clubId),
+          eq(userCoach.userId, input.coachUserId),
+        ),
+      });
+      if (existing) return existing;
 
       return db
-        .update(clubCoachs)
-        .set({
+        .insert(clubCoachs)
+        .values({
+          coachUserId: input.coachUserId,
           clubId: input.clubId,
         })
-        .where(eq(userCoach.userId, input.coachUserId))
         .returning();
     }),
 });

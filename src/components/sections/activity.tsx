@@ -4,8 +4,10 @@ import { Fragment, startTransition, useEffect, useState } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 
-import { PageSectionElementTypeEnum } from "@/db/schema/enums";
+import { InferSelectModel } from "drizzle-orm";
+
 import ThemeSelector, { TThemes } from "../themeSelector";
+import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
@@ -67,8 +69,8 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
                 >
                   <p>{activity.title}</p>
                   <div className="mt-2 flex items-center justify-between gap-4">
-                    <UpdateActivity pageId={pageId} activityId={activity.id} />
-                    <DeleteActivity pageId={pageId} activityId={activity.id} />
+                    <UpdateActivity pageId={pageId} activityId={activity.id!} />
+                    <DeleteActivity pageId={pageId} activityId={activity.id!} />
                   </div>
                 </div>
               ))}
@@ -501,16 +503,7 @@ export const ActivityDisplayCard = ({
   );
 };
 
-type ActivityContentElement = {
-  id: string;
-  title: string | null;
-  subTitle: string | null;
-  content: string | null;
-  elementType: PageSectionElementTypeEnum | null;
-  link: string | null;
-  optionValue: string | null;
-  images: string[] | null;
-};
+type ActivityContentElement = InferSelectModel<typeof pageSectionElement>;
 
 type ActivitiesContentCardProps = {
   preview?: boolean;
@@ -523,10 +516,10 @@ function ActivityContentCard({
 }: ActivitiesContentCardProps) {
   return (
     <div key={activity.id} className="card bg-base-100 shadow-xl">
-      {activity.images?.[0] ? (
+      {activity.imageUrls?.[0] ? (
         <figure className="white">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={activity.images[0]} alt="" />
+          <img src={activity.imageUrls[0]} alt="" />
         </figure>
       ) : null}
       <div className={`card-body ${preview ? "p-4 text-sm" : ""}`}>

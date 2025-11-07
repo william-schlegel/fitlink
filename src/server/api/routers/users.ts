@@ -20,10 +20,10 @@ import {
 } from "@/lib/trpc/server";
 import { pricing, subscription } from "@/db/schema/subscription";
 import { TUserFilter } from "@/app/admin/users/userFilter";
+import { hasRole, isAdmin } from "@/server/lib/userTools";
 import { featureEnum, roleEnum } from "@/db/schema/enums";
+import { auth, getActualUser } from "@/lib/auth/server";
 import { reservation } from "@/db/schema/planning";
-import { isAdmin } from "@/server/lib/userTools";
-import { auth } from "@/lib/auth/server";
 import { user } from "@/db/schema/auth";
 import { db } from "@/db";
 
@@ -67,7 +67,6 @@ async function getMemberData(memberId: string) {
   const cd = await db.query.userCoach.findFirst({
     where: eq(userCoach.userId, memberId),
     with: {
-      coachingActivities: true,
       coachingPrices: true,
       certifications: true,
       activityGroups: true,
@@ -75,7 +74,7 @@ async function getMemberData(memberId: string) {
       clubs: true,
     },
   });
-  const mnd = db.query.userManager.findFirst({
+  const mnd = await db.query.userManager.findFirst({
     where: eq(userManager.userId, memberId),
     with: {
       managedClubs: true,
@@ -252,6 +251,14 @@ export const userRouter = createTRPCRouter({
       // //   });
       // // }
     }),
+  getUserAvatar: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input }) => {
+      const u = await db.query.user.findFirst({
+        where: eq(user.id, input.userId),
+      });
+      return { name: u?.name ?? "", imageUrl: u?.image ?? "/images/dummy.jpg" };
+    }),
   getUserSubscriptionsById: protectedProcedure
     .input(z.string())
     .query(async ({ input }) => {
@@ -395,6 +402,7 @@ export const userRouter = createTRPCRouter({
               publicName: input.publicName,
               aboutMe: input.aboutMe,
               description: input.description,
+              coachingActivities: input.coachingActivities,
             })
             .returning();
 
@@ -473,22 +481,34 @@ export const userRouter = createTRPCRouter({
       });
       const managerId = sub?.club.managerId;
       if (managerId) {
-        await createNotificationInConvex(
-          managerId,
-          input.userId,
-          "NEW_SUBSCRIPTION",
-          "",
-          {
+        await createNotificationInConvex({
+          userId: managerId,
+          userFromId: input.userId,
+          type: "NEW_SUBSCRIPTION",
+          message: "",
+          data: {
             subscriptionId: input.subscriptionId,
             monthly: input.monthly,
             online: input.online,
           },
-        );
+        });
       }
       const clubId = sub?.club.id;
       if (clubId) {
         await addMemberToClubRoomInConvex(clubId, input.userId);
       }
+      return true;
+    }),
+
+  validateSubscription: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        subscriptionId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await hasRole(["ADMIN", "MANAGER", "MANAGER_COACH"]);
       const member = await db.query.userMember.findFirst({
         where: eq(userMember.userId, input.userId),
       });

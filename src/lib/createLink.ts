@@ -2,7 +2,8 @@ export default function createLink(
   searchParams: Record<string, string | undefined>,
   location?: string | null,
 ) {
-  const url = new URL(location ?? window.location.href);
+  const url = new URL(location ?? window?.location?.href ?? "");
+  if (!url) return "";
 
   for (const d of Object.keys(searchParams)) {
     url.searchParams.delete(d);

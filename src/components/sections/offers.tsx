@@ -5,9 +5,11 @@ import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
+import { InferSelectModel } from "drizzle-orm";
+
 import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
-import { PageSectionElementTypeEnum } from "@/db/schema/enums";
 import ThemeSelector, { TThemes } from "../themeSelector";
+import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
 import { List } from "@/app/member/[userId]/list";
 import { formatMoney } from "@/lib/formatNumber";
@@ -478,20 +480,11 @@ export const OfferDisplayCard = ({ pageId, clubId }: OfferDisplayProps) => {
 
 type OffersContentCardProps = {
   preview?: boolean;
-  offer: OfferContentElement;
+  offer: InferSelectModel<typeof pageSectionElement>;
   clubId: string;
 };
 
-type OfferContentElement = {
-  id: string;
-  title: string | null;
-  subTitle: string | null;
-  content: string | null;
-  elementType: PageSectionElementTypeEnum | null;
-  link: string | null;
-  optionValue: string | null;
-  images: string[] | null;
-};
+type OfferContentElement = InferSelectModel<typeof pageSectionElement>;
 
 function OfferContentCard({
   preview = false,
@@ -522,7 +515,7 @@ function OfferContentCard({
     >
       <figure>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={offer.images?.[0] ?? ""} alt={offer.title ?? ""} />
+        <img src={offer.imageUrls?.[0] ?? ""} alt={offer.title ?? ""} />
       </figure>
       <div className="card-body">
         <h2 className="card-title">{offer.title}</h2>

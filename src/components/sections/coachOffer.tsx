@@ -34,9 +34,9 @@ export function CoachOfferPage({ offerId, condensed }: CoachOfferPageProps) {
     >
       <div className={condensed ? undefined : "space-y-8"}>
         <section className={`flex ${condensed ? "gap-2" : "gap-8 "}`}>
-          {offerQuery.data?.coach?.coachingActivities.map((activity) => (
-            <span className="pill px-4" key={activity.id}>
-              {activity.name}
+          {offerQuery.data?.coach?.coachingActivities?.map((activity, idx) => (
+            <span className="pill px-4" key={idx}>
+              {activity}
             </span>
           ))}
         </section>

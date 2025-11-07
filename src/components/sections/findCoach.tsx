@@ -76,7 +76,7 @@ function FindCoach({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
   const circle = useMemo(() => {
-    return generateCircle(myAddress.lat, myAddress.lng, range);
+    return generateCircle(myAddress.lng, myAddress.lat, range);
   }, [myAddress.lat, myAddress.lng, range]);
   const [selectedCoachs, setSelectedCoachs] = useState(new Set<string>());
 
@@ -113,10 +113,10 @@ function FindCoach({
         </td>
         <td>
           <div className="flex flex-wrap gap-1">
-            {item.coachingActivities.length ? (
-              item.coachingActivities.map((activity) => (
-                <span key={activity.id} className="pill pill-xs">
-                  {activity.name}
+            {item.coachingActivities?.length ? (
+              item.coachingActivities.map((activity, idx) => (
+                <span key={`${idx}-${activity}`} className="pill pill-xs">
+                  {activity}
                 </span>
               ))
             ) : (

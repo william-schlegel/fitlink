@@ -433,7 +433,7 @@
       "room": "Room",
       "new-subscription": "New subscription",
       "subscribe": "Subscribe to this program",
-      "subscription-added": "Subscription added to your account",
+      "subscription-added": "Subscription added to your account, waiting for validation by the club manager",
       "cancel": "Cancel",
       "payment": "Payment",
       "select-monthly": "Pay {price} every month",
@@ -647,7 +647,8 @@
       "error": "Error writing",
       "new-subscription": "New subscribed member",
       "subscription-accepted": "The subscription has been added",
-      "subscription-rejected": "The subscription has been refused"
+      "subscription-rejected": "The subscription has been refused",
+      "new-message": "New message"
     }
   },
   "dashboard": {

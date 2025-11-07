@@ -16,15 +16,8 @@ import {
   coachMarketPlace,
   coachOrganisms,
 } from "./coach";
-import {
-  activityGroup,
-  club,
-  clubCoachs,
-  clubMembers,
-  coachingActivity,
-} from "./club";
+import { activityGroup, club, clubCoachs, clubMembers } from "./club";
 import { planning, planningActivity } from "./planning";
-import { notificationTypeEnum } from "./enums";
 import { subscription } from "./subscription";
 import { page } from "./page";
 import { user } from "./auth";
@@ -48,6 +41,7 @@ export const userCoach = pgTable(
     rating: real("rating").default(0),
     pageStyle: text("page_style").default("light"),
     convexRoomId: text("convex_room_id"),
+    coachingActivities: text("coaching_activities").array().default([]),
   },
   (table) => [index("user_coach_user_idx").on(table.userId)],
 );
@@ -59,7 +53,6 @@ export const userCoachRelations = relations(userCoach, ({ one, many }) => ({
   }),
   activityGroups: many(activityGroup),
   coachingPrices: many(coachingPrice),
-  coachingActivities: many(coachingActivity),
   certifications: many(coachCertification),
   organisms: many(coachOrganisms),
   page: one(page),
@@ -132,39 +125,39 @@ export const userManagerRelations = relations(userManager, ({ one, many }) => ({
   managedClubs: many(club),
 }));
 
-export const userNotification = pgTable(
-  "UserNotification",
-  {
-    id: text("id").primaryKey().$defaultFn(createId),
-    type: notificationTypeEnum("type").notNull(),
-    userToId: text("user_to_id").notNull(),
-    userFromId: text("user_from_id").notNull(),
-    message: text("message").notNull(),
-    viewDate: timestamp("view_date"),
-    date: timestamp("date").notNull().defaultNow(),
-    data: json("data"),
-    answered: timestamp("answered"),
-    answer: text("answer"),
-    linkedNotification: text("linked_notification"),
-  },
-  (table) => [
-    index("user_notification_user_to_idx").on(table.userToId),
-    index("user_notification_user_from_idx").on(table.userFromId),
-  ],
-);
+// export const userNotification = pgTable(
+//   "UserNotification",
+//   {
+//     id: text("id").primaryKey().$defaultFn(createId),
+//     type: notificationTypeEnum("type").notNull(),
+//     userToId: text("user_to_id").notNull(),
+//     userFromId: text("user_from_id").notNull(),
+//     message: text("message").notNull(),
+//     viewDate: timestamp("view_date"),
+//     date: timestamp("date").notNull().defaultNow(),
+//     data: json("data"),
+//     answered: timestamp("answered"),
+//     answer: text("answer"),
+//     linkedNotification: text("linked_notification"),
+//   },
+//   (table) => [
+//     index("user_notification_user_to_idx").on(table.userToId),
+//     index("user_notification_user_from_idx").on(table.userFromId),
+//   ],
+// );
 
-export const userNotificationRelations = relations(
-  userNotification,
-  ({ one }) => ({
-    userTo: one(user, {
-      fields: [userNotification.userToId],
-      references: [user.id],
-      relationName: "user-to",
-    }),
-    userFrom: one(user, {
-      fields: [userNotification.userFromId],
-      references: [user.id],
-      relationName: "user-from",
-    }),
-  }),
-);
+// export const userNotificationRelations = relations(
+//   userNotification,
+//   ({ one }) => ({
+//     userTo: one(user, {
+//       fields: [userNotification.userToId],
+//       references: [user.id],
+//       relationName: "user-to",
+//     }),
+//     userFrom: one(user, {
+//       fields: [userNotification.userFromId],
+//       references: [user.id],
+//       relationName: "user-from",
+//     }),
+//   }),
+// );

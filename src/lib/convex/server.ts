@@ -1,6 +1,9 @@
-import { Id } from "../../../convex/_generated/dataModel";
-import { api } from "../../../convex/_generated/api";
 import { ConvexHttpClient } from "convex/browser";
+
+import { NotificationType } from "@/app/user/[userId]/notification/types";
+import { Id } from "../../../convex/_generated/dataModel";
+import { CreateNotificationInConvexArgs } from "./types";
+import { api } from "../../../convex/_generated/api";
 import { env } from "@/env";
 
 const convexHttpClient = new ConvexHttpClient(
@@ -13,7 +16,7 @@ export async function createClubRoomInConvex(
   managerId: string,
 ) {
   if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
-    console.warn("CONVEX_URL not set, skipping Convex room creation");
+    console.warn("CONVEX_URL not set, skipping Convex club room creation");
     return null;
   }
 
@@ -35,7 +38,7 @@ export async function createCoachRoomInConvex(
   coachName: string,
 ) {
   if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
-    console.warn("CONVEX_URL not set, skipping Convex room creation");
+    console.warn("CONVEX_URL not set, skipping Convex coach room creation");
     return null;
   }
 
@@ -56,7 +59,9 @@ export async function addMemberToClubRoomInConvex(
   userId: string,
 ) {
   if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
-    console.warn("CONVEX_URL not set, skipping Convex member addition");
+    console.warn(
+      "CONVEX_URL not set, skipping Convex member addition in club room",
+    );
     return null;
   }
 
@@ -74,6 +79,7 @@ export async function addMemberToClubRoomInConvex(
 
 export async function getClubRoomId(clubId: string): Promise<string | null> {
   if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
+    console.warn("CONVEX_URL not set, skipping Convex club room get");
     return null;
   }
 
@@ -93,7 +99,9 @@ export async function createDirectMessageRoomInConvex(
   userId2: string,
 ) {
   if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
-    console.warn("CONVEX_URL not set, skipping Convex DM room creation");
+    console.warn(
+      "CONVEX_URL not set, skipping Convex direct message room creation",
+    );
     return null;
   }
 
@@ -113,29 +121,19 @@ export async function createDirectMessageRoomInConvex(
 }
 
 export async function createNotificationInConvex(
-  userId: string,
-  userFromId: string,
-  type: string,
-  message: string,
-  data?: unknown,
-  linkedNotification?: string,
+  notification: CreateNotificationInConvexArgs,
 ) {
   if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
-    console.warn("CONVEX_URL not set, skipping Convex notification creation");
+    console.warn(
+      "CONVEX_URL not set, skipping Convex notification creation in convex",
+    );
     return null;
   }
 
   try {
     const notificationId = await convexHttpClient.mutation(
       api.notifications.createNotification,
-      {
-        userId,
-        userFromId,
-        type,
-        message,
-        data,
-        linkedNotification,
-      },
+      notification,
     );
     return notificationId;
   } catch (error) {
@@ -145,30 +143,72 @@ export async function createNotificationInConvex(
 }
 
 export async function createNotificationsInConvex(
-  notifications: Array<{
-    userId: string;
-    userFromId: string;
-    type: string;
-    message: string;
-    data?: unknown;
-    linkedNotification?: string;
-  }>,
+  notifications: Array<CreateNotificationInConvexArgs>,
 ) {
   if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
-    console.warn("CONVEX_URL not set, skipping Convex notifications creation");
+    console.warn(
+      "CONVEX_URL not set, skipping Convex notifications creation in convex",
+    );
     return null;
   }
 
   try {
     const notificationIds = await convexHttpClient.mutation(
       api.notifications.createNotifications,
-      {
-        notifications,
-      },
+      { notifications },
     );
     return notificationIds;
   } catch (error) {
     console.error("Error creating Convex notifications:", error);
+    return null;
+  }
+}
+
+export async function updateNotificationInConvex(
+  notificationId: Id<"notifications">,
+  answeredAt: number,
+  answer: string,
+  linkedNotification?: string,
+) {
+  if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
+    console.warn(
+      "CONVEX_URL not set, skipping Convex notification update in convex",
+    );
+    return null;
+  }
+  try {
+    await convexHttpClient.mutation(api.notifications.updateNotification, {
+      notificationId,
+      answeredAt,
+      answer,
+      linkedNotification,
+    });
+    return notificationId;
+  } catch (error) {
+    console.error("Error updating Convex notification:", error);
+    return null;
+  }
+}
+
+export async function getNotificationByIdInConvex(
+  notificationId: Id<"notifications">,
+) {
+  if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
+    console.warn(
+      "CONVEX_URL not set, skipping Convex notification get in convex",
+    );
+    return null;
+  }
+  try {
+    const notification = await convexHttpClient.query(
+      api.notifications.getNotificationById,
+      {
+        notificationId,
+      },
+    );
+    return notification;
+  } catch (error) {
+    console.error("Error getting Convex notification:", error);
     return null;
   }
 }

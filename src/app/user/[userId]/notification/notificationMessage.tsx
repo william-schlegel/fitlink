@@ -4,19 +4,18 @@ import { useTranslations } from "next-intl";
 import React, { Fragment } from "react";
 import { isDate } from "date-fns";
 
-import { GetNotificationByIdReturn } from "@/server/api/routers/notification";
-import { NotificationTypeEnum } from "@/db/schema/enums";
+import { FromTo, NOTIFICATION_TYPES, NotificationType } from "./types";
+import { CreateNotificationInConvexArgs } from "@/lib/convex/types";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { formatMoney } from "@/lib/formatNumber";
 import Spinner from "@/components/ui/spinner";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import { toast } from "@/lib/toast";
-import { FromTo } from "./types";
 
 type NotificationMessageProps = {
   fromTo: FromTo;
-  notification: GetNotificationByIdReturn;
+  notification: CreateNotificationInConvexArgs;
 };
 
 export function NotificationMessage({
@@ -91,7 +90,7 @@ export function NotificationMessage({
             onClick={() =>
               handleClick(
                 "/api/notification/acceptSearchCoach",
-                notification.id,
+                notification.id!.toString(),
               )
             }
           >
@@ -103,7 +102,7 @@ export function NotificationMessage({
             onClick={() =>
               handleClick(
                 "/api/notification/refuseSearchCoach",
-                notification.id,
+                notification.id!.toString(),
               )
             }
           >
@@ -120,7 +119,7 @@ export function NotificationMessage({
             onClick={() =>
               handleClick(
                 "/api/notification/validateSubscription",
-                notification.id,
+                notification.id!.toString(),
               )
             }
           >
@@ -132,7 +131,7 @@ export function NotificationMessage({
             onClick={() =>
               handleClick(
                 "/api/notification/cancelSubscription",
-                notification.id,
+                notification.id!.toString(),
               )
             }
           >
@@ -183,67 +182,9 @@ function SubscriptionInfo({ data }: SubscriptionInfoProps) {
   );
 }
 
-const NOTIFICATION_TYPES: readonly {
-  readonly value: NotificationTypeEnum;
-  readonly label: string;
-}[] = [
-  {
-    value: "SEARCH_COACH",
-    label: "notification.type.search-coach",
-  },
-  {
-    value: "COACH_ACCEPT",
-    label: "notification.type.coach-accept",
-  },
-  {
-    value: "COACH_REFUSE",
-    label: "notification.type.coach-refuse",
-  },
-  {
-    value: "SEARCH_CLUB",
-    label: "notification.type.search-club",
-  },
-  {
-    value: "CLUB_ACCEPT",
-    label: "notification.type.club-accept",
-  },
-  {
-    value: "CLUB_REFUSE",
-    label: "notification.type.club-refuse",
-  },
-  {
-    value: "NEW_MESSAGE",
-    label: "notification.type.new-message",
-  },
-  {
-    value: "NEW_SUBSCRIPTION",
-    label: "notification.type.new-subscription",
-  },
-  {
-    value: "NEW_REQUEST",
-    label: "notification.type.new-request",
-  },
-  {
-    value: "SUBSCRIPTION_VALIDATED",
-    label: "notification.type.subscription-validated",
-  },
-  {
-    value: "SUBSCRIPTION_REJECTED",
-    label: "notification.type.subscription-rejected",
-  },
-  {
-    value: "REQUEST_VALIDATED",
-    label: "notification.type.request-validated",
-  },
-  {
-    value: "REQUEST_REJECTED",
-    label: "notification.type.request-rejected",
-  },
-];
-
 function useNotificationType() {
   const t = useTranslations("auth");
-  function getName(type: NotificationTypeEnum | undefined) {
+  function getName(type: NotificationType | undefined) {
     if (!type) return "?";
     const nt = NOTIFICATION_TYPES.find((t) => t.value === type);
     return nt?.label ? t(nt.label) : "?";

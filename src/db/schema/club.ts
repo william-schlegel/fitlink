@@ -221,25 +221,6 @@ export const activityRelations = relations(activity, ({ one, many }) => ({
   reservations: many(reservation),
   rooms: many(roomActivities),
 }));
-export const coachingActivity = pgTable(
-  "CoachingActivity",
-  {
-    id: text("id").primaryKey().$defaultFn(createId),
-    name: text("name").notNull(),
-    coachId: text("coach_id").notNull(),
-  },
-  (table) => [index("coaching_activity_coach_idx").on(table.coachId)],
-);
-
-export const coachingActivityRelations = relations(
-  coachingActivity,
-  ({ one }) => ({
-    coach: one(userCoach, {
-      fields: [coachingActivity.coachId],
-      references: [userCoach.userId],
-    }),
-  }),
-);
 
 export const clubMembers = pgTable(
   "ClubMembers",

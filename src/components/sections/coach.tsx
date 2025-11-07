@@ -61,12 +61,18 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
     },
   });
   const querySection = trpc.pages.getPageSection.useQuery(
-    { pageId, section: "HERO" },
+    {
+      pageId,
+      section: "HERO",
+      createIfNone: true,
+      createElement: { elementType: "HERO_CONTENT", title: "Héro" },
+    },
     {
       enabled: isCUID(pageId),
       refetchOnWindowFocus: false,
     },
   );
+
   useEffect(() => {
     if (!querySection.data) return;
 
@@ -85,10 +91,11 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
       withCertifications:
         options.find((o) => o.title === "certifications")?.optionValue ===
         "yes",
-      imageUrl: hc?.images?.[0] ?? undefined,
+      imageUrl: hc?.imageUrls?.[0] ?? undefined,
     };
     form.reset(resetData);
   }, [querySection.data, form]);
+
   const createSectionElement =
     trpc.pages.createPageSectionElement.useMutation();
   const updateSectionElement = trpc.pages.updatePageSectionElement.useMutation({
@@ -115,7 +122,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
       (e) => e.elementType === "OPTION" && e.title === "certifications",
     );
     await updateSectionElement.mutateAsync({
-      id: hc.id,
+      id: hc.id!,
       subTitle: data.subtitle,
       content: data.description,
       images: data.imageUrl ? [data.imageUrl] : undefined,
