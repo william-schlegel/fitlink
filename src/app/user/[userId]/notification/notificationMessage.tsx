@@ -22,7 +22,6 @@ export function NotificationMessage({
   notification,
   fromTo,
 }: NotificationMessageProps) {
-  const utils = trpc.useUtils();
   const t = useTranslations("auth");
   const { getName } = useNotificationType();
   if (!notification) return null;

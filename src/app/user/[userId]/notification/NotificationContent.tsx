@@ -1,8 +1,8 @@
 "use client";
 
+import { startTransition, useEffect, useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
 
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { NotificationMessage } from "./notificationMessage";
@@ -22,6 +22,14 @@ export function NotificationContent({
 }: NotificationContentProps) {
   const t = useTranslations("auth");
   const markAsViewed = useMutation(api.notifications.markAsViewed);
+  const [userFrom, setUserFrom] = useState<{
+    name: string;
+    imageUrl: string;
+  } | null>(null);
+  const [userTo, setUserTo] = useState<{
+    name: string;
+    imageUrl: string;
+  } | null>(null);
 
   const notification = useQuery(
     api.notifications.getNotificationById,
@@ -49,18 +57,21 @@ export function NotificationContent({
     }
   }, [notification, notificationId, markAsViewed]);
 
-  if (!notification) {
-    return null;
-  }
+  useEffect(() => {
+    if (!fromData.data) return;
+    startTransition(() => {
+      setUserFrom(fromData.data);
+    });
+  }, [fromData.data]);
 
-  const userFrom = {
-    name: fromData.data?.name,
-    imageUrl: fromData.data?.imageUrl,
-  };
-  const userTo = {
-    name: toData.data?.name,
-    imageUrl: toData.data?.imageUrl,
-  };
+  useEffect(() => {
+    if (!toData.data) return;
+    startTransition(() => {
+      setUserTo(toData.data);
+    });
+  }, [toData.data]);
+
+  if (!notification) return null;
 
   // Convert Convex notification to the format expected by NotificationMessage
   const notificationForMessage = {
@@ -91,16 +102,24 @@ export function NotificationContent({
         </span>
         <div className="avatar">
           <div className="w-16 avatar">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={fromTo === "to" ? userFrom.imageUrl : userTo.imageUrl}
-              alt={fromTo === "to" ? userFrom.name : userTo.name}
-            />
+            {userFrom && userTo && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={fromTo === "to" ? userFrom.imageUrl : userTo.imageUrl}
+                alt={fromTo === "to" ? userFrom.name : userTo.name}
+                width={64}
+                height={64}
+                className="rounded-full"
+                loading="lazy"
+              />
+            )}
           </div>
         </div>
-        <span className="text-lg font-bold text-secondary">
-          {(fromTo === "to" ? userFrom.name : userTo.name) ?? ""}
-        </span>
+        {userFrom && userTo && (
+          <span className="text-lg font-bold text-secondary">
+            {(fromTo === "to" ? userFrom.name : userTo.name) ?? ""}
+          </span>
+        )}
       </div>
       <div className="flex items-center gap-4">
         <h2>

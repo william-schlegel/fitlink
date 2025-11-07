@@ -4,6 +4,8 @@ import { TRPCError } from "@trpc/server";
 
 import { Id } from "../../../../../convex/_generated/dataModel";
 
+import { getTranslations } from "next-intl/server";
+
 import {
   createNotificationInConvex,
   getNotificationByIdInConvex,
@@ -23,9 +25,11 @@ type ResponseData = {
 export async function GET(request: Request) {
   const session = await getSession();
   const caller = await createTrpcCaller();
+  const t = await getTranslations("common");
+
   if (!caller) {
     return NextResponse.json<ResponseData>(
-      { error: "cannot create caller" },
+      { error: t("api.error-with", { error: "cannot create caller" }) },
       { status: 500 },
     );
   }
@@ -36,7 +40,7 @@ export async function GET(request: Request) {
   if (!notificationId || !isCUID(notificationId)) {
     return NextResponse.json<ResponseData>(
       {
-        error: "invalid notificationId",
+        error: t("api.error-with", { error: "invalid notificationId" }),
         step: "notificationId",
       },
       { status: 500 },
@@ -45,7 +49,7 @@ export async function GET(request: Request) {
 
   if (!session) {
     return NextResponse.json<ResponseData>(
-      { error: "unauthorized" },
+      { error: t("api.error-with", { error: "unauthorized" }) },
       { status: 401 },
     );
   }
@@ -57,7 +61,7 @@ export async function GET(request: Request) {
     if (!notification) {
       return NextResponse.json<ResponseData>(
         {
-          error: "notification not found",
+          error: t("api.error-with", { error: "notification not found" }),
           step: "notification",
         },
         { status: 500 },
@@ -70,7 +74,7 @@ export async function GET(request: Request) {
     if (!isCUID(clubId)) {
       return NextResponse.json<ResponseData>(
         {
-          error: "invalid clubId",
+          error: t("api.error-with", { error: "invalid clubId" }),
           step: "clubId - coachDataId",
         },
         { status: 500 },
@@ -84,8 +88,8 @@ export async function GET(request: Request) {
     if (updated) {
       // create answer notification
       const answer = await createNotificationInConvex({
-        userId: notification.userId,
-        userFromId: notification.userFromId,
+        userId: notification.userFromId,
+        userFromId: notification.userId,
         type: "COACH_ACCEPT",
         message: notification.message,
         data: notification._id.toString(),
@@ -95,12 +99,12 @@ export async function GET(request: Request) {
       await updateNotificationInConvex(
         notificationId as Id<"notifications">,
         Date.now(),
-        "Demande acceptée",
+        t("api.accept"),
         answer?.toString() ?? undefined,
       );
     }
     return NextResponse.json<ResponseData>(
-      { success: "Demande acceptée" },
+      { success: t("api.accept") },
       { status: 200 },
     );
   } catch (e) {
@@ -114,7 +118,7 @@ export async function GET(request: Request) {
       );
     }
     return NextResponse.json<ResponseData>(
-      { error: "Unknown error" },
+      { error: t("api.error-with", { error: "Unknown error" }) },
       { status: 500 },
     );
   }

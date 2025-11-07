@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { twMerge } from "tailwind-merge";
 import { useQuery } from "convex/react";
@@ -28,6 +28,7 @@ export function NotificationList({
   page,
 }: NotificationListProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const t = useTranslations("auth");
 
   const notificationsData = useQuery(
@@ -48,11 +49,15 @@ export function NotificationList({
       <div className="grid grid-cols-2 gap-2">
         <Link
           className={`btn-primary btn ${fromTo === "to" ? "" : "btn-outline"}`}
-          href={createLink({
-            notificationId: "",
-            page: "0",
-            fromTo: "to",
-          })}
+          href={createLink(
+            {
+              notificationId: "",
+              page: "0",
+              fromTo: "to",
+            },
+            null,
+            pathname,
+          )}
         >
           {t("notification.to")}
         </Link>
@@ -60,11 +65,15 @@ export function NotificationList({
           className={`btn-primary btn ${
             fromTo === "from" ? "" : "btn-outline"
           }`}
-          href={createLink({
-            notificationId: "",
-            page: "0",
-            fromTo: "from",
-          })}
+          href={createLink(
+            {
+              notificationId: "",
+              page: "0",
+              fromTo: "from",
+            },
+            null,
+            pathname,
+          )}
         >
           {t("notification.from")}
         </Link>
@@ -73,11 +82,15 @@ export function NotificationList({
         {notifications.map((notification) => (
           <li key={notification._id}>
             <Link
-              href={createLink({
-                notificationId: notification._id,
-                page: page.toString(),
-                fromTo,
-              })}
+              href={createLink(
+                {
+                  notificationId: notification._id,
+                  page: page.toString(),
+                  fromTo,
+                },
+                null,
+                pathname,
+              )}
               className={twMerge(
                 "flex items-center justify-between",
                 notificationId === notification._id &&
@@ -124,11 +137,15 @@ export function NotificationList({
         count={total}
         onPageClick={(newPage) => {
           router.push(
-            createLink({
-              notificationId: "",
-              page: newPage.toString(),
-              fromTo,
-            }),
+            createLink(
+              {
+                notificationId: "",
+                page: newPage.toString(),
+                fromTo,
+              },
+              null,
+              pathname,
+            ),
           );
         }}
         perPage={PER_PAGE}

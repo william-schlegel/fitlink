@@ -1,15 +1,42 @@
 export default function createLink(
   searchParams: Record<string, string | undefined>,
   location?: string | null,
+  pathname?: string | null,
 ) {
-  const url = new URL(location ?? window?.location?.href ?? "");
-  if (!url) return "";
-
-  for (const d of Object.keys(searchParams)) {
-    url.searchParams.delete(d);
-    url.searchParams.append(d, searchParams[d] ?? "");
+  // Build query string from search params
+  const params = new URLSearchParams();
+  for (const key of Object.keys(searchParams)) {
+    if (searchParams[key] !== undefined && searchParams[key] !== null) {
+      params.set(key, searchParams[key] ?? "");
+    }
   }
-  return url.href;
+  const queryString = params.toString();
+
+  // If location is provided, use it as base
+  if (location) {
+    try {
+      const url = new URL(location);
+      // Clear existing search params and set new ones
+      url.search = queryString;
+      return url.href;
+    } catch {
+      // If location is not a valid URL, treat it as a path
+      return queryString ? `${location}?${queryString}` : location;
+    }
+  }
+
+  // Use provided pathname or get from window (client-side only)
+  const currentPathname =
+    pathname ?? (typeof window !== "undefined" ? window.location.pathname : "");
+
+  // Return consistent format: pathname + query string
+  // This ensures same output on server and client
+  if (queryString) {
+    return currentPathname
+      ? `${currentPathname}?${queryString}`
+      : `?${queryString}`;
+  }
+  return currentPathname || "";
 }
 
 export function createHref(

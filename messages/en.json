@@ -645,6 +645,7 @@
       "coach-added": "The coach has been added to the club",
       "answer-sent": "Answer sent",
       "error": "Error writing",
+      "error-with": "Error ({error})",
       "new-subscription": "New subscribed member",
       "subscription-accepted": "The subscription has been added",
       "subscription-rejected": "The subscription has been refused",

@@ -653,6 +653,7 @@
       "coach-added": "Le coach a été ajouté au club",
       "answer-sent": "Réponse envoyée",
       "error": "Erreur lors de l'écriture",
+      "error-with": "Erreur ({error})",
       "new-subscription": "Nouveau membre abonné",
       "subscription-accepted": "L'abonnement a été ajouté",
       "subscription-rejected": "L'abonnement a été refusé",

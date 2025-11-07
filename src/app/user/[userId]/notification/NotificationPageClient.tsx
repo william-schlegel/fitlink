@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useQuery } from "convex/react";
 import { useEffect } from "react";
 
@@ -20,6 +20,7 @@ export function NotificationPageClient({
   userId,
 }: NotificationPageClientProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const fromTo = (searchParams.get("fromTo") ?? "to") as FromTo;
   const notificationId = searchParams.get("notificationId") ?? "";
@@ -43,13 +44,17 @@ export function NotificationPageClient({
       !notificationId
     )
       router.push(
-        createLink({
-          notificationId: notificationsData.notifications[0]?._id ?? "",
-          page: page.toString(),
-          fromTo,
-        }),
+        createLink(
+          {
+            notificationId: notificationsData.notifications[0]?._id ?? "",
+            page: page.toString(),
+            fromTo,
+          },
+          null,
+          pathname,
+        ),
       );
-  }, [notificationsData, notificationId, page, fromTo, router]);
+  }, [notificationsData, notificationId, page, fromTo, router, pathname]);
 
   return (
     <div className="flex gap-4">

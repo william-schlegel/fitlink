@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/unstable-core-do-not-import";
 import { TRPCError } from "@trpc/server";
 
+import { getTranslations } from "next-intl/server";
+
 import {
   createNotificationInConvex,
   getNotificationByIdInConvex,
@@ -23,9 +25,11 @@ type ResponseData = {
 export async function GET(request: Request) {
   const session = await getSession();
   const caller = await createTrpcCaller();
+  const t = await getTranslations("common");
+
   if (!caller) {
     return NextResponse.json<ResponseData>(
-      { error: "common:api.error" },
+      { error: t("api.error") },
       { status: 500 },
     );
   }
@@ -36,7 +40,7 @@ export async function GET(request: Request) {
   if (!notificationId || !isCUID(notificationId)) {
     return NextResponse.json<ResponseData>(
       {
-        error: "common:api.error-validate-subscription",
+        error: t("api.error-validate-subscription"),
         step: "notificationId",
       },
       { status: 500 },
@@ -45,7 +49,7 @@ export async function GET(request: Request) {
 
   if (!session) {
     return NextResponse.json<ResponseData>(
-      { error: "common:api.error" },
+      { error: t("api.error") },
       { status: 401 },
     );
   }
@@ -57,7 +61,7 @@ export async function GET(request: Request) {
     if (!notification) {
       return NextResponse.json<ResponseData>(
         {
-          error: "common:api.error-validate-subscription",
+          error: t("api.error-validate-subscription"),
           step: "notification",
         },
         { status: 500 },
@@ -71,7 +75,7 @@ export async function GET(request: Request) {
     if (!isCUID(sData.subscriptionId)) {
       return NextResponse.json<ResponseData>(
         {
-          error: "common:api.error-validate-subscription",
+          error: t("api.error-validate-subscription"),
           step: "subscriptionId",
         },
         { status: 500 },
@@ -83,8 +87,8 @@ export async function GET(request: Request) {
 
     // create answer notification
     const answer = await createNotificationInConvex({
-      userId: notification.userId,
-      userFromId: notification.userFromId,
+      userId: notification.userFromId,
+      userFromId: notification.userId,
       type: "SUBSCRIPTION_VALIDATED",
       message: "",
       linkedNotification: notification._id.toString(),
@@ -94,11 +98,11 @@ export async function GET(request: Request) {
     await updateNotificationInConvex(
       notification._id,
       Date.now(),
-      "common:api.accept",
+      t("api.accept"),
       answer?.toString(),
     );
     return NextResponse.json<ResponseData>(
-      { success: "common:api.subscription-accepted" },
+      { success: t("api.subscription-accepted") },
       { status: 200 },
     );
   } catch (e) {
@@ -112,7 +116,7 @@ export async function GET(request: Request) {
       );
     }
     return NextResponse.json<ResponseData>(
-      { error: "common:api.error" },
+      { error: t("api.error") },
       { status: 500 },
     );
   }

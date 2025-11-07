@@ -2,6 +2,8 @@ import { getHTTPStatusCodeFromError } from "@trpc/server/http";
 import { NextResponse } from "next/server";
 import { TRPCError } from "@trpc/server";
 
+import { getTranslations } from "next-intl/server";
+
 import {
   createNotificationInConvex,
   getNotificationByIdInConvex,
@@ -20,6 +22,7 @@ type ResponseData = {
 
 export async function GET(request: Request) {
   const session = await getSession();
+  const t = await getTranslations("common");
 
   const { searchParams } = new URL(request.url);
   const notificationId = searchParams.get("notificationId");
@@ -27,7 +30,7 @@ export async function GET(request: Request) {
   if (!notificationId || !isCUID(notificationId)) {
     return NextResponse.json<ResponseData>(
       {
-        error: "common:api.error-cancel-subscription",
+        error: t("api.error-with", { error: "invalid notificationId" }),
         step: "notificationId",
       },
       { status: 500 },
@@ -36,7 +39,7 @@ export async function GET(request: Request) {
 
   if (!session) {
     return NextResponse.json<ResponseData>(
-      { error: "common:api.error" },
+      { error: t("api.error-with", { error: "unauthorized" }) },
       { status: 401 },
     );
   }
@@ -48,7 +51,7 @@ export async function GET(request: Request) {
     if (!notification) {
       return NextResponse.json<ResponseData>(
         {
-          error: "common:api.error-cancel-subscription",
+          error: t("api.error-with", { error: "notification not found" }),
           step: "notification",
         },
         { status: 500 },
@@ -62,7 +65,7 @@ export async function GET(request: Request) {
     if (!isCUID(sData.subscriptionId)) {
       return NextResponse.json<ResponseData>(
         {
-          error: "common:api.error-cancel-subscription",
+          error: t("api.error-with", { error: "invalid subscriptionId" }),
           step: "subscriptionId",
         },
         { status: 500 },
@@ -71,10 +74,10 @@ export async function GET(request: Request) {
 
     // create answer notification
     const answer = await createNotificationInConvex({
-      userId: notification.userId,
-      userFromId: notification.userFromId,
+      userId: notification.userFromId,
+      userFromId: notification.userId,
       type: "SUBSCRIPTION_REJECTED",
-      message: "",
+      message: t("api.subscription-rejected"),
       linkedNotification: notification._id.toString(),
       data: JSON.stringify(sData),
     });
@@ -82,11 +85,11 @@ export async function GET(request: Request) {
     await updateNotificationInConvex(
       notification._id,
       Date.now(),
-      "common:api.reject",
+      t("api.reject"),
       answer?.toString(),
     );
     return NextResponse.json<ResponseData>(
-      { success: "common:api.subscription-rejected" },
+      { success: t("api.subscription-rejected") },
       { status: 200 },
     );
   } catch (e) {
@@ -100,7 +103,7 @@ export async function GET(request: Request) {
       );
     }
     return NextResponse.json<ResponseData>(
-      { error: "common:api.error" },
+      { error: t("api.error-with", { error: "Unknown error" }) },
       { status: 500 },
     );
   }
