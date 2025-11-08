@@ -21,7 +21,6 @@ export default async function Account({
       withPricing: true,
     },
   });
-  console.log(userData);
   const t = await getTranslations("auth");
 
   return (

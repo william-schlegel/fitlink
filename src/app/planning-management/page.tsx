@@ -1,7 +1,8 @@
 import { redirect, RedirectType } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
+import { getTranslations } from "next-intl/server";
+
+import SelectCoachManager from "../manager-coach/selectCoachManager";
 import { getActualUser } from "@/lib/auth/server";
 
 export default async function PlanningManagement() {
@@ -9,9 +10,12 @@ export default async function PlanningManagement() {
   const t = await getTranslations("planning");
   if (user?.internalRole === "MANAGER_COACH" || user?.internalRole === "ADMIN")
     return (
-      <div>
-        <Link href={"/planning-management/coach"}>{t("coach")}</Link>
-        <Link href={"/planning-management/club"}>{t("club")}</Link>
+      <div className="container mx-auto my-2 space-y-2 p-2">
+        <h1>{t("planning-management")} </h1>
+        <SelectCoachManager
+          hrefCoach={"/planning-management/coach"}
+          hrefManager={"/planning-management/club"}
+        />
       </div>
     );
   if (user?.internalRole === "MANAGER")

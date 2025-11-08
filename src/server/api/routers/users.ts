@@ -362,7 +362,6 @@ export const userRouter = createTRPCRouter({
         pricingId: z.cuid2().optional(),
         monthlyPayment: z.boolean().optional(),
         cancelationDate: z.date().optional(),
-        // profileImageId: z.string().optional(),
         profileImageUrl: z.string().optional(),
         // coach data
         longitude: z.number().optional(),
@@ -387,9 +386,19 @@ export const userRouter = createTRPCRouter({
           input.internalRole === "COACH" ||
           input.internalRole === "MANAGER_COACH"
         ) {
-          const initialCoach = (await tx.query.userCoach.findFirst({
+          let initialCoach = await tx.query.userCoach.findFirst({
             where: eq(userCoach.userId, input.id),
-          })) ?? { convexRoomId: undefined };
+          });
+          if (!initialCoach) {
+            initialCoach = (
+              await tx
+                .insert(userCoach)
+                .values({
+                  userId: input.id,
+                })
+                .returning()
+            )[0];
+          }
           const coachRecord = await tx
             .update(userCoach)
             .set({
@@ -404,6 +413,7 @@ export const userRouter = createTRPCRouter({
               description: input.description,
               coachingActivities: input.coachingActivities,
             })
+            .where(eq(userCoach.id, initialCoach.id))
             .returning();
 
           // Create Convex room for coach

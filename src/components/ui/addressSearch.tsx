@@ -76,28 +76,25 @@ const AddressSearch = ({
 
   return (
     <>
-      {label ? (
-        <label className={`label ${required ? "required" : ""}`}>{label}</label>
-      ) : null}
       <div className={`dropdown dropdown-bottom ${className ?? ""}`}>
-        <div className="input-group">
+        <label className={`input ${required ? "required" : ""}`}>
+          {label ?? ""}
           {iconSearch ? (
             <span>
               <i
-                className="bx bx-map-pin bx-md cursor-pointer text-primary hover:text-secondary"
+                className="bx bx-map-pin bx-sm cursor-pointer text-primary hover:text-secondary"
                 onClick={handleClickIcon}
               />
             </span>
           ) : null}
           <input
-            className="input input-bordered w-full"
             value={address}
             onChange={(e) => handleSelect(e.currentTarget.value)}
             list="addresses"
             placeholder={t("location") ?? ""}
             required={required}
           />
-        </div>
+        </label>
         {error ? <p className="label-text-alt text-error">{error}</p> : null}
         {addresses.length > 0 ? (
           <ul className="menu dropdown-content w-full rounded-box bg-base-100 p-2 shadow">

@@ -714,7 +714,12 @@
         "slot": "Créneau de réservation"
       }
     },
-    "view-club": "Voir la page du club"
+    "view-club": "Voir la page du club",
+    "manager-coach": {
+      "dashboard": "Dashboard du manager/coach",
+      "continue-as-coach": "Continuer en tant que coach",
+      "continue-as-manager": "Continuer en tant que manager"
+    }
   },
   "home": {
     "title": "Rejoignez la communauté des clubs de sport",
@@ -977,7 +982,8 @@
     "page-preview": "Prévisualiser la page dans une nouvelle fenêtre",
     "save-style": "Enregistrer le style",
     "publish-page": "Publication de la page",
-    "undefined": "Non défini"
+    "undefined": "Non défini",
+    "page-creation": "Créer une page de présentation"
   },
   "planning": {
     "planning-management": "Gestion des plannings",

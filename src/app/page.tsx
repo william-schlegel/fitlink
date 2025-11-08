@@ -13,7 +13,7 @@ export default async function HomePage() {
     if (internalRole === "MANAGER")
       redirect(`/manager/${userId}`, RedirectType.replace);
     if (internalRole === "MANAGER_COACH")
-      redirect(`/manager-coach/${userId}`, RedirectType.replace);
+      redirect(`/manager-coach?userId=${userId}`, RedirectType.replace);
     if (internalRole === "ADMIN")
       redirect(`/admin/${userId}`, RedirectType.replace);
   }

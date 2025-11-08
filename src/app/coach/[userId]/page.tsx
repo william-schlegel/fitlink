@@ -25,7 +25,12 @@ export default async function CoachDashboard({
   const searchParamsValue = await searchParams;
   const day = searchParamsValue?.day ?? getToday();
   const user = await getActualUser();
-  if (!user || (user.internalRole !== "COACH" && user.internalRole !== "ADMIN"))
+  if (
+    !user ||
+    (user.internalRole !== "COACH" &&
+      user.internalRole !== "MANAGER_COACH" &&
+      user.internalRole !== "ADMIN")
+  )
     redirect("/", RedirectType.replace);
 
   const coachQuery = await getCoachDataForUserId(userId);

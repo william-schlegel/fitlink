@@ -55,7 +55,6 @@ export default function DailyPlanning({ memberId, day }: DailyPlanningProps) {
   if (planning.isLoading) return <Spinner />;
   if (!planning.data || planning.data.length === 0)
     return <div>{t("no-planning")}</div>;
-  console.log("planning.data", planning.data);
   return (
     <div className="flex flex-col gap-2">
       {planning.data.map((plan) => (

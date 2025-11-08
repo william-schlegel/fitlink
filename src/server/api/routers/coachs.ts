@@ -687,7 +687,7 @@ export const coachRouter = createTRPCRouter({
   deleteModule: protectedProcedure
     .input(z.cuid2())
     .mutation(async ({ input }) => {
-      db.transaction(async (tx) => {
+      return db.transaction(async (tx) => {
         await tx
           .delete(certificationModuleActivityGroups)
           .where(
@@ -730,7 +730,7 @@ export const coachRouter = createTRPCRouter({
         activityName: z.string().optional(),
         range: z.number().max(100).default(25),
         priceMin: z.number().min(0).default(0),
-        priceMax: z.number().max(1000).default(1000),
+        priceMax: z.number().max(5000).default(1000),
       }),
     )
     .query(async ({ input }) => {
@@ -757,8 +757,8 @@ export const coachRouter = createTRPCRouter({
         .where(
           and(
             eq(coachingPrice.target, "COMPANY"),
-            eq(coachingPrice.perHourPhysical, input.priceMin),
-            eq(coachingPrice.perHourPhysical, input.priceMax),
+            gte(coachingPrice.perHourPhysical, input.priceMin),
+            lte(coachingPrice.perHourPhysical, input.priceMax),
           ),
         )
         .leftJoin(uc, eq(coachingPrice.coachId, uc.userId));

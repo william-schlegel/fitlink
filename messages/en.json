@@ -706,7 +706,12 @@
         "slot": "Booking slot"
       }
     },
-    "view-club": "See the club page"
+    "view-club": "See the club page",
+    "manager-coach": {
+      "dashboard": "Manager/coach dashboard",
+      "continue-as-coach": "Continue as a coach",
+      "continue-as-manager": "Continue as manager"
+    }
   },
   "home": {
     "title": "Join the community of sports clubs",
@@ -968,7 +973,8 @@
     "page-preview": "Preview the page in a new window",
     "save-style": "Save style",
     "publish-page": "Publish page",
-    "undefined": "Undefined"
+    "undefined": "Undefined",
+    "page-creation": "Create a presentation page"
   },
   "planning": {
     "planning-management": "Planning management",

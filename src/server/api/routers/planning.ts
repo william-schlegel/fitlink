@@ -301,7 +301,6 @@ export const planningRouter = createTRPCRouter({
           },
         },
       });
-      console.log("userData", userData);
       const clubIds = Array.from(
         new Set(
           userData?.memberData?.subscriptions.map(
@@ -309,7 +308,6 @@ export const planningRouter = createTRPCRouter({
           ),
         ),
       );
-      console.log("clubIds", clubIds);
       const planningClubs = await db.query.planning.findMany({
         where: and(
           lte(planning.startDate, new Date(Date.now())),
@@ -317,7 +315,6 @@ export const planningRouter = createTRPCRouter({
         ),
         with: { club: true },
       });
-      console.log("planningClubs", planningClubs);
       // Infer types from actual query results
       type PlanningWithClub = (typeof planningClubs)[number];
 

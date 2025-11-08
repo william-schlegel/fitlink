@@ -25,7 +25,7 @@ export function Feature({ title, description, children }: FeatureProps) {
         <figure className="px-10 pt-10">{children}</figure>
         <div className="card-body items-center text-center">
           <h2 className="card-title text-3xl font-bold">{title}</h2>
-          {description.split("\n").map((desc, id) => (
+          {description.split("|").map((desc, id) => (
             <p key={`p-${id}`}>{desc}</p>
           ))}
         </div>

@@ -1,17 +1,20 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
+import SelectCoachManager from "../manager-coach/selectCoachManager";
 import { getActualUser } from "@/lib/auth/server";
 
 export default async function PageCreation() {
   const user = await getActualUser();
-  const t = await getTranslations("planning");
+  const t = await getTranslations("pages");
   if (user?.internalRole === "MANAGER_COACH" || user?.internalRole === "ADMIN")
     return (
-      <div>
-        <Link href={"/create-page/coach"}>{t("coach")}</Link>
-        <Link href={"/create-page/club"}>{t("club")}</Link>
+      <div className="container mx-auto my-2 space-y-2 p-2">
+        <h1>{t("page-creation")} </h1>
+        <SelectCoachManager
+          hrefCoach={"/create-page/coach"}
+          hrefManager={"/create-page/club"}
+        />
       </div>
     );
   if (user?.internalRole === "MANAGER")

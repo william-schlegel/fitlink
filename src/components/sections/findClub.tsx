@@ -141,17 +141,20 @@ function FindClub({ address = "" }: FindClubProps) {
             className="w-full"
           />
         </div>
-        <div className="grid w-full max-w-sm grid-flow-col gap-4 text-start">
-          <label>{t("search-radius")}</label>
-          <div className="input-group">
+        <div className="w-full max-w-sm text-start">
+          <label htmlFor="range" className="input">
+            {t("search-radius")}
             <input
+              id="range"
               type="number"
-              className="input-bordered input w-full text-end"
               value={range}
               onChange={(e) => setRange(e.target.valueAsNumber)}
+              className="text-end"
+              min={0}
+              max={50}
             />
-            <span>Km</span>
-          </div>
+            <span>km</span>
+          </label>
         </div>
         <button
           className="btn btn-primary flex items-center gap-4"
