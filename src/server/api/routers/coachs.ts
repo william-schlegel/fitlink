@@ -73,72 +73,111 @@ const OfferData = z.object({
 });
 
 export const coachRouter = createTRPCRouter({
-  getCoachById: protectedProcedure.input(z.cuid2()).query(async ({ input }) => {
-    const coach = await db.query.user.findFirst({
-      where: eq(user.id, input),
-      with: {
-        coachData: {
-          with: {
-            activityGroups: {
-              with: {
-                activities: true,
-              },
-            },
-            certifications: {
-              with: {
-                activityGroups: true,
-                selectedModuleForCoach: {
-                  with: {
-                    module: true,
-                  },
+  getCoachById: protectedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const coach = await db.query.user.findFirst({
+        where: eq(user.id, input),
+        with: {
+          coachData: {
+            with: {
+              activityGroups: {
+                with: {
+                  activities: true,
                 },
               },
+              certifications: true,
+              clubs: true,
+              page: { columns: { id: true } },
             },
-            clubs: true,
-            page: { columns: { id: true } },
           },
         },
-      },
-    });
-    if (!coach) return null;
+      });
+      console.log("coach", coach);
+      if (!coach) return null;
 
-    // Find the first page for the coach with target "HOME"
-    const pages = await db.query.page.findMany({
-      where: and(eq(page.coachId, coach?.id ?? ""), eq(page.target, "HOME")),
-      with: {
-        sections: {
+      // Fetch certifications with modules separately to avoid deep nesting issues
+      const certifications = coach.coachData?.certifications ?? [];
+      const certificationIds = certifications.map((c) => c.id);
+      const coachId = coach.coachData?.id;
+
+      let selectedModules: Array<{
+        certificationId: string;
+        module: {
+          id: string;
+          name: string;
+        };
+      }> = [];
+
+      if (certificationIds.length > 0 && coachId) {
+        const modules = await db.query.selectedModuleForCoach.findMany({
+          where: and(
+            eq(selectedModuleForCoach.coachId, coachId),
+            inArray(selectedModuleForCoach.certificationId, certificationIds),
+          ),
           with: {
-            elements: {
-              where: eq(pageSectionElement.elementType, "HERO_CONTENT"),
+            module: {
+              columns: {
+                id: true,
+                name: true,
+              },
             },
           },
-          where: eq(pageSection.model, "HERO"),
+        });
+
+        selectedModules = modules.map((sm) => ({
+          certificationId: sm.certificationId,
+          module: {
+            id: sm.module.id,
+            name: sm.module.name,
+          },
+        }));
+      }
+
+      // Group modules by certificationId
+      const modulesByCertification = new Map<
+        string,
+        Array<{ id: string; name: string }>
+      >();
+      for (const sm of selectedModules) {
+        if (!modulesByCertification.has(sm.certificationId)) {
+          modulesByCertification.set(sm.certificationId, []);
+        }
+        modulesByCertification.get(sm.certificationId)!.push(sm.module);
+      }
+
+      // Find the first page for the coach with target "HOME"
+      const pages = await db.query.page.findMany({
+        where: and(eq(page.coachId, coach?.id ?? ""), eq(page.target, "HOME")),
+        with: {
+          sections: {
+            with: {
+              elements: {
+                where: eq(pageSectionElement.elementType, "HERO_CONTENT"),
+              },
+            },
+            where: eq(pageSection.model, "HERO"),
+          },
         },
-      },
-      limit: 1,
-    });
+        limit: 1,
+      });
 
-    const imageData = pages[0];
-    const imgData = imageData?.sections?.[0]?.elements?.[0]?.imageUrls?.[0];
-    const imageUrl = imgData ?? coach.image ?? "/images/dummy.jpg";
+      const imageData = pages[0];
+      const imgData = imageData?.sections?.[0]?.elements?.[0]?.imageUrls?.[0];
+      const imageUrl = imgData ?? coach.image ?? "/images/dummy.jpg";
 
-    const certificationModules = coach.coachData?.certifications?.map(
-      (cert) => ({
+      const certificationModules = certifications.map((cert) => ({
         id: cert.id,
         name: cert.name,
-        modules: cert.selectedModuleForCoach.flatMap((mod) => ({
-          id: mod.module.id,
-          name: mod.module.name,
-        })),
-      }),
-    );
+        modules: modulesByCertification.get(cert.id) ?? [],
+      }));
 
-    return {
-      ...coach,
-      certificationModules,
-      imageUrl: imageUrl ?? "/images/dummy.jpg",
-    };
-  }),
+      return {
+        ...coach,
+        certificationModules,
+        imageUrl: imageUrl ?? "/images/dummy.jpg",
+      };
+    }),
   getCoachsFromDistance: publicProcedure
     .input(
       z.object({

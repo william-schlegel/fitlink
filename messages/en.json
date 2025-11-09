@@ -1058,6 +1058,15 @@
     "deleted-message": "Delete message",
     "deleted-message-message": "Do you want to delete this message?",
     "direct-messages": "Direct messages",
-    "group-rooms": "Message groups"
+    "group-rooms": "Message groups",
+    "user-not-member-of-room": "The user is not a member of this room",
+    "user-banned-from-room": "User is banned from this room",
+    "user-globally-banned": "User is globally banned",
+    "room-not-found": "Room not found",
+    "new-direct-message": "New direct message",
+    "new-message-in-room": "New message in room {roomName}",
+    "message-not-found": "Message not found",
+    "only-message-author-can-edit": "Only the message author can edit it",
+    "only-message-author-or-admin-can-delete": "Only the author of the message can delete it"
   }
 }

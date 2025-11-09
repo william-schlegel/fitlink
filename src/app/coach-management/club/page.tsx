@@ -60,9 +60,11 @@ export default async function CoachManagementForClub({
   let queryCoach:
     | inferProcedureOutput<AppRouter["coachs"]["getCoachById"]>
     | undefined = undefined;
-  if (isCUID(coachId)) {
+  if (Boolean(coachId)) {
     queryCoach = await caller.coachs.getCoachById(coachId);
   }
+
+  console.log("queryCoach", queryCoach);
 
   const coachList = queryCoachs.map((coach) => ({
     id: coach.id,
@@ -88,28 +90,30 @@ export default async function CoachManagementForClub({
           noItemsText={t("coach.no-coachs")}
         />
         {queryCoach ? (
-          <CoachDataPresentation
-            url={queryCoach.imageUrl}
-            activityGroups={
-              queryCoach.coachData?.activityGroups?.map((ag) => ({
-                id: ag.id,
-                name: ag.name,
-              })) ?? []
-            }
-            certifications={
-              queryCoach?.certificationModules?.map((cert) => ({
-                id: cert.id,
-                name: cert.name,
-                modules: cert.modules.map((mod) => ({
-                  id: mod.id,
-                  name: mod.name,
-                })),
-              })) ?? []
-            }
-            rating={queryCoach.coachData?.rating ?? 0}
-            id={queryCoach.id ?? ""}
-            pageId={queryCoach.coachData?.page?.id}
-          />
+          <article className="flex gap-4">
+            <CoachDataPresentation
+              url={queryCoach.imageUrl}
+              activityGroups={
+                queryCoach.coachData?.activityGroups?.map((ag) => ({
+                  id: ag.id,
+                  name: ag.name,
+                })) ?? []
+              }
+              certifications={
+                queryCoach?.certificationModules?.map((cert) => ({
+                  id: cert.id,
+                  name: cert.name,
+                  modules: cert.modules.map((mod) => ({
+                    id: mod.id,
+                    name: mod.name,
+                  })),
+                })) ?? []
+              }
+              rating={queryCoach.coachData?.rating ?? 0}
+              id={queryCoach.id ?? ""}
+              pageId={queryCoach.coachData?.page?.id}
+            />
+          </article>
         ) : null}
       </LayoutPage.Main>
     </LayoutPage>

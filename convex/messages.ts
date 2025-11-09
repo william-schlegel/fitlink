@@ -1,5 +1,7 @@
 import { v } from "convex/values";
 
+import { getTranslations } from "next-intl/server";
+
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
@@ -196,15 +198,16 @@ export const sendMessage = mutation({
         q.eq("roomId", args.roomId).eq("userId", args.userId),
       )
       .first();
+    const t = await getTranslations("message");
 
     if (!membership) {
-      throw new Error("User is not a member of this room");
+      throw new Error(t("user-not-member-of-room"));
     }
 
     if (membership.isBanned) {
       const now = Date.now();
       if (membership.bannedUntil && membership.bannedUntil > now) {
-        throw new Error("User is banned from this room");
+        throw new Error(t("user-banned-from-room"));
       }
       // Ban expired, unban
       await ctx.db.patch(membership._id, {
@@ -220,7 +223,7 @@ export const sendMessage = mutation({
       .first();
 
     if (globalBan) {
-      throw new Error("User is globally banned");
+      throw new Error(t("user-globally-banned"));
     }
 
     const messageId = await ctx.db.insert("messages", {
@@ -235,7 +238,7 @@ export const sendMessage = mutation({
     // Get room to check if it's a direct message
     const room = await ctx.db.get(args.roomId);
     if (!room) {
-      throw new Error("Room not found");
+      throw new Error(t("room-not-found"));
     }
 
     // Get all room members except the sender
@@ -278,8 +281,8 @@ export const sendMessage = mutation({
     if (recipientsToNotify.length > 0) {
       const notificationMessage =
         room.type === "DIRECT"
-          ? "New direct message"
-          : `New message in ${room.name}`;
+          ? t("new-direct-message")
+          : t("new-message-in-room", { roomName: room.name });
 
       const now = Date.now();
       await Promise.all(
@@ -312,12 +315,14 @@ export const editMessage = mutation({
   },
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.messageId);
+    const t = await getTranslations("message");
+
     if (!message) {
-      throw new Error("Message not found");
+      throw new Error(t("message-not-found"));
     }
 
     if (message.userId !== args.userId) {
-      throw new Error("Only the message author can edit it");
+      throw new Error(t("only-message-author-can-edit"));
     }
 
     await ctx.db.patch(args.messageId, {
@@ -335,13 +340,15 @@ export const deleteMessage = mutation({
   },
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.messageId);
+    const t = await getTranslations("message");
+
     if (!message) {
-      throw new Error("Message not found");
+      throw new Error(t("message-not-found"));
     }
 
     // Check if user is the author or an admin
     if (message.userId !== args.userId && !args.isAdmin) {
-      throw new Error("Only the message author or an admin can delete it");
+      throw new Error(t("only-message-author-or-admin-can-delete"));
     }
 
     // Delete reactions first

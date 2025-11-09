@@ -1068,6 +1068,15 @@
     "no-users-found": "Aucun utilisateur trouvé",
     "close": "Fermer",
     "direct-messages": "Messages directs",
-    "group-rooms": "Groupes de messages"
+    "group-rooms": "Groupes de messages",
+    "user-not-member-of-room": "L'utilisateur n'est pas un membre de ce canal",
+    "user-banned-from-room": "L'utilisateur est banni de ce canal",
+    "user-globally-banned": "L'utilisateur est banni globalement",
+    "room-not-found": "Canal non trouvé",
+    "new-direct-message": "Nouveau message direct",
+    "new-message-in-room": "Nouveau message dans le canal {roomName}",
+    "message-not-found": "Message introuvable",
+    "only-message-author-can-edit": "Seul l'auteur peut modifier ce message",
+    "only-message-author-or-admin-can-delete": "Seul l'auteur du message peut le supprimer"
   }
 }
