@@ -496,6 +496,7 @@ export const userRouter = createTRPCRouter({
           userFromId: input.userId,
           type: "NEW_SUBSCRIPTION",
           message: "",
+          createdAt: Date.now(),
           data: {
             subscriptionId: input.subscriptionId,
             monthly: input.monthly,

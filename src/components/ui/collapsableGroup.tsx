@@ -17,7 +17,7 @@ function CollapsableGroup({
 }: Props) {
   return (
     <div
-      className={`collapse collapse-arrow border border-base-300 bg-base-100 rounded-box ${className}`}
+      className={`collapse collapse-arrow border border-base-300 bg-base-100 ${className}`}
     >
       <input type={inputType ?? "checkbox"} name={inputName} />
       <div className="collapse-title text-primary">{groupName}</div>

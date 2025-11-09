@@ -4,8 +4,11 @@ import { startTransition, useEffect, useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
 
+import {
+  NotificationForMessage,
+  NotificationMessage,
+} from "./notificationMessage";
 import { Id } from "../../../../../convex/_generated/dataModel";
-import { NotificationMessage } from "./notificationMessage";
 import { api } from "../../../../../convex/_generated/api";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { trpc } from "@/lib/trpc/client";
@@ -74,20 +77,8 @@ export function NotificationContent({
   if (!notification) return null;
 
   // Convert Convex notification to the format expected by NotificationMessage
-  const notificationForMessage = {
-    id: notification._id,
-    type: notification.type as any,
-    message: notification.message,
-    viewDate: notification.viewedAt ? new Date(notification.viewedAt) : null,
-    date: new Date(notification.createdAt),
-    data: notification.data,
-    answered: notification.answeredAt
-      ? new Date(notification.answeredAt)
-      : null,
-    answer: notification.answer ?? null,
-    linkedNotification: notification.linkedNotification ?? null,
-    userFromId: notification.userFromId,
-    userToId: notification.userId,
+  const notificationForMessage: NotificationForMessage = {
+    ...notification,
     userFrom,
     userTo,
   };
@@ -142,7 +133,7 @@ export function NotificationContent({
       </div>
       <div className="space-y-4 rounded border border-primary p-4">
         <NotificationMessage
-          notification={notificationForMessage as any}
+          notification={notificationForMessage}
           fromTo={fromTo}
         />
       </div>

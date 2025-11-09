@@ -77,24 +77,26 @@ const AddressSearch = ({
   return (
     <>
       <div className={`dropdown dropdown-bottom ${className ?? ""}`}>
-        <label className={`input ${required ? "required" : ""}`}>
-          {label ?? ""}
-          {iconSearch ? (
-            <span>
-              <i
-                className="bx bx-map-pin bx-sm cursor-pointer text-primary hover:text-secondary"
-                onClick={handleClickIcon}
-              />
-            </span>
-          ) : null}
-          <input
-            value={address}
-            onChange={(e) => handleSelect(e.currentTarget.value)}
-            list="addresses"
-            placeholder={t("location") ?? ""}
-            required={required}
-          />
-        </label>
+        <fieldset className={`fieldset ${required ? "required" : ""}`}>
+          {label && <legend className="fieldset-legend">{label}</legend>}
+          <div className="input">
+            {iconSearch ? (
+              <span>
+                <i
+                  className="bx bx-map-pin bx-sm cursor-pointer text-primary hover:text-secondary"
+                  onClick={handleClickIcon}
+                />
+              </span>
+            ) : null}
+            <input
+              value={address}
+              onChange={(e) => handleSelect(e.currentTarget.value)}
+              list="addresses"
+              placeholder={t("location") ?? ""}
+              required={required}
+            />
+          </div>
+        </fieldset>
         {error ? <p className="label-text-alt text-error">{error}</p> : null}
         {addresses.length > 0 ? (
           <ul className="menu dropdown-content w-full rounded-box bg-base-100 p-2 shadow">

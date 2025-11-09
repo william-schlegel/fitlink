@@ -200,7 +200,9 @@
       "payment-online": "Payé en ligne ({firstPayment} puis {nextPayment})",
       "payment-club": "A payer au club ({firstPayment} puis {nextPayment})",
       "validate": "Valider",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "send-message": "Envoyer un message",
+      "message-placeholder": "Message de réponse"
     },
     "signin": {
       "name": "Nom",

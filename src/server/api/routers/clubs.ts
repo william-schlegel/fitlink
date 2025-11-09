@@ -312,6 +312,7 @@ export const clubRouter = createTRPCRouter({
       const initialClub = await db.query.club.findFirst({
         where: eq(club.id, input.clubId),
       });
+
       const managerId = input.managerId ?? initialClub?.managerId;
       if (
         ctx.user.internalRole !== "ADMIN" &&
@@ -324,17 +325,18 @@ export const clubRouter = createTRPCRouter({
       const existing = await db.query.clubCoachs.findFirst({
         where: and(
           eq(clubCoachs.clubId, input.clubId),
-          eq(userCoach.userId, input.coachUserId),
+          eq(clubCoachs.coachUserId, input.coachUserId),
         ),
       });
       if (existing) return existing;
 
-      return db
+      const newCoach = await db
         .insert(clubCoachs)
         .values({
           coachUserId: input.coachUserId,
           clubId: input.clubId,
         })
         .returning();
+      return newCoach;
     }),
 });

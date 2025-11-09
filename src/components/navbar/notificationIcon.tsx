@@ -83,14 +83,15 @@ export default function NotificationIcon({ userId }: NotificationIconProps) {
               : `/user/${notification.userId}/notification?notificationId=${notification._id}`;
 
           return (
-            <li
-              key={notification._id}
-              className={`max-w-full overflow-hidden truncate text-ellipsis ${
-                notification.viewedAt ? "" : "font-bold text-secondary"
-              }`}
-            >
+            <li key={notification._id}>
               <Link href={href}>
-                <span>{formatMessage(t, notification)}</span>
+                <span
+                  className={`line-clamp-2 ${
+                    notification.viewedAt ? "" : "font-bold text-secondary"
+                  }`}
+                >
+                  {formatMessage(t, notification)}
+                </span>
               </Link>
             </li>
           );

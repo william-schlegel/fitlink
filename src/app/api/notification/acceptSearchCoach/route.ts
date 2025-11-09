@@ -94,6 +94,7 @@ export async function GET(request: Request) {
         message: notification.message,
         data: notification._id.toString(),
         linkedNotification: notification._id.toString(),
+        createdAt: Date.now(),
       });
 
       await updateNotificationInConvex(

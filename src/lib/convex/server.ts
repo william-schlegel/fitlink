@@ -1,6 +1,5 @@
 import { ConvexHttpClient } from "convex/browser";
 
-import { NotificationType } from "@/app/user/[userId]/notification/types";
 import { Id } from "../../../convex/_generated/dataModel";
 import { CreateNotificationInConvexArgs } from "./types";
 import { api } from "../../../convex/_generated/api";

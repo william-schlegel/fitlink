@@ -1,5 +1,7 @@
-import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+
+import { mutation, query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 
 // Queries
 export const getMessages = query({
@@ -619,5 +621,158 @@ export const getOrCreateDirectRoom = query({
 
     // Room doesn't exist, return null (frontend will create it via action)
     return null;
+  },
+});
+
+export const sendDirectMessage = mutation({
+  args: {
+    fromUserId: v.string(),
+    toUserId: v.string(),
+    content: v.optional(v.string()),
+    imageUrls: v.optional(v.array(v.string())),
+    replyToMessageId: v.optional(v.id("messages")),
+  },
+  handler: async (ctx, args) => {
+    // Validate that both users are different
+    if (args.fromUserId === args.toUserId) {
+      throw new Error("Cannot send direct message to yourself");
+    }
+
+    // Check global ban for sender
+    const globalBan = await ctx.db
+      .query("bannedUsers")
+      .withIndex("by_userId", (q) => q.eq("userId", args.fromUserId))
+      .first();
+
+    if (globalBan) {
+      throw new Error("User is globally banned");
+    }
+
+    // Find or create direct room
+    const rooms = await ctx.db
+      .query("chatRooms")
+      .withIndex("by_type", (q) => q.eq("type", "DIRECT"))
+      .collect();
+
+    let room = rooms.find(
+      (r) =>
+        r.userIds?.includes(args.fromUserId) &&
+        r.userIds?.includes(args.toUserId),
+    );
+
+    let roomId: Id<"chatRooms">;
+
+    if (!room) {
+      // Create new direct message room
+      roomId = await ctx.db.insert("chatRooms", {
+        type: "DIRECT",
+        userIds: [args.fromUserId, args.toUserId],
+        name: "", // Direct messages don't need a name
+        createdAt: Date.now(),
+      });
+
+      // Add both users as members
+      await ctx.db.insert("roomMembers", {
+        roomId,
+        userId: args.fromUserId,
+        isAdmin: false,
+        isBanned: false,
+        joinedAt: Date.now(),
+      });
+
+      await ctx.db.insert("roomMembers", {
+        roomId,
+        userId: args.toUserId,
+        isAdmin: false,
+        isBanned: false,
+        joinedAt: Date.now(),
+      });
+    } else {
+      roomId = room._id;
+
+      // Ensure both users are members
+      const fromMembership = await ctx.db
+        .query("roomMembers")
+        .withIndex("by_roomId_userId", (q) =>
+          q.eq("roomId", roomId).eq("userId", args.fromUserId),
+        )
+        .first();
+
+      if (!fromMembership) {
+        await ctx.db.insert("roomMembers", {
+          roomId,
+          userId: args.fromUserId,
+          isAdmin: false,
+          isBanned: false,
+          joinedAt: Date.now(),
+        });
+      }
+
+      const toMembership = await ctx.db
+        .query("roomMembers")
+        .withIndex("by_roomId_userId", (q) =>
+          q.eq("roomId", roomId).eq("userId", args.toUserId),
+        )
+        .first();
+
+      if (!toMembership) {
+        await ctx.db.insert("roomMembers", {
+          roomId,
+          userId: args.toUserId,
+          isAdmin: false,
+          isBanned: false,
+          joinedAt: Date.now(),
+        });
+      }
+
+      // Check if sender is banned from this room
+      if (fromMembership?.isBanned) {
+        const now = Date.now();
+        if (fromMembership.bannedUntil && fromMembership.bannedUntil > now) {
+          throw new Error("User is banned from this conversation");
+        }
+        // Ban expired, unban
+        await ctx.db.patch(fromMembership._id, {
+          isBanned: false,
+          bannedUntil: undefined,
+        });
+      }
+    }
+
+    // Insert the message
+    const messageId = await ctx.db.insert("messages", {
+      roomId,
+      userId: args.fromUserId,
+      content: args.content,
+      imageUrls: args.imageUrls ?? [],
+      replyToMessageId: args.replyToMessageId,
+      createdAt: Date.now(),
+    });
+
+    // Check if recipient is banned (they shouldn't receive notifications)
+    const toMembership = await ctx.db
+      .query("roomMembers")
+      .withIndex("by_roomId_userId", (q) =>
+        q.eq("roomId", roomId).eq("userId", args.toUserId),
+      )
+      .first();
+
+    // Create notification for recipient if they're not banned
+    if (!toMembership || !toMembership.isBanned) {
+      await ctx.db.insert("notifications", {
+        userId: args.toUserId,
+        userFromId: args.fromUserId,
+        type: "NEW_MESSAGE",
+        message: "New direct message",
+        data: {
+          roomId: roomId as string,
+          messageId: messageId as string,
+          roomType: "DIRECT",
+        },
+        createdAt: Date.now(),
+      });
+    }
+
+    return messageId;
   },
 });

@@ -15,7 +15,7 @@ export default async function SelectCoachManager({
       <Link href={hrefCoach} className="card bg-base-100 w-96 shadow-sm">
         <figure>
           <Image
-            src="/images/coach.jpeg"
+            src="/images/coach-f.jpeg"
             alt="coach"
             width={400}
             height={300}
@@ -28,7 +28,7 @@ export default async function SelectCoachManager({
       <Link href={hrefManager} className="card bg-base-100 w-96 shadow-sm">
         <figure>
           <Image
-            src="/images/manager.jpeg"
+            src="/images/manager-f.jpeg"
             alt="coach"
             width={400}
             height={300}

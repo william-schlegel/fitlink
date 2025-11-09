@@ -199,7 +199,9 @@
       "payment-online": "Paid online ({firstPayment} then {nextPayment})",
       "payment-club": "To be paid at the club ({firstPayment} then {nextPayment})",
       "validate": "Validate",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "send-message": "Send a message",
+      "message-placeholder": "Response message"
     },
     "signin": {
       "name": "Name",

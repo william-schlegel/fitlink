@@ -1,21 +1,35 @@
 "use client";
 
+import React, { Fragment, useState } from "react";
 import { useTranslations } from "next-intl";
-import React, { Fragment } from "react";
 import { isDate } from "date-fns";
+
+import { useMutation } from "convex/react";
 
 import { FromTo, NOTIFICATION_TYPES, NotificationType } from "./types";
 import { CreateNotificationInConvexArgs } from "@/lib/convex/types";
+import { api } from "../../../../../convex/_generated/api";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { formatMoney } from "@/lib/formatNumber";
 import Spinner from "@/components/ui/spinner";
+import Modal from "@/components/ui/modal";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import { toast } from "@/lib/toast";
 
+type UserDetails = {
+  name: string;
+  imageUrl: string;
+} | null;
+
+export type NotificationForMessage = CreateNotificationInConvexArgs & {
+  userFrom: UserDetails;
+  userTo: UserDetails;
+};
+
 type NotificationMessageProps = {
   fromTo: FromTo;
-  notification: CreateNotificationInConvexArgs;
+  notification: NotificationForMessage;
 };
 
 export function NotificationMessage({
@@ -24,6 +38,10 @@ export function NotificationMessage({
 }: NotificationMessageProps) {
   const t = useTranslations("auth");
   const { getName } = useNotificationType();
+  const sendMessage = useMutation(api.messages.sendDirectMessage);
+
+  const [closeModal, setCloseModal] = useState(false);
+
   if (!notification) return null;
 
   async function handleClick(link: string | null, id: string) {
@@ -37,24 +55,24 @@ export function NotificationMessage({
     } else if (json.error) {
       toast.error(t(json.error));
     } else if (json.success) {
-      toast.success(t(json.success));
+      toast.success(json.success);
     }
   }
   const Elem: React.ReactNode[] = [];
   Elem.push(
     <div className="badge-info badge">
       {t("notification.notification-type", {
-        type: getName(notification.type),
+        type: getName(notification.type as NotificationType),
       })}
     </div>,
   );
   Elem.push(<p>{notification.message}</p>);
-  if (isDate(notification.answered))
+  if (isDate(notification.answeredAt))
     Elem.push(
       <div className="flex items-center gap-2">
         <span>
           {t("notification.answered", {
-            date: formatDateLocalized(notification.answered, {
+            date: formatDateLocalized(notification.answeredAt, {
               dateFormat: "long",
               withTime: true,
             }),
@@ -79,7 +97,7 @@ export function NotificationMessage({
     Elem.push(<SubscriptionInfo data={sData} />);
   }
 
-  if (fromTo === "to" && !notification.answered) {
+  if (fromTo === "to" && !notification.answeredAt) {
     if (notification.type === "SEARCH_COACH")
       Elem.push(
         <div className="flex items-center gap-2">
@@ -89,7 +107,7 @@ export function NotificationMessage({
             onClick={() =>
               handleClick(
                 "/api/notification/acceptSearchCoach",
-                notification.id!.toString(),
+                notification._id!.toString(),
               )
             }
           >
@@ -101,12 +119,47 @@ export function NotificationMessage({
             onClick={() =>
               handleClick(
                 "/api/notification/refuseSearchCoach",
-                notification.id!.toString(),
+                notification._id!.toString(),
               )
             }
           >
             {t("notification.refuse")}
           </button>
+          <Modal
+            title={t("notification.send-message")}
+            submitButtonText={t("notification.send-message")}
+            buttonIcon={<i className="bx bx-envelope bx-sm" />}
+            variant="Outlined-Primary"
+            className="w-2/3 max-w-xl"
+            cancelButtonText=""
+            onCloseModal={() => setCloseModal(true)}
+            closeModal={closeModal}
+            onOpenModal={() => setCloseModal(false)}
+          >
+            <form
+              onSubmit={async (e) => {
+                console.log("notification", notification);
+                e.preventDefault();
+                const formData = new FormData(e.target as HTMLFormElement);
+                const content = formData.get("content") as string;
+                await sendMessage({
+                  toUserId: notification.userFromId,
+                  fromUserId: notification.userId,
+                  content,
+                });
+                setCloseModal(true);
+              }}
+            >
+              <textarea
+                name="content"
+                className="textarea textarea-bordered w-full"
+                placeholder={t("notification.message-placeholder")}
+              />
+              <button type="submit" className="btn btn-primary mt-4 ">
+                {t("notification.send-message")}
+              </button>
+            </form>
+          </Modal>
         </div>,
       );
     if (notification.type === "NEW_SUBSCRIPTION")
@@ -118,7 +171,7 @@ export function NotificationMessage({
             onClick={() =>
               handleClick(
                 "/api/notification/validateSubscription",
-                notification.id!.toString(),
+                notification._id!.toString(),
               )
             }
           >
@@ -130,7 +183,7 @@ export function NotificationMessage({
             onClick={() =>
               handleClick(
                 "/api/notification/cancelSubscription",
-                notification.id!.toString(),
+                notification._id!.toString(),
               )
             }
           >
