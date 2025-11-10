@@ -3,11 +3,12 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 
+import { useQuery } from "convex/react";
+
 import { Id } from "../../../convex/_generated/dataModel";
 import { LayoutPage } from "../../components/layoutPage";
 import { api } from "../../../convex/_generated/api";
 import { trpc } from "@/lib/trpc/client";
-import { useQuery } from "convex/react";
 import { isCUID } from "@/lib/utils";
 
 type RoomListProps = {
@@ -37,7 +38,7 @@ function DirectConversationItem({ conv }: DirectConversationItemProps) {
   });
 
   return (
-    <div className="flex items-center gap-2 flex-1 min-w-0">
+    <div className="flex items-center gap-2 flex-1 min-w-0 max-w-full">
       <div className="avatar">
         <div className="w-8 h-8 rounded-full">
           <Image
@@ -72,7 +73,7 @@ function RoomItem({ clubId, userId }: { clubId: string; userId: string }) {
   );
 
   return (
-    <div className="flex items-center gap-2 flex-1 min-w-0">
+    <div className="flex items-center gap-2 flex-1 min-w-0 max-w-full">
       <div className="avatar">
         <div className="w-8 h-8 rounded-full">
           <Image

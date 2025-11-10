@@ -1,9 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useQuery } from "convex/react";
 import Link from "next/link";
 
 import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
+import { api } from "../../../convex/_generated/api";
 import { useUser } from "@/lib/auth/client";
 
 type MenuDefinitionType = {
@@ -11,6 +13,7 @@ type MenuDefinitionType = {
   page: string;
   access: ("VISITOR" | RoleEnum)[];
   featured?: FeatureEnum;
+  badge?: "unread_messages";
 };
 
 const MENUS: MenuDefinitionType[] = [
@@ -28,6 +31,7 @@ const MENUS: MenuDefinitionType[] = [
     label: "navigation.chat",
     page: "/chat",
     access: ["ADMIN", "COACH", "MANAGER", "MANAGER_COACH", "MEMBER"],
+    badge: "unread_messages",
   },
 
   {
@@ -88,6 +92,17 @@ const MENUS: MenuDefinitionType[] = [
 ];
 const Menu = () => {
   const { data: user } = useUser({ withFeatures: true });
+  const isAdmin = user?.internalRole === "ADMIN";
+  const totalUnreadCount = useQuery(
+    api.messages.getTotalUnreadCount,
+    user?.id
+      ? {
+          userId: user.id,
+          isAdmin,
+        }
+      : "skip",
+  );
+
   return (
     <>
       {MENUS.map((menu) => {
@@ -99,9 +114,18 @@ const Menu = () => {
             (menu.featured &&
               !user?.features.map((f) => f).includes(menu.featured)) ??
             false;
+          const badgeCount =
+            menu.badge === "unread_messages" && totalUnreadCount !== undefined
+              ? totalUnreadCount
+              : undefined;
           return (
             <li key={menu.page}>
-              <MenuItem locked={locked} label={menu.label} page={menu.page} />
+              <MenuItem
+                locked={locked}
+                label={menu.label}
+                page={menu.page}
+                badgeCount={badgeCount}
+              />
             </li>
           );
         }
@@ -117,10 +141,12 @@ function MenuItem({
   locked,
   label,
   page,
+  badgeCount,
 }: {
   locked: boolean;
   label: string;
   page: string;
+  badgeCount?: number;
 }) {
   const t = useTranslations("common");
   return locked ? (
@@ -134,6 +160,9 @@ function MenuItem({
   ) : (
     <Link className="justify-between" href={page}>
       {t(label)}
+      {badgeCount !== undefined && badgeCount > 0 && (
+        <span className="badge badge-primary badge-sm">{badgeCount}</span>
+      )}
     </Link>
   );
 }

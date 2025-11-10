@@ -570,7 +570,8 @@
       "home": "At {name}",
       "in-limit": "Within the limit of {limit} km around {address}",
       "back-to-my-page": "Back to my page",
-      "created": "Offer recorded"
+      "created": "Offer recorded",
+      "contact-me": "Contact me!"
     },
     "target": {
       "individual": "Individual",

@@ -1,9 +1,13 @@
 import { v } from "convex/values";
 
-import { getTranslations } from "next-intl/server";
-
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+
+// fake translation function
+const t = (s: string, args?: Record<string, string>) => {
+  if (!args) return s;
+  return s.replace(/{(\w+)}/g, (match, key) => args[key] || match);
+};
 
 // Queries
 export const getMessages = query({
@@ -181,6 +185,70 @@ export const getUnreadCount = query({
   },
 });
 
+export const getTotalUnreadCount = query({
+  args: {
+    userId: v.string(),
+    isAdmin: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    // Get all unread counts for the user across all rooms
+    let unreadCounts: number[] = [];
+
+    if (args.isAdmin) {
+      // Admin: Get all non-direct rooms
+      const allRooms = await ctx.db
+        .query("chatRooms")
+        .filter((q) => q.neq(q.field("type"), "DIRECT"))
+        .collect();
+
+      unreadCounts = await Promise.all(
+        allRooms.map(async (room) => {
+          const membership = await ctx.db
+            .query("roomMembers")
+            .withIndex("by_roomId_userId", (q) =>
+              q.eq("roomId", room._id).eq("userId", args.userId),
+            )
+            .first();
+
+          const lastRead = membership?.lastReadAt ?? 0;
+          const unreadMessages = await ctx.db
+            .query("messages")
+            .withIndex("by_roomId_createdAt", (q) => q.eq("roomId", room._id))
+            .filter((q) => q.gt(q.field("createdAt"), lastRead))
+            .collect();
+
+          return unreadMessages.length;
+        }),
+      );
+    } else {
+      // Non-admin: Get all rooms where user has membership (including direct messages)
+      const memberships = await ctx.db
+        .query("roomMembers")
+        .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+        .filter((q) => q.eq(q.field("isBanned"), false))
+        .collect();
+
+      unreadCounts = await Promise.all(
+        memberships.map(async (membership) => {
+          const lastRead = membership.lastReadAt ?? 0;
+          const unreadMessages = await ctx.db
+            .query("messages")
+            .withIndex("by_roomId_createdAt", (q) =>
+              q.eq("roomId", membership.roomId),
+            )
+            .filter((q) => q.gt(q.field("createdAt"), lastRead))
+            .collect();
+
+          return unreadMessages.length;
+        }),
+      );
+    }
+
+    // Sum up all unread counts
+    return unreadCounts.reduce((total, count) => total + count, 0);
+  },
+});
+
 // Mutations
 export const sendMessage = mutation({
   args: {
@@ -198,7 +266,6 @@ export const sendMessage = mutation({
         q.eq("roomId", args.roomId).eq("userId", args.userId),
       )
       .first();
-    const t = await getTranslations("message");
 
     if (!membership) {
       throw new Error(t("user-not-member-of-room"));
@@ -315,7 +382,6 @@ export const editMessage = mutation({
   },
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.messageId);
-    const t = await getTranslations("message");
 
     if (!message) {
       throw new Error(t("message-not-found"));
@@ -340,7 +406,6 @@ export const deleteMessage = mutation({
   },
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.messageId);
-    const t = await getTranslations("message");
 
     if (!message) {
       throw new Error(t("message-not-found"));

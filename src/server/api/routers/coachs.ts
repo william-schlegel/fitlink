@@ -827,6 +827,7 @@ export const coachRouter = createTRPCRouter({
           packs: true,
         },
       });
+
       const pageImage =
         offer?.coach.page?.sections?.[0]?.elements?.[0]?.imageUrls?.[0];
       const imageUrl =

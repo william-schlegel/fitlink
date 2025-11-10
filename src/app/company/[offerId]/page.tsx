@@ -14,7 +14,7 @@ export default async function OfferPage({
     <div>
       <section className="bg-base-100 py-48">
         <div className="container mx-auto">
-          <CoachOfferPage offerId={offerId} />
+          <CoachOfferPage offerId={offerId} withContact />
         </div>
       </section>
     </div>

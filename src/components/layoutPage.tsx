@@ -51,7 +51,12 @@ function Main({
   className?: string;
 }) {
   return (
-    <section className={twMerge("grid grid-cols-[1fr_3fr] gap-4", className)}>
+    <section
+      className={twMerge(
+        "grid grid-cols-2 md:grid-cols-[300px_1fr] gap-4",
+        className,
+      )}
+    >
       {children}
     </section>
   );

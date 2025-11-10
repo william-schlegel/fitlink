@@ -2,8 +2,12 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
+import Link from "next/link";
+
 import { useCoachingLevel } from "@/lib/offers/useOffers";
 import { formatMoney } from "@/lib/formatNumber";
+import SendMessage from "../modals/sendMessage";
+import { useUser } from "@/lib/auth/client";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
@@ -12,9 +16,14 @@ import Rating from "../ui/rating";
 type CoachOfferPageProps = {
   offerId: string;
   condensed?: boolean;
+  withContact?: boolean;
 };
 
-export function CoachOfferPage({ offerId, condensed }: CoachOfferPageProps) {
+export function CoachOfferPage({
+  offerId,
+  condensed,
+  withContact,
+}: CoachOfferPageProps) {
   const t = useTranslations("coach");
   const offerQuery = trpc.coachs.getOfferWithDetails.useQuery(offerId, {
     enabled: isCUID(offerId),
@@ -24,8 +33,11 @@ export function CoachOfferPage({ offerId, condensed }: CoachOfferPageProps) {
 
   const listFormatter = new Intl.ListFormat(locale);
   const router = useRouter();
-
+  const { data: user } = useUser();
+  const userId = user?.id;
   if (offerQuery.isLoading) return <Spinner />;
+  if (!offerQuery.data) return null;
+
   return (
     <div
       className={`container mx-auto flex flex-col-reverse ${
@@ -34,7 +46,7 @@ export function CoachOfferPage({ offerId, condensed }: CoachOfferPageProps) {
     >
       <div className={condensed ? undefined : "space-y-8"}>
         <section className={`flex ${condensed ? "gap-2" : "gap-8 "}`}>
-          {offerQuery.data?.coach?.coachingActivities?.map((activity, idx) => (
+          {offerQuery.data.coach?.coachingActivities?.map((activity, idx) => (
             <span className="pill px-4" key={idx}>
               {activity}
             </span>
@@ -43,41 +55,41 @@ export function CoachOfferPage({ offerId, condensed }: CoachOfferPageProps) {
 
         <section>
           {condensed ? (
-            <h2>{offerQuery.data?.name}</h2>
+            <h2>{offerQuery.data.name}</h2>
           ) : (
-            <h1>{offerQuery.data?.name}</h1>
+            <h1>{offerQuery.data.name}</h1>
           )}
-          <p>{offerQuery.data?.description}</p>
+          <p>{offerQuery.data.description}</p>
         </section>
 
         <section>
-          <h2>{offerQuery.data?.coach?.description}</h2>
+          <h2>{offerQuery.data.coach?.description}</h2>
         </section>
         <section>
           <h3>{t("offer.where")}</h3>
           <div className="flex flex-wrap gap-2">
-            {offerQuery.data?.physical && offerQuery.data?.myPlace ? (
+            {offerQuery.data.physical && offerQuery.data.myPlace ? (
               <OfferBadge
                 variant="My-Place"
                 publicName={offerQuery.data.coach?.publicName}
                 searchAddress={offerQuery.data.coach?.searchAddress}
               />
             ) : null}
-            {offerQuery.data?.physical && offerQuery.data?.inHouse ? (
+            {offerQuery.data.physical && offerQuery.data.inHouse ? (
               <OfferBadge
                 variant="In-House"
                 travelLimit={offerQuery.data.travelLimit}
                 searchAddress={offerQuery.data.coach?.searchAddress}
               />
             ) : null}
-            {offerQuery.data?.physical && offerQuery.data?.publicPlace ? (
+            {offerQuery.data.physical && offerQuery.data.publicPlace ? (
               <OfferBadge
                 variant="Public-Place"
                 travelLimit={offerQuery.data.travelLimit}
                 searchAddress={offerQuery.data.coach?.searchAddress}
               />
             ) : null}
-            {offerQuery.data?.webcam ? <OfferBadge variant="Webcam" /> : null}
+            {offerQuery.data.webcam ? <OfferBadge variant="Webcam" /> : null}
           </div>
         </section>
         <section>
@@ -87,14 +99,14 @@ export function CoachOfferPage({ offerId, condensed }: CoachOfferPageProps) {
             {t("offer.levels")}
             {" : "}
             {listFormatter.format(
-              offerQuery.data?.coachingLevel?.map((l) =>
+              offerQuery.data.coachingLevel?.map((l) =>
                 getNameLevel(l.level),
               ) ?? [],
             )}
           </div>
-          <p className="my-4">{offerQuery.data?.coach?.aboutMe}</p>
+          <p className="my-4">{offerQuery.data.coach?.aboutMe}</p>
         </section>
-        {offerQuery.data?.packs?.length ? (
+        {offerQuery.data.packs?.length ? (
           <section>
             <h3>{t("offer.packs")}</h3>
             <div className="flex flex-wrap gap-4">
@@ -114,57 +126,73 @@ export function CoachOfferPage({ offerId, condensed }: CoachOfferPageProps) {
         <figure
           className="w-[40%] max-w-[16rem] shrink-0 xl:h-64 xl:w-full xl:max-w-full"
           style={{
-            backgroundImage: `url(${offerQuery.data?.imageUrl})`,
+            backgroundImage: `url(${offerQuery.data.imageUrl})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         >
           <div className="mt-auto h-fit bg-black/20 px-4 py-2 text-accent xl:w-full">
             <h3 className="text-center text-accent">
-              {offerQuery.data?.coach?.publicName}
+              {offerQuery.data.coach?.publicName}
             </h3>
           </div>
         </figure>
         <div className="card-body justify-center">
           <Rating
-            note={offerQuery.data?.coach?.rating ?? 5}
+            note={offerQuery.data.coach?.rating ?? 5}
             className="justify-center"
           />
           <div className="space-y-2">
             <Tarif
-              value={offerQuery.data?.perHourPhysical ?? 0}
+              value={offerQuery.data.perHourPhysical ?? 0}
               icon="bx-user"
               unit={t("offer.per-hour")}
             />
             <Tarif
-              value={offerQuery.data?.perDayPhysical ?? 0}
+              value={offerQuery.data.perDayPhysical ?? 0}
               icon="bx-user"
               unit={t("offer.per-day")}
             />
             <Tarif
-              value={offerQuery.data?.perHourWebcam ?? 0}
+              value={offerQuery.data.perHourWebcam ?? 0}
               icon="bx-webcam"
               unit={t("offer.per-hour")}
             />
             <Tarif
-              value={offerQuery.data?.perDayWebcam ?? 0}
+              value={offerQuery.data.perDayWebcam ?? 0}
               icon="bx-webcam"
               unit={t("offer.per-day")}
             />
             <Tarif
-              value={offerQuery.data?.travelFee ?? 0}
+              value={offerQuery.data.travelFee ?? 0}
               icon="bx-car"
               unit=""
             />
             <Tarif
-              value={offerQuery.data?.freeHours ?? 0}
+              value={offerQuery.data.freeHours ?? 0}
               icon="bx-gift"
               unit={"h"}
               money={false}
               className="rounded bg-primary/10 outline outline-primary"
               label={t("offer.free-hours") ?? ""}
             />
-            {condensed ? null : (
+            {condensed ? null : withContact ? (
+              <>
+                {userId && offerQuery.data.coach?.userId ? (
+                  <SendMessage
+                    toUserId={offerQuery.data.coach.userId}
+                    fromUserId={userId}
+                  />
+                ) : offerQuery.data.coach?.user.email ? (
+                  <Link
+                    href={`mailto:${offerQuery.data.coach.user.email}`}
+                    className="btn-primary btn-block btn col-span-2 mt-8"
+                  >
+                    {t("offer.contact-me")}
+                  </Link>
+                ) : null}
+              </>
+            ) : (
               <button
                 className="btn-primary btn-block btn col-span-2 mt-8"
                 onClick={() => router.back()}

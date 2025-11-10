@@ -1,18 +1,15 @@
 "use client";
 
-import React, { Fragment, useState } from "react";
 import { useTranslations } from "next-intl";
+import React, { Fragment } from "react";
 import { isDate } from "date-fns";
-
-import { useMutation } from "convex/react";
 
 import { FromTo, NOTIFICATION_TYPES, NotificationType } from "./types";
 import { CreateNotificationInConvexArgs } from "@/lib/convex/types";
-import { api } from "../../../../../convex/_generated/api";
+import SendMessage from "@/components/modals/sendMessage";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { formatMoney } from "@/lib/formatNumber";
 import Spinner from "@/components/ui/spinner";
-import Modal from "@/components/ui/modal";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import { toast } from "@/lib/toast";
@@ -38,9 +35,6 @@ export function NotificationMessage({
 }: NotificationMessageProps) {
   const t = useTranslations("auth");
   const { getName } = useNotificationType();
-  const sendMessage = useMutation(api.messages.sendDirectMessage);
-
-  const [closeModal, setCloseModal] = useState(false);
 
   if (!notification) return null;
 
@@ -125,40 +119,10 @@ export function NotificationMessage({
           >
             {t("notification.refuse")}
           </button>
-          <Modal
-            title={t("notification.send-message")}
-            submitButtonText={t("notification.send-message")}
-            buttonIcon={<i className="bx bx-envelope bx-sm" />}
-            variant="Outlined-Primary"
-            className="w-2/3 max-w-xl"
-            cancelButtonText=""
-            onCloseModal={() => setCloseModal(true)}
-            closeModal={closeModal}
-            onOpenModal={() => setCloseModal(false)}
-          >
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const formData = new FormData(e.target as HTMLFormElement);
-                const content = formData.get("content") as string;
-                await sendMessage({
-                  toUserId: notification.userFromId,
-                  fromUserId: notification.userId,
-                  content,
-                });
-                setCloseModal(true);
-              }}
-            >
-              <textarea
-                name="content"
-                className="textarea textarea-bordered w-full"
-                placeholder={t("notification.message-placeholder")}
-              />
-              <button type="submit" className="btn btn-primary mt-4 ">
-                {t("notification.send-message")}
-              </button>
-            </form>
-          </Modal>
+          <SendMessage
+            toUserId={notification.userFromId}
+            fromUserId={notification.userId}
+          />
         </div>,
       );
     if (notification.type === "NEW_SUBSCRIPTION")
