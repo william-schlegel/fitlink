@@ -7,9 +7,12 @@ import { useTranslations } from "next-intl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Link from "next/link";
 
+import { inferProcedureOutput } from "@trpc/server";
+
 import AddressSearch, { AddressData } from "../ui/addressSearch";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { type TThemes } from "../themeSelector";
+import { AppRouter } from "@/server/api/root";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import hslToHex from "@/lib/hslToHex";
@@ -23,6 +26,10 @@ type FindCoachProps = {
   onSelectMultiple?: (coachDataIds: string[]) => void;
   className?: string;
 };
+
+type TCoachItem = inferProcedureOutput<
+  AppRouter["coachs"]["getCoachsFromDistance"]
+>[number];
 
 function FindCoach({
   address = "",
@@ -48,9 +55,6 @@ function FindCoach({
   );
   const [theme] = useLocalStorage<TThemes>("theme", "cupcake");
 
-  type TCoachItem = typeof coachSearch.data extends (infer U)[] | undefined
-    ? U
-    : never;
   const handleSearch = () => {
     setSelectedCoachs(new Set());
     coachSearch.refetch();
@@ -91,30 +95,30 @@ function FindCoach({
   }
 
   function CoachRow({
-    item,
+    coach,
     onHover,
   }: {
-    item: TCoachItem;
+    coach: TCoachItem;
     onHover: (id: string) => void;
   }) {
     const ref = useRef<HTMLTableRowElement>(null);
     const isHovered = useHover(ref as React.RefObject<HTMLElement>);
 
     useEffect(() => {
-      if (isHovered) onHover(item.id);
-    }, [isHovered, onHover, item]);
+      if (isHovered) onHover(coach.id);
+    }, [isHovered, onHover, coach]);
 
     return (
       <tr className={`hover ${className ?? ""}`} ref={ref}>
-        <td>{item.publicName}</td>
-        <td>{item.distance.toFixed(0)}&nbsp;km</td>
+        <td>{coach.publicName}</td>
+        <td>{coach.distance.toFixed(0)}&nbsp;km</td>
         <td>
-          <Rating note={item.rating ?? 0} />
+          <Rating note={coach.rating ?? 0} />
         </td>
         <td>
           <div className="flex flex-wrap gap-1">
-            {item.coachingActivities?.length ? (
-              item.coachingActivities.map((activity, idx) => (
+            {coach.coachingActivities?.length ? (
+              coach.coachingActivities.map((activity, idx) => (
                 <span key={`${idx}-${activity}`} className="pill pill-xs">
                   {activity}
                 </span>
@@ -125,14 +129,14 @@ function FindCoach({
           </div>
         </td>
         <td>
-          {item?.page?.published ? (
+          {coach?.page?.published ? (
             <Link
-              href={`/presentation-page/coach/${item.id}/${item.page.id}`}
+              href={`/presentation-page/coach/${coach.userId}/${coach.page.id}`}
               target="_blank"
               rel="noreferrer"
             >
               <ButtonIcon
-                title={t("page-coach", { name: item.publicName ?? "" })}
+                title={t("page-coach", { name: coach.publicName ?? "" })}
                 iconComponent={<i className="bx bx-link-external bx-xs" />}
                 buttonSize="sm"
                 buttonVariant="Icon-Outlined-Primary"
@@ -147,7 +151,7 @@ function FindCoach({
             <span
               className="btn-primary btn-xs btn"
               tabIndex={0}
-              onClick={() => onSelect(item.userId)}
+              onClick={() => onSelect(coach.userId)}
             >
               {t("select")}
             </span>
@@ -157,9 +161,9 @@ function FindCoach({
           <td>
             <input
               type="checkbox"
-              checked={selectedCoachs.has(item.userId)}
+              checked={selectedCoachs.has(coach.userId)}
               className="checkbox-primary checkbox"
-              onChange={(e) => handleSelect(item.userId, e.target.checked)}
+              onChange={(e) => handleSelect(coach.userId, e.target.checked)}
             />
           </td>
         ) : null}
@@ -218,7 +222,7 @@ function FindCoach({
               {coachSearch.data?.map((res) => (
                 <CoachRow
                   key={res.id}
-                  item={res}
+                  coach={res}
                   onHover={(id) => setHoveredId(id)}
                 />
               ))}

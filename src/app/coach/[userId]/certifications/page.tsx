@@ -29,8 +29,16 @@ export default async function ManageCertifications({
   const certificationId = searchParamsValue?.certificationId;
   const t = await getTranslations();
   const user = await getActualUser();
-  if (!user || (user.internalRole !== "COACH" && user.internalRole !== "ADMIN"))
-    return <div className="alert alert-error">{t("coach.coach-only")}</div>;
+  if (
+    !user ||
+    !user.internalRole ||
+    !["COACH", "ADMIN", "MANAGER_COACH"].includes(user.internalRole)
+  )
+    return (
+      <div className="alert alert-error">
+        {t("common.navigation.insufficient-plan")}
+      </div>
+    );
 
   const caller = await createTrpcCaller();
   if (!caller) return null;

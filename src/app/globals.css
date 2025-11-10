@@ -58,12 +58,12 @@
 
 @layer utilities {
   .pill {
-    @apply flex flex-wrap items-center gap-2 border border-neutral bg-base-200 p-[0.5rem] text-base-content;
+    @apply flex flex-wrap items-center gap-2 border border-neutral bg-base-200 p-2 text-base-content;
     border-radius: var(--rounded-btn, 0.5rem);
   }
 
   .pill-xs {
-    @apply px-[0.25rem] py-[0.125rem] text-xs;
+    @apply px-1 py-0.5 text-xs;
   }
 
   .input-group {

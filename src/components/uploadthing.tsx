@@ -17,6 +17,9 @@ export const UploadButton = (
 ) => {
   return (
     <MyUploadButton
+      onClientUploadComplete={(result) => {
+        props.onClientUploadComplete?.(result);
+      }}
       {...props}
       className={twMerge(
         "ut-button:btn-primary ut-button:btn",
@@ -31,6 +34,8 @@ export const UploadButton = (
         button() {
           return {
             width: "fit-content",
+            backgroundColor: "var(--join-bg, var(--color-primary))",
+            color: "var(--join-text, var(--color-primary-content))",
             borderStartStartRadius: "var(--join-ss, var(--radius-field))",
             borderStartEndRadius: "var(--join-se, var(--radius-field))",
             borderEndEndRadius: "var(--join-ee, var(--radius-field))",

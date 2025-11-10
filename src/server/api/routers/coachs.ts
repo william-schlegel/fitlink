@@ -230,7 +230,7 @@ export const coachRouter = createTRPCRouter({
             name: input.name,
             obtainedIn: input.obtainedIn,
             coachId: input.userId,
-            documentUrl: input.documentUrl,
+            documentUrl: input.documentUrl || undefined,
           })
           .returning();
 
