@@ -64,8 +64,6 @@ export default async function CoachManagementForClub({
     queryCoach = await caller.coachs.getCoachById(coachId);
   }
 
-  console.log("queryCoach", queryCoach);
-
   const coachList = queryCoachs.map((coach) => ({
     id: coach.id,
     name: coach.name,

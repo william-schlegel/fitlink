@@ -13,14 +13,11 @@ export default async function CoachPresentation({
   const userId = paramsValue.userId;
   const pageId = paramsValue.pageId;
 
-  console.log("userId", userId);
-  console.log("pageId", pageId);
   if (!Boolean(userId) || !isCUID(pageId)) return notFound();
   const caller = await createTrpcCaller();
   if (!caller) return null;
 
   const queryPage = await caller.pages.getPageForCoach({ userId });
-  console.log("queryPage", queryPage);
   if (!queryPage) return notFound();
   return <CoachDisplay pageId={pageId} />;
 }

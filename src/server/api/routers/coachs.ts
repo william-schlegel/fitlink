@@ -93,7 +93,6 @@ export const coachRouter = createTRPCRouter({
           },
         },
       });
-      console.log("coach", coach);
       if (!coach) return null;
 
       // Fetch certifications with modules separately to avoid deep nesting issues

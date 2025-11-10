@@ -138,7 +138,6 @@ export function NotificationMessage({
           >
             <form
               onSubmit={async (e) => {
-                console.log("notification", notification);
                 e.preventDefault();
                 const formData = new FormData(e.target as HTMLFormElement);
                 const content = formData.get("content") as string;
