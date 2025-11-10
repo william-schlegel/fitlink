@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { CoachCreation } from "@/components/sections/coach";
-import { getPageForCoach } from "@/server/api/routers/page";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import PublishPageButton from "./publisPageButton";
 import { getActualUser } from "@/lib/auth/server";
 import Title from "@/components/title";
@@ -24,7 +24,9 @@ export default async function CoachPage({
   )
     redirect("/", RedirectType.replace);
   const t = await getTranslations("pages");
-  const queryPage = await getPageForCoach(userId);
+  const caller = await createTrpcCaller();
+  if (!caller) return null;
+  const queryPage = await caller.pages.getPageForCoach({ userId });
 
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">

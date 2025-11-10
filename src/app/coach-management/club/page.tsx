@@ -74,7 +74,6 @@ export default async function CoachManagementForClub({
 
   return (
     <LayoutPage
-      preTitle={queryClubs[0]?.name}
       title={t("common.navigation.coach-management")}
       titleComponents={
         <div className="flex items-center gap-2 justify-between">

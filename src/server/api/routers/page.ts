@@ -63,50 +63,6 @@ export function getPagesForClub(clubId: string) {
   });
 }
 
-export async function getPageForCoach(coachId: string) {
-  {
-    const coachPage = await db.query.page.findFirst({
-      where: eq(page.coachId, coachId),
-    });
-    if (coachPage) return coachPage;
-    const actualUser = await db.query.user.findFirst({
-      where: eq(user.id, coachId),
-    });
-    if (!actualUser)
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: `Error fetching user ${coachId}`,
-      });
-    return db.transaction(async (tx) => {
-      const newPage = await tx
-        .insert(page)
-        .values({
-          name: actualUser.name ?? "coach",
-          target: "HOME",
-          coachId,
-        })
-        .returning();
-
-      const newSection = await tx
-        .insert(pageSection)
-        .values({
-          pageId: newPage[0].id,
-          model: "HERO",
-          title: actualUser.name,
-          subTitle: actualUser.name,
-        })
-        .returning({ id: pageSection.id });
-      await tx.insert(pageSectionElement).values({
-        pageId: newPage[0].id,
-        sectionId: newSection[0].id,
-        elementType: "HERO_CONTENT",
-        title: actualUser.name,
-      });
-      return newPage[0];
-    });
-  }
-}
-
 export const pageRouter = createTRPCRouter({
   getPagesForManager: protectedProcedure
     .input(z.string())
@@ -123,7 +79,48 @@ export const pageRouter = createTRPCRouter({
     .query(({ input }) => getPagesForClub(input)),
   getPageForCoach: publicProcedure
     .input(z.object({ userId: z.string() }))
-    .query(async ({ input }) => getPageForCoach(input.userId)),
+    .query(async ({ input }) => {
+      {
+        const coachPage = await db.query.page.findFirst({
+          where: eq(page.coachId, input.userId),
+        });
+        if (coachPage) return coachPage;
+        const actualUser = await db.query.user.findFirst({
+          where: eq(user.id, input.userId),
+        });
+
+        if (actualUser)
+          return db.transaction(async (tx) => {
+            const newPage = await tx
+              .insert(page)
+              .values({
+                name: actualUser.name ?? "coach",
+                target: "HOME",
+                coachId: input.userId,
+              })
+              .returning();
+
+            const newSection = await tx
+              .insert(pageSection)
+              .values({
+                pageId: newPage[0].id,
+                model: "HERO",
+                title: actualUser.name,
+                subTitle: actualUser.name,
+              })
+              .returning({ id: pageSection.id });
+
+            await tx.insert(pageSectionElement).values({
+              pageId: newPage[0].id,
+              sectionId: newSection[0].id,
+              elementType: "HERO_CONTENT",
+              title: actualUser.name,
+            });
+            return newPage[0];
+          });
+        return null;
+      }
+    }),
   getPageById: protectedProcedure.input(z.cuid2()).query(({ input }) =>
     db.query.page.findFirst({
       where: eq(page.id, input),
