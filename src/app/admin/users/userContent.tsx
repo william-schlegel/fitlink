@@ -4,7 +4,6 @@ import Link from "next/link";
 import { DeleteUser, UpdateUser } from "@/components/modals/manageUser";
 import { getUserFullById } from "@/server/api/routers/users";
 import { formatMoney } from "@/lib/formatNumber";
-import Periodicity from "./periodicity";
 
 type UserContentProps = {
   userId: string;
@@ -40,7 +39,7 @@ export default async function UserContent({ userId }: UserContentProps) {
           <DeleteUser userId={userId} />
         </div>
       </div>
-      <section className="grid grid-cols-2 gap-2">
+      <section className="grid xl:grid-cols-2 gap-2">
         <article className="flex flex-col gap-2 rounded-md border border-primary p-2">
           <h2 className="flex items-center justify-between gap-2">
             {t("admin.user.plan")}
@@ -73,10 +72,6 @@ export default async function UserContent({ userId }: UserContentProps) {
                       "admin.user.per-year",
                     )}`}
             </span>
-            <Periodicity
-              userId={userId}
-              monthlyPayment={userQuery?.monthlyPayment ?? false}
-            />
           </div>
           {userQuery?.internalRole === "MANAGER" ||
           userQuery?.internalRole === "MANAGER_COACH" ? (

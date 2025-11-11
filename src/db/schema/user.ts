@@ -5,7 +5,6 @@ import {
   text,
   timestamp,
   real,
-  json,
 } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
@@ -124,40 +123,3 @@ export const userManagerRelations = relations(userManager, ({ one, many }) => ({
   }),
   managedClubs: many(club),
 }));
-
-// export const userNotification = pgTable(
-//   "UserNotification",
-//   {
-//     id: text("id").primaryKey().$defaultFn(createId),
-//     type: notificationTypeEnum("type").notNull(),
-//     userToId: text("user_to_id").notNull(),
-//     userFromId: text("user_from_id").notNull(),
-//     message: text("message").notNull(),
-//     viewDate: timestamp("view_date"),
-//     date: timestamp("date").notNull().defaultNow(),
-//     data: json("data"),
-//     answered: timestamp("answered"),
-//     answer: text("answer"),
-//     linkedNotification: text("linked_notification"),
-//   },
-//   (table) => [
-//     index("user_notification_user_to_idx").on(table.userToId),
-//     index("user_notification_user_from_idx").on(table.userFromId),
-//   ],
-// );
-
-// export const userNotificationRelations = relations(
-//   userNotification,
-//   ({ one }) => ({
-//     userTo: one(user, {
-//       fields: [userNotification.userToId],
-//       references: [user.id],
-//       relationName: "user-to",
-//     }),
-//     userFrom: one(user, {
-//       fields: [userNotification.userFromId],
-//       references: [user.id],
-//       relationName: "user-from",
-//     }),
-//   }),
-// );

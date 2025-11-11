@@ -12,11 +12,11 @@ function Pagination({ count, actualPage, onPageClick, perPage }: Props) {
   const nbPage = Math.ceil(count / perPage);
   if (nbPage < 2) return null;
   return (
-    <div className="btn-group">
+    <div className="join">
       {Array.from({ length: nbPage }, (_, k) => k).map((pg) => (
         <button
           key={`page-${pg}`}
-          className={`btn btn-sm ${pg === actualPage ? "btn-active" : ""}`}
+          className={`btn btn-sm join-item ${pg === actualPage ? "btn-active" : ""}`}
           onClick={() => onPageClick?.(pg)}
         >
           {pg}

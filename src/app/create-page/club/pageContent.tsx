@@ -97,11 +97,11 @@ export default function PageContent({
           <DeletePage clubId={clubId} pageId={pageId} size="md" />
         </div>
       </div>
-      <div className="btn-group flex-wrap">
+      <div className="join flex-wrap">
         {sections.map((sec) => (
           <button
             key={sec}
-            className={`btn btn-primary flex-1 ${
+            className={`btn btn-primary flex-1 join-item ${
               sec === (section ?? defaultSection(target)) ? "" : "btn-outline"
             }`}
             onClick={() =>

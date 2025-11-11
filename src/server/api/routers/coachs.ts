@@ -514,9 +514,36 @@ export const coachRouter = createTRPCRouter({
               },
             },
           },
+          selectedModulesForCoach: {
+            with: {
+              coach: {
+                with: {
+                  user: { columns: { id: true, name: true } },
+                },
+              },
+            },
+          },
         },
       });
       if (!cg) return null;
+      type CoachWithCount = {
+        id: string;
+        name: string;
+        count: number;
+      };
+      const coaches = new Map<string, CoachWithCount>(
+        cg.selectedModulesForCoach.reduce((acc, c) => {
+          const userId = c.coach.user.id;
+          if (acc.has(userId)) {
+            const entry = acc.get(userId);
+            entry.count += 1;
+          } else {
+            acc.set(userId, { ...c.coach.user, count: 1 });
+          }
+          return acc;
+        }, new Map()),
+      );
+
       return {
         id: cg.id,
         name: cg.name,
@@ -528,6 +555,7 @@ export const coachRouter = createTRPCRouter({
             name: g.activityGroup.name,
           })),
         })),
+        coaches: Array.from(coaches.values()),
       };
     }),
   createOrganism: protectedProcedure

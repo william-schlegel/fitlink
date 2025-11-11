@@ -1,15 +1,17 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import Link from "next/link";
+
 import {
   CreateCertificationOrganism,
   DeleteCertificationGroup,
   UpdateCertificationGroup,
 } from "@/components/modals/manageCertification";
+import createLink, { createHref } from "@/lib/createLink";
 import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
-import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
 import { isCUID } from "@/lib/utils";
 
@@ -66,8 +68,11 @@ async function CGContent({ cgId }: CGContentProps) {
   if (!caller || !isCUID(cgId)) return null;
   const cgQuery = await caller.coachs.getCertificationOrganismById(cgId);
   const t = await getTranslations("admin");
+  const href = await getHref();
 
   if (!cgQuery) return null;
+
+  console.log(cgQuery);
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -96,6 +101,20 @@ async function CGContent({ cgId }: CGContentProps) {
         </article>
         <article className="flex flex-col gap-2 rounded-md border border-primary p-2">
           <h3>{t("certification.group-coachs")}</h3>
+          <div className="flex flex-row flex-wrap gap-2">
+            {cgQuery?.coaches?.map((coach) => (
+              <Link
+                href={createHref(href, ["admin", "users"], {
+                  userId: coach.id,
+                })}
+                key={coach.id}
+                className="pill"
+              >
+                <span>{coach.name}</span>
+                <span className="badge-primary badge">{coach.count}</span>
+              </Link>
+            ))}
+          </div>
         </article>
       </section>
     </div>

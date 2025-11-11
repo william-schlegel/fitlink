@@ -142,7 +142,7 @@ export default async function CoachDashboard({
       )}
       <section className="grid auto-rows-auto gap-2 lg:grid-cols-2">
         <article className="rounded-md border border-primary p-2">
-          <div className="flex items-center justify-between">
+          <div className="mb-2">
             <h2>{t("dashboard.planning")}</h2>
             <SelectDay day={day} redirectTo={`/coach/${userId}`} />
           </div>

@@ -30,22 +30,24 @@ export default function SelectDay({
   };
 
   return (
-    <div className="btn-group">
+    <div className="join">
       <button
-        className="btn btn-primary"
+        className="btn btn-primary join-item"
         onClick={() => handleClick(getPreviousDay(day))}
       >
         <i className="bx bx-chevron-left bx-sm" />
       </button>
-      <span className="btn btn-primary w-32 text-center">{getName(day)}</span>
+      <span className="btn btn-primary w-32 text-center join-item">
+        {getName(day)}
+      </span>
       <button
-        className="btn btn-primary"
+        className="btn btn-primary join-item"
         onClick={() => handleClick(getToday())}
       >
         <i className="bx bx-calendar-event bx-sm" />
       </button>
       <button
-        className="btn btn-primary"
+        className="btn btn-primary join-item"
         onClick={() => handleClick(getNextDay(day))}
       >
         <i className="bx bx-chevron-right bx-sm" />
@@ -61,24 +63,24 @@ type SelectDateProps = {
 
 export function SelectDate({ day, onNewDay }: SelectDateProps) {
   return (
-    <div className="btn-group">
+    <div className="join">
       <button
-        className="btn btn-primary"
+        className="btn btn-primary join-item"
         onClick={() => onNewDay(subDays(day, 1))}
       >
         <i className="bx bx-chevron-left bx-sm" />
       </button>
-      <span className="btn btn-primary w-32 text-center">
+      <span className="btn btn-primary w-32 text-center join-item">
         {formatDateLocalized(day, { dateFormat: "short", withDay: "short" })}
       </span>
       <button
-        className="btn btn-primary"
+        className="btn btn-primary join-item"
         onClick={() => onNewDay(startOfToday())}
       >
         <i className="bx bx-calendar-event bx-sm" />
       </button>
       <button
-        className="btn btn-primary"
+        className="btn btn-primary join-item"
         onClick={() => onNewDay(addDays(day, 1))}
       >
         <i className="bx bx-chevron-right bx-sm" />

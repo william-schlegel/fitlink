@@ -699,7 +699,7 @@ function CertificationGroupForm({
         ) : null}
       </form>
       <div className="grid grid-cols-2 gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-center gap-2">
           <div className="flex flex-col gap-2 rounded-md border border-primary p-2">
             <input
               type={"text"}
@@ -755,20 +755,21 @@ function CertificationGroupForm({
               }
               title={t("pricing.add-option")}
               buttonVariant="Icon-Outlined-Primary"
-              buttonSize="md"
+              fullButton
             />
           </button>
         </div>
         <div>
-          <label>{t("certification.modules")}</label>
+          <h3>{t("certification.modules")}</h3>
           {data.modules.length > 0 ? (
-            <ul className="menu overflow-hidden rounded border border-base-300">
+            <ul className="menu overflow-hidden rounded border border-base-300 w-full">
               {data.modules.map((mod, idx) => (
                 <li key={mod.dbId ?? mod.name}>
                   <div
                     className={twMerge(
                       "flex w-full items-center justify-between text-center",
-                      moduleId === mod.dbId && "badge badge-primary",
+                      moduleId === mod.dbId &&
+                        "border border-primary bg-primary/10",
                     )}
                     onClick={() => selectModule(mod.dbId)}
                   >

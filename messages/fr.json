@@ -23,7 +23,7 @@
       "deletion-message": "Voulez vous supprimer ce tarif ?|Vous pourrez le réactiver si besoin",
       "options": "Options liées au tarif",
       "delete-option": "Supprimer cette option",
-      "add-option": "Ajouter cette option",
+      "add-option": "Ajouter ce module de formation",
       "undelete": "Restaurer le tarif",
       "undelete-message": "Voulez vous restaurer ce tarif ?",
       "created": "Tarif créé",
