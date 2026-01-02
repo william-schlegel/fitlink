@@ -7,7 +7,6 @@ import {
 } from "@/lib/trpc/server";
 import { calculateDistance } from "@/lib/distance";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import { roomReservationEnum } from "@/db/schema/enums";
 import {
   getSiteById,
   getSitesForClub,
@@ -22,27 +21,7 @@ import {
   deleteRoom,
   getUserWithPricingForSites,
 } from "@/db/dal";
-
-const SiteObject = z.object({
-  id: z.cuid2(),
-  clubId: z.cuid2(),
-  name: z.string(),
-  address: z.string(),
-  searchAddress: z.string(),
-  longitude: z.number(),
-  latitude: z.number(),
-});
-
-const RoomObject = z.object({
-  id: z.cuid2(),
-  siteId: z.cuid2(),
-  name: z.string(),
-  reservation: z.enum(roomReservationEnum.enumValues),
-  capacity: z.number(),
-  unavailable: z.boolean(),
-  openWithClub: z.boolean().default(true),
-  openWithSite: z.boolean().default(true),
-});
+import { siteSchema, roomSchema } from "@/schemas/sites";
 
 export async function getSitesForClubWithLimit(clubId: string, userId: string) {
   const u = await getUserWithPricingForSites(userId);
@@ -75,11 +54,11 @@ export const siteRouter = createTRPCRouter({
     ),
 
   createSite: protectedProcedure
-    .input(SiteObject.omit({ id: true }))
+    .input(siteSchema.omit({ id: true }))
     .mutation(({ input }) => createSite(input)),
 
   updateSite: protectedProcedure
-    .input(SiteObject.partial())
+    .input(siteSchema.partial())
     .mutation(({ input }) => updateSite({ id: input.id ?? "", ...input })),
 
   deleteSite: protectedProcedure
@@ -98,11 +77,11 @@ export const siteRouter = createTRPCRouter({
     ),
 
   createRoom: protectedProcedure
-    .input(RoomObject.omit({ id: true }))
+    .input(roomSchema.omit({ id: true }))
     .mutation(({ input }) => createRoom(input)),
 
   updateRoom: protectedProcedure
-    .input(RoomObject.partial())
+    .input(roomSchema.partial())
     .mutation(({ input }) => updateRoom({ id: input.id ?? "", ...input })),
 
   deleteRoom: protectedProcedure

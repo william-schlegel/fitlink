@@ -8,6 +8,13 @@ import {
 } from "@/db/schema/club";
 import { db } from "@/db";
 
+import type {
+  CreateActivityInput,
+  UpdateActivityInput,
+  CreateActivityGroupInput,
+  UpdateActivityGroupInput,
+} from "@/schemas/activities";
+
 // ==================== ACTIVITY ====================
 
 export async function getActivityById(id: string) {
@@ -45,26 +52,11 @@ export async function getAllClubsForGroup(groupId: string) {
   });
 }
 
-export async function createActivity(data: {
-  name: string;
-  noCalendar?: boolean;
-  reservationDuration?: number;
-  clubId: string;
-  groupId: string;
-}) {
+export async function createActivity(data: CreateActivityInput) {
   return db.insert(activity).values(data);
 }
 
-export async function updateActivity(
-  data: Partial<{
-    id: string;
-    name: string;
-    noCalendar: boolean;
-    reservationDuration: number;
-    clubId: string;
-    groupId: string;
-  }>,
-) {
+export async function updateActivity(data: UpdateActivityInput) {
   return db
     .update(activity)
     .set(data)
@@ -101,11 +93,7 @@ export async function getAllActivityGroups() {
   });
 }
 
-export async function createActivityGroup(data: {
-  name: string;
-  coachId?: string | null;
-  default?: boolean;
-}) {
+export async function createActivityGroup(data: CreateActivityGroupInput) {
   return db
     .insert(activityGroup)
     .values({
@@ -116,11 +104,7 @@ export async function createActivityGroup(data: {
     .returning();
 }
 
-export async function updateActivityGroup(data: {
-  id: string;
-  name: string;
-  default?: boolean;
-}) {
+export async function updateActivityGroup(data: UpdateActivityGroupInput) {
   return db
     .update(activityGroup)
     .set({
@@ -156,4 +140,3 @@ export async function removeActivityFromRoom(
       ),
     );
 }
-

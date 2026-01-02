@@ -1,10 +1,15 @@
 import { and, asc, eq, gte, lte } from "drizzle-orm";
 
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import { roomReservationEnum } from "@/db/schema/enums";
 import { calculateBBox } from "@/lib/distance";
 import { room, site } from "@/db/schema/club";
 import { user } from "@/db/schema/auth";
+import type {
+  CreateSiteInput,
+  UpdateSiteInput,
+  CreateRoomInput,
+  UpdateRoomInput,
+} from "@/schemas/sites";
 import { db } from "@/db";
 
 // ==================== SITE QUERIES ====================
@@ -48,35 +53,11 @@ export async function getSitesFromDistance(
 
 // ==================== SITE MUTATIONS ====================
 
-export async function createSite(data: {
-  clubId: string;
-  name: string;
-  address: string;
-  searchAddress: string;
-  longitude: number;
-  latitude: number;
-}) {
-  return db
-    .insert(site)
-    .values({
-      clubId: data.clubId,
-      name: data.name,
-      address: data.address,
-      searchAddress: data.searchAddress,
-      longitude: data.longitude,
-      latitude: data.latitude,
-    })
-    .returning();
+export async function createSite(data: CreateSiteInput) {
+  return db.insert(site).values(data).returning();
 }
 
-export async function updateSite(data: {
-  id: string;
-  name?: string;
-  address?: string;
-  searchAddress?: string;
-  longitude?: number;
-  latitude?: number;
-}) {
+export async function updateSite(data: UpdateSiteInput) {
   return db
     .update(site)
     .set({
@@ -111,44 +92,19 @@ export async function getRoomsForSite(siteId: string) {
 
 // ==================== ROOM MUTATIONS ====================
 
-export async function createRoom(data: {
-  siteId: string;
-  name: string;
-  reservation: (typeof roomReservationEnum.enumValues)[number];
-  capacity: number;
-  unavailable: boolean;
-  openWithClub?: boolean;
-  openWithSite?: boolean;
-}) {
+export async function createRoom(data: CreateRoomInput) {
   return db
     .insert(room)
     .values({
-      siteId: data.siteId,
-      name: data.name,
-      reservation: data.reservation,
-      capacity: data.capacity,
-      unavailable: data.unavailable,
+      ...data,
       openWithClub: data.openWithClub ?? true,
       openWithSite: data.openWithSite ?? true,
     })
     .returning();
 }
 
-export async function updateRoom(data: {
-  id: string;
-  siteId?: string;
-  name?: string;
-  reservation?: (typeof roomReservationEnum.enumValues)[number];
-  capacity?: number;
-  unavailable?: boolean;
-  openWithClub?: boolean;
-  openWithSite?: boolean;
-}) {
-  return db
-    .update(room)
-    .set(data)
-    .where(eq(room.id, data.id))
-    .returning();
+export async function updateRoom(data: UpdateRoomInput) {
+  return db.update(room).set(data).where(eq(room.id, data.id)).returning();
 }
 
 export async function deleteRoom(id: string) {

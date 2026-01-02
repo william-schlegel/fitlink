@@ -21,6 +21,11 @@ import {
   removeActivityFromRoom,
 } from "@/db/dal";
 import {
+  activitySchema,
+  updateActivityGroupSchema,
+  roomActivitySchema,
+} from "@/schemas/activities";
+import {
   requireAdmin,
   requireAdminOrSelf,
   requireAdminOrOwner,
@@ -32,15 +37,6 @@ import {
 } from "@/lib/trpc/server";
 import { activityGroup } from "@/db/schema/club";
 import { db } from "@/db";
-
-const activityObject = z.object({
-  id: z.cuid2(),
-  name: z.string(),
-  noCalendar: z.boolean().default(false),
-  reservationDuration: z.number().default(60),
-  clubId: z.cuid2(),
-  groupId: z.cuid2(),
-});
 
 export const activityRouter = createTRPCRouter({
   getActivityById: protectedProcedure
@@ -83,11 +79,11 @@ export const activityRouter = createTRPCRouter({
     }),
 
   createActivity: protectedProcedure
-    .input(activityObject.omit({ id: true }))
+    .input(activitySchema.omit({ id: true }))
     .mutation(({ input }) => createActivity(input)),
 
   updateActivity: protectedProcedure
-    .input(activityObject.partial())
+    .input(activitySchema.partial())
     .mutation(({ input }) => updateActivity(input)),
 
   deleteActivity: protectedProcedure
@@ -116,13 +112,7 @@ export const activityRouter = createTRPCRouter({
     ),
 
   updateGroup: protectedProcedure
-    .input(
-      z.object({
-        id: z.cuid2(),
-        name: z.string(),
-        default: z.boolean().optional().default(false),
-      }),
-    )
+    .input(updateActivityGroupSchema)
     .mutation(({ input }) => updateActivityGroup(input)),
 
   deleteGroup: protectedProcedure
@@ -140,23 +130,13 @@ export const activityRouter = createTRPCRouter({
     }),
 
   affectToRoom: protectedProcedure
-    .input(
-      z.object({
-        roomId: z.cuid2(),
-        activityId: z.cuid2(),
-      }),
-    )
+    .input(roomActivitySchema)
     .mutation(({ input }) =>
       affectActivityToRoom(input.roomId, input.activityId),
     ),
 
   removeFromRoom: protectedProcedure
-    .input(
-      z.object({
-        roomId: z.cuid2(),
-        activityId: z.cuid2(),
-      }),
-    )
+    .input(roomActivitySchema)
     .mutation(({ input }) =>
       removeActivityFromRoom(input.roomId, input.activityId),
     ),
