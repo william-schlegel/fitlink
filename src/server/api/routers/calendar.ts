@@ -1,19 +1,14 @@
-import { and, desc, eq, lte } from "drizzle-orm";
 import { z } from "zod";
 
-import { endOfDay } from "date-fns";
-
-import {
-  dayOpeningTime,
-  openingCalendar,
-  openingCalendarClubs,
-  openingCalendarRooms,
-  openingCalendarSites,
-} from "@/db/schema/planning";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 import { dayNameEnum } from "@/db/schema/enums";
-import { room, site } from "@/db/schema/club";
-import { db } from "@/db";
+import {
+  getCalendarById,
+  getCalendarForClub,
+  getCalendarForSite,
+  getCalendarForRoom,
+  createCalendar,
+} from "@/db/dal";
 
 const CalendarData = {
   startDate: z.date().default(new Date()),
@@ -41,27 +36,17 @@ const CalendarData = {
 };
 
 export const calendarRouter = createTRPCRouter({
-  getCalendarById: protectedProcedure.input(z.cuid2()).query(({ input }) => {
-    return db.query.openingCalendar.findFirst({
-      where: eq(openingCalendar.id, input),
-      with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
-    });
-  }),
+  getCalendarById: protectedProcedure
+    .input(z.cuid2())
+    .query(({ input }) => getCalendarById(input)),
+
   getCalendarForClub: protectedProcedure
     .input(z.cuid2())
     .query(async ({ input }) => {
-      const now = endOfDay(new Date());
-
-      const calendarForClub = await db.query.openingCalendar.findFirst({
-        where: and(
-          eq(openingCalendar.id, input),
-          lte(openingCalendar.startDate, now),
-        ),
-        orderBy: desc(openingCalendar.startDate),
-        with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
-      });
+      const calendarForClub = await getCalendarForClub(input);
       return calendarForClub ?? null;
     }),
+
   getCalendarForSite: protectedProcedure
     .input(
       z.object({
@@ -70,35 +55,8 @@ export const calendarRouter = createTRPCRouter({
         openWithClub: z.boolean().default(false),
       }),
     )
-    .query(async ({ input }) => {
-      const now = endOfDay(new Date());
-      const siteCal = await db.query.openingCalendar.findFirst({
-        where: and(
-          eq(openingCalendar.id, input.siteId),
-          lte(openingCalendar.startDate, now),
-        ),
-        orderBy: desc(openingCalendar.startDate),
-        with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
-      });
-      if (!siteCal) {
-        const siteData = await db.query.site.findFirst({
-          where: eq(site.id, input.siteId),
-          with: { openingCalendars: true },
-        });
+    .query(({ input }) => getCalendarForSite(input.siteId, input.clubId)),
 
-        if (siteData?.openWithClub) {
-          return db.query.openingCalendar.findFirst({
-            where: and(
-              eq(openingCalendar.id, input.clubId),
-              lte(openingCalendar.startDate, now),
-            ),
-            orderBy: desc(openingCalendar.startDate),
-            with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
-          });
-        }
-      }
-      return siteCal;
-    }),
   getCalendarForRoom: protectedProcedure
     .input(
       z.object({
@@ -107,63 +65,10 @@ export const calendarRouter = createTRPCRouter({
         clubId: z.cuid2(),
       }),
     )
-    .query(async ({ input }) => {
-      const now = endOfDay(new Date());
-      const roomCal = await db.query.openingCalendar.findFirst({
-        where: and(
-          eq(openingCalendar.id, input.roomId),
-          lte(openingCalendar.startDate, now),
-        ),
-        orderBy: desc(openingCalendar.startDate),
-        with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
-      });
-      if (!roomCal) {
-        const roomData = await db.query.room.findFirst({
-          where: eq(room.id, input.roomId),
-        });
-        if (roomData?.openWithSite) {
-          const siteCal = await db.query.openingCalendar.findFirst({
-            where: and(
-              eq(openingCalendar.id, input.siteId),
-              lte(openingCalendar.startDate, now),
-            ),
-            orderBy: desc(openingCalendar.startDate),
-            with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
-          });
-          if (!siteCal) {
-            const siteData = await db.query.site.findFirst({
-              where: eq(site.id, input.siteId),
-              with: { openingCalendars: true },
-            });
-            if (siteData?.openWithClub) {
-              const clubCal = await db.query.openingCalendar.findFirst({
-                where: and(
-                  eq(openingCalendar.id, input.clubId),
-                  lte(openingCalendar.startDate, now),
-                ),
+    .query(({ input }) =>
+      getCalendarForRoom(input.roomId, input.siteId, input.clubId),
+    ),
 
-                orderBy: desc(openingCalendar.startDate),
-                with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
-              });
-              return clubCal;
-            }
-          }
-          return siteCal;
-        } else if (roomData?.openWithClub) {
-          const clubCal = await db.query.openingCalendar.findFirst({
-            where: and(
-              eq(openingCalendar.id, input.clubId),
-              lte(openingCalendar.startDate, now),
-            ),
-            orderBy: desc(openingCalendar.startDate),
-            with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
-          });
-          return clubCal;
-        }
-      }
-
-      return roomCal;
-    }),
   createCalendar: protectedProcedure
     .input(
       z.object({
@@ -173,46 +78,13 @@ export const calendarRouter = createTRPCRouter({
         clubId: z.cuid2().optional(),
       }),
     )
-    .mutation(({ input }) => {
-      const createOT = input.calendar.openingTime.map((i) => ({
-        name: i.name,
-        wholeDay: i.wholeDay,
-        closed: i.closed,
-        workingHours: {
-          create: i.workingHours.map((w) => ({
-            opening: w.opening,
-            closing: w.closing,
-          })),
-        },
-      }));
-      return db.transaction(async (tx) => {
-        const calendar = await tx
-          .insert(openingCalendar)
-          .values({
-            startDate: input.calendar.startDate,
-          })
-          .returning();
-        const calendarId = calendar[0].id;
-        await tx.insert(dayOpeningTime).values(createOT);
-        if (input.siteId) {
-          await tx.insert(openingCalendarSites).values({
-            siteId: input.siteId,
-            openingCalendarId: calendarId,
-          });
-        }
-        if (input.roomId) {
-          await tx.insert(openingCalendarRooms).values({
-            roomId: input.roomId,
-            openingCalendarId: calendarId,
-          });
-        }
-        if (input.clubId) {
-          await tx.insert(openingCalendarClubs).values({
-            clubId: input.clubId,
-            openingCalendarId: calendarId,
-          });
-        }
-        return calendar;
-      });
-    }),
+    .mutation(({ input }) =>
+      createCalendar({
+        startDate: input.calendar.startDate,
+        openingTime: input.calendar.openingTime,
+        siteId: input.siteId,
+        roomId: input.roomId,
+        clubId: input.clubId,
+      }),
+    ),
 });

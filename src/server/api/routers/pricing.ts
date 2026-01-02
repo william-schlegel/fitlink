@@ -1,4 +1,3 @@
-import { and, asc, eq, isNull } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -7,14 +6,18 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
+import { featureEnum, roleEnum } from "@/db/schema/enums";
+import { isAdmin, requireAdmin } from "@/server/lib/userTools";
 import {
-  pricing,
-  pricingFeature,
-  pricingOption,
-} from "@/db/schema/subscription";
-import { featureEnum, RoleEnum, roleEnum } from "@/db/schema/enums";
-import { isAdmin } from "@/server/lib/userTools";
-import { db } from "@/db";
+  getPricingById as dalGetPricingById,
+  getPricingForRole as dalGetPricingForRole,
+  getAllPricing as dalGetAllPricing,
+  createPricing as dalCreatePricing,
+  updatePricing as dalUpdatePricing,
+  deletePricing as dalDeletePricing,
+  undeletePricing as dalUndeletePricing,
+  deletePricingOption as dalDeletePricingOption,
+} from "@/db/dal";
 
 const PricingObject = z.object({
   id: z.cuid2(),
@@ -29,39 +32,32 @@ const PricingObject = z.object({
 
 export async function getAllPricing() {
   await isAdmin();
-  return db.query.pricing.findMany({
-    orderBy: [asc(pricing.roleTarget), asc(pricing.monthly)],
-  });
+  return dalGetAllPricing();
 }
 
 export async function getPricingById(id: string) {
-  return db.query.pricing.findFirst({
-    where: eq(pricing.id, id),
-    with: { options: true, features: true },
-  });
+  return dalGetPricingById(id);
 }
 
 export type GetPricingById = Awaited<ReturnType<typeof getPricingById>>;
 
-export async function getPricingForRole(internalRole: RoleEnum) {
-  return db.query.pricing.findMany({
-    where: and(
-      eq(pricing.roleTarget, internalRole),
-      isNull(pricing.deletionDate),
-    ),
-    with: { options: true, features: true },
-    orderBy: [asc(pricing.monthly)],
-  });
+export async function getPricingForRole(
+  internalRole: (typeof roleEnum.enumValues)[number],
+) {
+  return dalGetPricingForRole(internalRole);
 }
 
 export const pricingRouter = createTRPCRouter({
   getPricingById: publicProcedure
     .input(z.cuid2())
-    .query(async ({ input }) => await getPricingById(input)),
+    .query(async ({ input }) => getPricingById(input)),
+
   getPricingForRole: publicProcedure
     .input(z.enum(roleEnum.enumValues))
     .query(({ input }) => getPricingForRole(input)),
-  getAllPricing: protectedProcedure.query(async () => await getAllPricing()),
+
+  getAllPricing: protectedProcedure.query(async () => getAllPricing()),
+
   createPricing: protectedProcedure
     .input(
       z.object({
@@ -70,41 +66,11 @@ export const pricingRouter = createTRPCRouter({
         features: z.array(z.enum(featureEnum.enumValues)),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
-      if (ctx.user.internalRole !== "ADMIN")
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to create a pricing",
-        });
-
-      return await db.transaction(async (tx) => {
-        const [newPricing] = await tx
-          .insert(pricing)
-          .values(input.base)
-          .returning();
-
-        if (input.options.length > 0) {
-          await tx.insert(pricingOption).values(
-            input.options.map((o, i) => ({
-              name: o,
-              weight: i,
-              pricingId: newPricing.id,
-            })),
-          );
-        }
-
-        if (input.features.length > 0) {
-          await tx.insert(pricingFeature).values(
-            input.features.map((f) => ({
-              feature: f,
-              pricingId: newPricing.id,
-            })),
-          );
-        }
-
-        return newPricing;
-      });
+    .mutation(({ input, ctx }) => {
+      requireAdmin(ctx.user);
+      return dalCreatePricing(input);
     }),
+
   updatePricing: protectedProcedure
     .input(
       z.object({
@@ -113,12 +79,8 @@ export const pricingRouter = createTRPCRouter({
         features: z.array(z.enum(featureEnum.enumValues)),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
-      if (ctx.user.internalRole !== "ADMIN")
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to modify a pricing",
-        });
+    .mutation(({ input, ctx }) => {
+      requireAdmin(ctx.user);
 
       if (!input.base.id)
         throw new TRPCError({
@@ -126,82 +88,31 @@ export const pricingRouter = createTRPCRouter({
           message: "Pricing ID is required",
         });
 
-      const pricingId = input.base.id;
-
-      return await db.transaction(async (tx) => {
-        await tx
-          .delete(pricingOption)
-          .where(eq(pricingOption.pricingId, pricingId));
-        await tx
-          .delete(pricingFeature)
-          .where(eq(pricingFeature.pricingId, pricingId));
-
-        const [updatedPricing] = await tx
-          .update(pricing)
-          .set(input.base)
-          .where(eq(pricing.id, pricingId))
-          .returning();
-
-        if (input.options.length > 0) {
-          await tx.insert(pricingOption).values(
-            input.options.map((o, i) => ({
-              name: o,
-              weight: i,
-              pricingId: pricingId,
-            })),
-          );
-        }
-
-        if (input.features.length > 0) {
-          await tx.insert(pricingFeature).values(
-            input.features.map((f) => ({
-              feature: f,
-              pricingId: pricingId,
-            })),
-          );
-        }
-
-        return updatedPricing;
+      return dalUpdatePricing({
+        base: { id: input.base.id, ...input.base },
+        options: input.options,
+        features: input.features,
       });
     }),
+
   deletePricing: protectedProcedure
     .input(z.string())
     .mutation(({ input, ctx }) => {
-      if (ctx.user.internalRole !== "ADMIN")
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to delete a pricing",
-        });
-      return db
-        .update(pricing)
-        .set({
-          deletionDate: new Date(Date.now()),
-        })
-        .where(eq(pricing.id, input));
+      requireAdmin(ctx.user);
+      return dalDeletePricing(input);
     }),
+
   undeletePricing: protectedProcedure
     .input(z.string())
     .mutation(({ input, ctx }) => {
-      if (ctx.user.internalRole !== "ADMIN")
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to undelete a pricing",
-        });
-      return db
-        .update(pricing)
-        .set({
-          deletionDate: null,
-        })
-        .where(eq(pricing.id, input));
+      requireAdmin(ctx.user);
+      return dalUndeletePricing(input);
     }),
+
   deletePricingOption: protectedProcedure
     .input(z.string())
     .mutation(({ input, ctx }) => {
-      if (ctx.user.internalRole !== "ADMIN")
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to delete a pricing option",
-        });
-      return db.delete(pricingOption).where(eq(pricingOption.name, input));
+      requireAdmin(ctx.user);
+      return dalDeletePricingOption(input);
     }),
 });

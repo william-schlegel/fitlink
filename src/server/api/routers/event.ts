@@ -1,9 +1,13 @@
-import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
-import { event } from "@/db/schema/club";
-import { db } from "@/db";
+import {
+  getEventById,
+  getEventsForClub,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+} from "@/db/dal";
 
 const eventObject = z.object({
   id: z.cuid2(),
@@ -27,36 +31,26 @@ const eventObject = z.object({
 });
 
 export const eventRouter = createTRPCRouter({
-  getEventById: protectedProcedure.input(z.cuid2()).query(async ({ input }) => {
-    const eventData = await db.query.event.findFirst({
-      where: eq(event.id, input),
-      with: { club: { with: { manager: true } } },
-    });
-    return eventData ?? null;
-  }),
-  getEventsForClub: protectedProcedure.input(z.cuid2()).query(({ input }) => {
-    return db.query.event.findMany({
-      where: eq(event.clubId, input),
-      orderBy: [desc(event.startDate)],
-    });
-  }),
+  getEventById: protectedProcedure
+    .input(z.cuid2())
+    .query(async ({ input }) => {
+      const eventData = await getEventById(input);
+      return eventData ?? null;
+    }),
+
+  getEventsForClub: protectedProcedure
+    .input(z.cuid2())
+    .query(({ input }) => getEventsForClub(input)),
+
   createEvent: protectedProcedure
     .input(eventObject.omit({ id: true }))
-    .mutation(({ input }) =>
-      db.insert(event).values({
-        ...input,
-      }),
-    ),
+    .mutation(({ input }) => createEvent(input)),
+
   updateEvent: protectedProcedure
     .input(eventObject.partial())
-    .mutation(({ input }) => {
-      return db.update(event).set({
-        ...input,
-      });
-    }),
+    .mutation(({ input }) => updateEvent({ id: input.id ?? "", ...input })),
+
   deleteEvent: protectedProcedure
     .input(z.cuid2())
-    .mutation(async ({ input }) => {
-      return db.delete(event).where(eq(event.id, input));
-    }),
+    .mutation(({ input }) => deleteEvent(input)),
 });

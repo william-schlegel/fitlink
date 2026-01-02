@@ -1,5 +1,3 @@
-import { and, asc, eq, inArray } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
 import z from "zod";
 
 import {
@@ -7,72 +5,47 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { activity, club, clubCoachs, site } from "@/db/schema/club";
 import { createClubRoomInConvex } from "@/lib/convex/server";
-import { openingCalendarClubs } from "@/db/schema/planning";
-import { userCoach } from "@/db/schema/user";
-import { page } from "@/db/schema/page";
-import { user } from "@/db/schema/auth";
-import { isCUID } from "@/lib/utils";
-import { db } from "@/db";
+import {
+  requireAdminOrSelf,
+  requireAdminOrOwner,
+} from "@/server/lib/userTools";
+import {
+  getClubById as dalGetClubById,
+  getClubPagesForNav,
+  getClubsForManager,
+  getAllClubs,
+  getClubForUpdate,
+  createClub as dalCreateClub,
+  createSiteForClub,
+  updateClub as dalUpdateClub,
+  updateClubConvexRoomId,
+  updateClubCalendar as dalUpdateClubCalendar,
+  deleteClub as dalDeleteClub,
+  updateClubActivities as dalUpdateClubActivities,
+  getClubCoachRelation,
+  addCoachToClub,
+  getUserWithPricingFeatures,
+} from "@/db/dal";
 
 export const clubRouter = createTRPCRouter({
   getClubById: protectedProcedure
     .input(z.object({ clubId: z.cuid2(), userId: z.string() }))
     .query(async ({ input }) => {
-      if (!isCUID(input.clubId) || !input.userId) return null;
-      const userData = await db.query.user.findFirst({
-        where: eq(user.id, input.userId),
-        with: {
-          pricing: {
-            with: {
-              features: true,
-            },
-          },
-        },
-      });
-      const take: number | undefined = userData?.pricing?.features.find(
+      if (!input.clubId || !input.userId) return null;
+      const userData = await getUserWithPricingFeatures(input.userId);
+      const siteLimit: number | undefined = userData?.pricing?.features.find(
         (f) => f.feature === "MANAGER_MULTI_SITE",
       )
         ? undefined
         : 1;
-      const myClub = await db.query.club.findFirst({
-        where: eq(club.id, input.clubId),
-        with: {
-          sites: {
-            limit: take,
-            with: {
-              rooms: {
-                with: {
-                  activities: {
-                    with: {
-                      activity: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-
-          activities: { with: { group: true } },
-        },
-      });
-      return myClub;
+      return dalGetClubById(input.clubId, siteLimit);
     }),
+
   getClubPagesForNavByClubId: publicProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      const myClub = await db.query.club.findFirst({
-        where: eq(club.id, input),
-        with: {
-          pages: {
-            where: eq(page.published, true),
-            with: {
-              sections: true,
-            },
-          },
-        },
-      });
+      const myClub = await getClubPagesForNav(input);
       if (!myClub) return { pages: [], logoUrl: "" };
       return {
         pages: myClub.pages.map((p) => ({
@@ -89,36 +62,21 @@ export const clubRouter = createTRPCRouter({
         logoUrl: myClub.logoUrl,
       };
     }),
+
   getClubsForManager: protectedProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      const userData = await db.query.user.findFirst({
-        where: eq(user.id, input),
-        with: {
-          pricing: {
-            with: {
-              features: true,
-            },
-          },
-        },
-      });
+      const userData = await getUserWithPricingFeatures(input);
       const take = userData?.pricing?.features.find(
         (f) => f.feature === "MANAGER_MULTI_CLUB",
       )
         ? undefined
         : 1;
-      return db.query.club.findMany({
-        where: eq(club.managerId, input),
-        orderBy: asc(club.name),
-        limit: take,
-      });
+      return getClubsForManager(input, take);
     }),
-  getAllClubs: publicProcedure.query(async () =>
-    db.query.club.findMany({
-      orderBy: asc(club.name),
-      with: { activities: { with: { group: true } }, pages: true },
-    }),
-  ),
+
+  getAllClubs: publicProcedure.query(() => getAllClubs()),
+
   createClub: protectedProcedure
     .input(
       z.object({
@@ -133,54 +91,42 @@ export const clubRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId)
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to create a club for this user",
-        });
+      requireAdminOrSelf(ctx.user, input.userId);
 
-      const newClub = await db.transaction(async (tx) => {
-        // create the channel for the club via shared service (legacy)
-        const clb = await tx
-          .insert(club)
-          .values({
-            name: input.name,
-            address: input.address,
-            managerId: input.userId,
-            logoUrl: input.logoUrl,
-          })
-          .returning();
-
-        // create Convex room for real-time chat (after club is created so we have clubId)
-        const convexRoomId = await createClubRoomInConvex(
-          clb[0].id,
-          input.name,
-          input.userId,
-        );
-
-        // Update club with Convex room ID
-        if (convexRoomId) {
-          await tx
-            .update(club)
-            .set({ convexRoomId: String(convexRoomId) })
-            .where(eq(club.id, clb[0].id));
-          clb[0].convexRoomId = String(convexRoomId);
-        }
-        if (input.isSite) {
-          await tx.insert(site).values({
-            clubId: clb[0].id,
-            name: input.name,
-            address: input.address,
-            searchAddress: input.searchAddress,
-            longitude: input.longitude,
-            latitude: input.latitude,
-          });
-        }
-        return clb[0];
+      const clb = await dalCreateClub({
+        name: input.name,
+        address: input.address,
+        managerId: input.userId,
+        logoUrl: input.logoUrl,
       });
 
-      return newClub;
+      // create Convex room for real-time chat
+      const convexRoomId = await createClubRoomInConvex(
+        clb[0].id,
+        input.name,
+        input.userId,
+      );
+
+      // Update club with Convex room ID
+      if (convexRoomId) {
+        await updateClubConvexRoomId(clb[0].id, String(convexRoomId));
+        clb[0].convexRoomId = String(convexRoomId);
+      }
+
+      if (input.isSite) {
+        await createSiteForClub({
+          clubId: clb[0].id,
+          name: input.name,
+          address: input.address,
+          searchAddress: input.searchAddress,
+          longitude: input.longitude,
+          latitude: input.latitude,
+        });
+      }
+
+      return clb[0];
     }),
+
   updateClub: protectedProcedure
     .input(
       z.object({
@@ -191,24 +137,8 @@ export const clubRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const initialClub = await db.query.club.findFirst({
-        where: eq(club.id, input.id),
-        with: {
-          manager: {
-            with: {
-              user: true,
-            },
-          },
-        },
-      });
-      if (
-        ctx.user.internalRole !== "ADMIN" &&
-        ctx.user.id !== initialClub?.managerId
-      )
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to modify this club",
-        });
+      const initialClub = await getClubForUpdate(input.id);
+      requireAdminOrOwner(ctx.user, initialClub?.managerId);
 
       let convexRoomId: string | null | undefined;
       if (initialClub && !initialClub.convexRoomId) {
@@ -218,25 +148,16 @@ export const clubRouter = createTRPCRouter({
           initialClub.managerId,
         );
       }
-      const data: {
-        name: string;
-        address: string;
-        logoUrl: string | null;
-        convexRoomId?: string;
-      } = {
+
+      return dalUpdateClub({
+        id: input.id,
         name: input.name,
         address: input.address,
         logoUrl: input.logoUrl,
         convexRoomId: convexRoomId ?? undefined,
-      };
-      const updated = await db
-        .update(club)
-        .set(data)
-        .where(eq(club.id, input.id))
-        .returning();
-
-      return updated;
+      });
     }),
+
   updateClubCalendar: protectedProcedure
     .input(
       z.object({
@@ -244,33 +165,16 @@ export const clubRouter = createTRPCRouter({
         calendarId: z.cuid2(),
       }),
     )
-    .mutation(async ({ input }) => {
-      return db
-        .update(openingCalendarClubs)
-        .set({
-          openingCalendarId: input.calendarId,
-          clubId: input.id,
-        })
-        .where(eq(openingCalendarClubs.clubId, input.id))
-        .returning();
-    }),
+    .mutation(({ input }) => dalUpdateClubCalendar(input.id, input.calendarId)),
 
   deleteClub: protectedProcedure
     .input(z.cuid2())
     .mutation(async ({ ctx, input }) => {
-      const deletedClub = await db.query.club.findFirst({
-        where: eq(club.id, input),
-      });
-      if (
-        ctx.user.internalRole !== "ADMIN" &&
-        ctx.user.id !== deletedClub?.managerId
-      )
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to delete this club",
-        });
-      return db.delete(club).where(eq(club.id, input));
+      const deletedClub = await getClubForUpdate(input);
+      requireAdminOrOwner(ctx.user, deletedClub?.managerId);
+      return dalDeleteClub(input);
     }),
+
   updateClubActivities: protectedProcedure
     .input(
       z.object({
@@ -279,27 +183,11 @@ export const clubRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const initialClub = await db.query.club.findFirst({
-        where: eq(club.id, input.id),
-      });
-      if (
-        ctx.user.internalRole !== "ADMIN" &&
-        ctx.user.id !== initialClub?.managerId
-      )
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to modify this club",
-        });
-
-      // Option 1: Assign activities to this club (update clubId in activities)
-      return db
-        .update(activity)
-        .set({
-          clubId: input.id,
-        })
-        .where(inArray(activity.id, input.activities))
-        .returning();
+      const initialClub = await getClubForUpdate(input.id);
+      requireAdminOrOwner(ctx.user, initialClub?.managerId);
+      return dalUpdateClubActivities(input.id, input.activities);
     }),
+
   updateClubCoach: protectedProcedure
     .input(
       z.object({
@@ -309,34 +197,17 @@ export const clubRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const initialClub = await db.query.club.findFirst({
-        where: eq(club.id, input.clubId),
-      });
-
+      const initialClub = await getClubForUpdate(input.clubId);
       const managerId = input.managerId ?? initialClub?.managerId;
-      if (
-        ctx.user.internalRole !== "ADMIN" &&
-        managerId !== initialClub?.managerId
-      )
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to modify this club",
-        });
-      const existing = await db.query.clubCoachs.findFirst({
-        where: and(
-          eq(clubCoachs.clubId, input.clubId),
-          eq(clubCoachs.coachUserId, input.coachUserId),
-        ),
-      });
+      requireAdminOrOwner(ctx.user, managerId);
+
+      const existing = await getClubCoachRelation(
+        input.clubId,
+        input.coachUserId,
+      );
       if (existing) return existing;
 
-      const newCoach = await db
-        .insert(clubCoachs)
-        .values({
-          coachUserId: input.coachUserId,
-          clubId: input.clubId,
-        })
-        .returning();
+      const newCoach = await addCoachToClub(input.clubId, input.coachUserId);
       return newCoach;
     }),
 });

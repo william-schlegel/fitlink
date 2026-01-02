@@ -1,18 +1,36 @@
-import { and, asc, eq, ilike, or } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { eq } from "drizzle-orm";
+
+import {
+  getActivityById,
+  getActivityByName,
+  getActivityGroupById,
+  getActivityGroupsForUser,
+  getAllActivityGroups,
+  getActivitiesForClub,
+  getAllActivitiesForGroup,
+  getAllClubsForGroup,
+  createActivity,
+  updateActivity,
+  deleteActivity,
+  createActivityGroup,
+  updateActivityGroup,
+  deleteActivityGroup,
+  affectActivityToRoom,
+  removeActivityFromRoom,
+} from "@/db/dal";
+import {
+  requireAdmin,
+  requireAdminOrSelf,
+  requireAdminOrOwner,
+} from "@/server/lib/userTools";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import {
-  activity,
-  activityGroup,
-  club,
-  roomActivities,
-} from "@/db/schema/club";
+import { activityGroup } from "@/db/schema/club";
 import { db } from "@/db";
 
 const activityObject = z.object({
@@ -25,96 +43,53 @@ const activityObject = z.object({
 });
 
 export const activityRouter = createTRPCRouter({
-  getActivityById: protectedProcedure.input(z.cuid2()).query(({ input }) => {
-    return db.query.activity.findFirst({
-      where: eq(activity.id, input),
-    });
-  }),
-  getActivityByName: publicProcedure.input(z.string()).query(({ input }) =>
-    db.query.activity.findMany({
-      where: ilike(activity.name, `%${input}%`),
-      limit: 25,
-      with: { group: true },
-    }),
-  ),
+  getActivityById: protectedProcedure
+    .input(z.cuid2())
+    .query(({ input }) => getActivityById(input)),
+
+  getActivityByName: publicProcedure
+    .input(z.string())
+    .query(({ input }) => getActivityByName(input)),
+
   getActivityGroupById: protectedProcedure
     .input(z.cuid2())
-    .query(({ input }) => {
-      return db.query.activityGroup.findFirst({
-        where: eq(activityGroup.id, input),
-      });
-    }),
+    .query(({ input }) => getActivityGroupById(input)),
+
   getActivityGroupsForUser: protectedProcedure
     .input(z.string())
-    .query(({ input }) => {
-      return db.query.activityGroup.findMany({
-        where: or(
-          eq(activityGroup.default, true),
-          eq(activityGroup.coachId, input),
-        ),
-        with: { activities: true },
-        orderBy: asc(activityGroup.name),
-      });
-    }),
-  getAllActivityGroups: protectedProcedure.query(() =>
-    db.query.activityGroup.findMany({
-      with: { coach: { with: { user: true } } },
-      orderBy: asc(activityGroup.name),
-    }),
-  ),
+    .query(({ input }) => getActivityGroupsForUser(input)),
+
+  getAllActivityGroups: protectedProcedure.query(() => getAllActivityGroups()),
+
   getActivitiesForClub: protectedProcedure
     .input(z.object({ clubId: z.cuid2(), userId: z.string() }))
     .query(({ ctx, input }) => {
-      if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== input.userId)
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to query activities from this club",
-        });
-
-      return db.query.club.findFirst({
-        where: eq(club.id, input.clubId),
-        with: { activities: true },
-      });
+      requireAdminOrSelf(ctx.user, input.userId);
+      return getActivitiesForClub(input.clubId);
     }),
+
   getAllActivitiesForGroup: protectedProcedure
     .input(z.cuid2())
     .query(({ ctx, input }) => {
-      if (ctx.user.internalRole !== "ADMIN")
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to query activities from this group",
-        });
-
-      return db.query.activity.findMany({
-        where: eq(activity.groupId, input),
-        with: { club: { columns: { name: true } } },
-      });
+      requireAdmin(ctx.user);
+      return getAllActivitiesForGroup(input);
     }),
+
   getAllClubsForGroup: protectedProcedure
     .input(z.cuid2())
     .query(({ ctx, input }) => {
-      if (ctx.user.internalRole !== "ADMIN")
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to query activities from this group",
-        });
-
-      return db.query.activity.findMany({
-        where: eq(activity.groupId, input),
-        with: { club: { columns: { name: true, id: true } } },
-      });
+      requireAdmin(ctx.user);
+      return getAllClubsForGroup(input);
     }),
+
   createActivity: protectedProcedure
     .input(activityObject.omit({ id: true }))
-    .mutation(({ input }) => db.insert(activity).values(input)),
+    .mutation(({ input }) => createActivity(input)),
+
   updateActivity: protectedProcedure
     .input(activityObject.partial())
-    .mutation(({ input }) =>
-      db
-        .update(activity)
-        .set(input)
-        .where(eq(activity.id, input.id ?? "")),
-    ),
+    .mutation(({ input }) => updateActivity(input)),
+
   deleteActivity: protectedProcedure
     .input(
       z.object({
@@ -122,9 +97,8 @@ export const activityRouter = createTRPCRouter({
         clubId: z.cuid2(),
       }),
     )
-    .mutation(({ input }) =>
-      db.delete(activity).where(eq(activity.id, input.activityId)),
-    ),
+    .mutation(({ input }) => deleteActivity(input.activityId)),
+
   createGroup: protectedProcedure
     .input(
       z.object({
@@ -134,15 +108,13 @@ export const activityRouter = createTRPCRouter({
       }),
     )
     .mutation(({ input }) =>
-      db
-        .insert(activityGroup)
-        .values({
-          name: input.name,
-          coachId: input.userId,
-          default: input.default,
-        })
-        .returning(),
+      createActivityGroup({
+        name: input.name,
+        coachId: input.userId,
+        default: input.default,
+      }),
     ),
+
   updateGroup: protectedProcedure
     .input(
       z.object({
@@ -151,15 +123,8 @@ export const activityRouter = createTRPCRouter({
         default: z.boolean().optional().default(false),
       }),
     )
-    .mutation(({ input }) =>
-      db
-        .update(activityGroup)
-        .set({
-          name: input.name,
-          default: input.default,
-        })
-        .where(eq(activityGroup.id, input.id)),
-    ),
+    .mutation(({ input }) => updateActivityGroup(input)),
+
   deleteGroup: protectedProcedure
     .input(
       z.object({
@@ -170,16 +135,10 @@ export const activityRouter = createTRPCRouter({
       const group = await db.query.activityGroup.findFirst({
         where: eq(activityGroup.id, input.groupId),
       });
-      if (ctx.user.internalRole !== "ADMIN" && ctx.user.id !== group?.coachId)
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to delete this group",
-        });
-
-      return db
-        .delete(activityGroup)
-        .where(eq(activityGroup.id, input.groupId));
+      requireAdminOrOwner(ctx.user, group?.coachId);
+      return deleteActivityGroup(input.groupId);
     }),
+
   affectToRoom: protectedProcedure
     .input(
       z.object({
@@ -188,11 +147,9 @@ export const activityRouter = createTRPCRouter({
       }),
     )
     .mutation(({ input }) =>
-      db.insert(roomActivities).values({
-        roomId: input.roomId,
-        activityId: input.activityId,
-      }),
+      affectActivityToRoom(input.roomId, input.activityId),
     ),
+
   removeFromRoom: protectedProcedure
     .input(
       z.object({
@@ -201,13 +158,6 @@ export const activityRouter = createTRPCRouter({
       }),
     )
     .mutation(({ input }) =>
-      db
-        .delete(roomActivities)
-        .where(
-          and(
-            eq(roomActivities.roomId, input.roomId),
-            eq(roomActivities.activityId, input.activityId),
-          ),
-        ),
+      removeActivityFromRoom(input.roomId, input.activityId),
     ),
 });

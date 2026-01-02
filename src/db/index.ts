@@ -34,3 +34,7 @@ export const schema = {
 export const db = drizzle(pool, {
   schema,
 });
+
+// Type for db or transaction client
+export type DbClient = typeof db;
+export type TxClient = Parameters<Parameters<typeof db.transaction>[0]>[0];

@@ -1,66 +1,21 @@
-import { asc, eq, gte } from "drizzle-orm";
-import { startOfToday } from "date-fns";
 import { z } from "zod";
 
+import {
+  getAdminData as dalGetAdminData,
+  getManagerDataForUserId as dalGetManagerData,
+  getCoachDataForUserId as dalGetCoachData,
+} from "@/db/dal";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 import { hasRole, isAdmin } from "@/server/lib/userTools";
-import { club, event } from "@/db/schema/club";
-import { user } from "@/db/schema/auth";
-import { db } from "@/db";
 
 export async function getAdminData() {
   await isAdmin();
-  const clubs = await db.query.club.findMany({
-    with: {
-      sites: {
-        columns: { id: true },
-        with: { rooms: { columns: { id: true } } },
-      },
-    },
-  });
-  const members = await db.query.user.findMany();
-  return {
-    clubs,
-    members,
-  };
+  return dalGetAdminData();
 }
 
 export async function getManagerDataForUserId(userId: string) {
   await hasRole(["MANAGER", "MANAGER_COACH", "ADMIN"], true);
-  const clubData = await db.query.club.findMany({
-    where: eq(club.managerId, userId),
-    with: {
-      sites: {
-        columns: { name: true },
-        with: {
-          rooms: {
-            columns: {
-              name: true,
-            },
-          },
-        },
-      },
-      activities: {
-        columns: { name: true },
-      },
-      subscriptions: {
-        columns: {
-          name: true,
-        },
-        with: {
-          users: {
-            columns: {
-              userId: true,
-            },
-          },
-        },
-      },
-      events: {
-        where: gte(event.startDate, startOfToday()),
-        orderBy: asc(event.startDate),
-      },
-    },
-  });
+  const clubData = await dalGetManagerData(userId);
 
   if (!clubData) return null;
   const memberSet = new Set<string>();
@@ -106,26 +61,7 @@ export async function getManagerDataForUserId(userId: string) {
 
 export async function getCoachDataForUserId(userId: string) {
   await hasRole(["COACH", "MANAGER_COACH", "ADMIN"], true);
-
-  const coachData = await db.query.user.findFirst({
-    where: eq(user.id, userId),
-    with: {
-      coachData: {
-        with: {
-          clubs: {
-            with: {
-              club: true,
-            },
-          },
-          certifications: true,
-          activityGroups: true,
-          page: true,
-          coachingPrices: true,
-        },
-      },
-    },
-  });
-  return coachData;
+  return dalGetCoachData(userId);
 }
 
 export const dashboardRouter = createTRPCRouter({
@@ -134,6 +70,6 @@ export const dashboardRouter = createTRPCRouter({
     .query(({ input }) => getManagerDataForUserId(input)),
   getCoachDataForUserId: protectedProcedure
     .input(z.string())
-    .query(async () => {}),
+    .query(({ input }) => getCoachDataForUserId(input)),
   getAdminData: protectedProcedure.query(async () => getAdminData()),
 });

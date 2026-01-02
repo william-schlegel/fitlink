@@ -72,8 +72,6 @@ async function CGContent({ cgId }: CGContentProps) {
 
   if (!cgQuery) return null;
 
-  console.log(cgQuery);
-
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="flex items-center justify-between">

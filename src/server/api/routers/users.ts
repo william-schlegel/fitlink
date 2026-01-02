@@ -1,30 +1,50 @@
-import { and, asc, count, eq, gte, ilike, SQL } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
+import {
+  getUserById as dalGetUserById,
+  getUserByEmail,
+  getUserFullById as dalGetUserFullById,
+  getUserAvatar,
+  getAllUsers as dalGetAllUsers,
+  searchUsers,
+  updateUser as dalUpdateUser,
+  deleteUser as dalDeleteUser,
+  updatePaymentPeriod as dalUpdatePaymentPeriod,
+  getUserSubscriptionsById,
+  getReservationsByUserId,
+  getPricingData,
+  getMemberData,
+  getOrCreateCoachData,
+  updateCoachData,
+} from "@/db/dal";
+import {
+  getOrCreateMember,
+  addSubscriptionToMember,
+  deleteMemberSubscription,
+  getSubscriptionWithClub,
+} from "@/db/dal";
 import {
   addMemberToClubRoomInConvex,
   createCoachRoomInConvex,
   createNotificationInConvex,
 } from "@/lib/convex/server";
 import {
-  userCoach,
-  userManager,
-  userMember,
-  userMemberToSubscription,
-} from "@/db/schema/user";
+  hasRole,
+  isAdmin,
+  requireAdmin,
+  requireAdminOrSelf,
+} from "@/server/lib/userTools";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { pricing, subscription } from "@/db/schema/subscription";
 import { TUserFilter } from "@/app/admin/users/userFilter";
-import { hasRole, isAdmin } from "@/server/lib/userTools";
 import { featureEnum, roleEnum } from "@/db/schema/enums";
-import { auth, getActualUser } from "@/lib/auth/server";
-import { reservation } from "@/db/schema/planning";
-import { user } from "@/db/schema/auth";
+import { userCoach } from "@/db/schema/user";
+import { auth } from "@/lib/auth/server";
 import { db } from "@/db";
 
 const UserFilter = z
@@ -44,47 +64,18 @@ export type GetUserByIdOptions = {
   withPricing?: boolean;
 };
 
-async function getMemberData(memberId: string) {
-  const md = await db.query.userMember.findFirst({
-    where: eq(userMember.userId, memberId),
-    with: {
-      subscriptions: {
-        with: {
-          subscription: {
-            with: {
-              activitieGroups: { with: { activityGroup: true } },
-              activities: { with: { activity: true } },
-              sites: { with: { site: true } },
-              rooms: { with: { room: true } },
-              club: true,
-            },
-          },
-        },
-      },
-      clubs: true,
-    },
-  });
-  const cd = await db.query.userCoach.findFirst({
-    where: eq(userCoach.userId, memberId),
-    with: {
-      coachingPrices: true,
-      certifications: true,
-      activityGroups: true,
-      page: true,
-      clubs: true,
-    },
-  });
-  const mnd = await db.query.userManager.findFirst({
-    where: eq(userManager.userId, memberId),
-    with: {
-      managedClubs: true,
-    },
-  });
-  return {
-    memberData: md,
-    coachData: cd,
-    managerData: mnd,
-  };
+export async function getAllUsers(input: {
+  filter: TUserFilter;
+  skip: number;
+  take: number;
+}) {
+  await isAdmin(true);
+  return dalGetAllUsers(input);
+}
+
+export async function getUserFullById(id: string) {
+  await isAdmin(true);
+  return dalGetUserFullById(id);
 }
 
 export type CoachDataOfferType = NonNullable<
@@ -94,78 +85,6 @@ export type CoachDataOfferType = NonNullable<
 export type MemberSubscriptionType = NonNullable<
   Awaited<ReturnType<typeof getMemberData>>["memberData"]
 >["subscriptions"][number]["subscription"];
-
-async function getPricingData(pricingId: string) {
-  return await db.query.pricing.findFirst({
-    where: eq(pricing.id, pricingId!),
-    with: {
-      features: true,
-    },
-  });
-}
-
-export async function getAllUsers(input: {
-  filter: TUserFilter;
-  skip: number;
-  take: number;
-}) {
-  await isAdmin(true);
-  const filter: SQL[] = [];
-  if (input.filter?.name)
-    filter.push(ilike(user.name, `%${input.filter.name}%`));
-  if (input.filter?.email)
-    filter.push(ilike(user.email, `%${input.filter.email}%`));
-  if (input.filter?.internalRole)
-    filter.push(eq(user.internalRole, input.filter.internalRole));
-  if (input.filter?.dueDate)
-    filter.push(eq(user.cancelationDate, input.filter.dueDate));
-
-  return db.transaction(async (tx) => {
-    const userCount = await tx
-      .select({ count: count() })
-      .from(user)
-      .where(and(...filter));
-    const users = await tx
-      .select()
-      .from(user)
-      .where(and(...filter))
-      .limit(input.take)
-      .offset(input.skip);
-    return { userCount: userCount[0].count, users };
-  });
-}
-
-export async function getUserFullById(id: string) {
-  await isAdmin(true);
-  return db.query.user.findFirst({
-    where: eq(user.id, id),
-    with: {
-      pricing: true,
-      paiements: true,
-      managerData: {
-        with: {
-          managedClubs: {
-            columns: {
-              id: true,
-            },
-            with: {
-              sites: { columns: { id: true } },
-              activities: { columns: { id: true } },
-              subscriptions: { columns: { id: true } },
-            },
-          },
-        },
-      },
-      coachData: {
-        with: {
-          certifications: true,
-          page: true,
-          // clubs: true,
-        },
-      },
-    },
-  });
-}
 
 export const userRouter = createTRPCRouter({
   getUserById: publicProcedure
@@ -183,12 +102,7 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const u = await db.query.user.findFirst({
-        where: eq(user.id, input.id),
-        with: {
-          accounts: true,
-        },
-      });
+      const u = await dalGetUserById(input.id);
       if (!u) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -203,17 +117,12 @@ export const userRouter = createTRPCRouter({
 
       let pricingData: Awaited<ReturnType<typeof getPricingData>> | null = null;
 
-      if (input.options?.withPricing)
-        pricingData = await getPricingData(u.pricingId!);
+      if (input.options?.withPricing && u.pricingId)
+        pricingData = await getPricingData(u.pricingId);
 
       let features: (typeof featureEnum.enumValues)[number][] = [];
-      if (input.options?.withFeatures) {
-        const featuresData = await db.query.pricing.findFirst({
-          where: eq(pricing.id, u.pricingId!),
-          with: {
-            features: true,
-          },
-        });
+      if (input.options?.withFeatures && u.pricingId) {
+        const featuresData = await getPricingData(u.pricingId);
         features = featuresData?.features.map((f) => f.feature) ?? [];
       }
 
@@ -240,50 +149,16 @@ export const userRouter = createTRPCRouter({
         pricing: pricingData,
         features,
       };
-
-      // // TODO: add chat token
-      // // if (u?.id && !u?.chatToken) {
-      // //   const token = createToken(user.id);
-      // //   user.chatToken = token;
-      // //   await ctx.prisma.user.update({
-      // //     where: { id: input },
-      // //     data: { chatToken: token },
-      // //   });
-      // // }
     }),
+
   getUserAvatar: protectedProcedure
     .input(z.object({ userId: z.string() }))
-    .query(async ({ input }) => {
-      const u = await db.query.user.findFirst({
-        where: eq(user.id, input.userId),
-      });
-      return { name: u?.name ?? "", imageUrl: u?.image ?? "/images/dummy.jpg" };
-    }),
+    .query(({ input }) => getUserAvatar(input.userId)),
+
   getUserSubscriptionsById: protectedProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      const u = await db.query.user.findFirst({
-        where: eq(user.id, input),
-        with: {
-          memberData: {
-            with: {
-              subscriptions: {
-                with: {
-                  subscription: {
-                    with: {
-                      activitieGroups: { with: { activityGroup: true } },
-                      activities: { with: { activity: true } },
-                      sites: { with: { site: true } },
-                      rooms: { with: { room: true } },
-                      club: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
+      const u = await getUserSubscriptionsById(input);
       return (
         u?.memberData?.subscriptions?.map(({ subscription: s }) => ({
           ...s,
@@ -294,31 +169,15 @@ export const userRouter = createTRPCRouter({
         })) ?? []
       );
     }),
+
   getReservationsByUserId: protectedProcedure
     .input(z.object({ userId: z.string(), after: z.date() }))
-    .query(({ input }) => {
-      return db.query.reservation.findMany({
-        where: and(
-          eq(reservation.userId, input.userId),
-          gte(reservation.date, input.after),
-        ),
-        orderBy: [asc(reservation.date)],
-        with: {
-          room: true,
-          activity: true,
-          planningActivity: {
-            with: {
-              activity: true,
-              coach: true,
-              room: true,
-            },
-          },
-        },
-      });
-    }),
+    .query(({ input }) => getReservationsByUserId(input.userId, input.after)),
+
   getUserFullById: protectedProcedure
     .input(z.string())
     .query(({ input }) => getUserFullById(input)),
+
   getAllUsers: protectedProcedure
     .input(
       z.object({
@@ -328,6 +187,7 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .query(({ input }) => getAllUsers(input)),
+
   searchUsers: protectedProcedure
     .input(
       z.object({
@@ -335,20 +195,7 @@ export const userRouter = createTRPCRouter({
         limit: z.number().min(1).max(50).default(20),
       }),
     )
-    .query(async ({ input }) => {
-      const users = await db
-        .select({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          image: user.image,
-        })
-        .from(user)
-        .where(ilike(user.name, `%${input.query}%`))
-        .limit(input.limit);
-
-      return users;
-    }),
+    .query(({ input }) => searchUsers(input.query, input.limit)),
 
   updateUser: protectedProcedure
     .input(
@@ -375,34 +222,21 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (input.internalRole === "ADMIN" && ctx.user?.internalRole !== "ADMIN")
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Only an admin user can give admin access",
-        });
+      // Special case: only admin can grant admin access
+      if (input.internalRole === "ADMIN") {
+        requireAdmin(ctx.user);
+      }
 
       const result = await db.transaction(async (tx) => {
         if (
           input.internalRole === "COACH" ||
           input.internalRole === "MANAGER_COACH"
         ) {
-          let initialCoach = await tx.query.userCoach.findFirst({
-            where: eq(userCoach.userId, input.id),
-          });
-          if (!initialCoach) {
-            initialCoach = (
-              await tx
-                .insert(userCoach)
-                .values({
-                  userId: input.id,
-                })
-                .returning()
-            )[0];
-          }
-          const coachRecord = await tx
-            .update(userCoach)
-            .set({
-              ...initialCoach,
+          const initialCoach = await getOrCreateCoachData(input.id, tx);
+
+          await updateCoachData(
+            {
+              id: initialCoach.id,
               userId: input.id,
               longitude: input.longitude,
               latitude: input.latitude,
@@ -412,11 +246,11 @@ export const userRouter = createTRPCRouter({
               aboutMe: input.aboutMe,
               description: input.description,
               coachingActivities: input.coachingActivities,
-            })
-            .where(eq(userCoach.id, initialCoach.id))
-            .returning();
+            },
+            tx,
+          );
 
-          // Create Convex room for coach
+          // Create Convex room for coach (external call - not part of DB transaction)
           if (!initialCoach?.convexRoomId) {
             const coachName = input.publicName ?? input.name ?? "Coach";
             const convexRoomId = await createCoachRoomInConvex(
@@ -425,17 +259,22 @@ export const userRouter = createTRPCRouter({
             );
 
             // Update coach record with Convex room ID
-            if (convexRoomId && coachRecord[0]) {
-              await tx
-                .update(userCoach)
-                .set({ convexRoomId: String(convexRoomId) })
-                .where(eq(userCoach.userId, input.id));
+            if (convexRoomId) {
+              await updateCoachData(
+                {
+                  id: initialCoach.id,
+                  userId: input.id,
+                  convexRoomId: String(convexRoomId),
+                },
+                tx,
+              );
             }
           }
         }
-        return tx
-          .update(user)
-          .set({
+
+        return dalUpdateUser(
+          {
+            id: input.id,
             name: input.name,
             email: input.email,
             phone: input.phone,
@@ -445,35 +284,27 @@ export const userRouter = createTRPCRouter({
             monthlyPayment: input.monthlyPayment,
             cancelationDate: input.cancelationDate,
             image: input.profileImageUrl,
-          })
-          .where(eq(user.id, input.id))
-          .returning();
+          },
+          tx,
+        );
       });
       return result;
     }),
+
   deleteUser: protectedProcedure
     .input(z.string())
     .mutation(({ ctx, input }) => {
-      if (ctx.user?.internalRole !== "ADMIN")
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Only an admin user can delete a user",
-        });
-      return db.delete(user).where(eq(user.id, input));
+      requireAdmin(ctx.user);
+      return dalDeleteUser(input);
     }),
+
   updatePaymentPeriod: protectedProcedure
     .input(z.object({ userId: z.string(), monthlyPayment: z.boolean() }))
     .mutation(({ ctx, input }) => {
-      if (ctx.user?.id !== input.userId && ctx.user?.internalRole !== "ADMIN")
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Only an admin or actual user can change periodicity",
-        });
-      return db
-        .update(user)
-        .set({ monthlyPayment: input.monthlyPayment })
-        .where(eq(user.id, input.userId));
+      requireAdminOrSelf(ctx.user, input.userId);
+      return dalUpdatePaymentPeriod(input.userId, input.monthlyPayment);
     }),
+
   addSubscriptionWithValidation: protectedProcedure
     .input(
       z.object({
@@ -485,10 +316,7 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       // notify the club manager
-      const sub = await db.query.subscription.findFirst({
-        where: eq(subscription.id, input.subscriptionId),
-        with: { club: true },
-      });
+      const sub = await getSubscriptionWithClub(input.subscriptionId);
       const managerId = sub?.club.managerId;
       if (managerId) {
         await createNotificationInConvex({
@@ -520,36 +348,16 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       await hasRole(["ADMIN", "MANAGER", "MANAGER_COACH"]);
-      const member = await db.query.userMember.findFirst({
-        where: eq(userMember.userId, input.userId),
-      });
-      let memberId = member?.id;
-      if (!member) {
-        const newMember = await db
-          .insert(userMember)
-          .values({
-            userId: input.userId,
-          })
-          .returning();
-        memberId = newMember[0].id;
-      }
-      return db.insert(userMemberToSubscription).values({
-        userId: memberId!,
-        subscriptionId: input.subscriptionId,
-      });
+      const member = await getOrCreateMember(input.userId);
+      return addSubscriptionToMember(member.id, input.subscriptionId);
     }),
+
   deleteSubscription: protectedProcedure
     .input(z.object({ userId: z.string(), subscriptionId: z.cuid2() }))
     .mutation(({ input }) =>
-      db
-        .delete(userMemberToSubscription)
-        .where(
-          and(
-            eq(userMemberToSubscription.userId, input.userId),
-            eq(userMemberToSubscription.subscriptionId, input.subscriptionId),
-          ),
-        ),
+      deleteMemberSubscription(input.userId, input.subscriptionId),
     ),
+
   createUserWithCredentials: publicProcedure
     .input(
       z.object({
@@ -560,9 +368,7 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       // check if user exist with email
-      const userData = await db.query.user.findFirst({
-        where: eq(user.email, input.email),
-      });
+      const userData = await getUserByEmail(input.email);
       if (userData)
         throw new TRPCError({
           code: "CONFLICT",

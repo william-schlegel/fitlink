@@ -1,35 +1,59 @@
-import { and, eq, gte, ilike, lte, or, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  coachCertification,
-  selectedModuleForCoach,
-  certificationOrganism,
-  certificationModule,
-  certificationModuleActivityGroups,
-  certificationOrganismModules,
-  coachingLevel,
-  coachingPrice,
-  coachingPricePack,
-} from "@/db/schema/coach";
-import {
-  coachingLevelListEnum,
-  CoachingTargetEnum,
-  coachingTargetEnum,
-} from "@/db/schema/enums";
+  // Coaching
+  getCoachById as dalGetCoachById,
+  getSelectedModulesForCoach,
+  getCoachHomePage,
+  getCoachsFromDistance,
+  getAllCoaches,
+  getCoachsForClub as dalGetCoachsForClub,
+  getCoachData,
+  getOfferById,
+  getOfferWithDetails,
+  getCoachOffers,
+  getOffersForCompanies,
+  createCoachOffer as dalCreateCoachOffer,
+  updateCoachOffer as dalUpdateCoachOffer,
+  deleteCoachOffer,
+  getOfferActivityByName as dalGetOfferActivityByName,
+  getUserWithPricingForOffer,
+  // Certifications
+  getCertificationById,
+  getCertificationsForCoach,
+  getCoachWithCertifications,
+  getSelectedModulesForCertifications,
+  createCertification as dalCreateCertification,
+  updateCertification as dalUpdateCertification,
+  deleteCertification,
+  getCoachId,
+  getModulesByIds,
+  insertSelectedModulesForCoach,
+  deleteSelectedModulesForCertification,
+  getCertificationOrganisms,
+  getCertificationOrganismById,
+  createOrganism as dalCreateOrganism,
+  updateOrganism as dalUpdateOrganism,
+  deleteOrganism as dalDeleteOrganism,
+  createModule as dalCreateModule,
+  updateModule as dalUpdateModule,
+  deleteModule as dalDeleteModule,
+  linkModuleToOrganism,
+  deleteOrganismModuleLinks,
+  updateActivitiesForModule,
+  insertModuleActivityGroups,
+  deleteModuleActivityGroups,
+} from "@/db/dal";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
+import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
 import { LATITUDE, LONGITUDE, DEFAULT_RANGE } from "@/lib/defaultValues";
-import { page, pageSection, pageSectionElement } from "@/db/schema/page";
-import { calculateBBox, calculateDistance } from "@/lib/distance";
+import { calculateDistance } from "@/lib/distance";
 import { isAdmin } from "@/server/lib/userTools";
-import { userCoach } from "@/db/schema/user";
-import { club } from "@/db/schema/club";
-import { user } from "@/db/schema/auth";
 import { isCUID } from "@/lib/utils";
 import { db } from "@/db";
 
@@ -76,53 +100,23 @@ export const coachRouter = createTRPCRouter({
   getCoachById: protectedProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      const coach = await db.query.user.findFirst({
-        where: eq(user.id, input),
-        with: {
-          coachData: {
-            with: {
-              activityGroups: {
-                with: {
-                  activities: true,
-                },
-              },
-              certifications: true,
-              clubs: true,
-              page: { columns: { id: true } },
-            },
-          },
-        },
-      });
+      const coach = await dalGetCoachById(input);
       if (!coach) return null;
 
-      // Fetch certifications with modules separately to avoid deep nesting issues
       const certifications = coach.coachData?.certifications ?? [];
       const certificationIds = certifications.map((c) => c.id);
       const coachId = coach.coachData?.id;
 
       let selectedModules: Array<{
         certificationId: string;
-        module: {
-          id: string;
-          name: string;
-        };
+        module: { id: string; name: string };
       }> = [];
 
       if (certificationIds.length > 0 && coachId) {
-        const modules = await db.query.selectedModuleForCoach.findMany({
-          where: and(
-            eq(selectedModuleForCoach.coachId, coachId),
-            inArray(selectedModuleForCoach.certificationId, certificationIds),
-          ),
-          with: {
-            module: {
-              columns: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        });
+        const modules = await getSelectedModulesForCoach(
+          coachId,
+          certificationIds,
+        );
 
         selectedModules = modules.map((sm) => ({
           certificationId: sm.certificationId,
@@ -133,7 +127,6 @@ export const coachRouter = createTRPCRouter({
         }));
       }
 
-      // Group modules by certificationId
       const modulesByCertification = new Map<
         string,
         Array<{ id: string; name: string }>
@@ -145,22 +138,7 @@ export const coachRouter = createTRPCRouter({
         modulesByCertification.get(sm.certificationId)!.push(sm.module);
       }
 
-      // Find the first page for the coach with target "HOME"
-      const pages = await db.query.page.findMany({
-        where: and(eq(page.coachId, coach?.id ?? ""), eq(page.target, "HOME")),
-        with: {
-          sections: {
-            with: {
-              elements: {
-                where: eq(pageSectionElement.elementType, "HERO_CONTENT"),
-              },
-            },
-            where: eq(pageSection.model, "HERO"),
-          },
-        },
-        limit: 1,
-      });
-
+      const pages = await getCoachHomePage(coach?.id ?? "");
       const imageData = pages[0];
       const imgData = imageData?.sections?.[0]?.elements?.[0]?.imageUrls?.[0];
       const imageUrl = imgData ?? coach.image ?? "/images/dummy.jpg";
@@ -177,6 +155,7 @@ export const coachRouter = createTRPCRouter({
         imageUrl: imageUrl ?? "/images/dummy.jpg",
       };
     }),
+
   getCoachsFromDistance: publicProcedure
     .input(
       z.object({
@@ -186,23 +165,11 @@ export const coachRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const bbox = calculateBBox(
+      const coachs = await getCoachsFromDistance(
         input.locationLng,
         input.locationLat,
         input.range,
       );
-      const coachs = await db.query.userCoach.findMany({
-        where: and(
-          gte(userCoach.longitude, bbox?.[0]?.[0] ?? LONGITUDE),
-          lte(userCoach.longitude, bbox?.[1]?.[0] ?? LONGITUDE),
-          gte(userCoach.latitude, bbox?.[1]?.[1] ?? LATITUDE),
-          lte(userCoach.latitude, bbox?.[0]?.[1] ?? LATITUDE),
-        ),
-        with: {
-          page: true,
-          certifications: true,
-        },
-      });
       return coachs
         .map((c) => ({
           ...c,
@@ -219,33 +186,28 @@ export const coachRouter = createTRPCRouter({
             c.distance <= (c.range ?? DEFAULT_RANGE),
         );
     }),
+
   createCertification: protectedProcedure
     .input(CertificationData.omit({ id: true }))
     .mutation(async ({ input }) => {
-      return await db.transaction(async (tx) => {
-        const certif = await tx
-          .insert(coachCertification)
-          .values({
+      return db.transaction(async (tx) => {
+        const certif = await dalCreateCertification(
+          {
             name: input.name,
             obtainedIn: input.obtainedIn,
             coachId: input.userId,
-            documentUrl: input.documentUrl || undefined,
-          })
-          .returning();
+            documentUrl: input.documentUrl,
+          },
+          tx,
+        );
 
         const certifId = certif[0].id;
 
         if (input.modules.length) {
-          const coach = await tx.query.userCoach.findFirst({
-            where: eq(userCoach.userId, input.userId),
-            columns: { id: true },
-          });
-          const modules = await tx.query.certificationModule.findMany({
-            where: inArray(certificationModule.id, input.modules),
-            columns: { id: true, certificationOrganismId: true },
-          });
+          const coach = await getCoachId(input.userId, tx);
+          const modules = await getModulesByIds(input.modules, tx);
           const byId = new Map(modules.map((m) => [m.id, m]));
-          await tx.insert(selectedModuleForCoach).values(
+          await insertSelectedModulesForCoach(
             input.modules
               .map((m) => byId.get(m))
               .filter(
@@ -258,11 +220,13 @@ export const coachRouter = createTRPCRouter({
                 certificationModuleId: m.id,
                 certificationOrganismId: m.certificationOrganismId,
               })),
+            tx,
           );
         }
         return certif;
       });
     }),
+
   updateCertification: protectedProcedure
     .input(CertificationData.partial())
     .mutation(({ input }) =>
@@ -273,29 +237,21 @@ export const coachRouter = createTRPCRouter({
             code: "BAD_REQUEST",
             message: "Invalid certification id",
           });
-        const certif = await tx
-          .update(coachCertification)
-          .set({
+        const certif = await dalUpdateCertification(
+          {
+            id: certifId,
             name: input.name,
             obtainedIn: input.obtainedIn,
-            coachId: input.userId ?? undefined,
-          })
-          .where(eq(coachCertification.id, certifId))
-          .returning();
-        await tx
-          .delete(selectedModuleForCoach)
-          .where(eq(selectedModuleForCoach.certificationId, certifId));
+            coachId: input.userId,
+          },
+          tx,
+        );
+        await deleteSelectedModulesForCertification(certifId, tx);
         if (input.modules?.length) {
-          const coach = await tx.query.userCoach.findFirst({
-            where: eq(userCoach.userId, input.userId ?? ""),
-            columns: { id: true },
-          });
-          const modules = await tx.query.certificationModule.findMany({
-            where: inArray(certificationModule.id, input.modules),
-            columns: { id: true, certificationOrganismId: true },
-          });
+          const coach = await getCoachId(input.userId ?? "", tx);
+          const modules = await getModulesByIds(input.modules, tx);
           const byId = new Map(modules.map((m) => [m.id, m]));
-          await tx.insert(selectedModuleForCoach).values(
+          await insertSelectedModulesForCoach(
             input.modules
               .map((m) => byId.get(m))
               .filter(
@@ -308,46 +264,24 @@ export const coachRouter = createTRPCRouter({
                 certificationModuleId: m.id,
                 certificationOrganismId: m.certificationOrganismId,
               })),
+            tx,
           );
         }
 
         return certif;
       }),
     ),
+
   deleteCertification: protectedProcedure
     .input(z.cuid2())
-    .mutation(({ input }) =>
-      db.delete(coachCertification).where(eq(coachCertification.id, input)),
-    ),
-  getAllCoachs: publicProcedure.query(() =>
-    db.query.user.findMany({
-      where: or(
-        eq(user.internalRole, "COACH"),
-        eq(user.internalRole, "MANAGER_COACH"),
-      ),
-      with: {
-        coachData: {
-          with: {
-            certifications: true,
-            page: true,
-          },
-        },
-      },
-    }),
-  ),
+    .mutation(({ input }) => deleteCertification(input)),
+
+  getAllCoachs: publicProcedure.query(() => getAllCoaches()),
+
   getCoachsForClub: publicProcedure
     .input(z.cuid2())
     .query(async ({ input }) => {
-      const clb = await db.query.club.findFirst({
-        where: eq(club.id, input),
-        with: {
-          coaches: {
-            with: {
-              coach: { with: { user: { columns: { id: true, name: true } } } },
-            },
-          },
-        },
-      });
+      const clb = await dalGetCoachsForClub(input);
       return (
         clb?.coaches.map(
           (c: { coach: { user: { id: string; name: string } } }) =>
@@ -359,57 +293,19 @@ export const coachRouter = createTRPCRouter({
   getCertificationsForCoach: protectedProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      const coach = await db.query.userCoach.findFirst({
-        where: eq(userCoach.userId, input),
-        columns: {
-          id: true,
-          userId: true,
-          publicName: true,
-          description: true,
-          aboutMe: true,
-          searchAddress: true,
-          latitude: true,
-          longitude: true,
-          range: true,
-          facebookLink: true,
-          twitterLink: true,
-          youtubeLink: true,
-          instagramLink: true,
-          rating: true,
-          pageStyle: true,
-        },
-      });
+      const coach = await getCoachWithCertifications(input);
       if (!coach) return null;
 
-      const certifications = await db.query.coachCertification.findMany({
-        where: eq(coachCertification.coachId, input),
-      });
-
-      // Fetch selectedModuleForCoach separately with correct coachId filter
+      const certifications = await getCertificationsForCoach(input);
       const certificationIds = certifications.map((c) => c.id);
       const selectedModules =
         certificationIds.length > 0
-          ? await db.query.selectedModuleForCoach.findMany({
-              where: and(
-                eq(selectedModuleForCoach.coachId, coach.id),
-                inArray(
-                  selectedModuleForCoach.certificationId,
-                  certificationIds,
-                ),
-              ),
-              with: {
-                module: {
-                  with: {
-                    activityGroups: {
-                      with: { activityGroup: true },
-                    },
-                  },
-                },
-              },
-            })
+          ? await getSelectedModulesForCertifications(
+              coach.id,
+              certificationIds,
+            )
           : [];
 
-      // Group selectedModules by certificationId
       const selectedModulesGroups = new Map<string, typeof selectedModules>();
       for (const sm of selectedModules) {
         if (!selectedModulesGroups.has(sm.certificationId)) {
@@ -440,22 +336,7 @@ export const coachRouter = createTRPCRouter({
   getCertificationById: protectedProcedure
     .input(z.cuid2())
     .query(async ({ input }) => {
-      const cert = await db.query.coachCertification.findFirst({
-        where: eq(coachCertification.id, input),
-        with: {
-          selectedModuleForCoach: {
-            with: {
-              module: {
-                with: {
-                  activityGroups: {
-                    with: { activityGroup: true },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
+      const cert = await getCertificationById(input);
       if (!cert) return cert;
       return {
         ...cert,
@@ -467,22 +348,9 @@ export const coachRouter = createTRPCRouter({
         ).filter((v, i, a) => a.findIndex((x) => x.id === v.id) === i),
       };
     }),
+
   getCertificationOrganisms: protectedProcedure.query(async () => {
-    const organisms = await db.query.certificationOrganism.findMany({
-      with: {
-        modules: {
-          with: {
-            module: {
-              with: {
-                activityGroups: {
-                  with: { activityGroup: true },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+    const organisms = await getCertificationOrganisms();
 
     return organisms.map((organism) => ({
       id: organism.id,
@@ -497,34 +365,11 @@ export const coachRouter = createTRPCRouter({
       })),
     }));
   }),
+
   getCertificationOrganismById: protectedProcedure
     .input(z.cuid2())
     .query(async ({ input }) => {
-      const cg = await db.query.certificationOrganism.findFirst({
-        where: eq(certificationOrganism.id, input),
-        with: {
-          modules: {
-            with: {
-              module: {
-                with: {
-                  activityGroups: {
-                    with: { activityGroup: true },
-                  },
-                },
-              },
-            },
-          },
-          selectedModulesForCoach: {
-            with: {
-              coach: {
-                with: {
-                  user: { columns: { id: true, name: true } },
-                },
-              },
-            },
-          },
-        },
-      });
+      const cg = await getCertificationOrganismById(input);
       if (!cg) return null;
       type CoachWithCount = {
         id: string;
@@ -558,6 +403,7 @@ export const coachRouter = createTRPCRouter({
         coaches: Array.from(coaches.values()),
       };
     }),
+
   createOrganism: protectedProcedure
     .input(
       z.object({
@@ -572,38 +418,26 @@ export const coachRouter = createTRPCRouter({
     )
     .mutation(({ input }) =>
       db.transaction(async (tx) => {
-        const organism = await tx
-          .insert(certificationOrganism)
-          .values({
-            name: input.name,
-          })
-          .returning();
+        const organism = await dalCreateOrganism(input.name, tx);
         const organismId = organism[0].id;
         for (const mod of input.modules) {
-          const [newModule] = await tx
-            .insert(certificationModule)
-            .values({
+          const newModule = await dalCreateModule(
+            {
               name: mod.name,
               certificationOrganismId: organismId,
-            })
-            .returning();
-          const moduleId = newModule.id;
-          await tx.insert(certificationOrganismModules).values({
-            certificationOrganismId: organismId,
-            certificationModuleId: moduleId,
-          });
+            },
+            tx,
+          );
+          const moduleId = newModule[0].id;
+          await linkModuleToOrganism(organismId, moduleId, tx);
           if (mod.activityIds.length > 0) {
-            await tx.insert(certificationModuleActivityGroups).values(
-              mod.activityIds.map((id) => ({
-                certificationModuleId: moduleId,
-                activityGroupId: id,
-              })),
-            );
+            await insertModuleActivityGroups(moduleId, mod.activityIds, tx);
           }
         }
         return organism;
       }),
     ),
+
   updateOrganism: protectedProcedure
     .input(
       z.object({
@@ -619,43 +453,22 @@ export const coachRouter = createTRPCRouter({
     )
     .mutation(({ input }) =>
       db.transaction(async (tx) => {
-        const organism = await tx
-          .update(certificationOrganism)
-          .set({
-            name: input.name,
-          })
-          .where(eq(certificationOrganism.id, input.id))
-          .returning();
-        // Remove existing module links for this organism
-        await tx
-          .delete(certificationOrganismModules)
-          .where(
-            eq(certificationOrganismModules.certificationOrganismId, input.id),
-          )
-          .catch(() => {
-            console.error("error deleting organism-module links");
-          });
-        // Recreate modules and links
+        const organism = await dalUpdateOrganism(input.id, input.name, tx);
+        await deleteOrganismModuleLinks(input.id, tx).catch(() => {
+          console.error("error deleting organism-module links");
+        });
         for (const mod of input.modules) {
-          const [newModule] = await tx
-            .insert(certificationModule)
-            .values({
+          const newModule = await dalCreateModule(
+            {
               name: mod.name,
               certificationOrganismId: input.id,
-            })
-            .returning();
-          const moduleId = newModule.id;
-          await tx.insert(certificationOrganismModules).values({
-            certificationOrganismId: input.id,
-            certificationModuleId: moduleId,
-          });
+            },
+            tx,
+          );
+          const moduleId = newModule[0].id;
+          await linkModuleToOrganism(input.id, moduleId, tx);
           if (mod.activityIds.length > 0) {
-            await tx.insert(certificationModuleActivityGroups).values(
-              mod.activityIds.map((id) => ({
-                certificationModuleId: moduleId,
-                activityGroupId: id,
-              })),
-            );
+            await insertModuleActivityGroups(moduleId, mod.activityIds, tx);
           }
         }
         return organism;
@@ -670,33 +483,16 @@ export const coachRouter = createTRPCRouter({
       }),
     )
     .mutation(({ input }) =>
-      db.transaction(async (tx) => {
-        await tx
-          .delete(certificationModuleActivityGroups)
-          .where(
-            eq(
-              certificationModuleActivityGroups.certificationModuleId,
-              input.moduleId,
-            ),
-          );
-        await tx.insert(certificationModuleActivityGroups).values(
-          input.activityIds.map((id) => ({
-            certificationModuleId: input.moduleId,
-            activityGroupId: id,
-          })),
-        );
-      }),
+      updateActivitiesForModule(input.moduleId, input.activityIds),
     ),
 
   deleteOrganism: protectedProcedure
     .input(z.cuid2())
     .mutation(async ({ input }) => {
       await isAdmin(true);
-      return db
-        .delete(certificationOrganism)
-        .where(eq(certificationOrganism.id, input))
-        .returning();
+      return dalDeleteOrganism(input);
     }),
+
   createModule: protectedProcedure
     .input(
       z.object({
@@ -707,28 +503,21 @@ export const coachRouter = createTRPCRouter({
     )
     .mutation(({ input }) =>
       db.transaction(async (tx) => {
-        const [mod] = await tx
-          .insert(certificationModule)
-          .values({
+        const mod = await dalCreateModule(
+          {
             name: input.name,
             certificationOrganismId: input.organismId,
-          })
-          .returning();
-        await tx.insert(certificationOrganismModules).values({
-          certificationOrganismId: input.organismId,
-          certificationModuleId: mod.id,
-        });
+          },
+          tx,
+        );
+        await linkModuleToOrganism(input.organismId, mod[0].id, tx);
         if (input.activityIds.length) {
-          await tx.insert(certificationModuleActivityGroups).values(
-            input.activityIds.map((id) => ({
-              certificationModuleId: mod.id,
-              activityGroupId: id,
-            })),
-          );
+          await insertModuleActivityGroups(mod[0].id, input.activityIds, tx);
         }
         return mod;
       }),
     ),
+
   updateModule: protectedProcedure
     .input(
       z.object({
@@ -737,56 +526,22 @@ export const coachRouter = createTRPCRouter({
         activityIds: z.array(z.cuid2()),
       }),
     )
-    .mutation(({ input }) =>
-      db
-        .update(certificationModule)
-        .set({
-          name: input.name,
-          // activityGroups: {
-          //   connect: input.activityIds.map((id) => ({ id })),
-          // },
-        })
-        .where(eq(certificationModule.id, input.id))
-        .returning(),
-    ),
+    .mutation(({ input }) => dalUpdateModule(input.id, input.name)),
 
   deleteModule: protectedProcedure
     .input(z.cuid2())
     .mutation(async ({ input }) => {
-      return db.transaction(async (tx) => {
-        await tx
-          .delete(certificationModuleActivityGroups)
-          .where(
-            eq(certificationModuleActivityGroups.certificationModuleId, input),
-          );
-        return tx
-          .delete(certificationModule)
-          .where(eq(certificationModule.id, input))
-          .returning();
-      });
+      await deleteModuleActivityGroups(input);
+      return dalDeleteModule(input);
     }),
-  getCoachData: protectedProcedure.input(z.cuid2()).query(({ input }) =>
-    db.query.userCoach.findFirst({
-      where: eq(userCoach.userId, input),
-      with: {
-        coachingPrices: {
-          with: {
-            packs: true,
-            coachingLevel: true,
-          },
-        },
-      },
-    }),
-  ),
-  getOfferById: protectedProcedure.input(z.cuid2()).query(({ input }) =>
-    db.query.coachingPrice.findFirst({
-      where: eq(coachingPrice.id, input),
-      with: {
-        packs: true,
-        coachingLevel: true,
-      },
-    }),
-  ),
+
+  getCoachData: protectedProcedure
+    .input(z.cuid2())
+    .query(({ input }) => getCoachData(input)),
+
+  getOfferById: protectedProcedure
+    .input(z.cuid2())
+    .query(({ input }) => getOfferById(input)),
 
   getOffersForCompanies: publicProcedure
     .input(
@@ -799,63 +554,20 @@ export const coachRouter = createTRPCRouter({
         priceMax: z.number().max(5000).default(1000),
       }),
     )
-    .query(async ({ input }) => {
-      const bbox = calculateBBox(
+    .query(({ input }) =>
+      getOffersForCompanies(
         input.locationLng,
         input.locationLat,
         input.range,
-      );
-      const uc = db
-        .select()
-        .from(userCoach)
-        .where(
-          and(
-            gte(userCoach.longitude, bbox?.[0]?.[0] ?? LONGITUDE),
-            lte(userCoach.longitude, bbox?.[1]?.[0] ?? LONGITUDE),
-            gte(userCoach.latitude, bbox?.[1]?.[1] ?? LATITUDE),
-            lte(userCoach.latitude, bbox?.[0]?.[1] ?? LATITUDE),
-          ),
-        )
-        .as("user_coaches");
-      const cp = await db
-        .select()
-        .from(coachingPrice)
-        .where(
-          and(
-            eq(coachingPrice.target, "COMPANY"),
-            gte(coachingPrice.perHourPhysical, input.priceMin),
-            lte(coachingPrice.perHourPhysical, input.priceMax),
-          ),
-        )
-        .leftJoin(uc, eq(coachingPrice.coachId, uc.userId));
-      return cp;
-    }),
+        input.priceMin,
+        input.priceMax,
+      ),
+    ),
+
   getOfferWithDetails: publicProcedure
     .input(z.cuid2())
     .query(async ({ input }) => {
-      const offer = await db.query.coachingPrice.findFirst({
-        where: eq(coachingPrice.id, input),
-
-        with: {
-          coach: {
-            with: {
-              page: {
-                with: {
-                  sections: {
-                    with: {
-                      elements: true,
-                    },
-                  },
-                },
-              },
-              user: true,
-            },
-          },
-          coachingLevel: true,
-          packs: true,
-        },
-      });
-
+      const offer = await getOfferWithDetails(input);
       const pageImage =
         offer?.coach.page?.sections?.[0]?.elements?.[0]?.imageUrls?.[0];
       const imageUrl =
@@ -863,155 +575,51 @@ export const coachRouter = createTRPCRouter({
 
       return { ...offer, imageUrl };
     }),
-  getCoachOffers: protectedProcedure.input(z.string()).query(({ input }) =>
-    db.query.coachingPrice.findMany({
-      where: eq(coachingPrice.coachId, input),
-      with: {
-        coachingLevel: true,
-      },
-    }),
-  ),
+
+  getCoachOffers: protectedProcedure
+    .input(z.string())
+    .query(({ input }) => getCoachOffers(input)),
+
   createCoachOffer: protectedProcedure
     .input(OfferData.omit({ id: true }))
     .mutation(async ({ input }) => {
-      const u = await db.query.user.findFirst({
-        where: eq(user.id, input.coachId),
-        with: {
-          pricing: {
-            with: { features: true },
-          },
-        },
-      });
+      const u = await getUserWithPricingForOffer(input.coachId);
       const pricingData = u?.pricing;
-      const target: CoachingTargetEnum = pricingData?.features.find(
+      const target = pricingData?.features.find(
         (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY",
       )
         ? input.target
         : "INDIVIDUAL";
 
-      return db.transaction(async (tx) => {
-        const [cp] = await tx
-          .insert(coachingPrice)
-          .values({
-            name: input.name,
-            description: input.description,
-            target,
-            excludingTaxes: input.excludingTaxes,
-            coachId: input.coachId,
-            inHouse: input.inHouse,
-            physical: input.physical,
-            myPlace: input.myPlace,
-            publicPlace: input.publicPlace,
-            startDate: input.startDate,
-            webcam: input.webcam,
-            freeHours: input.freeHours,
-            perDayPhysical: input.perDayPhysical,
-            perDayWebcam: input.perDayWebcam,
-            perHourPhysical: input.perHourPhysical,
-            perHourWebcam: input.perHourWebcam,
-            travelFee: input.travelFee,
-            travelLimit: input.travelLimit,
-          })
-          .returning();
-        if (input.packs.length)
-          await tx.insert(coachingPricePack).values(
-            input.packs.map((pack) => ({
-              coachingPriceId: cp.id,
-              nbHours: pack.nbHours,
-              packPrice: pack.packPrice,
-            })),
-          );
-        if (input.levels.length)
-          await tx.insert(coachingLevel).values(
-            input.levels.map((level) => ({
-              level,
-              offerId: cp.id,
-            })),
-          );
-        return coachingPrice;
-      });
+      return dalCreateCoachOffer({ ...input, target });
     }),
+
   updateCoachOffer: protectedProcedure
     .input(OfferData.partial())
     .mutation(async ({ input }) => {
-      const u = await db.query.user.findFirst({
-        where: eq(user.id, input.coachId ?? ""),
-        with: {
-          pricing: {
-            with: { features: true },
-          },
-        },
-      });
-
+      const u = await getUserWithPricingForOffer(input.coachId ?? "");
       const pricingData = u?.pricing;
       const target = pricingData?.features.find(
         (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY",
       )
         ? (input.target ?? "INDIVIDUAL")
         : "INDIVIDUAL";
-      return db.transaction(async (tx) => {
-        await tx
-          .delete(coachingPricePack)
-          .where(eq(coachingPricePack.coachingPriceId, input.id ?? ""));
-        await tx
-          .delete(coachingLevel)
-          .where(eq(coachingLevel.offerId, input.id ?? ""));
-        const [cp] = await tx
-          .update(coachingPrice)
-          .set({
-            name: input.name,
-            description: input.description,
-            target,
-            excludingTaxes: input.excludingTaxes,
-            coachId: input.coachId,
-            inHouse: input.inHouse,
-            physical: input.physical,
-            myPlace: input.myPlace,
-            publicPlace: input.publicPlace,
-            startDate: input.startDate,
-            webcam: input.webcam,
-            freeHours: input.freeHours,
-            perDayPhysical: input.perDayPhysical,
-            perDayWebcam: input.perDayWebcam,
-            perHourPhysical: input.perHourPhysical,
-            perHourWebcam: input.perHourWebcam,
-            travelFee: input.travelFee,
-            travelLimit: input.travelLimit,
-          })
-          .where(eq(coachingPrice.id, input.id ?? ""))
-          .returning();
-        if (input.packs?.length)
-          await tx.insert(coachingPricePack).values(
-            input.packs?.map((pack) => ({
-              coachingPriceId: cp.id,
-              nbHours: pack.nbHours,
-              packPrice: pack.packPrice,
-            })) ?? [],
-          );
-        if (input.levels?.length)
-          await tx.insert(coachingLevel).values(
-            input.levels?.map((level) => ({
-              level,
-              offerId: cp.id,
-            })) ?? [],
-          );
-        return cp;
+
+      return dalUpdateCoachOffer({
+        id: input.id ?? "",
+        ...input,
+        target,
       });
     }),
 
   deleteCoachOffer: protectedProcedure
     .input(z.cuid2())
-    .mutation(({ input }) =>
-      db.delete(coachingPrice).where(eq(coachingPrice.id, input)),
-    ),
+    .mutation(({ input }) => deleteCoachOffer(input)),
+
   getOfferActivityByName: publicProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      const coaches = await db
-        .select({
-          coachingActivities: userCoach.coachingActivities,
-        })
-        .from(userCoach);
+      const coaches = await dalGetOfferActivityByName(input);
 
       const allActivities = new Set<string>();
       coaches.forEach((coach) => {

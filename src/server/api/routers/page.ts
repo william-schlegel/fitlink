@@ -1,30 +1,46 @@
-import { and, eq, InferSelectModel } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
+import { InferSelectModel } from "drizzle-orm";
 import z from "zod";
-
-import { QueryResult } from "pg";
 
 import {
   pageSectionElementTypeEnum,
   pageSectionModelEnum,
   pageTargetEnum,
 } from "@/db/schema/enums";
-import {
-  page,
-  pageSection,
-  pageSectionElement,
-  page as pageTable,
-} from "@/db/schema/page";
+import { pageSectionElement } from "@/db/schema/page";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { club, club as clubTable } from "@/db/schema/club";
-import { userCoach } from "@/db/schema/user";
-import { user } from "@/db/schema/auth";
-import { isCUID } from "@/lib/utils";
-import { db } from "@/db";
+import {
+  getPageById,
+  getPagesForClub,
+  getPagesForManager,
+  getPageForCoach,
+  getUserForPageCreation,
+  getClubPage as dalGetClubPage,
+  getPublishedPagesForClub,
+  getClubBasicInfo,
+  getCoachPage as dalGetCoachPage,
+  getCoachUserForPage,
+  getCoachDataForPage,
+  createPage,
+  updatePage,
+  updatePagePublication,
+  deletePage,
+  getPageSection as dalGetPageSection,
+  getPageSectionElements,
+  createPageSection,
+  updatePageSection,
+  deletePageSection,
+  getPageSectionElementById,
+  createPageSectionElement,
+  updatePageSectionElement,
+  deletePageSectionElement,
+  updatePageStyleForCoach,
+  updatePageStyleForClub,
+  createPageWithInitialSection,
+} from "@/db/dal";
 
 const PageObject = z.object({
   id: z.cuid2(),
@@ -56,83 +72,38 @@ const PageSectionElementObject = z.object({
   optionValue: z.string().optional(),
 });
 
-export function getPagesForClub(clubId: string) {
-  if (!isCUID(clubId)) return [];
-  return db.query.page.findMany({
-    where: eq(page.clubId, clubId),
-  });
-}
+export { getPagesForClub };
 
 export const pageRouter = createTRPCRouter({
   getPagesForManager: protectedProcedure
     .input(z.string())
-    .query(async ({ input }) => {
-      const rows = await db
-        .select({ page: pageTable, club: clubTable })
-        .from(pageTable)
-        .innerJoin(clubTable, eq(pageTable.clubId, clubTable.id))
-        .where(eq(clubTable.managerId, input));
-      return rows.map((r) => ({ ...r.page, club: r.club }));
-    }),
+    .query(({ input }) => getPagesForManager(input)),
+
   getPagesForClub: protectedProcedure
     .input(z.cuid2())
     .query(({ input }) => getPagesForClub(input)),
+
   getPageForCoach: publicProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ input }) => {
-      {
-        const coachPage = await db.query.page.findFirst({
-          where: eq(page.coachId, input.userId),
-        });
-        if (coachPage) return coachPage;
-        const actualUser = await db.query.user.findFirst({
-          where: eq(user.id, input.userId),
-        });
+      const coachPage = await getPageForCoach(input.userId);
+      if (coachPage) return coachPage;
 
-        if (actualUser)
-          return db.transaction(async (tx) => {
-            const newPage = await tx
-              .insert(page)
-              .values({
-                name: actualUser.name ?? "coach",
-                target: "HOME",
-                coachId: input.userId,
-              })
-              .returning();
-
-            const newSection = await tx
-              .insert(pageSection)
-              .values({
-                pageId: newPage[0].id,
-                model: "HERO",
-                title: actualUser.name,
-                subTitle: actualUser.name,
-              })
-              .returning({ id: pageSection.id });
-
-            await tx.insert(pageSectionElement).values({
-              pageId: newPage[0].id,
-              sectionId: newSection[0].id,
-              elementType: "HERO_CONTENT",
-              title: actualUser.name,
-            });
-            return newPage[0];
-          });
-        return null;
+      const actualUser = await getUserForPageCreation(input.userId);
+      if (actualUser) {
+        return createPageWithInitialSection(
+          actualUser.name ?? "coach",
+          input.userId,
+          actualUser.name,
+        );
       }
+      return null;
     }),
-  getPageById: protectedProcedure.input(z.cuid2()).query(({ input }) =>
-    db.query.page.findFirst({
-      where: eq(page.id, input),
-      with: {
-        sections: {
-          with: {
-            elements: true,
-          },
-        },
-      },
-    }),
-  ),
+
+  getPageById: protectedProcedure
+    .input(z.cuid2())
+    .query(({ input }) => getPageById(input)),
+
   getPageSection: publicProcedure
     .input(
       z.object({
@@ -148,37 +119,22 @@ export const pageRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const section = await db.query.pageSection.findFirst({
-        where: and(
-          eq(pageSection.pageId, input.pageId),
-          eq(pageSection.model, input.section),
-        ),
-        with: {
-          elements: true,
-          page: { with: { club: true } },
-        },
-      });
+      const section = await dalGetPageSection(input.pageId, input.section);
       if (!section) {
         if (input.createIfNone) {
-          const newSection = await db
-            .insert(pageSection)
-            .values({
-              pageId: input.pageId,
-              model: input.section,
-              title: "Section",
-              subTitle: "",
-            })
-            .returning();
+          const newSection = await createPageSection({
+            pageId: input.pageId,
+            model: input.section,
+            title: "Section",
+            subTitle: "",
+          });
           let newElement: InferSelectModel<typeof pageSectionElement>[] = [];
           if (input.createElement) {
-            newElement = await db
-              .insert(pageSectionElement)
-              .values({
-                sectionId: newSection[0].id,
-                elementType: input.createElement.elementType,
-                title: input.createElement.title,
-              })
-              .returning();
+            newElement = await createPageSectionElement({
+              sectionId: newSection[0].id,
+              elementType: input.createElement.elementType,
+              title: input.createElement.title,
+            });
           }
           return {
             id: newSection[0].id,
@@ -216,25 +172,12 @@ export const pageRouter = createTRPCRouter({
         section: z.enum(pageSectionModelEnum.enumValues),
       }),
     )
-    .query(async ({ input }) => {
-      const section = await db.query.pageSection.findFirst({
-        where: and(
-          eq(pageSection.pageId, input.pageId),
-          eq(pageSection.model, input.section),
-        ),
-        with: {
-          elements: true,
-        },
-      });
-      if (!section) return null;
-      return section.elements;
-    }),
+    .query(({ input }) => getPageSectionElements(input.pageId, input.section)),
+
   getPageSectionElementById: protectedProcedure
     .input(z.cuid2())
     .query(async ({ input }) => {
-      const elem = await db.query.pageSectionElement.findFirst({
-        where: eq(pageSectionElement.id, input),
-      });
+      const elem = await getPageSectionElementById(input);
       if (!elem) return null;
       return {
         id: elem.id,
@@ -250,99 +193,59 @@ export const pageRouter = createTRPCRouter({
         images: elem.imageUrls,
       };
     }),
+
   createPage: protectedProcedure
     .input(PageObject.omit({ id: true }))
-    .mutation(({ input }) => db.insert(page).values(input).returning()),
+    .mutation(({ input }) =>
+      createPage({
+        name: input.name,
+        clubId: input.clubId,
+        coachId: input.userId,
+        target: input.target,
+      }),
+    ),
+
   updatePage: protectedProcedure
     .input(PageObject.omit({ clubId: true }))
-    .mutation(({ input }) =>
-      db.update(page).set(input).where(eq(page.id, input.id)),
-    ),
+    .mutation(({ input }) => updatePage(input)),
+
   deletePage: protectedProcedure
     .input(z.string())
-    .mutation(({ input }) => db.delete(page).where(eq(page.id, input))),
+    .mutation(({ input }) => deletePage(input)),
+
   createPageSection: protectedProcedure
     .input(PageSectionObject.omit({ id: true }))
-    .mutation(({ input }) => db.insert(pageSection).values(input).returning()),
+    .mutation(({ input }) => createPageSection(input)),
+
   updatePageSection: protectedProcedure
     .input(PageSectionObject.partial())
-    .mutation(({ input }) => {
-      return db
-        .update(pageSection)
-        .set(input)
-        .where(eq(pageSection.id, input.id ?? ""))
-        .returning();
-    }),
+    .mutation(({ input }) =>
+      updatePageSection({ id: input.id ?? "", ...input }),
+    ),
+
   deletePageSection: protectedProcedure
     .input(z.object({ pageId: z.cuid2(), sectionId: z.cuid2() }))
-    .mutation(async ({ input }) => {
-      return db
-        .delete(pageSection)
-        .where(eq(pageSection.id, input.sectionId))
-        .returning();
-    }),
+    .mutation(({ input }) => deletePageSection(input.sectionId)),
+
   createPageSectionElement: protectedProcedure
     .input(PageSectionElementObject.omit({ id: true }))
-    .mutation(({ input }) =>
-      db
-        .insert(pageSectionElement)
-        .values({
-          content: input.content,
-          elementType: input.elementType,
-          link: input.link,
-          pageId: input.pageId,
-          pageSection: input.pageSection,
-          title: input.title,
-          subTitle: input.subTitle,
-          sectionId: input.sectionId,
-          optionValue: input.optionValue,
-          imageUrls: input.images,
-        })
-        .returning(),
-    ),
+    .mutation(({ input }) => createPageSectionElement(input)),
+
   updatePageSectionElement: protectedProcedure
     .input(
       PageSectionElementObject.omit({ sectionId: true, elementType: true }),
     )
-    .mutation(({ input }) =>
-      db
-        .update(pageSectionElement)
-        .set({
-          content: input.content,
-          imageUrls: input.images,
-          link: input.link,
-          pageId: input.pageId,
-          pageSection: input.pageSection,
-          title: input.title,
-          subTitle: input.subTitle,
-          optionValue: input.optionValue,
-        })
-        .where(eq(pageSectionElement.id, input.id))
-        .returning(),
-    ),
+    .mutation(({ input }) => updatePageSectionElement(input)),
+
   deletePageSectionElement: protectedProcedure
     .input(z.string())
-    .mutation(({ input }) =>
-      db.delete(pageSectionElement).where(eq(pageSectionElement.id, input)),
-    ),
+    .mutation(({ input }) => deletePageSectionElement(input)),
+
   getClubPage: publicProcedure.input(z.string()).query(async ({ input }) => {
-    const clubPage = await db.query.page.findFirst({
-      where: and(eq(page.id, input), eq(page.published, true)),
-      with: {
-        sections: {
-          with: {
-            elements: true,
-          },
-        },
-      },
-    });
+    const clubPage = await dalGetClubPage(input);
     const clubId = clubPage?.clubId ?? "";
-    const allPages = await db.query.page.findMany({
-      where: and(eq(page.clubId, clubId), eq(page.published, true)),
-    });
-    const myClub = await db.query.club.findFirst({
-      where: eq(club.id, clubId),
-    });
+    const allPages = await getPublishedPagesForClub(clubId);
+    const myClub = await getClubBasicInfo(clubId);
     return {
       clubId,
       sections: clubPage?.sections ?? [],
@@ -351,44 +254,11 @@ export const pageRouter = createTRPCRouter({
       clubName: myClub?.name ?? "",
     };
   }),
+
   getCoachPage: publicProcedure.input(z.string()).query(async ({ input }) => {
-    // 1) Charger la page avec ses relations (sections -> elements -> images)
-    const coachPage = await db.query.page.findFirst({
-      where: and(
-        eq(page.id, input),
-        eq(page.target, "HOME"),
-        eq(page.published, true),
-      ),
-      with: {
-        sections: {
-          with: {
-            elements: true,
-          },
-        },
-      },
-    });
-
+    const coachPage = await dalGetCoachPage(input);
     const coachUserId = coachPage?.coachId ?? "";
-
-    // 2) Charger l'utilisateur coach et toutes ses relations nécessaires
-    const coachUser = await db.query.user.findFirst({
-      where: eq(user.id, coachUserId),
-      with: {
-        pricing: { with: { features: true } },
-        coachData: {
-          with: {
-            certifications: {
-              with: {
-                selectedModuleForCoach: {
-                  with: { module: true },
-                },
-              },
-            },
-            coachingPrices: { with: { coachingLevel: true } },
-          },
-        },
-      },
-    });
+    const coachUser = await getCoachUserForPage(coachUserId);
 
     const image = coachPage?.sections
       .find((s) => s.model === "HERO")
@@ -447,27 +317,11 @@ export const pageRouter = createTRPCRouter({
       image,
     };
   }),
+
   getCoachDataForPage: publicProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      const userData = await db.query.user.findFirst({
-        where: eq(user.id, input),
-        with: {
-          pricing: { with: { features: true } },
-          coachData: {
-            with: {
-              certifications: {
-                with: {
-                  selectedModuleForCoach: {
-                    with: { module: true },
-                  },
-                },
-              },
-              coachingPrices: { with: { coachingLevel: true } },
-            },
-          },
-        },
-      });
+      const userData = await getCoachDataForPage(input);
       const features = (userData?.pricing?.features ?? []) as Array<{
         feature: string;
       }>;
@@ -500,15 +354,13 @@ export const pageRouter = createTRPCRouter({
         offers,
       };
     }),
+
   updatePagePublication: protectedProcedure
     .input(z.object({ pageId: z.cuid2(), published: z.boolean() }))
     .mutation(({ input }) =>
-      db
-        .update(page)
-        .set({ published: input.published })
-        .where(eq(page.id, input.pageId))
-        .returning(),
+      updatePagePublication(input.pageId, input.published),
     ),
+
   updatePageStyleForCoach: protectedProcedure
     .input(
       z.object({
@@ -517,11 +369,9 @@ export const pageRouter = createTRPCRouter({
       }),
     )
     .mutation(({ input }) =>
-      db
-        .update(userCoach)
-        .set({ pageStyle: input.pageStyle })
-        .where(eq(userCoach.userId, input.userId)),
+      updatePageStyleForCoach(input.userId, input.pageStyle),
     ),
+
   updatePageStyleForClub: protectedProcedure
     .input(
       z.object({
@@ -530,9 +380,6 @@ export const pageRouter = createTRPCRouter({
       }),
     )
     .mutation(({ input }) =>
-      db
-        .update(club)
-        .set({ pageStyle: input.pageStyle })
-        .where(eq(club.id, input.clubId)),
+      updatePageStyleForClub(input.clubId, input.pageStyle),
     ),
 });
