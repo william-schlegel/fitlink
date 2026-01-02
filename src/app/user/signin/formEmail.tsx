@@ -40,7 +40,7 @@ export default async function FormEmail({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-base-content/50" />
+                  <Info className="h-4 w-4 text-[hsl(var(--foreground)/0.5)]" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{t("signin.magic-link")}</p>
@@ -73,7 +73,7 @@ export default async function FormEmail({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-base-content/50" />
+                  <Info className="h-4 w-4 text-[hsl(var(--foreground)/0.5)]" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{t("signin.credentials")}</p>

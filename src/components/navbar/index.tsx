@@ -27,7 +27,7 @@ export default async function Navbar({
   if (!caller) return null;
 
   return (
-    <div className="flex items-center justify-between bg-base-100 px-4 py-2">
+    <div className="flex items-center justify-between bg-shadcn-card px-4 py-2 border-b border-shadcn">
       <div className="flex items-center gap-2">
         <div className="lg:hidden">
           <MobileMenu />

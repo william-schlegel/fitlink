@@ -348,7 +348,6 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
                 buttonVariant="Icon-Outlined-Secondary"
                 buttonSize="md"
                 onClick={handleDeleteImage}
-                type="button"
                 className="absolute right-2 bottom-2"
               />
             </div>
@@ -558,7 +557,6 @@ function DisplayEventCard() {
               buttonVariant="Icon-Outlined-Secondary"
               buttonSize="md"
               onClick={() => setShowMap((prev) => !prev)}
-              type="button"
             />
           ) : null}
         </p>

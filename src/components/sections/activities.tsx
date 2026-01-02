@@ -480,7 +480,6 @@ function ActivityGroupForm({
               buttonVariant="Icon-Outlined-Secondary"
               buttonSize="md"
               onClick={handleDeleteImage}
-              type="button"
               className="absolute right-2 bottom-2"
             />
           </div>
@@ -601,7 +600,7 @@ function ActivityGroupContentCard({
           }`}
         >
           {elements?.map((activity) => (
-            <div key={activity.id} className="card bg-base-100 shadow-xl">
+            <div key={activity.id} className="card bg-shadcn-card shadow-xl">
               {activity.imageUrls?.[0] ? (
                 <figure className="white">
                   {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -296,7 +296,7 @@ function ClubForm({ onSubmit, onCancel, update, initialData }: ClubFormProps) {
                 variant="ghost"
                 size="icon"
                 onClick={handleDeleteImage}
-                className="absolute right-2 bottom-2 bg-base-100/80 hover:bg-base-100"
+                className="absolute right-2 bottom-2 bg-shadcn-card/80 hover:bg-shadcn-card"
               >
                 <Trash2 className="h-4 w-4 text-error" />
               </Button>
@@ -446,7 +446,7 @@ export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
               key={idx}
               className={cn(
                 "flex items-center gap-2 p-2 rounded-md",
-                idx <= step ? "bg-primary/10" : "bg-base-200"
+                idx <= step ? "bg-primary/10" : "bg-shadcn-muted"
               )}
             >
               <span className="text-xl">{s.content}</span>
@@ -557,7 +557,7 @@ export function CoachDataPresentation({
               <CollapsableGroup
                 key={cert.id}
                 groupName={cert.name}
-                className="bg-base-100"
+                className="bg-shadcn-card"
               >
                 {cert.modules.map((mod) => (
                   <Badge key={mod.id} variant="secondary" className="text-xs">

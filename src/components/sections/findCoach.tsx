@@ -206,7 +206,7 @@ function FindCoach({
           <i className="bx bx-search bx-xs" />
         </button>
         <div className="mt-8">
-          <table className="table-zebra table border border-base-300">
+          <table className="table-zebra table border border-shadcn">
             <thead>
               <tr>
                 <th>{t("coach")}</th>

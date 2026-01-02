@@ -90,15 +90,15 @@ export function LayoutPageList<T extends ListItem>({
       {children}
       {list.length === 0 ? (
         <div className="text-center">
-          <p className="text-base-content/70">{noItemsText}</p>
+          <p className="text-[hsl(var(--foreground)/0.7)]">{noItemsText}</p>
         </div>
       ) : (
-        <ul className="overflow-hidden rounded-md border border-base-300 bg-base-100 w-full">
+        <ul className="overflow-hidden rounded-md border border-shadcn bg-shadcn-card w-full">
           {list.map((item) => (
             <li key={item.id}>
               <Link
                 className={cn(
-                  "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-base-200",
+                  "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-shadcn-muted",
                   itemId === item.id && "border border-primary bg-primary/10",
                 )}
                 href={item.link ?? ""}
@@ -149,20 +149,20 @@ export function LayoutPageLists<T extends ListItem>({
       {children}
       {lists.length === 0 ? (
         <div className="text-center">
-          <p className="text-base-content/70">{noItemsText}</p>
+          <p className="text-[hsl(var(--foreground)/0.7)]">{noItemsText}</p>
         </div>
       ) : (
-        <ul className="overflow-hidden rounded-md border border-base-300 bg-base-100 w-full">
+        <ul className="overflow-hidden rounded-md border border-shadcn bg-shadcn-card w-full">
           {lists.map((group) => (
             <Fragment key={group.name}>
-              <h2 className="px-3 py-2 text-sm font-semibold text-base-content/70 bg-base-200">
+              <h2 className="px-3 py-2 text-sm font-semibold text-[hsl(var(--foreground)/0.7)] bg-shadcn-muted">
                 {group.name}
               </h2>
               {group.items.map((item) => (
                 <li key={item.id}>
                   <Link
                     className={cn(
-                      "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-base-200",
+                      "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-shadcn-muted",
                       itemId === item.id &&
                         "border border-primary bg-primary/10",
                     )}

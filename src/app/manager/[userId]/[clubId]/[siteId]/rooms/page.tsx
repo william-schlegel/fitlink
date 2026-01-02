@@ -2,11 +2,7 @@ import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-import {
-  getRoomById,
-  getRoomsForSite,
-  getSiteById,
-} from "@/server/api/routers/sites";
+import { getRoomById, getSiteById } from "@/server/api/routers/sites";
 import {
   CreateRoom,
   DeleteRoom,
@@ -54,7 +50,7 @@ export default async function ManageRooms({
     return <div>{t("club.manager-only")}</div>;
 
   const siteQuery = await getSiteById(siteId);
-  const roomQuery = await getRoomsForSite(siteId, userId);
+  const roomQuery = await caller.sites.getRoomsForSite(siteId);
   if (!roomId && roomQuery.length > 0)
     redirect(createLink({ roomId: roomQuery[0]?.id }, href));
 
@@ -65,7 +61,7 @@ export default async function ManageRooms({
       </div>
     );
 
-  const roomList = roomQuery.map((room) => ({
+  const roomList = roomQuery.map((room: NonNullable<typeof roomQuery[number]>) => ({
     id: room.id,
     name: room.name,
     link: createLink({ roomId: room.id }, href),

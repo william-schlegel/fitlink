@@ -44,11 +44,11 @@ export default async function ManageSites({
     return <div>{t("manager-only")}</div>;
 
   const clubQuery = await caller.clubs.getClubById({ clubId, userId: user.id });
-  const siteQuery = await getSitesForClub(clubId, user.id);
+  const siteQuery = await caller.sites.getSitesForClub(clubId);
   if (siteQuery.length && !siteId)
     redirect(createLink({ siteId: siteQuery[0]?.id }, href), RedirectType.push);
 
-  const siteList = siteQuery.map((site) => ({
+  const siteList = siteQuery.map((site: NonNullable<typeof siteQuery[number]>) => ({
     id: site.id,
     name: site.name,
     link: createLink({ siteId: site.id }, href),

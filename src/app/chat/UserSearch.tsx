@@ -89,7 +89,7 @@ export function UserSearch({ currentUserId, onClose }: UserSearchProps) {
         {isSearching && searchResults && (
           <div className="max-h-96 overflow-y-auto">
             {searchResults.length === 0 ? (
-              <p className="text-center text-base-content/60">
+              <p className="text-center text-[hsl(var(--foreground)/0.6)]">
                 {t("no-users-found")}
               </p>
             ) : (
@@ -101,7 +101,7 @@ export function UserSearch({ currentUserId, onClose }: UserSearchProps) {
                       <button
                         type="button"
                         onClick={() => handleStartConversation(user.id)}
-                        className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg"
+                        className="flex items-center gap-3 p-3 hover:bg-shadcn-muted rounded-lg"
                       >
                         <div className="avatar">
                           <div className="w-10 h-10 rounded-full">
@@ -117,7 +117,7 @@ export function UserSearch({ currentUserId, onClose }: UserSearchProps) {
                         <div className="flex-1 text-left">
                           <div className="font-semibold">{user.name}</div>
                           {user.email && (
-                            <div className="text-sm text-base-content/60">
+                            <div className="text-sm text-[hsl(var(--foreground)/0.6)]">
                               {user.email}
                             </div>
                           )}

@@ -72,7 +72,7 @@ export function MessageItem({ message, userId }: MessageItemProps) {
     >
       <div className="chat-header">
         <span className="text-xs opacity-50">
-          {userInfo.isLoading ? <Spinner size={12} /> : userInfo.data?.name}
+          {userInfo.isLoading ? <Spinner size="sm" /> : userInfo.data?.name}
         </span>
         <time className="text-xs opacity-50">
           {userInfo.isLoading ? (
@@ -83,7 +83,7 @@ export function MessageItem({ message, userId }: MessageItemProps) {
         </time>
       </div>
       <div
-        className="chat-bubble bg-base-300 text-base-content relative"
+        className="chat-bubble bg-shadcn-muted text-[hsl(var(--foreground))] relative"
         ref={msgRef}
       >
         {message.content && <p>{message.content}</p>}
@@ -178,7 +178,7 @@ const EmojiPicker = ({
 
   return createPortal(
     <div
-      className="absolute mb-2 flex gap-1 bg-base-100 p-2 rounded-lg shadow-lg z-10"
+      className="absolute mb-2 flex gap-1 bg-shadcn-card p-2 rounded-lg shadow-lg z-10"
       style={{ top: position.top, left: position.left }}
     >
       {commonEmojis.map((emoji) => (

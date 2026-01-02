@@ -68,7 +68,7 @@ export default async function ClubPage({
       <div className="flex items-center gap-2">
         <TargetName target={page.target ?? "HOME"} />
         <i
-          className={`bx bx-xs aspect-square rounded-full bg-base-100 ${
+          className={`bx bx-xs aspect-square rounded-full bg-shadcn-card ${
             page.published ? "bx-check text-success" : "bx-x text-error"
           }`}
         />

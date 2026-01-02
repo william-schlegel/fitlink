@@ -55,7 +55,7 @@ function DirectConversationItem({ conv }: DirectConversationItemProps) {
           {otherUser?.name ?? "..."}
         </span>
         {conv.lastMessage && (
-          <span className="text-xs text-base-content/60 truncate">
+          <span className="text-xs text-[hsl(var(--foreground)/0.6)] truncate">
             {conv.lastMessage.content}
           </span>
         )}

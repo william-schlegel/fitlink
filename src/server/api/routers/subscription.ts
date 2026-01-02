@@ -21,7 +21,7 @@ import {
   getClubWithActivities,
   getSitesWithRoomActivities,
   getRoomsWithActivities,
-  getActivitiesForClub,
+  getActivitiesListForClub,
   getSitesWithRoomActivitiesBasic,
   getRoomsWithActivitiesBasic,
 } from "@/db/dal";
@@ -156,24 +156,32 @@ export const subscriptionRouter = createTRPCRouter({
       }
       if (input.mode === "ACTIVITY") {
         if (input.restriction === "CLUB") {
-          const activities = await getActivitiesForClub(input.clubId);
+          const activities = await getActivitiesListForClub(input.clubId);
           return { activities };
         }
         if (input.restriction === "SITE") {
           const sites = await getSitesWithRoomActivitiesBasic(input.siteIds);
-          const activities = new Map<string, { id: string }>();
+          const activities = new Map<string, { id: string; name: string }>();
           for (const site of sites)
             for (const room of site.rooms)
-              for (const activity of room.activities)
-                activities.set(activity.id, activity);
+              for (const roomActivity of room.activities)
+                if (roomActivity.activity)
+                  activities.set(roomActivity.activity.id, {
+                    id: roomActivity.activity.id,
+                    name: roomActivity.activity.name,
+                  });
           return { activities: Array.from(activities.values()) };
         }
         if (input.restriction === "ROOM") {
           const rooms = await getRoomsWithActivitiesBasic(input.roomIds);
-          const activities = new Map<string, { id: string }>();
+          const activities = new Map<string, { id: string; name: string }>();
           for (const room of rooms)
-            for (const activity of room.activities)
-              activities.set(activity.id, activity);
+            for (const roomActivity of room.activities)
+              if (roomActivity.activity)
+                activities.set(roomActivity.activity.id, {
+                  id: roomActivity.activity.id,
+                  name: roomActivity.activity.name,
+                });
           return { activities: Array.from(activities.values()) };
         }
       }

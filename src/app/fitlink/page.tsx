@@ -41,13 +41,13 @@ export default async function FitlinkPage() {
           </div>
         </div>
       </section>
-      <section id="find-club" className="bg-base-200">
+      <section id="find-club" className="bg-shadcn-muted">
         <div className="container mx-auto p-4">
           <h2>{t("find-club")}</h2>
           <FindClub />
         </div>
       </section>
-      <section id="find-coach" className="bg-base-100">
+      <section id="find-coach" className="bg-shadcn-card">
         <div className="container mx-auto p-4 @container">
           <h2>{t("find-coach")}</h2>
           <FindCoach />

@@ -546,7 +546,7 @@ function MapSection({
   const circle = generateCircle(longitude, latitude, range);
 
   return (
-    <section className={`${preview ? "pt-4" : "pt-24"} w-full bg-base-200`}>
+    <section className={`${preview ? "pt-4" : "pt-24"} w-full bg-shadcn-muted`}>
       <div className={`mx-auto max-w-4xl ${preview ? "p-8" : "p-24"}`}>
         <h2
           className={`w-full text-center ${
@@ -605,14 +605,14 @@ function CoachOffers({ offers, preview, coachData }: CoachOffersProps) {
   const t = useTranslations("pages");
   if (!offers.length) return null;
   return (
-    <section className={`${preview ? "py-4" : "py-12"} w-full bg-base-200`}>
+    <section className={`${preview ? "py-4" : "py-12"} w-full bg-shadcn-muted`}>
       <div className={`container mx-auto ${preview ? "py-2 px-8" : "p-8"}`}>
         <h3>{t("coach.coach-offers")}</h3>
         <div className="flex flex-wrap gap-2">
           {offers.map((offer) => (
             <article
               key={offer.id}
-              className="card flex-1 bg-base-100 p-4 shadow-xl"
+              className="card flex-1 bg-shadcn-card p-4 shadow-xl"
             >
               <div className={`card-body ${preview ? "p-0" : ""}`}>
                 <h2 className={`card-title ${preview ? "text-base" : ""}`}>

@@ -511,7 +511,7 @@ function DeleteZone({
     <li
       ref={setNodeRef}
       className={`grid place-items-center rounded border border-secondary py-2 text-secondary ${
-        isOver ? "bg-secondary/10" : "bg-base-100"
+        isOver ? "bg-secondary/10" : "bg-shadcn-card"
       }`}
     >
       <i className="bx bx-trash bx-sm" />
@@ -538,7 +538,7 @@ const Option = ({ option }: OptionProps) => {
       {...attributes}
       {...listeners}
       style={style}
-      className="my-2 flex items-center justify-between gap-4 border border-base-300 bg-base-100 p-2"
+      className="my-2 flex items-center justify-between gap-4 border border-shadcn bg-shadcn-card p-2"
     >
       <div className="flex items-center gap-2">
         <i className="bx bx-menu bx-sm text-base-300" />

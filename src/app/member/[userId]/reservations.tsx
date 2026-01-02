@@ -96,7 +96,7 @@ function MyReservation({ reservation, memberId, day }: MyReservationProps) {
   }
 
   return (
-    <div className="rounded border border-primary bg-base-100">
+    <div className="rounded border border-primary bg-shadcn-card">
       <div className="flex items-center justify-between gap-4 bg-primary px-3 py-1 text-center text-primary-content">
         <span>
           {formatDateLocalized(reservation.date, {

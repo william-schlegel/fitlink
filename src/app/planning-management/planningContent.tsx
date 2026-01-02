@@ -220,7 +220,7 @@ export function PlanningContent({
             <div>
               <div className="h-12"></div>
               <div>
-                <div className="flex w-10 shrink-0 flex-col border-r border-base-200 bg-base-100 text-center">
+                <div className="flex w-10 shrink-0 flex-col border-r border-shadcn bg-shadcn-card text-center">
                   {Array.from(
                     { length: NB_HOUR },
                     (_, k) => k + START_HOUR,
@@ -374,7 +374,7 @@ function PlanningActivity({
   const w = 100 / nbPosition;
   return (
     <button
-      className="absolute flex cursor-pointer items-center justify-center rounded border border-secondary bg-base-200 text-base-content"
+      className="absolute flex cursor-pointer items-center justify-center rounded border border-secondary bg-shadcn-muted text-[hsl(var(--foreground))]"
       style={{ top, height, width: `${w}%`, left: `${position * w}%` }}
       onClick={(e) =>
         onActivatePopup(planningActivity.id, e.currentTarget.getClientRects())
@@ -434,7 +434,7 @@ function PopupActivityDetails({
 
   return (
     <div
-      className="absolute z-20 mb-4 w-max min-w-fit rounded bg-base-200 p-2 shadow"
+      className="absolute z-20 mb-4 w-max min-w-fit rounded bg-shadcn-muted p-2 shadow"
       style={{
         left: popupData.rect[0]?.left ?? 0,
         top: (popupData.rect[0]?.bottom ?? 0) + 5,
@@ -482,7 +482,7 @@ function DraggableActivity({ id, name }: { id: string; name: string }) {
       style={style}
       {...listeners}
       {...attributes}
-      className="pill z-10 mx-2 justify-center bg-base-100"
+      className="pill z-10 mx-2 justify-center bg-shadcn-card"
     >
       {name}
     </button>
@@ -503,7 +503,7 @@ function DropSite({ id, data, children }: DropSiteProps) {
   return (
     <div
       ref={setNodeRef}
-      className={`relative ${HSITE} ${isOver ? "bg-base-200" : "bg-base-100"}`}
+      className={`relative ${HSITE} ${isOver ? "bg-shadcn-muted" : "bg-shadcn-card"}`}
     >
       {children}
     </div>

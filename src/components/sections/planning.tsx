@@ -382,7 +382,6 @@ function PlanningForm({
               buttonVariant="Icon-Outlined-Secondary"
               buttonSize="md"
               onClick={handleDeleteImage}
-              type="button"
               className="absolute right-2 bottom-2"
             />
           </div>

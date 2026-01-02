@@ -91,7 +91,7 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
           {groups.data?.map((group) => (
             <Fragment key={group.id}>
               <h2 className="text-center">{group.title}</h2>
-              <section id="ACTIVITIES" className={`w-full bg-base-200 p-4`}>
+              <section id="ACTIVITIES" className={`w-full bg-shadcn-muted p-4`}>
                 <div className={`container mx-auto p-4`}>
                   <p className={`text-3xl font-bold text-primary-content`}>
                     {querySection.data?.title}
@@ -400,7 +400,6 @@ function ActivityForm({
               buttonVariant="Icon-Outlined-Secondary"
               buttonSize="md"
               onClick={handleDeleteImage}
-              type="button"
               className="absolute right-2 bottom-2"
             />
           </div>
@@ -512,7 +511,7 @@ function ActivityContentCard({
   activity,
 }: ActivitiesContentCardProps) {
   return (
-    <div key={activity.id} className="card bg-base-100 shadow-xl">
+    <div key={activity.id} className="card bg-shadcn-card shadow-xl">
       {activity.imageUrls?.[0] ? (
         <figure className="white">
           {/* eslint-disable-next-line @next/next/no-img-element */}

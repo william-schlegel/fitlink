@@ -21,6 +21,9 @@ import {
   deleteRoom,
   getUserWithPricingForSites,
 } from "@/db/dal";
+
+// Export functions for use in server components
+export { getSiteById, getRoomsForSite, getSitesForClub, getRoomById };
 import { siteSchema, roomSchema } from "@/schemas/sites";
 
 export async function getSitesForClubWithLimit(clubId: string, userId: string) {

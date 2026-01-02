@@ -182,7 +182,7 @@ function MenuItem({
     <Link
       className={cn(
         "flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm font-medium",
-        "hover:bg-base-200 transition-colors"
+        "hover:bg-shadcn-muted transition-colors"
       )}
       href={page}
     >

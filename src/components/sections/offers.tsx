@@ -103,7 +103,7 @@ export const OfferCreation = ({ clubId, pageId }: OfferCreationProps) => {
           />
         </h3>
         <div data-theme={previewTheme}>
-          <div className="grid grid-cols-2 gap-4 bg-base-200 p-4">
+          <div className="grid grid-cols-2 gap-4 bg-shadcn-muted p-4">
             {querySection.data?.elements.map((card) => (
               <OfferContentCard
                 key={card.id}
@@ -389,7 +389,6 @@ function OfferForm({
               buttonVariant="Icon-Outlined-Secondary"
               buttonSize="md"
               onClick={handleDeleteImage}
-              type="button"
               className="absolute right-2 bottom-2"
             />
           </div>
@@ -465,7 +464,7 @@ export const OfferDisplayCard = ({ pageId, clubId }: OfferDisplayProps) => {
   if (!querySection.data) return <div>Offers section unavailable</div>;
 
   return (
-    <div className="grid grid-flow-col justify-center gap-4 bg-base-200 p-4">
+    <div className="grid grid-flow-col justify-center gap-4 bg-shadcn-muted p-4">
       {querySection.data?.elements
         .filter((e) => e.elementType === "CARD")
         .map((e) => (
@@ -508,7 +507,7 @@ function OfferContentCard({
     <div
       className={`card ${
         preview ? "card-compact w-full" : "w-96"
-      } bg-base-100 shadow-xl`}
+      } bg-shadcn-card shadow-xl`}
     >
       <figure>
         {/* eslint-disable-next-line @next/next/no-img-element */}

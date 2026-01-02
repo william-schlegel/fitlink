@@ -69,20 +69,44 @@
       Segoe UI Symbol,
       Noto Color Emoji;
   }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
 }
 
 @layer components {
+  /* Default headings use shadcn theme */
   h1 {
-    @apply space-x-2 py-4 text-4xl font-bold text-primary;
+    @apply space-x-2 py-4 text-4xl font-bold;
+    color: hsl(var(--foreground));
   }
   h2 {
-    @apply space-x-2 py-3 text-3xl font-bold text-primary;
+    @apply space-x-2 py-3 text-3xl font-bold;
+    color: hsl(var(--foreground));
   }
   h3 {
-    @apply space-x-2 py-3 text-2xl font-semibold text-secondary;
+    @apply space-x-2 py-3 text-2xl font-semibold;
+    color: hsl(var(--foreground));
   }
   h4 {
-    @apply space-x-2 py-2 text-xl font-semibold text-secondary;
+    @apply space-x-2 py-2 text-xl font-semibold;
+    color: hsl(var(--foreground));
+  }
+
+  /* DaisyUI theme headings for presentation pages (coach/club) */
+  [data-theme] h1 {
+    @apply text-primary;
+  }
+  [data-theme] h2 {
+    @apply text-primary;
+  }
+  [data-theme] h3 {
+    @apply text-secondary;
+  }
+  [data-theme] h4 {
+    @apply text-secondary;
   }
 
   label.required::after {
@@ -103,6 +127,37 @@
 }
 
 @layer utilities {
+  /* shadcn background utilities */
+  .bg-shadcn {
+    background-color: hsl(var(--background));
+  }
+  .bg-shadcn-card {
+    background-color: hsl(var(--card));
+  }
+  .bg-shadcn-muted {
+    background-color: hsl(var(--muted));
+  }
+  .hover\:bg-shadcn-muted:hover {
+    background-color: hsl(var(--muted));
+  }
+  .border-shadcn {
+    border-color: hsl(var(--border));
+  }
+
+  /* Override shadcn utilities with DaisyUI colors in presentation pages */
+  [data-theme] .bg-shadcn-card {
+    @apply bg-base-100;
+  }
+  [data-theme] .bg-shadcn-muted {
+    @apply bg-base-200;
+  }
+  [data-theme] .bg-shadcn {
+    @apply bg-base-200;
+  }
+  [data-theme] .border-shadcn {
+    @apply border-base-300;
+  }
+
   .pill {
     @apply flex flex-wrap items-center gap-2 border border-neutral bg-base-200 p-2 text-base-content;
     border-radius: var(--rounded-btn, 0.5rem);

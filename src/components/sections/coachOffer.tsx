@@ -122,7 +122,7 @@ export function CoachOfferPage({
           </section>
         ) : null}
       </div>
-      <div className="card w-full place-self-start bg-base-100 shadow-xl max-xl:card-side">
+      <div className="card w-full place-self-start bg-shadcn-card shadow-xl max-xl:card-side">
         <figure
           className="w-[40%] max-w-[16rem] shrink-0 xl:h-64 xl:w-full xl:max-w-full"
           style={{

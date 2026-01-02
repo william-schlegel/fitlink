@@ -168,7 +168,7 @@ export async function getRoomsWithActivities(roomIds: string[]) {
   });
 }
 
-export async function getActivitiesForClub(clubId: string) {
+export async function getActivitiesListForClub(clubId: string) {
   return db.query.activity.findMany({
     where: eq(activity.clubId, clubId),
   });
@@ -180,7 +180,11 @@ export async function getSitesWithRoomActivitiesBasic(siteIds: string[]) {
     with: {
       rooms: {
         with: {
-          activities: true,
+          activities: {
+            with: {
+              activity: true,
+            },
+          },
         },
       },
     },
@@ -191,7 +195,11 @@ export async function getRoomsWithActivitiesBasic(roomIds: string[]) {
   return db.query.room.findMany({
     where: inArray(room.id, roomIds),
     with: {
-      activities: true,
+      activities: {
+        with: {
+          activity: true,
+        },
+      },
     },
   });
 }

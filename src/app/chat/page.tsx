@@ -34,7 +34,7 @@ export default function ConvexChat() {
 
   if (!userId) {
     return (
-      <div className="flex items-center justify-center h-64 text-base-content/60">
+      <div className="flex items-center justify-center h-64 text-[hsl(var(--foreground)/0.6)]">
         {t("login-to-use-chat")}
       </div>
     );
@@ -80,7 +80,7 @@ export default function ConvexChat() {
                   isAdmin={isAdmin}
                 />
               </div>
-              <div className="border-t border-base-300">
+              <div className="border-t border-shadcn">
                 <MessageInput
                   roomId={roomId}
                   userId={userId}
@@ -90,7 +90,7 @@ export default function ConvexChat() {
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-full text-base-content/60">
+            <div className="flex items-center justify-center h-full text-[hsl(var(--foreground)/0.6)]">
               {t("no-room-selected")}
             </div>
           )}

@@ -1,23 +1,32 @@
 "use client";
 
 import { useLocalStorage } from "usehooks-ts";
+import { useEffect } from "react";
 
-import { TThemes } from "../themeSelector";
+type ThemeMode = "light" | "dark";
 
 export default function ThemeButton() {
-  const [theme, setTheme] = useLocalStorage<TThemes>("theme", "cupcake");
+  const [theme, setTheme] = useLocalStorage<ThemeMode>("shadcn-theme", "light");
 
-  const onChangeTheme = (newTheme: TThemes) => {
-    setTheme(newTheme);
+  useEffect(() => {
     const html = document.querySelector("html");
-    html?.setAttribute("data-theme", newTheme);
+    if (theme === "dark") {
+      html?.classList.add("dark");
+    } else {
+      html?.classList.remove("dark");
+    }
+  }, [theme]);
+
+  const onChangeTheme = (isDark: boolean) => {
+    const newTheme: ThemeMode = isDark ? "dark" : "light";
+    setTheme(newTheme);
   };
 
   return (
     <label className="swap swap-rotate" aria-label="swap">
       <input
         type="checkbox"
-        onChange={(e) => onChangeTheme(e.target.checked ? "dark" : "cupcake")}
+        onChange={(e) => onChangeTheme(e.target.checked)}
         checked={theme === "dark"}
         className="m-0 border-0 p-0"
       />

@@ -178,7 +178,7 @@ async function ClubCard({
   const homePage = clubPages?.pages?.find((p) => p.target === "HOME");
 
   return (
-    <div className="card card-border bg-base-100">
+    <div className="card card-border bg-shadcn-card">
       <div className="card-body">
         <div className="flex items-center gap-3">
           {club.logoUrl && (
@@ -196,7 +196,7 @@ async function ClubCard({
           )}
           <div className="flex-1 min-w-0">
             <h3 className="text-base truncate p-0">{club.name}</h3>
-            <p className="text-xs text-base-content/70 truncate">
+            <p className="text-xs text-[hsl(var(--foreground)/0.7)] truncate">
               {club.address}
             </p>
           </div>
@@ -233,14 +233,14 @@ async function DailyPlanning({
       {planning.map((plan) => (
         <div
           key={plan.id}
-          className="flex flex-col items-center rounded border border-secondary bg-base-100"
+          className="flex flex-col items-center rounded border border-secondary bg-shadcn-card"
         >
           <div className="w-full  bg-secondary text-center text-secondary-content">
             {plan.club.name}
           </div>
           <div className="flex shrink-0 flex-wrap items-start gap-2 p-2">
             {plan.planningActivities.map((activity) => (
-              <div key={activity.id} className="border border-base-300 p-2">
+                <div key={activity.id} className="border border-shadcn p-2">
                 <p>
                   <span className="text-xs">{activity.startTime}</span>
                   {" ("}

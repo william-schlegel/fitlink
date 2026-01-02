@@ -179,8 +179,8 @@ export const planningRouter = createTRPCRouter({
               Awaited<ReturnType<typeof getPlanningActivityById>>
             >["activity"];
             site: NonNullable<
-              Awaited<ReturnType<typeof getPlanningActivityById>>
-            >["site"];
+              Awaited<ReturnType<typeof getPlanningActivitiesWithFilters>>
+            >[number]["site"];
             room: NonNullable<
               Awaited<ReturnType<typeof getPlanningActivityById>>
             >["room"] | null;
@@ -190,6 +190,8 @@ export const planningRouter = createTRPCRouter({
           withNoCalendar: Array<{
             id: string;
             name: string;
+            clubId: string;
+            reservationDuration: number | null;
             rooms: Array<{
               id: string;
               name: string;
@@ -324,6 +326,8 @@ export const planningRouter = createTRPCRouter({
             return {
               id: wnc.id,
               name: wnc.name,
+              clubId: wnc.clubId,
+              reservationDuration: wnc.reservationDuration,
               rooms: (wnc.rooms ?? []).map((ra) => ({
                 id: ra.room.id,
                 name: ra.room.name,

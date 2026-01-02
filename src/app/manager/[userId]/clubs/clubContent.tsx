@@ -199,8 +199,6 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
                   key={gp.id}
                   groupName={gp.name}
                   className="join-item"
-                  inputType="radio"
-                  inputName="group"
                 >
                   {clubQuery.data?.activities
                     ?.filter((a) => a.groupId === gp.id)
@@ -232,7 +230,7 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
             {clubQuery.data?.sites?.map((site) => (
               <div
                 key={site.id}
-                className="collapse collapse-arrow join-item w-full bg-base-100 border-secondary border"
+                className="collapse collapse-arrow join-item w-full bg-shadcn-card border-secondary border"
               >
                 <input type="checkbox" defaultChecked={true} />
                 <div className="collapse-title">
@@ -260,7 +258,7 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
                             data-tip={t("activity.remove")}
                           >
                             <i
-                              className="bx bx-x bx-sm cursor-pointer rounded-full bg-base-100 text-secondary hover:bg-secondary hover:text-secondary-content"
+                              className="bx bx-x bx-sm cursor-pointer rounded-full bg-shadcn-card text-secondary hover:bg-secondary hover:text-secondary-content"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handledeleteActivity(room.id, a.id);
@@ -296,7 +294,7 @@ function DroppableArea({ areaId, title, children }: DroppableAreaProps) {
     <div
       ref={setNodeRef}
       className={`min-h-16 relative m-1 flex flex-wrap items-center gap-2 rounded border border-neutral p-2 ${
-        isOver ? "bg-base-300" : "bg-base-100"
+        isOver ? "bg-shadcn-muted" : "bg-shadcn-card"
       }`}
     >
       <span className="absolute right-4 text-secondary opacity-70">
@@ -331,7 +329,7 @@ function DraggableElement({
       ref={setNodeRef}
       className={`z-50 ${
         transform ? "cursor-grabbing" : "cursor-grab"
-      } flex items-center gap-2 rounded-full border border-neutral bg-base-100 px-4 py-1`}
+      } flex items-center gap-2 rounded-full border border-neutral bg-shadcn-card px-4 py-1`}
       style={style}
       {...listeners}
       {...attributes}

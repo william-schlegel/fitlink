@@ -32,7 +32,7 @@ function CollapsableGroup({
         <Button
           variant="ghost"
           className={cn(
-            "flex w-full justify-between rounded-md border border-base-300 bg-base-200 px-3 py-2",
+            "flex w-full justify-between rounded-md border border-shadcn bg-shadcn-muted px-3 py-2",
             className
           )}
         >

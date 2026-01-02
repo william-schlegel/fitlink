@@ -164,7 +164,7 @@ function FindClub({ address = "" }: FindClubProps) {
           <i className="bx bx-search bx-xs" />
         </button>
         <div className="mt-8 max-h-[40vh]">
-          <table className="table-zebra table border border-base-300">
+          <table className="table-zebra table border border-shadcn">
             <thead>
               <tr>
                 <th>{t("club")}</th>

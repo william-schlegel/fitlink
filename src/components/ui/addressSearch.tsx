@@ -119,13 +119,13 @@ const AddressSearch = ({
       </div>
       {error && <p className="text-sm text-error mt-1">{error}</p>}
       {isOpen && addresses.length > 0 && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-base-300 bg-base-100 shadow-lg">
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-shadcn bg-shadcn-card shadow-lg">
           <ul className="max-h-60 overflow-auto py-1">
             {addresses.map((adr, idx) => (
               <li key={`ADR-${idx}`}>
                 <button
                   type="button"
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-base-200 transition-colors"
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-shadcn-muted transition-colors"
                   onClick={() => {
                     setAddress(adr.address);
                     onSearch(adr);

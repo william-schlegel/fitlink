@@ -13,13 +13,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/shadcn/dialog";
-import { Button } from "@/components/ui/shadcn/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
+import { Button } from "@/components/ui/shadcn/button";
 import { cn } from "@/lib/utils";
 
 import { type ButtonSize, type TIconButtonVariant } from "./buttonIcon";
@@ -101,6 +101,8 @@ export default function Modal({
     variant === "Outlined-Secondary" ||
     variant === "Icon-Outlined-Primary" ||
     variant === "Icon-Outlined-Secondary";
+  const outlinedSecondary =
+    variant === "Outlined-Secondary" || variant === "Icon-Outlined-Secondary";
   const iconOnly =
     variant === "Icon-Outlined-Primary" ||
     variant === "Icon-Outlined-Secondary" ||
@@ -137,7 +139,9 @@ export default function Modal({
       className={cn(
         buttonClassName,
         noBorder && (primary ? "text-primary" : "text-secondary"),
-        "gap-2"
+        outlinedSecondary &&
+          "border-secondary bg-transparent! text-secondary hover:bg-secondary/10! hover:text-secondary!",
+        "gap-2",
       )}
     >
       {buttonIcon}

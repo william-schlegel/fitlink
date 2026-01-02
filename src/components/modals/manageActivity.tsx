@@ -79,14 +79,14 @@ const AddActivity = ({
       <div className="flex gap-4">
         <aside className="space-y-4">
           <h4>{t("group.group")}</h4>
-          <div className="flex max-h-[70vh] flex-col flex-wrap rounded border border-secondary bg-base-100">
+          <div className="flex max-h-[70vh] flex-col flex-wrap rounded border border-secondary bg-shadcn-card">
             {queryGroups.data?.map((group) => (
               <div
                 key={group.id}
                 className={`inline-flex cursor-pointer py-4 px-8 ${
                   groupId === group.id
                     ? "bg-primary text-primary-content"
-                    : "bg-base-100 text-base-content hover:bg-base-200"
+                    : "bg-shadcn-card text-[hsl(var(--foreground))] hover:bg-shadcn-muted"
                 }`}
               >
                 <span tabIndex={0} onClick={() => setGroupId(group.id)}>

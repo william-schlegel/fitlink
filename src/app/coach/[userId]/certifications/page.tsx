@@ -92,7 +92,7 @@ export default async function ManageCertifications({
           {(certificationQuery?.certifications ?? []).map((certification) => (
             <div
               key={certification.id}
-              className="card w-96 bg-base-100 shadow-xl"
+              className="card w-96 bg-shadcn-card shadow-xl"
             >
               <div className="card-body">
                 <h2 className="card-title">{certification.name}</h2>

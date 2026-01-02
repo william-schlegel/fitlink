@@ -562,7 +562,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
         </fieldset>
         <fieldset className="flex flex-col rounded border border-primary p-4">
           <label>{t("offer.packs")}</label>
-          <table className="table-compact w-full table-auto bg-base-200">
+          <table className="table-compact w-full table-auto bg-shadcn-muted">
             <thead>
               <tr>
                 <th>{t("offer.nb-hour")}</th>

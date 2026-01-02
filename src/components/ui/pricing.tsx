@@ -1,10 +1,9 @@
 "use client";
 
 import { type ReactNode, useState } from "react";
-import { useTranslations } from "next-intl";
 import { ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
-import { GetPricingById } from "@/server/api/routers/pricing";
 import {
   Card,
   CardContent,
@@ -12,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/shadcn/card";
+import { GetPricingById } from "@/server/api/routers/pricing";
 import { Button } from "@/components/ui/shadcn/button";
 import { Badge } from "@/components/ui/shadcn/badge";
 import { cn } from "@/lib/utils";
@@ -40,8 +40,9 @@ export function PricingComponent({
         "w-96",
         compact && "w-fit",
         hl && "border-2 border-primary",
-        data?.deleted && "border-2 border-error"
+        data?.deleted && "border-2 border-error",
       )}
+      data-theme="cupcake"
     >
       <CardHeader className={cn("items-center text-center", compact && "p-2")}>
         {data?.deleted && (
@@ -69,7 +70,7 @@ export function PricingComponent({
           <p
             className={cn(
               "py-4 text-xl font-bold text-accent",
-              compact && "py-1"
+              compact && "py-1",
             )}
           >
             {t("pricing.free")}
@@ -97,7 +98,7 @@ export function PricingComponent({
             <p
               className={cn(
                 "py-4 text-xl font-bold text-accent",
-                compact && "py-1"
+                compact && "py-1",
               )}
             >
               {monthlyPrice
@@ -139,7 +140,7 @@ export function PricingContainer({
     <div
       className={cn(
         "flex flex-wrap items-stretch gap-4 justify-center py-12",
-        compact && "justify-start"
+        compact && "justify-start",
       )}
     >
       {children}

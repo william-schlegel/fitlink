@@ -30,7 +30,7 @@ export function FeatureContainer({ children }: FeatureContainerProps) {
 export function Feature({ title, description, children }: FeatureProps) {
   return (
     <div className="w-full p-4 lg:w-1/2 xl:w-1/4">
-      <Card className="h-full bg-base-200">
+      <Card className="h-full bg-shadcn-muted">
         <CardHeader className="items-center">
           <div className="px-10 pt-4">{children}</div>
         </CardHeader>
