@@ -1,11 +1,13 @@
-import { twMerge } from "tailwind-merge";
-import Link from "next/link";
+"use client";
 
 import { Fragment } from "react";
+import Link from "next/link";
 
+import { Badge } from "@/components/ui/shadcn/badge";
+import { cn } from "@/lib/utils";
 import Title from "./title";
 
-function LayoutPage({
+export function LayoutPage({
   children,
   preTitle,
   title,
@@ -21,7 +23,7 @@ function LayoutPage({
   className?: string;
 }) {
   return (
-    <div className={twMerge("container mx-auto my-2 space-y-2 p-2", className)}>
+    <div className={cn("container mx-auto my-2 space-y-2 p-2", className)}>
       {variant === "main" ? <Title title={title} /> : null}
       <header className="mb-4 flex flex-row flex-wrap items-center gap-4">
         {variant === "main" ? (
@@ -43,7 +45,7 @@ function LayoutPage({
   );
 }
 
-function Main({
+export function LayoutPageMain({
   children,
   className,
 }: {
@@ -52,7 +54,7 @@ function Main({
 }) {
   return (
     <section
-      className={twMerge(
+      className={cn(
         "grid grid-cols-2 md:grid-cols-[300px_1fr] gap-4",
         className,
       )}
@@ -72,7 +74,7 @@ type ListItem = {
   badgeIcon?: string;
 };
 
-function List<T extends ListItem>({
+export function LayoutPageList<T extends ListItem>({
   children,
   list,
   itemId,
@@ -88,15 +90,15 @@ function List<T extends ListItem>({
       {children}
       {list.length === 0 ? (
         <div className="text-center">
-          <p>{noItemsText}</p>
+          <p className="text-base-content/70">{noItemsText}</p>
         </div>
       ) : (
-        <ul className="menu overflow-hidden rounded bg-base-100 w-full">
+        <ul className="overflow-hidden rounded-md border border-base-300 bg-base-100 w-full">
           {list.map((item) => (
             <li key={item.id}>
               <Link
-                className={twMerge(
-                  "flex w-full items-center justify-between p-2 rounded-md",
+                className={cn(
+                  "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-base-200",
                   itemId === item.id && "border border-primary bg-primary/10",
                 )}
                 href={item.link ?? ""}
@@ -110,9 +112,9 @@ function List<T extends ListItem>({
                 <div className="flex items-center gap-2">
                   {item.badgeText &&
                     (typeof item.badgeText === "string" ? (
-                      <span className={`${item.badgeColor} badge`}>
+                      <Badge variant="outline" className={item.badgeColor}>
                         {item.badgeText}
-                      </span>
+                      </Badge>
                     ) : (
                       <>{item.badgeText}</>
                     ))}
@@ -128,7 +130,7 @@ function List<T extends ListItem>({
   );
 }
 
-function Lists<T extends ListItem>({
+export function LayoutPageLists<T extends ListItem>({
   children,
   lists,
   itemId,
@@ -147,18 +149,20 @@ function Lists<T extends ListItem>({
       {children}
       {lists.length === 0 ? (
         <div className="text-center">
-          <p>{noItemsText}</p>
+          <p className="text-base-content/70">{noItemsText}</p>
         </div>
       ) : (
-        <ul className="menu overflow-hidden rounded bg-base-100 w-full">
+        <ul className="overflow-hidden rounded-md border border-base-300 bg-base-100 w-full">
           {lists.map((group) => (
             <Fragment key={group.name}>
-              <h2>{group.name}</h2>
+              <h2 className="px-3 py-2 text-sm font-semibold text-base-content/70 bg-base-200">
+                {group.name}
+              </h2>
               {group.items.map((item) => (
                 <li key={item.id}>
                   <Link
-                    className={twMerge(
-                      "flex w-full items-center justify-between p-2 rounded-md",
+                    className={cn(
+                      "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-base-200",
                       itemId === item.id &&
                         "border border-primary bg-primary/10",
                     )}
@@ -172,9 +176,9 @@ function Lists<T extends ListItem>({
                     )}
                     <div className="flex items-center gap-2">
                       {item.badgeText && (
-                        <span className={`${item.badgeColor} badge`}>
+                        <Badge variant="outline" className={item.badgeColor}>
                           {item.badgeText}
-                        </span>
+                        </Badge>
                       )}
                       {item.badgeIcon && <i className={item.badgeIcon} />}
                     </div>
@@ -189,13 +193,15 @@ function Lists<T extends ListItem>({
   );
 }
 
-LayoutPage.List = List;
-LayoutPage.Lists = Lists;
-LayoutPage.Content = Content;
-LayoutPage.Main = Main;
-
-function Content({ children }: { children: React.ReactNode }) {
+export function LayoutPageContent({ children }: { children: React.ReactNode }) {
   return <article className="w-full">{children}</article>;
 }
 
-export { LayoutPage };
+// Re-export with namespace for backwards compatibility
+export const LayoutPageCompound = {
+  Root: LayoutPage,
+  Main: LayoutPageMain,
+  List: LayoutPageList,
+  Lists: LayoutPageLists,
+  Content: LayoutPageContent,
+};

@@ -6,7 +6,11 @@ import { getSitesForClub } from "@/server/api/routers/sites";
 import { CreateSite } from "@/components/modals/manageSite";
 import createLink, { createHref } from "@/lib/createLink";
 import LockedButton from "@/components/ui/lockedButton";
-import { LayoutPage } from "@/components/layoutPage";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getHref } from "@/lib/getHref";
 import SiteContent from "./siteContent";
@@ -73,8 +77,8 @@ export default async function ManageSites({
         </div>
       }
     >
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={siteList}
           itemId={siteId}
           noItemsText={t("site.no-sites")}
@@ -83,7 +87,7 @@ export default async function ManageSites({
         {siteId === "" ? null : (
           <SiteContent userId={userId} clubId={clubId} siteId={siteId} />
         )}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

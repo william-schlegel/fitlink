@@ -172,17 +172,14 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
               <div className="relative w-60 max-w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imageUrls[0]} alt="" />
-                <button
+                <ButtonIcon
+                  iconComponent={<i className="bx bx-trash" />}
+                  title={t("title.delete-image")}
+                  buttonVariant="Icon-Secondary"
+                  buttonSize="sm"
                   onClick={handleDeleteImage}
                   className="absolute right-2 bottom-2 z-10"
-                >
-                  <ButtonIcon
-                    iconComponent={<i className="bx bx-trash" />}
-                    title={t("title.delete-image")}
-                    buttonVariant="Icon-Secondary"
-                    buttonSize="sm"
-                  />
-                </button>
+                />
               </div>
             </div>
           ) : null}

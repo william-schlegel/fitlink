@@ -15,7 +15,11 @@ import {
 import { CreateRoomCalendar } from "@/components/modals/manageCalendar";
 import createLink, { createHref } from "@/lib/createLink";
 import CalendarWeek from "@/components/calendarWeek";
-import { LayoutPage } from "@/components/layoutPage";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { RESERVATIONS } from "@/lib/data";
 import { getHref } from "@/lib/getHref";
@@ -92,8 +96,8 @@ export default async function ManageRooms({
         </div>
       }
     >
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={roomList}
           itemId={roomId}
           noItemsText={t("club.room.no-rooms")}
@@ -102,7 +106,7 @@ export default async function ManageRooms({
         {siteId === "" ? null : (
           <RoomContent clubId={clubId} roomId={roomId} siteId={siteId} />
         )}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

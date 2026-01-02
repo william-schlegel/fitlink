@@ -5,7 +5,11 @@ import Link from "next/link";
 import { CreateSubscription } from "@/components/modals/manageSubscription";
 import { getSubscriptionsForClub } from "@/server/api/routers/subscription";
 import createLink, { createHref } from "@/lib/createLink";
-import { LayoutPage } from "@/components/layoutPage";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { SubscriptionContent } from "./pageContent";
 import { getActualUser } from "@/lib/auth/server";
@@ -66,8 +70,8 @@ export default async function ManageSubscriptions({
         </div>
       }
     >
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={listSubscriptions}
           itemId={subscriptionId}
           noItemsText={t("subscription.no-subscription")}
@@ -80,7 +84,7 @@ export default async function ManageSubscriptions({
             subscriptionId={subscriptionId}
           />
         ) : null}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

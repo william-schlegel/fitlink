@@ -7,7 +7,12 @@ import {
   type HTMLInputTypeAttribute,
 } from "react";
 import { useTranslations } from "next-intl";
-import { twMerge } from "tailwind-merge";
+
+import { Input } from "@/components/ui/shadcn/input";
+import { Checkbox } from "@/components/ui/shadcn/checkbox";
+import { Label } from "@/components/ui/shadcn/label";
+import { Textarea } from "@/components/ui/shadcn/textarea";
+import { cn } from "@/lib/utils";
 
 import Spinner from "./spinner";
 
@@ -52,7 +57,7 @@ export default function SimpleForm<T extends FieldValues>({
 }: SimpleFormProps<T>): ReactNode {
   return (
     <form
-      className={twMerge(
+      className={cn(
         "grid grid-cols-[auto_1fr] gap-2 items-start",
         className,
       )}
@@ -84,36 +89,37 @@ export default function SimpleForm<T extends FieldValues>({
               ? { required: requiredOption }
               : {}),
           } as const;
+
           return (
             <Fragment key={fn}>
               {field.type === "checkbox" ? (
-                <div className="form-control col-span-2">
-                  <label
-                    className={twMerge(
-                      "label cursor-pointer justify-start gap-4",
-                      field.required && "required",
+                <div className="col-span-2 flex items-center space-x-3">
+                  <Checkbox
+                    id={fn}
+                    {...register(fn as Path<T>)}
+                    defaultChecked={false}
+                  />
+                  <Label
+                    htmlFor={fn}
+                    className={cn(
+                      "cursor-pointer",
+                      field.required && "after:content-['*'] after:text-error after:ml-0.5"
                     )}
                   >
-                    <input
-                      type="checkbox"
-                      className="checkbox-primary checkbox"
-                      {...register(fn as Path<T>)}
-                      defaultChecked={false}
-                    />
-                    <span className="label-text">{field.label}</span>
-                  </label>
+                    {field.label}
+                  </Label>
                 </div>
               ) : (
                 <>
                   {field.label !== undefined ? (
-                    <label
-                      className={twMerge(
-                        field.required && "required",
-                        isTextArea && "self-start",
+                    <Label
+                      className={cn(
+                        field.required && "after:content-['*'] after:text-error after:ml-0.5",
+                        isTextArea && "self-start"
                       )}
                     >
                       {field.label}
-                    </label>
+                    </Label>
                   ) : null}
                   <div
                     className={field.label === undefined ? "col-span-2" : ""}
@@ -121,8 +127,8 @@ export default function SimpleForm<T extends FieldValues>({
                     {field.component ? (
                       field.component
                     ) : field.unit !== undefined ? (
-                      <div className="input-group items-center">
-                        <input
+                      <div className="flex items-center gap-2">
+                        <Input
                           {...register(
                             fn as Path<T>,
                             inputRegisterOptions as unknown as RegisterOptions<
@@ -132,12 +138,12 @@ export default function SimpleForm<T extends FieldValues>({
                           )}
                           type={field.type || "text"}
                           disabled={field.disabled}
-                          className="input-bordered input"
+                          className="w-auto flex-1"
                         />
-                        <span>{field.unit}</span>
+                        <span className="text-sm text-base-content/70">{field.unit}</span>
                       </div>
                     ) : isTextArea ? (
-                      <textarea
+                      <Textarea
                         {...register(
                           fn as Path<T>,
                           textareaRegisterOptions as unknown as RegisterOptions<
@@ -147,10 +153,9 @@ export default function SimpleForm<T extends FieldValues>({
                         )}
                         disabled={field.disabled}
                         rows={field.rows}
-                        className="field-sizing-content"
                       />
                     ) : (
-                      <input
+                      <Input
                         {...register(
                           fn as Path<T>,
                           inputRegisterOptions as unknown as RegisterOptions<
@@ -160,7 +165,6 @@ export default function SimpleForm<T extends FieldValues>({
                         )}
                         type={field.type || "text"}
                         disabled={field.disabled}
-                        className="input-bordered input w-full"
                       />
                     )}
                     <TextError
@@ -185,5 +189,5 @@ export function TextError({ err }: TextErrorProps) {
   if (!err) return null;
   const msg = err || t("navigation.required") || "Error";
 
-  return <p className="text-sm text-error">{msg}</p>;
+  return <p className="text-sm text-error mt-1">{msg}</p>;
 }

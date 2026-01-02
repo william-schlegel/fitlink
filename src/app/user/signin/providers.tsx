@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { Button } from "@/components/ui/shadcn/button";
 import { authClient } from "@/lib/auth/client";
 
 export default function Providers({
@@ -11,10 +12,11 @@ export default function Providers({
 }) {
   const t = useTranslations("auth");
   return (
-    <>
+    <div className="space-y-2">
       {providers.map((provider) => (
-        <button
-          className="btn-outline btn w-full"
+        <Button
+          variant="outline"
+          className="w-full"
           key={provider.name}
           onClick={() =>
             authClient.signIn.social({
@@ -24,8 +26,8 @@ export default function Providers({
           }
         >
           {t("signin.connect-with-account")} {provider.name}
-        </button>
+        </Button>
       ))}
-    </>
+    </div>
   );
 }

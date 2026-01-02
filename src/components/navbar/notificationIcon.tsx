@@ -2,10 +2,20 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-
 import { useQuery } from "convex/react";
+import { Bell } from "lucide-react";
 
 import { api } from "../../../convex/_generated/api";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/shadcn/dropdown-menu";
+import { Button } from "@/components/ui/shadcn/button";
+import { Badge } from "@/components/ui/shadcn/badge";
+import { cn } from "@/lib/utils";
 
 type NotificationIconProps = {
   userId: string;
@@ -17,7 +27,7 @@ function formatMessage(
     type: string;
     message: string;
     data?: unknown;
-  },
+  }
 ) {
   if (notification.type === "NEW_SUBSCRIPTION")
     return t("common.api.new-subscription");
@@ -45,36 +55,36 @@ export default function NotificationIcon({ userId }: NotificationIconProps) {
       userId,
       limit: 10,
       skip: 0,
-    },
+    }
   );
 
   const notifications = notificationsData?.notifications ?? [];
   const unread = notificationsData?.unread ?? 0;
 
   if (!notifications.length) {
-    return <i className="bx bx-bell bx-md text-base-300" />;
+    return (
+      <Button variant="ghost" size="icon" disabled>
+        <Bell className="h-5 w-5 text-base-content/30" />
+      </Button>
+    );
   }
 
   return (
-    <div className="dropdown dropdown-end">
-      <label tabIndex={0} className="btn-ghost btn-circle btn">
-        <div className="w-10 rounded-full">
-          {unread ? (
-            <div className="indicator ">
-              <i className="bx bx-bell bx-md text-primary" />
-              <span className="badge-secondary badge badge-sm indicator-item">
-                {unread}
-              </span>
-            </div>
-          ) : (
-            <i className="bx bx-bell bx-md text-primary" />
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative">
+          <Bell className="h-5 w-5 text-primary" />
+          {unread > 0 && (
+            <Badge
+              variant="secondary"
+              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+            >
+              {unread}
+            </Badge>
           )}
-        </div>
-      </label>
-      <ul
-        tabIndex={0}
-        className="dropdown-content menu rounded-box menu-compact mt-3 w-52 bg-base-100 p-2 shadow"
-      >
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64">
         {notifications.map((notification) => {
           const data = notification.data as { roomId?: string } | undefined;
           const href =
@@ -83,26 +93,27 @@ export default function NotificationIcon({ userId }: NotificationIconProps) {
               : `/user/${notification.userId}/notification?notificationId=${notification._id}`;
 
           return (
-            <li key={notification._id}>
+            <DropdownMenuItem key={notification._id} asChild>
               <Link href={href}>
                 <span
-                  className={`line-clamp-2 ${
-                    notification.viewedAt ? "" : "font-bold text-secondary"
-                  }`}
+                  className={cn(
+                    "line-clamp-2",
+                    !notification.viewedAt && "font-bold text-secondary"
+                  )}
                 >
                   {formatMessage(t, notification)}
                 </span>
               </Link>
-            </li>
+            </DropdownMenuItem>
           );
         })}
-        <div className="divider my-1"></div>
-        <li>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
           <Link href={`/user/${userId}/notification`}>
             <span>{t("common.navigation.my-notifications")}</span>
           </Link>
-        </li>
-      </ul>
-    </div>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

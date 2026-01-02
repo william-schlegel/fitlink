@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useQuery } from "convex/react";
 
 import { Id } from "../../../convex/_generated/dataModel";
-import { LayoutPage } from "../../components/layoutPage";
+import { LayoutPageLists } from "../../components/layoutPage";
 import { api } from "../../../convex/_generated/api";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -135,7 +135,7 @@ export function RoomList({
   }));
 
   return (
-    <LayoutPage.Lists
+    <LayoutPageLists
       lists={[
         { name: t("direct-messages"), items: directList },
         { name: t("group-rooms"), items: roomList },

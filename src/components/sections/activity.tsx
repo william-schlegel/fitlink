@@ -394,18 +394,15 @@ function ActivityForm({
               alt=""
               className="max-h-40 w-full object-contain"
             />
-            <button
-              className="absolute right-2 bottom-2"
-              type="button"
+            <ButtonIcon
+              iconComponent={<i className="bx bx-trash" />}
+              title={t("activity.delete-image")}
+              buttonVariant="Icon-Outlined-Secondary"
+              buttonSize="md"
               onClick={handleDeleteImage}
-            >
-              <ButtonIcon
-                iconComponent={<i className="bx bx-trash" />}
-                title={t("activity.delete-image")}
-                buttonVariant="Icon-Outlined-Secondary"
-                buttonSize="md"
-              />
-            </button>
+              type="button"
+              className="absolute right-2 bottom-2"
+            />
           </div>
         ) : null}
 

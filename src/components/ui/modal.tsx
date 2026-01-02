@@ -1,9 +1,26 @@
 "use client";
 
-import { type ReactNode, useRef, useId, useEffect, useCallback } from "react";
+import { type ReactNode, useState, useEffect, useCallback } from "react";
 import { type FieldErrors } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { twMerge } from "tailwind-merge";
+import { X } from "lucide-react";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/shadcn/dialog";
+import { Button } from "@/components/ui/shadcn/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/shadcn/tooltip";
+import { cn } from "@/lib/utils";
 
 import { type ButtonSize, type TIconButtonVariant } from "./buttonIcon";
 
@@ -49,13 +66,11 @@ export default function Modal({
   closeModal,
   onCloseModal,
 }: Props) {
-  const closeRef = useRef<HTMLInputElement>(null);
-  const modalId = useId();
+  const [open, setOpen] = useState(false);
   const t = useTranslations("common");
 
   const close = useCallback(() => {
-    if (!closeRef.current) return;
-    closeRef.current.checked = false;
+    setOpen(false);
     if (typeof onCloseModal === "function") onCloseModal();
   }, [onCloseModal]);
 
@@ -69,6 +84,12 @@ export default function Modal({
     if (typeof handleSubmit === "function") handleSubmit();
   };
 
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen && typeof onOpenModal === "function") onOpenModal();
+    if (!isOpen && typeof onCloseModal === "function") onCloseModal();
+  };
+
   const primary =
     variant === "Primary" ||
     variant === "Outlined-Primary" ||
@@ -79,9 +100,7 @@ export default function Modal({
     variant === "Outlined-Primary" ||
     variant === "Outlined-Secondary" ||
     variant === "Icon-Outlined-Primary" ||
-    variant === "Icon-Outlined-Secondary"
-      ? "btn-outlined"
-      : "";
+    variant === "Icon-Outlined-Secondary";
   const iconOnly =
     variant === "Icon-Outlined-Primary" ||
     variant === "Icon-Outlined-Secondary" ||
@@ -92,91 +111,97 @@ export default function Modal({
   const noBorder =
     variant === "Icon-Only-Primary" || variant === "Icon-Only-Secondary";
 
-  const color = noBorder
-    ? `hover:outline hover:outline-offset-2 rounded-full hover:outline-secondary cursor-pointer ${
-        primary ? "text-primary" : "text-secondary"
-      }`
-    : primary
-      ? "btn btn-primary"
-      : "btn btn-secondary";
+  const getButtonVariant = () => {
+    if (noBorder) return "ghost";
+    if (outlined) return "outline";
+    return primary ? "default" : "secondary";
+  };
+
+  const getButtonSize = () => {
+    switch (buttonSize) {
+      case "lg":
+        return "lg";
+      case "sm":
+        return "sm";
+      case "xs":
+        return "sm";
+      default:
+        return "default";
+    }
+  };
+
+  const TriggerButton = (
+    <Button
+      variant={getButtonVariant()}
+      size={iconOnly ? "icon" : getButtonSize()}
+      className={cn(
+        buttonClassName,
+        noBorder && (primary ? "text-primary" : "text-secondary"),
+        "gap-2"
+      )}
+    >
+      {buttonIcon}
+      {!iconOnly && title}
+    </Button>
+  );
 
   return (
-    <>
-      <div
-        className={twMerge(buttonClassName, iconOnly && "tooltip")}
-        data-tip={title}
-      >
-        <label
-          htmlFor={modalId}
-          className={`${color} ${outlined} gap-2 py-0 btn-${buttonSize} `}
-          tabIndex={0}
-        >
-          {buttonIcon ? buttonIcon : null}
-          {iconOnly ? null : title}
-        </label>
-      </div>
-      <input
-        type="checkbox"
-        id={modalId}
-        className="modal-toggle"
-        ref={closeRef}
-        onChange={(e) => {
-          if (e.target.checked && typeof onOpenModal === "function")
-            onOpenModal();
-        }}
-      />
-      <div className="modal ">
-        <div
-          className={twMerge(
-            "modal-box relative overflow-y-auto overflow-x-hidden",
-            className,
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <TooltipProvider>
+        {iconOnly ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>{TriggerButton}</DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{title}</p>
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <DialogTrigger asChild>{TriggerButton}</DialogTrigger>
+        )}
+      </TooltipProvider>
+      <DialogContent className={cn("max-h-[90vh] overflow-y-auto", className)}>
+        <DialogHeader>
+          <DialogTitle className="pr-6">{title}</DialogTitle>
+        </DialogHeader>
+        {children}
+        <DialogFooter className="gap-2 sm:gap-0">
+          {cancelButtonText !== "" && (
+            <Button
+              variant="outline"
+              onClick={(e) => {
+                e.preventDefault();
+                if (typeof handleCancel === "function") handleCancel();
+                close();
+              }}
+            >
+              {cancelButtonText ?? t("cancel")}
+            </Button>
           )}
-        >
-          <label
-            htmlFor={modalId}
-            className="btn btn-secondary btn-sm btn-circle absolute right-1 top-1"
-          >
-            <i className="bx bx-x bx-sm" />
-          </label>
-          {children}
-          <div className="modal-action">
-            {cancelButtonText !== "" ? (
-              <button
-                className="btn-outline btn btn-secondary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (typeof handleCancel === "function") handleCancel();
-                  close();
-                }}
-              >
-                {cancelButtonText ?? t("cancel")}
-              </button>
-            ) : null}
-            {typeof handleSubmit === "function" ? (
-              <button
-                className="btn btn-primary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleClickSubmit();
-                }}
-              >
-                {submitButtonText ?? t("save")}
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </div>
-    </>
+          {typeof handleSubmit === "function" && (
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                handleClickSubmit();
+              }}
+            >
+              {submitButtonText ?? t("save")}
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
 export function getButtonSize(size: ButtonSize) {
   switch (size) {
     case "lg":
-      return "bx-md";
+      return "h-6 w-6";
     case "md":
-      return "bx-sm";
+      return "h-5 w-5";
     default:
-      return "bx-xs";
+      return "h-4 w-4";
   }
 }

@@ -2,7 +2,11 @@ import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { NewGroup } from "@/components/modals/manageActivity";
-import { LayoutPage } from "@/components/layoutPage";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { AGContent } from "./agContent";
@@ -38,16 +42,16 @@ export default async function ActivityGroupManagement({
 
   return (
     <LayoutPage title={t("ag.manage-ag")} titleComponents={<NewGroup />}>
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={agList}
           itemId={agId}
           noItemsText={t("ag.no-groups")}
         >
           <h3>{t("ag.groups")}</h3>
-        </LayoutPage.List>
+        </LayoutPageList>
         {agId ? <AGContent agId={agId} /> : null}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

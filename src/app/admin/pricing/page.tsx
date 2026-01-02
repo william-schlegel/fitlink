@@ -9,7 +9,12 @@ import {
 } from "@/components/modals/managePricing";
 import { getAllPricing, getPricingById } from "@/server/api/routers/pricing";
 import { PricingComponent } from "@/components/ui/pricing";
-import { LayoutPage } from "@/components/layoutPage";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageLists,
+  LayoutPageContent,
+} from "@/components/layoutPage";
 import { getRoleName } from "@/server/lib/userTools";
 import { pricing } from "@/db/schema/subscription";
 import { getActualUser } from "@/lib/auth/server";
@@ -76,15 +81,15 @@ export default async function PricingManagement({
       title={t("pricing.manage-my-pricing")}
       titleComponents={<CreatePricing />}
     >
-      <LayoutPage.Main>
-        <LayoutPage.Lists
+      <LayoutPageMain>
+        <LayoutPageLists
           lists={pricingList}
           itemId={pricingId}
           noItemsText={t("pricing.no-pricing")}
         />
 
         {pricingId === "" ? null : <PricingContent pricingId={pricingId} />}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

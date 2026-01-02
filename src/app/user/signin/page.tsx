@@ -2,6 +2,13 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { getSession } from "@/lib/auth/server";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/shadcn/card";
+import { Separator } from "@/components/ui/shadcn/separator";
 import CreateAccount from "./createAccount";
 import { auth } from "@/lib/auth/server";
 import Title from "@/components/title";
@@ -25,13 +32,15 @@ export default async function SignIn({
       <div className="flex min-h-screen items-center justify-center bg-base-200 mx-8">
         <Title title="Magic link" />
 
-        <div className="rounded border border-primary bg-base-100 p-12 text-center">
-          <h1>{t("signin.continue-with-link")}</h1>
+        <Card className="p-12 text-center max-w-md">
+          <h1 className="text-2xl font-bold text-primary mb-4">
+            {t("signin.continue-with-link")}
+          </h1>
           <p className="text-lg font-semibold">
             {t("signin.check-your-mail", { email: signInEmail })}
           </p>
-          <p>{t("signin.close-page")}</p>
-        </div>
+          <p className="text-base-content/70">{t("signin.close-page")}</p>
+        </Card>
       </div>
     );
   if (signInCredentials) {
@@ -43,26 +52,35 @@ export default async function SignIn({
       title={t("signin.connect")}
       className="grid h-screen place-items-center"
     >
-      <div className="card w-full max-w-md bg-base-100 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title">{t("signin.connect")}</h2>
-          {/* {signInCredentials ? (
-            <div className="alert alert-error">
-              {t("signin.wrong-credentials")}
-            </div>
-          ) : null} */}
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl">{t("signin.connect")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <Providers
             providers={providers.map((p) => ({ id: p.id, name: p.name }))}
           />
-          <div className="divider  divider-primary">{t("signin.or")}</div>
+          <div className="flex items-center gap-4">
+            <Separator className="flex-1" />
+            <span className="text-sm text-primary font-medium">
+              {t("signin.or")}
+            </span>
+            <Separator className="flex-1" />
+          </div>
           <FormEmail />
 
-          <div className="divider  divider-primary">{t("signin.or")}</div>
+          <div className="flex items-center gap-4">
+            <Separator className="flex-1" />
+            <span className="text-sm text-primary font-medium">
+              {t("signin.or")}
+            </span>
+            <Separator className="flex-1" />
+          </div>
           <div className="flex justify-center">
             <CreateAccount />
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

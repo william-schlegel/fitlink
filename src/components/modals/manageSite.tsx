@@ -10,10 +10,14 @@ import { startTransition, useEffect, useState } from "react";
 import MapComponent, { Marker } from "react-map-gl/mapbox";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Plus, Edit, Trash2, MapPin } from "lucide-react";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import Modal, { TModalVariant } from "../ui/modal";
+import { Button } from "@/components/ui/shadcn/button";
+import { Input } from "@/components/ui/shadcn/input";
+import { Label } from "@/components/ui/shadcn/label";
 import AddressSearch from "../ui/addressSearch";
 import Confirmation from "../ui/confirmation";
 import { useUser } from "@/lib/auth/client";
@@ -60,14 +64,14 @@ export const CreateSite = ({ clubId }: CreateSiteProps) => {
   return (
     <Modal
       title={t("site.create")}
-      buttonIcon={<i className="bx bx-plus bx-xs" />}
+      buttonIcon={<Plus className="h-4 w-4" />}
       className="w-11/12 max-w-5xl"
       cancelButtonText=""
       closeModal={closeModal}
       onCloseModal={() => setCloseModal(false)}
     >
       <h3>{t("site.create")}</h3>
-      <p className="py-4">{t("site.enter-info-new-site")}</p>
+      <p className="py-4 text-base-content/70">{t("site.enter-info-new-site")}</p>
       <SiteForm onSubmit={onSubmit} onCancel={() => setCloseModal(true)} />
     </Modal>
   );
@@ -118,7 +122,7 @@ export const UpdateSite = ({ siteId, clubId }: UpdateSiteProps) => {
   return (
     <Modal
       title={t("site.update", { siteName: querySite.data?.name ?? "" })}
-      buttonIcon={<i className="bx bx-edit bx-sm" />}
+      buttonIcon={<Edit className="h-5 w-5" />}
       variant={"Icon-Outlined-Primary"}
       className="w-2/3 max-w-5xl"
       cancelButtonText=""
@@ -173,7 +177,7 @@ export const DeleteSite = ({
     <Confirmation
       message={t("site.deletion-message")}
       title={t("site.deletion")}
-      buttonIcon={<i className="bx bx-trash bx-sm" />}
+      buttonIcon={<Trash2 className="h-5 w-5" />}
       onConfirm={() => {
         deleteSite.mutate(siteId);
       }}
@@ -217,50 +221,49 @@ function SiteForm({ onSubmit, onCancel, initialData }: SiteFormProps) {
   return (
     <form
       onSubmit={handleSubmit(onSubmitForm, onError)}
-      className={`grid grid-cols-2 items-start gap-4`}
+      className="grid grid-cols-2 items-start gap-4"
     >
-      <div className="flex flex-col gap-2">
-        <label className="required w-fit">{t("club.club.name")}</label>
-        <div>
-          <input
+      <div className="flex flex-col gap-4">
+        <div className="space-y-2">
+          <Label className="after:content-['*'] after:text-error after:ml-0.5">
+            {t("club.club.name")}
+          </Label>
+          <Input
             {...register("name", {
               required: t("club.name-mandatory") ?? true,
             })}
-            type={"text"}
-            className="input-bordered input w-full"
+            type="text"
           />
-          {errors.name ? (
+          {errors.name && (
             <p className="text-sm text-error">{errors.name.message}</p>
-          ) : null}
+          )}
         </div>
-        <label className="required w-fit">{t("club.club.address")}</label>
-        <div>
-          <input
+        <div className="space-y-2">
+          <Label className="after:content-['*'] after:text-error after:ml-0.5">
+            {t("club.club.address")}
+          </Label>
+          <Input
             {...register("address", {
               required: t("club.address-mandatory") ?? true,
             })}
-            type={"text"}
-            className="input-bordered input w-full"
+            type="text"
           />
-          {errors.address ? (
+          {errors.address && (
             <p className="text-sm text-error">{errors.address.message}</p>
-          ) : null}
+          )}
         </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <div className="grid grid-cols-[auto_1fr] items-center gap-2">
-          <AddressSearch
-            label={t("club.club.search-address")}
-            defaultAddress={fields.searchAddress}
-            onSearch={(adr) => {
-              setValue("searchAddress", adr.address);
-              setValue("latitude", adr.lat);
-              setValue("longitude", adr.lng);
-            }}
-            className="col-span-2"
-            required
-          />
-        </div>
+      <div className="flex flex-col gap-4">
+        <AddressSearch
+          label={t("club.club.search-address")}
+          defaultAddress={fields.searchAddress}
+          onSearch={(adr) => {
+            setValue("searchAddress", adr.address);
+            setValue("latitude", adr.lat);
+            setValue("longitude", adr.lng);
+          }}
+          required
+        />
         <MapComponent
           initialViewState={{ zoom: 8 }}
           style={{ width: "100%", height: "20rem" }}
@@ -275,25 +278,23 @@ function SiteForm({ onSubmit, onCancel, initialData }: SiteFormProps) {
             latitude={fields.latitude ?? LATITUDE}
             anchor="bottom"
           >
-            <i className="bx bxs-map bx-md text-primary" />
+            <MapPin className="h-6 w-6 text-primary" />
           </Marker>
         </MapComponent>
       </div>
 
       <div className="col-span-2 flex items-center justify-end gap-2">
-        <button
+        <Button
           type="button"
-          className="btn btn-outline btn-secondary"
+          variant="outline"
           onClick={(e) => {
             e.preventDefault();
             onCancel();
           }}
         >
           {t("common.cancel")}
-        </button>
-        <button className="btn btn-primary" type="submit">
-          {t("common.save")}
-        </button>
+        </Button>
+        <Button type="submit">{t("common.save")}</Button>
       </div>
     </form>
   );

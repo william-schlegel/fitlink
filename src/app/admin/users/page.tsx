@@ -1,7 +1,12 @@
 import { getTranslations } from "next-intl/server";
 
 import { getAllUsers } from "@/server/api/routers/users";
-import { LayoutPage } from "@/components/layoutPage";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+  LayoutPageContent,
+} from "@/components/layoutPage";
 import Pagination from "@/components/ui/pagination";
 import { getActualUser } from "@/lib/auth/server";
 import { TUserFilter } from "./userFilter";
@@ -39,8 +44,8 @@ export default async function UserManagement({
 
   return (
     <LayoutPage title={t("user.manage-users")}>
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={userList}
           itemId={userId}
           noItemsText={t("user.no-users")}
@@ -64,12 +69,12 @@ export default async function UserManagement({
             count={userQuery.userCount ?? 0}
             perPage={PER_PAGE}
           />
-        </LayoutPage.List>
+        </LayoutPageList>
 
-        <LayoutPage.Content>
+        <LayoutPageContent>
           {userId === "" ? null : <UserContent userId={userId} />}
-        </LayoutPage.Content>
-      </LayoutPage.Main>
+        </LayoutPageContent>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

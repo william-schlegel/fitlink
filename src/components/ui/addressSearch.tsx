@@ -1,7 +1,14 @@
+"use client";
+
 import { startTransition, useEffect, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { useTranslations } from "next-intl";
+import { MapPin } from "lucide-react";
 
+import { Input } from "@/components/ui/shadcn/input";
+import { Label } from "@/components/ui/shadcn/label";
+import { Button } from "@/components/ui/shadcn/button";
+import { cn } from "@/lib/utils";
 import { env } from "@/env";
 
 type Props = {
@@ -32,6 +39,7 @@ const AddressSearch = ({
   const [address, setAddress] = useState("");
   const [debouncedAddress] = useDebounceValue<string>(address, 500);
   const [addresses, setAddresses] = useState<AddressData[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations("common");
 
   useEffect(() => {
@@ -47,11 +55,13 @@ const AddressSearch = ({
       searchAddresses(debouncedAddress).then((found) => {
         startTransition(() => {
           setAddresses(found);
+          setIsOpen(found.length > 0);
         });
       });
     } else {
       startTransition(() => {
         setAddresses([]);
+        setIsOpen(false);
       });
     }
   }, [debouncedAddress]);
@@ -66,6 +76,7 @@ const AddressSearch = ({
       const address = t("your-location");
       setAddress(address);
       setAddresses([]);
+      setIsOpen(false);
       onSearch({
         address,
         lng: position.coords.longitude,
@@ -75,39 +86,51 @@ const AddressSearch = ({
   }
 
   return (
-    <>
-      <div className={`dropdown dropdown-bottom ${className ?? ""}`}>
-        <fieldset className={`fieldset ${required ? "required" : ""}`}>
-          {label && <legend className="fieldset-legend">{label}</legend>}
-          <div className="input">
-            {iconSearch ? (
-              <span>
-                <i
-                  className="bx bx-map-pin bx-sm cursor-pointer text-primary hover:text-secondary"
-                  onClick={handleClickIcon}
-                />
-              </span>
-            ) : null}
-            <input
-              value={address}
-              onChange={(e) => handleSelect(e.currentTarget.value)}
-              list="addresses"
-              placeholder={t("location") ?? ""}
-              required={required}
-            />
-          </div>
-        </fieldset>
-        {error ? <p className="label-text-alt text-error">{error}</p> : null}
-        {addresses.length > 0 ? (
-          <ul className="menu dropdown-content w-full rounded-box bg-base-100 p-2 shadow">
+    <div className={cn("relative", className)}>
+      <div className="space-y-2">
+        {label && (
+          <Label
+            className={cn(
+              required && "after:content-['*'] after:text-error after:ml-0.5"
+            )}
+          >
+            {label}
+          </Label>
+        )}
+        <div className="flex gap-2">
+          {iconSearch && (
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={handleClickIcon}
+              className="shrink-0"
+            >
+              <MapPin className="h-4 w-4" />
+            </Button>
+          )}
+          <Input
+            value={address}
+            onChange={(e) => handleSelect(e.currentTarget.value)}
+            placeholder={t("location") ?? ""}
+            required={required}
+          />
+        </div>
+      </div>
+      {error && <p className="text-sm text-error mt-1">{error}</p>}
+      {isOpen && addresses.length > 0 && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-base-300 bg-base-100 shadow-lg">
+          <ul className="max-h-60 overflow-auto py-1">
             {addresses.map((adr, idx) => (
               <li key={`ADR-${idx}`}>
                 <button
                   type="button"
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-base-200 transition-colors"
                   onClick={() => {
                     setAddress(adr.address);
                     onSearch(adr);
                     setAddresses([]);
+                    setIsOpen(false);
                   }}
                 >
                   {adr.address}
@@ -115,9 +138,9 @@ const AddressSearch = ({
               </li>
             ))}
           </ul>
-        ) : null}
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
 };
 

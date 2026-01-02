@@ -458,20 +458,17 @@ function PricingForm() {
             }}
             className="input-bordered input w-full"
           />
-          <button
+          <ButtonIcon
+            iconComponent={<i className="bx bx-plus bx-sm" />}
+            title={t("pricing.add-option")}
+            buttonVariant="Icon-Outlined-Primary"
+            buttonSize="md"
             onClick={() => {
               if (!refOpt.current) return;
               addOption(refOpt.current.value);
               refOpt.current.value = "";
             }}
-          >
-            <ButtonIcon
-              iconComponent={<i className="bx bx-plus bx-sm" />}
-              title={t("pricing.add-option")}
-              buttonVariant="Icon-Outlined-Primary"
-              buttonSize="md"
-            />
-          </button>
+          />
         </div>
       </div>
       <div>

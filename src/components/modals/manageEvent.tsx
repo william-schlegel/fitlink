@@ -342,18 +342,15 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
                 alt=""
                 className="max-h-40 w-full object-cover"
               />
-              <button
-                className="absolute right-2 bottom-2"
-                type="button"
+              <ButtonIcon
+                iconComponent={<i className="bx bx-trash" />}
+                title={t("event.delete-image")}
+                buttonVariant="Icon-Outlined-Secondary"
+                buttonSize="md"
                 onClick={handleDeleteImage}
-              >
-                <ButtonIcon
-                  iconComponent={<i className="bx bx-trash" />}
-                  title={t("event.delete-image")}
-                  buttonVariant="Icon-Outlined-Secondary"
-                  buttonSize="md"
-                />
-              </button>
+                type="button"
+                className="absolute right-2 bottom-2"
+              />
             </div>
           ) : null}
 
@@ -553,16 +550,16 @@ function DisplayEventCard() {
         <p className="space-x-4 text-right text-xl font-bold">
           <span>{fields.address}</span>
           {fields.searchAddress ? (
-            <button type="button" onClick={() => setShowMap((prev) => !prev)}>
-              <ButtonIcon
-                iconComponent={
-                  <i className={`bx ${showMap ? "bx-x" : "bx-map"} bx-sm`} />
-                }
-                title={t("event.view-map")}
-                buttonVariant="Icon-Outlined-Secondary"
-                buttonSize="md"
-              />
-            </button>
+            <ButtonIcon
+              iconComponent={
+                <i className={`bx ${showMap ? "bx-x" : "bx-map"} bx-sm`} />
+              }
+              title={t("event.view-map")}
+              buttonVariant="Icon-Outlined-Secondary"
+              buttonSize="md"
+              onClick={() => setShowMap((prev) => !prev)}
+              type="button"
+            />
           ) : null}
         </p>
         <div

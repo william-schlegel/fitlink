@@ -263,17 +263,14 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
               <div className="relative w-60 max-w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imagePreview} alt="" />
-                <button
+                <ButtonIcon
+                  iconComponent={<i className="bx bx-trash" />}
+                  title={t("hero.delete-image")}
+                  buttonVariant="Icon-Secondary"
+                  buttonSize="sm"
                   onClick={handleDeleteImage}
                   className="absolute right-2 bottom-2 z-10"
-                >
-                  <ButtonIcon
-                    iconComponent={<i className="bx bx-trash" />}
-                    title={t("hero.delete-image")}
-                    buttonVariant="Icon-Secondary"
-                    buttonSize="sm"
-                  />
-                </button>
+                />
               </div>
             </div>
           ) : null}

@@ -173,17 +173,14 @@ function ProfileImage() {
               width={100}
               height={100}
             />
-            <button
+            <ButtonIcon
+              iconComponent={<i className="bx bx-trash" />}
+              title={t("delete-image")}
+              buttonVariant="Icon-Secondary"
+              buttonSize="sm"
               onClick={handleDeleteImage}
               className="absolute right-2 bottom-2 z-10"
-            >
-              <ButtonIcon
-                iconComponent={<i className="bx bx-trash" />}
-                title={t("delete-image")}
-                buttonVariant="Icon-Secondary"
-                buttonSize="sm"
-              />
-            </button>
+            />
           </div>
         ) : null}
       </div>

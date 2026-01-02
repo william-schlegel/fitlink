@@ -9,22 +9,26 @@ import {
   useState,
 } from "react";
 import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
-import { twMerge } from "tailwind-merge";
-
+import { Plus, Edit, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
+import { LayoutPage, LayoutPageMain, LayoutPageList } from "../layoutPage";
 import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
 import ButtonIcon, { ButtonSize } from "../ui/buttonIcon";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
+import { Button } from "@/components/ui/shadcn/button";
+import { Label } from "@/components/ui/shadcn/label";
+import { Input } from "@/components/ui/shadcn/input";
+import { Badge } from "@/components/ui/shadcn/badge";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
-import { LayoutPage } from "../layoutPage";
 import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
 
 type CertificationFormValues = {
   name: string;
@@ -163,12 +167,12 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
       title={t("create-certification")}
       handleSubmit={onSubmit}
       submitButtonText={t("save-certifications")}
-      buttonIcon={<i className="bx bx-plus bx-sm" />}
+      buttonIcon={<Plus className="h-5 w-5" />}
       className="w-11/12 max-w-5xl"
     >
       <LayoutPage title={t("create-certification")} variant="section">
-        <LayoutPage.Main>
-          <LayoutPage.List
+        <LayoutPageMain>
+          <LayoutPageList
             list={organismList}
             itemId={organismId}
             noItemsText={t("no-organisms")}
@@ -188,20 +192,21 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
               title={t("activities")}
             />
           </div>
-        </LayoutPage.Main>
+        </LayoutPageMain>
       </LayoutPage>
-      <hr />
-      <form className={`mt-2 grid grid-cols-2 gap-2`}>
-        <div className="flex flex-col">
-          <label className="required">{t("obtention-date")}</label>
-          <input
+      <hr className="my-4" />
+      <form className="mt-2 grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-2">
+          <Label className="after:content-['*'] after:text-error after:ml-0.5">
+            {t("obtention-date")}
+          </Label>
+          <Input
             type="date"
             value={formatDateAsYYYYMMDD(obtentionDate)}
             onChange={(e) =>
               setObtentionDate(e.target.valueAsDate ?? new Date(Date.now()))
             }
             required
-            className="input-bordered input w-full"
           />
         </div>
         <div className="flex flex-col">
@@ -234,17 +239,16 @@ function ModuleSelector({
   return (
     <div>
       <h4>{title}</h4>
-      <div className="flex flex-wrap gap-2 rounded border border-secondary bg-base-100 p-2">
+      <div className="flex flex-wrap gap-2 rounded-md border border-secondary bg-base-100 p-2">
         {modules?.map((mod) => (
-          <button
+          <Button
             key={mod.id}
-            className={`btn btn-primary normal-case ${
-              moduleIds.get(mod.id)?.selected ? "" : "btn-outline"
-            }`}
+            variant={moduleIds.get(mod.id)?.selected ? "default" : "outline"}
+            size="sm"
             onClick={() => onToggle(mod.id)}
           >
             {mod.name}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
@@ -267,17 +271,16 @@ function ActivitySelector({
   return (
     <div>
       <h4>{title}</h4>
-      <div className="flex flex-wrap gap-2 rounded border border-secondary bg-base-100 p-2">
+      <div className="flex flex-wrap gap-2 rounded-md border border-secondary bg-base-100 p-2">
         {activities.map((act) => (
-          <button
+          <Button
             key={act.id}
-            className={`btn btn-primary normal-case ${
-              activityIds.get(act.id)?.selected ? "" : "btn-outline"
-            }`}
+            variant={activityIds.get(act.id)?.selected ? "default" : "outline"}
+            size="sm"
             onClick={() => onToggle(act.id)}
           >
             {act.name}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
@@ -338,7 +341,7 @@ export const UpdateCertification = ({
       title={t("update-certification")}
       handleSubmit={handleSubmit(onSubmit, onError)}
       errors={errors}
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize(buttonSize)}`} />}
+      buttonIcon={<Edit className={getButtonSize(buttonSize)} />}
       variant={variant}
       buttonSize={buttonSize}
     >
@@ -387,7 +390,7 @@ export const DeleteCertification = ({
       onConfirm={() => {
         deleteCertification.mutate(certificationId);
       }}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize(buttonSize)}`} />}
+      buttonIcon={<Trash2 className={getButtonSize(buttonSize)} />}
       variant={variant}
       buttonSize={buttonSize}
       textConfirmation={t("certification-confirmation")}
@@ -445,7 +448,7 @@ export const CreateCertificationOrganism = ({
   return (
     <Modal
       title={t("certification.new-group")}
-      buttonIcon={<i className="bx bx-plus bx-sm" />}
+      buttonIcon={<Plus className="h-5 w-5" />}
       variant={variant}
       className="w-10/12 max-w-3xl"
       handleSubmit={onSubmit}
@@ -512,7 +515,7 @@ export function UpdateCertificationGroup({
   return (
     <Modal
       title={t("certification.update-group")}
-      buttonIcon={<i className="bx bx-edit bx-sm" />}
+      buttonIcon={<Edit className="h-5 w-5" />}
       variant={variant}
       className="w-10/12 max-w-3xl"
       handleSubmit={onSubmit}
@@ -553,7 +556,7 @@ export function DeleteCertificationGroup({ groupId }: DeleteGroupProps) {
       title={t("group-deletion")}
       message={t("group-deletion-message")}
       onConfirm={() => deleteGroup.mutate(groupId)}
-      buttonIcon={<i className="bx bx-trash bx-xs" />}
+      buttonIcon={<Trash2 className="h-4 w-4" />}
       variant={"Icon-Outlined-Secondary"}
       textConfirmation={t("group-deletion-confirmation")}
       buttonSize="sm"
@@ -682,58 +685,60 @@ function CertificationGroupForm({
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <form className={`grid grid-cols-[auto_1fr] gap-2`}>
-        <label htmlFor="name">{t("certification.group-name")}</label>
-        <input
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-[auto_1fr] gap-2 items-center">
+        <Label htmlFor="name">{t("certification.group-name")}</Label>
+        <Input
           id="name"
           value={data.name}
           onChange={(e) => setData({ ...data, name: e.currentTarget.value })}
-          type={"text"}
-          className="input-bordered input w-full"
+          type="text"
         />
-        {data.name === "" ? (
+        {data.name === "" && (
           <p className="col-span-2 text-sm text-error">
             {t("certification.name-mandatory")}
           </p>
-        ) : null}
-      </form>
-      <div className="grid grid-cols-2 gap-2">
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col items-center gap-2">
-          <div className="flex flex-col gap-2 rounded-md border border-primary p-2">
-            <input
-              type={"text"}
+          <div className="flex flex-col gap-2 rounded-md border border-primary p-4 w-full">
+            <Input
+              type="text"
               ref={refOpt}
               value={moduleName}
               onChange={(e) => {
                 setModuleName(e.currentTarget.value);
               }}
               onKeyDown={(e) => handleKeyboard(e.key, e.currentTarget.value)}
-              className="input-bordered input w-full"
             />
-            <h3>{t("certification.linked-activities")}</h3>
+            <h4 className="text-sm font-medium">
+              {t("certification.linked-activities")}
+            </h4>
             {agQuery.isLoading ? (
               <Spinner />
             ) : (
               <div className="flex flex-wrap gap-2">
                 {agQuery.data?.map((ag) => (
-                  <button
-                    className={`btn btn-primary btn-sm normal-case ${
+                  <Button
+                    key={ag.id}
+                    variant={
                       selectedModule?.activityIds.includes(ag.id) ||
                       activityIds.has(ag.id)
-                        ? ""
-                        : "btn-outline"
-                    }`}
-                    key={ag.id}
+                        ? "default"
+                        : "outline"
+                    }
+                    size="sm"
                     onClick={() => toggleActivityGroup(ag.id)}
                   >
                     {ag.name}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
           </div>
-          <button
+          <Button
+            variant="outline"
             onClick={() => {
               if (!refOpt.current) return;
               addModule({
@@ -743,31 +748,27 @@ function CertificationGroupForm({
               });
               handleKeyboard("Escape", "");
             }}
-            onKeyDown={(e) =>
-              handleKeyboard(e.key, refOpt.current?.value ?? "")
-            }
+            className="gap-2"
           >
-            <ButtonIcon
-              iconComponent={
-                <i
-                  className={`bx ${selectedModule ? "bx-edit" : "bx-plus"} bx-sm`}
-                />
-              }
-              title={t("pricing.add-option")}
-              buttonVariant="Icon-Outlined-Primary"
-              fullButton
-            />
-          </button>
+            {selectedModule ? (
+              <Edit className="h-4 w-4" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
+            {t("pricing.add-option")}
+          </Button>
         </div>
         <div>
-          <h3>{t("certification.modules")}</h3>
-          {data.modules.length > 0 ? (
-            <ul className="menu overflow-hidden rounded border border-base-300 w-full">
+          <h4 className="text-sm font-medium mb-2">
+            {t("certification.modules")}
+          </h4>
+          {data.modules.length > 0 && (
+            <ul className="overflow-hidden rounded-md border border-base-300 w-full">
               {data.modules.map((mod, idx) => (
                 <li key={mod.dbId ?? mod.name}>
                   <div
-                    className={twMerge(
-                      "flex w-full items-center justify-between text-center",
+                    className={cn(
+                      "flex w-full items-center justify-between p-3 cursor-pointer hover:bg-base-200",
                       moduleId === mod.dbId &&
                         "border border-primary bg-primary/10",
                     )}
@@ -777,26 +778,28 @@ function CertificationGroupForm({
                       <div className="flex flex-wrap items-center gap-2">
                         <span>{mod.name}</span>
                         {mod.activityIds.map((id) => (
-                          <span key={id} className="badge badge-primary">
+                          <Badge key={id} variant="default">
                             {agQuery.data?.find((g) => g.id === id)?.name ??
                               "???"}
-                          </span>
+                          </Badge>
                         ))}
                       </div>
-                      <button onClick={() => handleDeleteModule(idx)}>
-                        <ButtonIcon
-                          iconComponent={<i className="bx bx-trash bx-xs" />}
-                          title={t("certification.delete-module")}
-                          buttonVariant="Icon-Outlined-Secondary"
-                          buttonSize="sm"
-                        />
-                      </button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteModule(idx);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-error" />
+                      </Button>
                     </div>
                   </div>
                 </li>
               ))}
             </ul>
-          ) : null}
+          )}
         </div>
       </div>
     </div>

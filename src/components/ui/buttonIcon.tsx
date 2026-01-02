@@ -1,4 +1,15 @@
-import { type ReactNode, useId } from "react";
+"use client";
+
+import { type ReactNode } from "react";
+
+import { Button } from "@/components/ui/shadcn/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/shadcn/tooltip";
+import { cn } from "@/lib/utils";
 
 export type TIconButtonVariant =
   | "Icon-Only-Primary"
@@ -16,6 +27,8 @@ type Props = {
   buttonVariant?: TIconButtonVariant;
   buttonSize?: ButtonSize;
   fullButton?: boolean;
+  onClick?: () => void;
+  className?: string;
 };
 
 function ButtonIcon({
@@ -24,9 +37,9 @@ function ButtonIcon({
   buttonVariant = "Icon-Outlined-Primary",
   buttonSize = "md",
   fullButton,
+  onClick,
+  className,
 }: Props) {
-  const btnId = useId();
-
   const noBorder =
     buttonVariant === "Icon-Only-Primary" ||
     buttonVariant === "Icon-Only-Secondary";
@@ -36,45 +49,62 @@ function ButtonIcon({
     buttonVariant === "Icon-Primary";
   const outlined =
     buttonVariant === "Icon-Outlined-Primary" ||
-    buttonVariant === "Icon-Outlined-Secondary"
-      ? "btn-outlined"
-      : "";
+    buttonVariant === "Icon-Outlined-Secondary";
 
-  const color = noBorder
-    ? primary
-      ? "txt-primary"
-      : "txt-secondary"
-    : primary
-      ? "btn btn-primary"
-      : "btn btn-secondary";
+  const getButtonVariant = () => {
+    if (noBorder) return "ghost";
+    if (outlined) return "outline";
+    return primary ? "default" : "secondary";
+  };
 
-  const sz =
-    buttonSize === "lg"
-      ? "btn-lg"
-      : buttonSize === "md"
-        ? "btn-md"
-        : buttonSize === "sm"
-          ? "btn-sm"
-          : "btn-xs";
+  const getSize = () => {
+    switch (buttonSize) {
+      case "lg":
+        return "lg";
+      case "sm":
+        return "sm";
+      case "xs":
+        return "sm";
+      default:
+        return "default";
+    }
+  };
 
-  return fullButton ? (
-    <label
-      className={`${color} ${outlined} flex items-center gap-2 ${sz}`}
-      tabIndex={0}
-    >
-      {iconComponent}
-      {title}
-    </label>
-  ) : (
-    <div className={"tooltip z-50"} data-tip={title}>
-      <label
-        htmlFor={btnId}
-        className={`${color} ${outlined} gap-2 ${sz} `}
-        tabIndex={0}
+  if (fullButton) {
+    return (
+      <Button
+        variant={getButtonVariant()}
+        size={getSize()}
+        className={cn("gap-2", className)}
+        onClick={onClick}
       >
         {iconComponent}
-      </label>
-    </div>
+        {title}
+      </Button>
+    );
+  }
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant={getButtonVariant()}
+            size="icon"
+            className={cn(
+              noBorder && (primary ? "text-primary" : "text-secondary"),
+              className
+            )}
+            onClick={onClick}
+          >
+            {iconComponent}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{title}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 

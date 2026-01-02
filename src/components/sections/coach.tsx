@@ -183,17 +183,14 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
               <div className="relative w-40 max-w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={fields.imageUrl} alt="" />
-                <button
+                <ButtonIcon
+                  iconComponent={<i className="bx bx-trash" />}
+                  title={t("hero.delete-image")}
+                  buttonVariant="Icon-Secondary"
+                  buttonSize="sm"
                   onClick={handleDeleteImage}
                   className="absolute right-2 bottom-2 z-10"
-                >
-                  <ButtonIcon
-                    iconComponent={<i className="bx bx-trash" />}
-                    title={t("hero.delete-image")}
-                    buttonVariant="Icon-Secondary"
-                    buttonSize="sm"
-                  />
-                </button>
+                />
               </div>
             ) : null}
           </div>

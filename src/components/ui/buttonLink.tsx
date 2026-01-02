@@ -1,18 +1,24 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
+import Link from "next/link";
 import type { PropsWithChildren } from "react";
+
+import { Button } from "@/components/ui/shadcn/button";
+import { cn } from "@/lib/utils";
 
 export default function ButtonLink({
   href,
   children,
   className,
-}: PropsWithChildren<{ href: string; className: string }>) {
-  const router = useRouter();
+  variant = "default",
+}: PropsWithChildren<{
+  href: string;
+  className?: string;
+  variant?: "default" | "outline" | "secondary" | "ghost" | "link";
+}>) {
   return (
-    <button className={className} onClick={() => router.push(href)}>
-      {children}
-    </button>
+    <Button asChild variant={variant} className={cn(className)}>
+      <Link href={href}>{children}</Link>
+    </Button>
   );
 }

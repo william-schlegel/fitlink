@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import { type ReactNode } from "react";
 
@@ -39,12 +41,16 @@ function Confirmation({
       variant={variant}
       buttonSize={buttonSize}
     >
-      <h3>{title}</h3>
-      <div className="flex flex-col">
-        {message &&
-          message
-            .split("|")
-            .map((p: string, idx: number) => <p key={idx}>{p}</p>)}
+      <div className="py-4">
+        <h3 className="text-lg font-semibold mb-2">{title}</h3>
+        <div className="flex flex-col gap-2">
+          {message &&
+            message
+              .split("|")
+              .map((p: string, idx: number) => (
+                <p key={idx} className="text-base-content/80">{p}</p>
+              ))}
+        </div>
       </div>
     </Modal>
   );

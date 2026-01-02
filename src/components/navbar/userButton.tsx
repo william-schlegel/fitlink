@@ -1,9 +1,20 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { User, Settings, LogOut } from "lucide-react";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/shadcn/dropdown-menu";
+import { Button } from "@/components/ui/shadcn/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/shadcn/avatar";
 import { authClient, useUser } from "@/lib/auth/client";
 
 export default function UserButton() {
@@ -12,49 +23,60 @@ export default function UserButton() {
   const { data: user } = useUser({ withImage: true });
 
   if (!user) return null;
+
+  const initials = user.name
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "U";
+
   return (
-    <div className="dropdown dropdown-end">
-      <label tabIndex={0} className="btn-ghost btn-circle avatar btn">
-        <div className="w-10 rounded-full">
-          <Image
-            src={user?.profileImageUrl ?? "/images/dummy.jpg"}
-            alt={user?.name ?? ""}
-            width={80}
-            height={80}
-          />
-        </div>
-      </label>
-      <ul
-        tabIndex={0}
-        className="dropdown-content menu rounded-box menu-compact mt-3 w-52 bg-base-100 p-2 shadow"
-      >
-        <li>
-          <Link href={`/user/${user.id}/profile`}>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <Avatar className="h-9 w-9">
+            <AvatarImage
+              src={user?.profileImageUrl ?? undefined}
+              alt={user?.name ?? ""}
+            />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuItem asChild>
+          <Link href={`/user/${user.id}/profile`} className="flex items-center gap-2">
+            <User className="h-4 w-4" />
             {t("navigation.my-profile")}
           </Link>
-        </li>
-        <li>
-          <Link href={`/user/${user.id}/account`}>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/user/${user.id}/account`} className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
             {t("navigation.my-account")}
           </Link>
-        </li>
-        <li>
-          <div
-            onClick={() => {
-              authClient.signOut({
-                fetchOptions: {
-                  onSuccess: () => {
-                    router.push("/");
-                    router.refresh();
-                  },
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => {
+            authClient.signOut({
+              fetchOptions: {
+                onSuccess: () => {
+                  router.push("/");
+                  router.refresh();
                 },
-              });
-            }}
-          >
-            {t("navigation.disconnect")}
-          </div>
-        </li>
-      </ul>
-    </div>
+              },
+            });
+          }}
+          className="flex items-center gap-2 text-error"
+        >
+          <LogOut className="h-4 w-4" />
+          {t("navigation.disconnect")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

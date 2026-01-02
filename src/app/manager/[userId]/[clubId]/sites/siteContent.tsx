@@ -8,7 +8,11 @@ import Link from "next/link";
 import { DeleteSite, UpdateSite } from "@/components/modals/manageSite";
 import LockedButton from "@/components/ui/lockedButton";
 import CalendarWeek from "@/components/calendarWeek";
-import { LayoutPage } from "@/components/layoutPage";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import Spinner from "@/components/ui/spinner";
 import useUserInfo from "@/lib/useUserInfo";
 import createLink from "@/lib/createLink";
@@ -92,10 +96,10 @@ export default function SiteContent({ clubId, siteId }: SiteContentProps) {
           )
         }
       >
-        <LayoutPage.Main>
+        <LayoutPageMain>
           {features.includes("MANAGER_ROOM") ? (
             <>
-              <LayoutPage.List
+              <LayoutPageList
                 list={roomList}
                 itemId={roomId}
                 noItemsText={t("room.no-rooms")}
@@ -112,7 +116,7 @@ export default function SiteContent({ clubId, siteId }: SiteContentProps) {
               </div>
             </>
           ) : null}
-        </LayoutPage.Main>
+        </LayoutPageMain>
       </LayoutPage>
     </div>
   );

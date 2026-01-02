@@ -1,8 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Eye } from "lucide-react";
 
 import ButtonIcon from "@/components/ui/buttonIcon";
+import { Badge } from "@/components/ui/shadcn/badge";
 
 export default function DocButton({ documentUrl }: { documentUrl: string }) {
   const t = useTranslations("coach");
@@ -15,24 +17,19 @@ export default function DocButton({ documentUrl }: { documentUrl: string }) {
 
   return documentUrl ? (
     <>
-      <div className="rounded-full bg-info px-4 py-1 text-center text-info-content">
-        {t("document-ok")}
-      </div>
+      <Badge variant="info">{t("document-ok")}</Badge>
 
-      <button onClick={handleViewDocument}>
-        <ButtonIcon
-          iconComponent={<i className="bx bx-show bx-sm" />}
-          title={t("view-document")}
-          buttonSize="md"
-          buttonVariant="Icon-Outlined-Primary"
-        />
-      </button>
+      <ButtonIcon
+        iconComponent={<Eye className="h-5 w-5" />}
+        title={t("view-document")}
+        buttonSize="md"
+        buttonVariant="Icon-Outlined-Primary"
+        onClick={handleViewDocument}
+      />
     </>
   ) : (
     <>
-      <div className="rounded-full bg-warning px-4 py-1 text-center text-warning-content">
-        {t("document-nok")}
-      </div>
+      <Badge variant="warning">{t("document-nok")}</Badge>
     </>
   );
 }

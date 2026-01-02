@@ -9,7 +9,11 @@ import {
 } from "@/components/modals/manageCoach";
 import { CoachOfferPage } from "@/components/sections/coachOffer";
 import { getOfferName } from "@/lib/offers/serverOffer";
-import { LayoutPage } from "@/components/layoutPage";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
@@ -56,8 +60,8 @@ export default async function CoachOffer({
       title={t("offer.my-offer", { count: offerQuery?.length ?? 0 })}
       titleComponents={<CreateOffer userId={userId} />}
     >
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={offerList}
           itemId={offerId}
           noItemsText={t("offer.no-offer")}
@@ -65,7 +69,7 @@ export default async function CoachOffer({
         {offerId === "" ? null : (
           <OfferContent userId={userId} offerId={offerId} />
         )}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

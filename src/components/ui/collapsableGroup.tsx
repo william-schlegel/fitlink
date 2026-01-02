@@ -1,30 +1,54 @@
-import { type ReactNode } from "react";
+"use client";
+
+import { type ReactNode, useState } from "react";
+import { ChevronDown } from "lucide-react";
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/shadcn/collapsible";
+import { Button } from "@/components/ui/shadcn/button";
+import { cn } from "@/lib/utils";
 
 type Props = {
   groupName: string;
   children: ReactNode;
   className?: string;
-  inputType?: "checkbox" | "radio";
-  inputName?: string;
+  defaultOpen?: boolean;
 };
 
 function CollapsableGroup({
   groupName,
   children,
   className,
-  inputType,
-  inputName,
+  defaultOpen = false,
 }: Props) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
   return (
-    <div
-      className={`collapse collapse-arrow border border-base-300 bg-base-100 ${className}`}
-    >
-      <input type={inputType ?? "checkbox"} name={inputName} />
-      <div className="collapse-title text-primary">{groupName}</div>
-      <div className="collapse-content flex flex-wrap items-center gap-2 transition-transform duration-200">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="ghost"
+          className={cn(
+            "flex w-full justify-between rounded-md border border-base-300 bg-base-200 px-3 py-2",
+            className
+          )}
+        >
+          <span>{groupName}</span>
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              isOpen && "rotate-180"
+            )}
+          />
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="mt-2 space-y-2 pl-4">
         {children}
-      </div>
-    </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 

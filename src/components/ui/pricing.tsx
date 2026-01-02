@@ -1,9 +1,20 @@
 "use client";
+
 import { type ReactNode, useState } from "react";
 import { useTranslations } from "next-intl";
-import { twMerge } from "tailwind-merge";
+import { ChevronRight } from "lucide-react";
 
 import { GetPricingById } from "@/server/api/routers/pricing";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/shadcn/card";
+import { Button } from "@/components/ui/shadcn/button";
+import { Badge } from "@/components/ui/shadcn/badge";
+import { cn } from "@/lib/utils";
 
 type Props = Readonly<{
   data: GetPricingById;
@@ -24,34 +35,31 @@ export function PricingComponent({
   const hl = forceHighlight ?? data?.highlighted;
 
   return (
-    <div
-      className={twMerge(
-        "card  w-96 bg-base-100 shadow-xl",
+    <Card
+      className={cn(
+        "w-96",
         compact && "w-fit",
-        hl && "border-4 border-primary",
-        data?.deleted && "border-4 border-red-600",
+        hl && "border-2 border-primary",
+        data?.deleted && "border-2 border-error"
       )}
     >
-      <div
-        className={twMerge(
-          "card-body items-center text-center",
-          compact && "p-2",
-        )}
-      >
-        {data?.deleted ? (
-          <div className="alert alert-warning text-center">
+      <CardHeader className={cn("items-center text-center", compact && "p-2")}>
+        {data?.deleted && (
+          <Badge variant="warning" className="mb-2">
             {t("pricing.deleted", {
               date: data?.deletionDate?.toLocaleDateString() ?? "",
             })}
-          </div>
-        ) : null}
-        <h2 className="card-title text-3xl font-bold">{data?.title}</h2>
-        <p>{data?.description}</p>
-        {compact ? null : (
-          <ul className="self-start py-8">
+          </Badge>
+        )}
+        <CardTitle className="text-3xl font-bold">{data?.title}</CardTitle>
+        <p className="text-base-content/80">{data?.description}</p>
+      </CardHeader>
+      <CardContent className={cn("items-center text-center", compact && "p-2")}>
+        {!compact && (
+          <ul className="self-start py-4 space-y-2">
             {data?.options.map((option) => (
-              <li key={option.id} className="flex items-center gap-4">
-                <i className="bx bx-chevron-right bx-sm text-accent" />
+              <li key={option.id} className="flex items-center gap-2">
+                <ChevronRight className="h-5 w-5 text-accent" />
                 <span className="text-start">{option.name}</span>
               </li>
             ))}
@@ -59,41 +67,37 @@ export function PricingComponent({
         )}
         {data?.free ? (
           <p
-            className={twMerge(
+            className={cn(
               "py-4 text-xl font-bold text-accent",
-              compact && "py-1",
+              compact && "py-1"
             )}
           >
             {t("pricing.free")}
           </p>
         ) : (
           <>
-            <div className="flex items-center gap-2">
-              <button
-                className={twMerge(
-                  "btn btn-primary btn-sm",
-                  !monthlyPrice && "btn-outline",
-                )}
+            <div className="flex items-center gap-2 justify-center">
+              <Button
+                variant={monthlyPrice ? "default" : "outline"}
+                size="sm"
                 onClick={() => setMonthlyPrice(true)}
                 type="button"
               >
                 {t("pricing.monthly")}
-              </button>
-              <button
-                className={twMerge(
-                  "btn btn-primary btn-sm",
-                  monthlyPrice && "btn-outline",
-                )}
+              </Button>
+              <Button
+                variant={!monthlyPrice ? "default" : "outline"}
+                size="sm"
                 onClick={() => setMonthlyPrice(false)}
                 type="button"
               >
                 {t("pricing.yearly")}
-              </button>
+              </Button>
             </div>
             <p
-              className={twMerge(
+              className={cn(
                 "py-4 text-xl font-bold text-accent",
-                compact && "py-1",
+                compact && "py-1"
               )}
             >
               {monthlyPrice
@@ -106,19 +110,19 @@ export function PricingComponent({
             </p>
           </>
         )}
-        {typeof onSelect === "function" && (
-          <div className="card-actions">
-            <button
-              className="btn btn-primary btn-block"
-              type="button"
-              onClick={() => onSelect(data?.id ?? "", monthlyPrice)}
-            >
-              {t("pricing.select")}
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+      </CardContent>
+      {typeof onSelect === "function" && (
+        <CardFooter className="justify-center">
+          <Button
+            className="w-full"
+            type="button"
+            onClick={() => onSelect(data?.id ?? "", monthlyPrice)}
+          >
+            {t("pricing.select")}
+          </Button>
+        </CardFooter>
+      )}
+    </Card>
   );
 }
 
@@ -133,9 +137,9 @@ export function PricingContainer({
 }: PricingContainerProps) {
   return (
     <div
-      className={twMerge(
+      className={cn(
         "flex flex-wrap items-stretch gap-4 justify-center py-12",
-        compact && "justify-start",
+        compact && "justify-start"
       )}
     >
       {children}

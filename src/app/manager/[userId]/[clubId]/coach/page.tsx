@@ -7,7 +7,11 @@ import {
   CoachDataPresentation,
 } from "@/components/modals/manageClub";
 import createLink, { createHref } from "@/lib/createLink";
-import { LayoutPage } from "@/components/layoutPage";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { CoachPlanning } from "./coachPlanning";
@@ -64,17 +68,17 @@ export default async function ManageCoachs({
         </div>
       }
     >
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={coachList}
           itemId={coachId}
           noItemsText={t("coach.no-coachs")}
-        ></LayoutPage.List>
+        ></LayoutPageList>
 
         {Boolean(coachId) ? (
           <CoachContent clubId={clubId} coachId={coachId} />
         ) : null}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

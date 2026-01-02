@@ -1,5 +1,7 @@
 "use client";
-import React from "react";
+
+import { Button } from "@/components/ui/shadcn/button";
+import { cn } from "@/lib/utils";
 
 type Props = {
   count: number;
@@ -11,16 +13,25 @@ type Props = {
 function Pagination({ count, actualPage, onPageClick, perPage }: Props) {
   const nbPage = Math.ceil(count / perPage);
   if (nbPage < 2) return null;
+
   return (
-    <div className="join">
-      {Array.from({ length: nbPage }, (_, k) => k).map((pg) => (
-        <button
+    <div className="inline-flex rounded-md shadow-sm">
+      {Array.from({ length: nbPage }, (_, k) => k).map((pg, index) => (
+        <Button
           key={`page-${pg}`}
-          className={`btn btn-sm join-item ${pg === actualPage ? "btn-active" : ""}`}
+          variant={pg === actualPage ? "default" : "outline"}
+          size="sm"
+          className={cn(
+            "min-w-10",
+            index === 0 && "rounded-r-none",
+            index === nbPage - 1 && "rounded-l-none",
+            index > 0 && index < nbPage - 1 && "rounded-none",
+            index > 0 && "-ml-px",
+          )}
           onClick={() => onPageClick?.(pg)}
         >
-          {pg}
-        </button>
+          {pg + 1}
+        </Button>
       ))}
     </div>
   );

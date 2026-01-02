@@ -9,7 +9,12 @@ import {
   UpdateCertificationGroup,
 } from "@/components/modals/manageCertification";
 import createLink, { createHref } from "@/lib/createLink";
-import { LayoutPage } from "@/components/layoutPage";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+  LayoutPageContent,
+} from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { getHref } from "@/lib/getHref";
@@ -46,15 +51,15 @@ export default async function CertificationsManagement({
       title={t("certification.manage-cg")}
       titleComponents={<CreateCertificationOrganism />}
     >
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={cgList}
           itemId={cgId}
           noItemsText={t("certification.no-cg")}
         />
 
         {cgId === "" ? null : <CGContent cgId={cgId} />}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }
