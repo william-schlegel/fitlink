@@ -64,7 +64,7 @@ export function SortableItem({
     <SortableItemContext.Provider value={context}>
       <li
         className={cn(
-          "flex grow items-center justify-between rounded-md border border-shadcn bg-shadcn-card px-4 py-2 text-[hsl(var(--foreground))] shadow-sm",
+          "flex grow items-center justify-between rounded-md border border-border bg-card px-4 py-2 text-[hsl(var(--foreground))] shadow-sm",
           className,
         )}
         ref={setNodeRef}
@@ -86,7 +86,7 @@ export function DragHandle({ className }: DragHandleProps) {
   return (
     <button
       className={cn(
-          "flex cursor-grab touch-none items-center justify-center rounded-md border-none bg-transparent p-2 outline-none hover:bg-shadcn-muted focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing",
+        "flex cursor-grab touch-none items-center justify-center rounded-md border-none bg-transparent p-2 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing",
         className,
       )}
       {...attributes}

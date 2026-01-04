@@ -8,10 +8,13 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import Image from "next/image";
 import Link from "next/link";
 
+import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/shadcn/field";
 import { CoachDataOfferType } from "@/server/api/routers/users";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import ThemeSelector, { TThemes } from "../themeSelector";
+import { Textarea } from "../ui/shadcn/textarea";
 import { UploadButton } from "../uploadthing";
+import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
 import { OfferBadge } from "./coachOffer";
 import { trpc } from "@/lib/trpc/client";
@@ -203,18 +206,28 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
               <i className="bx bx-info-circle bx-xs" />
             </span>
           </div>
-          <label>{t("coach.info")}</label>
-          <input
-            {...form.register("subtitle")}
-            type="text"
-            className="input-bordered input w-full"
-          />
-          <label>{t("coach.description")}</label>
-          <textarea
-            {...form.register("description")}
-            className="field-sizing-content"
-            rows={4}
-          />
+          <FieldSet>
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="coach-info">{t("coach.info")}</FieldLabel>
+                <Input
+                  id="coach-info"
+                  {...form.register("subtitle")}
+                  type="text"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="coach-description">
+                  {t("coach.description")}
+                </FieldLabel>
+                <Textarea
+                  id="coach-description"
+                  {...form.register("description")}
+                  rows={4}
+                />
+              </Field>
+            </FieldGroup>
+          </FieldSet>
           <div className="form-control col-span-2">
             <div className="label cursor-pointer justify-start gap-4">
               <input
@@ -546,7 +559,7 @@ function MapSection({
   const circle = generateCircle(longitude, latitude, range);
 
   return (
-    <section className={`${preview ? "pt-4" : "pt-24"} w-full bg-shadcn-muted`}>
+    <section className={`${preview ? "pt-4" : "pt-24"} w-full bg-muted`}>
       <div className={`mx-auto max-w-4xl ${preview ? "p-8" : "p-24"}`}>
         <h2
           className={`w-full text-center ${
@@ -605,14 +618,14 @@ function CoachOffers({ offers, preview, coachData }: CoachOffersProps) {
   const t = useTranslations("pages");
   if (!offers.length) return null;
   return (
-    <section className={`${preview ? "py-4" : "py-12"} w-full bg-shadcn-muted`}>
+    <section className={`${preview ? "py-4" : "py-12"} w-full bg-muted`}>
       <div className={`container mx-auto ${preview ? "py-2 px-8" : "p-8"}`}>
         <h3>{t("coach.coach-offers")}</h3>
         <div className="flex flex-wrap gap-2">
           {offers.map((offer) => (
             <article
               key={offer.id}
-              className="card flex-1 bg-shadcn-card p-4 shadow-xl"
+              className="card flex-1 bg-card p-4 shadow-xl"
             >
               <div className={`card-body ${preview ? "p-0" : ""}`}>
                 <h2 className={`card-title ${preview ? "text-base" : ""}`}>

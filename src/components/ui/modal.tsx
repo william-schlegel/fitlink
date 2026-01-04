@@ -75,7 +75,9 @@ export default function Modal({
   }, [onCloseModal]);
 
   useEffect(() => {
-    if (closeModal) close();
+    if (closeModal) {
+      Promise.resolve().then(() => close());
+    }
   }, [closeModal, close]);
 
   const handleClickSubmit = () => {
@@ -138,9 +140,10 @@ export default function Modal({
       size={iconOnly ? "icon" : getButtonSize()}
       className={cn(
         buttonClassName,
-        noBorder && (primary ? "text-primary" : "text-secondary"),
+        noBorder &&
+          (primary ? "text-primary-foreground" : "text-secondary-foreground"),
         outlinedSecondary &&
-          "border-secondary bg-transparent! text-secondary hover:bg-secondary/10! hover:text-secondary!",
+          "border-secondary bg-transparent! text-secondary-foreground hover:bg-secondary/10! hover:text-secondary-foreground!",
         "gap-2",
       )}
     >

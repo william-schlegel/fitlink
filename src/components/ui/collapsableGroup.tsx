@@ -32,15 +32,15 @@ function CollapsableGroup({
         <Button
           variant="ghost"
           className={cn(
-            "flex w-full justify-between rounded-md border border-shadcn bg-shadcn-muted px-3 py-2",
-            className
+            "flex w-full justify-between rounded-md border border-border bg-muted px-3 py-2",
+            className,
           )}
         >
           <span>{groupName}</span>
           <ChevronDown
             className={cn(
               "h-4 w-4 transition-transform duration-200",
-              isOpen && "rotate-180"
+              isOpen && "rotate-180",
             )}
           />
         </Button>

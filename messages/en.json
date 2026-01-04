@@ -278,7 +278,10 @@
       "logo-size": "Maximum logo size: {size}",
       "delete-logo": "Delete logo",
       "search-address": "Geolocate club/activity site",
-      "manage-coachs": "Manage my coaches"
+      "manage-coachs": "Manage my coaches",
+      "activity-group": {
+        "name": "Name"
+      }
     },
     "site": {
       "site": "{count, plural, =0 {No site} =1 {Site} other {Sites}}",

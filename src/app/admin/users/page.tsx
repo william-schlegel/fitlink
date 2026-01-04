@@ -9,6 +9,7 @@ import {
 import { getAllUsers } from "@/server/api/routers/users";
 import Pagination from "@/components/ui/pagination";
 import { getActualUser } from "@/lib/auth/server";
+import { Badge } from "@/components/ui/shadcn";
 import { TUserFilter } from "./userFilter";
 import UserContent from "./userContent";
 import UserFilter from "./userFilter";
@@ -50,20 +51,8 @@ export default async function UserManagement({
           itemId={userId}
           noItemsText={t("user.no-users")}
         >
-          <div className="collapse-arrow rounded-box collapse border border-shadcn bg-shadcn-card mb-4">
-            <input type="checkbox" className="hidden" />
-            <div className="collapse-title text-xl font-medium">
-              <span className="flex items-center gap-4">
-                {t("user.filter")}
-                <span className="badge-info badge">
-                  {Object.keys(parsedFilter).length}
-                </span>
-              </span>
-            </div>
-            <div className="collapse-content">
-              <UserFilter filter={parsedFilter} />
-            </div>
-          </div>
+          <UserFilter filter={parsedFilter} />
+
           <Pagination
             actualPage={page}
             count={userQuery.userCount ?? 0}

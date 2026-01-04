@@ -1,16 +1,16 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
-import { CreatePage } from "@/components/modals/managePage";
-import { getPagesForClub } from "@/server/api/routers/page";
-import createLink, { createHref } from "@/lib/createLink";
-import { getDefaultSection } from "@/lib/sections/data";
-import { PageSectionModel } from "@/lib/sections/data";
 import {
   LayoutPage,
   LayoutPageMain,
   LayoutPageList,
 } from "@/components/layoutPage";
+import { CreatePage } from "@/components/modals/managePage";
+import { getPagesForClub } from "@/server/api/routers/page";
+import createLink, { createHref } from "@/lib/createLink";
+import { getDefaultSection } from "@/lib/sections/data";
+import { PageSectionModel } from "@/lib/sections/data";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import SelectClub from "@/components/selectClub";
@@ -68,7 +68,7 @@ export default async function ClubPage({
       <div className="flex items-center gap-2">
         <TargetName target={page.target ?? "HOME"} />
         <i
-          className={`bx bx-xs aspect-square rounded-full bg-shadcn-card ${
+          className={`bx bx-xs aspect-square rounded-full bg-card ${
             page.published ? "bx-check text-success" : "bx-x text-error"
           }`}
         />

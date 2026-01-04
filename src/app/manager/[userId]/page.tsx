@@ -200,13 +200,13 @@ async function DailyPlanning({ clubId }: { clubId: string }) {
   const planning = await getClubDailyPlanning(clubId, day);
   if (!planning) return <div>{t("no-planning")}</div>;
   return (
-    <div className="flex flex-col items-center rounded border border-secondary bg-shadcn-card">
+    <div className="flex flex-col items-center rounded border border-secondary bg-card">
       <div className="w-full  bg-secondary text-center text-secondary-content">
         {planning?.club?.name}
       </div>
       <div className="flex shrink-0 flex-wrap items-start gap-2 p-2">
         {planning.planningActivities.map((activity) => (
-          <div key={activity.id} className="border border-shadcn p-2">
+          <div key={activity.id} className="border border-border p-2">
             <p>
               <span className="text-xs">{activity.startTime}</span>
               {" ("}

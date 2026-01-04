@@ -9,6 +9,14 @@ import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { getButtonSize } from "../ui/modal";
 import ButtonIcon from "../ui/buttonIcon";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
+import { Input } from "../ui/shadcn/input";
+import { Textarea } from "../ui/shadcn/textarea";
 import { trpc } from "@/lib/trpc/client";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
@@ -183,24 +191,34 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
               </div>
             </div>
           ) : null}
-          <label>{t("title.title")}</label>
-          <input
-            {...register("title")}
-            type="text"
-            className="input-bordered input w-full"
-          />
-          <label>{t("title.subtitle")}</label>
-          <input
-            {...register("subtitle")}
-            type="text"
-            className="input-bordered input w-full"
-          />
-          <label>{t("title.description")}</label>
-          <textarea
-            {...register("description")}
-            className="field-sizing-content"
-            rows={4}
-          />
+          <FieldSet>
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="title-title">{t("title.title")}</FieldLabel>
+                <Input
+                  id="title-title"
+                  {...register("title")}
+                  type="text"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="title-subtitle">{t("title.subtitle")}</FieldLabel>
+                <Input
+                  id="title-subtitle"
+                  {...register("subtitle")}
+                  type="text"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="title-description">{t("title.description")}</FieldLabel>
+                <Textarea
+                  id="title-description"
+                  {...register("description")}
+                  rows={4}
+                />
+              </Field>
+            </FieldGroup>
+          </FieldSet>
 
           <div className="col-span-2 flex justify-between">
             <button className="btn btn-primary" type="submit">

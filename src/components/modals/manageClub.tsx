@@ -6,26 +6,26 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
+import { Plus, Edit, Trash2, MapPin, ExternalLink } from "lucide-react";
 import { startTransition, useEffect, useState } from "react";
 import MapComponent, { Marker } from "react-map-gl/mapbox";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Plus, Edit, Trash2, MapPin, ExternalLink } from "lucide-react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Image from "next/image";
 import Link from "next/link";
 
 import { useMutation } from "convex/react";
 
+import { Textarea } from "@/components/ui/shadcn/textarea";
+import { Checkbox } from "@/components/ui/shadcn/checkbox";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { Button } from "@/components/ui/shadcn/button";
 import CollapsableGroup from "../ui/collapsableGroup";
 import { api } from "../../../convex/_generated/api";
-import { Button } from "@/components/ui/shadcn/button";
-import { Input } from "@/components/ui/shadcn/input";
 import { Label } from "@/components/ui/shadcn/label";
-import { Checkbox } from "@/components/ui/shadcn/checkbox";
+import { Input } from "@/components/ui/shadcn/input";
 import { Badge } from "@/components/ui/shadcn/badge";
-import { Textarea } from "@/components/ui/shadcn/textarea";
 import AddressSearch from "../ui/addressSearch";
 import FindCoach from "../sections/findCoach";
 import Confirmation from "../ui/confirmation";
@@ -81,7 +81,9 @@ export const CreateClub = () => {
       onCloseModal={() => setCloseModal(false)}
     >
       <h3>{t("club.create-new")}</h3>
-      <p className="py-4 text-base-content/70">{t("club.enter-new-club-info")}</p>
+      <p className="py-4 text-base-content/70">
+        {t("club.enter-new-club-info")}
+      </p>
       <ClubForm onSubmit={onSubmit} onCancel={() => setCloseModal(true)} />
     </Modal>
   );
@@ -102,7 +104,7 @@ export const UpdateClub = ({ clubId }: PropsUpdateDelete) => {
     { clubId, userId },
     {
       enabled: isCUID(clubId) && userId !== "",
-    }
+    },
   );
   useEffect(() => {
     if (queryClub.data) {
@@ -232,7 +234,7 @@ function ClubForm({ onSubmit, onCancel, update, initialData }: ClubFormProps) {
       onSubmit={handleSubmit(onSubmitForm, onError)}
       className={cn(
         "items-start gap-4",
-        update || !fields.isSite ? "" : "grid grid-cols-2"
+        update || !fields.isSite ? "" : "grid grid-cols-2",
       )}
     >
       <div className="grid grid-cols-[auto_1fr] items-center gap-3">
@@ -296,7 +298,7 @@ function ClubForm({ onSubmit, onCancel, update, initialData }: ClubFormProps) {
                 variant="ghost"
                 size="icon"
                 onClick={handleDeleteImage}
-                className="absolute right-2 bottom-2 bg-shadcn-card/80 hover:bg-shadcn-card"
+                className="absolute right-2 bottom-2 bg-card/80 hover:bg-card"
               >
                 <Trash2 className="h-4 w-4 text-error" />
               </Button>
@@ -393,7 +395,7 @@ type AddCoachToClubProps = { clubId: string; userId: string };
 
 export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
   const createNotifications = useMutation(
-    api.notifications.createNotifications
+    api.notifications.createNotifications,
   );
   const [closeModal, setCloseModal] = useState(false);
   const t = useTranslations("club");
@@ -418,7 +420,7 @@ export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
         toast.error(
           error instanceof Error
             ? error.message
-            : "Failed to send notification"
+            : "Failed to send notification",
         );
       }
     }
@@ -446,14 +448,14 @@ export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
               key={idx}
               className={cn(
                 "flex items-center gap-2 p-2 rounded-md",
-                idx <= step ? "bg-primary/10" : "bg-shadcn-muted"
+                idx <= step ? "bg-primary/10" : "bg-muted",
               )}
             >
               <span className="text-xl">{s.content}</span>
               <span
                 className={cn(
                   "text-sm",
-                  idx === step && "font-bold text-primary"
+                  idx === step && "font-bold text-primary",
                 )}
               >
                 {t(s.label)}
@@ -557,7 +559,7 @@ export function CoachDataPresentation({
               <CollapsableGroup
                 key={cert.id}
                 groupName={cert.name}
-                className="bg-shadcn-card"
+                className="bg-card"
               >
                 {cert.modules.map((mod) => (
                   <Badge key={mod.id} variant="secondary" className="text-xs">

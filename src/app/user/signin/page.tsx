@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
-import { getSession } from "@/lib/auth/server";
 import {
   Card,
   CardContent,
@@ -9,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/shadcn/card";
 import { Separator } from "@/components/ui/shadcn/separator";
+import { getSession } from "@/lib/auth/server";
 import CreateAccount from "./createAccount";
 import { auth } from "@/lib/auth/server";
 import Title from "@/components/title";
@@ -29,7 +29,7 @@ export default async function SignIn({
     await searchParams;
   if (signInEmail)
     return (
-      <div className="flex min-h-screen items-center justify-center bg-shadcn mx-8">
+      <div className="flex min-h-screen items-center justify-center bg-background mx-8">
         <Title title="Magic link" />
 
         <Card className="p-12 text-center max-w-md">
@@ -39,7 +39,9 @@ export default async function SignIn({
           <p className="text-lg font-semibold">
             {t("signin.check-your-mail", { email: signInEmail })}
           </p>
-          <p className="text-[hsl(var(--foreground)/0.7)]">{t("signin.close-page")}</p>
+          <p className="text-[hsl(var(--foreground)/0.7)]">
+            {t("signin.close-page")}
+          </p>
         </Card>
       </div>
     );

@@ -281,7 +281,10 @@
       "logo-size": "Taille maximum du logo : {size}",
       "delete-logo": "Supprimer le logo",
       "search-address": "Géolocalisation du club/site d'activité",
-      "manage-coachs": "Gestion de mes coachs"
+      "manage-coachs": "Gestion de mes coachs",
+      "activity-group": {
+        "name": "Nom"
+      }
     },
     "site": {
       "site": "{count, plural, =0 {Aucun site} =1 {Site} other {Sites}}",

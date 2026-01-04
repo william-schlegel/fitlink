@@ -8,10 +8,16 @@ import {
 } from "react";
 import { useTranslations } from "next-intl";
 
-import { Input } from "@/components/ui/shadcn/input";
-import { Checkbox } from "@/components/ui/shadcn/checkbox";
-import { Label } from "@/components/ui/shadcn/label";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldError,
+  FieldSet,
+} from "@/components/ui/shadcn/field";
 import { Textarea } from "@/components/ui/shadcn/textarea";
+import { Checkbox } from "@/components/ui/shadcn/checkbox";
+import { Input } from "@/components/ui/shadcn/input";
 import { cn } from "@/lib/utils";
 
 import Spinner from "./spinner";
@@ -57,78 +63,114 @@ export default function SimpleForm<T extends FieldValues>({
 }: SimpleFormProps<T>): ReactNode {
   return (
     <form
-      className={cn(
-        "grid grid-cols-[auto_1fr] gap-2 items-start",
-        className,
-      )}
+      className={cn(className)}
       onSubmit={typeof onSubmit === "function" ? (e) => onSubmit(e) : undefined}
     >
       {isLoading ? (
         <Spinner />
       ) : (
-        fields.map((field) => {
-          const fn = field.name as string;
-          const isTextArea = field.rows && !isNaN(field.rows) && field.rows > 1;
-          const requiredOption =
-            field.required === true
-              ? true
-              : typeof field.required === "string"
-                ? field.required
-                : undefined;
+        <FieldSet className="space-y-6">
+          <FieldGroup>
+            {fields.map((field) => {
+              const fn = field.name as string;
+              const isTextArea =
+                field.rows && !isNaN(field.rows) && field.rows > 1;
+              const requiredOption =
+                field.required === true
+                  ? true
+                  : typeof field.required === "string"
+                    ? field.required
+                    : undefined;
 
-          const inputRegisterOptions = {
-            ...(requiredOption !== undefined
-              ? { required: requiredOption }
-              : {}),
-            ...(field.type === "date" ? { valueAsDate: true } : {}),
-            ...(field.type === "number" ? { valueAsNumber: true } : {}),
-          } as const;
+              const inputRegisterOptions = {
+                ...(requiredOption !== undefined
+                  ? { required: requiredOption }
+                  : {}),
+                ...(field.type === "date" ? { valueAsDate: true } : {}),
+                ...(field.type === "number" ? { valueAsNumber: true } : {}),
+              } as const;
 
-          const textareaRegisterOptions = {
-            ...(requiredOption !== undefined
-              ? { required: requiredOption }
-              : {}),
-          } as const;
+              const textareaRegisterOptions = {
+                ...(requiredOption !== undefined
+                  ? { required: requiredOption }
+                  : {}),
+              } as const;
 
-          return (
-            <Fragment key={fn}>
-              {field.type === "checkbox" ? (
-                <div className="col-span-2 flex items-center space-x-3">
-                  <Checkbox
-                    id={fn}
-                    {...register(fn as Path<T>)}
-                    defaultChecked={false}
-                  />
-                  <Label
-                    htmlFor={fn}
-                    className={cn(
-                      "cursor-pointer",
-                      field.required && "after:content-['*'] after:text-error after:ml-0.5"
-                    )}
-                  >
-                    {field.label}
-                  </Label>
-                </div>
-              ) : (
-                <>
-                  {field.label !== undefined ? (
-                    <Label
-                      className={cn(
-                        field.required && "after:content-['*'] after:text-error after:ml-0.5",
-                        isTextArea && "self-start"
-                      )}
-                    >
-                      {field.label}
-                    </Label>
-                  ) : null}
-                  <div
-                    className={field.label === undefined ? "col-span-2" : ""}
-                  >
-                    {field.component ? (
-                      field.component
-                    ) : field.unit !== undefined ? (
-                      <div className="flex items-center gap-2">
+              return (
+                <Field
+                  key={fn}
+                  orientation={
+                    field.type === "checkbox" ? "horizontal" : "vertical"
+                  }
+                >
+                  {field.type === "checkbox" ? (
+                    <>
+                      <Checkbox
+                        id={fn}
+                        {...register(fn as Path<T>)}
+                        defaultChecked={false}
+                      />
+                      <FieldLabel
+                        htmlFor={fn}
+                        className={cn(
+                          "cursor-pointer font-normal",
+                          field.required &&
+                            "after:content-['*'] after:text-error after:ml-0.5",
+                        )}
+                      >
+                        {field.label}
+                      </FieldLabel>
+                    </>
+                  ) : field.component ? (
+                    <div className="col-span-2">{field.component}</div>
+                  ) : (
+                    <>
+                      {field.label !== undefined ? (
+                        <FieldLabel
+                          htmlFor={fn}
+                          className={cn(
+                            field.required &&
+                              "after:content-['*'] after:text-error after:ml-0.5",
+                          )}
+                        >
+                          {field.label}
+                        </FieldLabel>
+                      ) : null}
+                      {field.unit !== undefined ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            id={fn}
+                            {...register(
+                              fn as Path<T>,
+                              inputRegisterOptions as unknown as RegisterOptions<
+                                T,
+                                Path<T>
+                              >,
+                            )}
+                            type={field.type || "text"}
+                            disabled={field.disabled}
+                            className="w-auto flex-1"
+                          />
+                          <span className="text-sm text-base-content/70">
+                            {field.unit}
+                          </span>
+                        </div>
+                      ) : isTextArea ? (
+                        <Textarea
+                          id={fn}
+                          {...register(
+                            fn as Path<T>,
+                            textareaRegisterOptions as unknown as RegisterOptions<
+                              T,
+                              Path<T>
+                            >,
+                          )}
+                          disabled={field.disabled}
+                          rows={field.rows}
+                        />
+                      ) : (
                         <Input
+                          id={fn}
                           {...register(
                             fn as Path<T>,
                             inputRegisterOptions as unknown as RegisterOptions<
@@ -138,56 +180,22 @@ export default function SimpleForm<T extends FieldValues>({
                           )}
                           type={field.type || "text"}
                           disabled={field.disabled}
-                          className="w-auto flex-1"
                         />
-                        <span className="text-sm text-base-content/70">{field.unit}</span>
-                      </div>
-                    ) : isTextArea ? (
-                      <Textarea
-                        {...register(
-                          fn as Path<T>,
-                          textareaRegisterOptions as unknown as RegisterOptions<
-                            T,
-                            Path<T>
-                          >,
-                        )}
-                        disabled={field.disabled}
-                        rows={field.rows}
-                      />
-                    ) : (
-                      <Input
-                        {...register(
-                          fn as Path<T>,
-                          inputRegisterOptions as unknown as RegisterOptions<
-                            T,
-                            Path<T>
-                          >,
-                        )}
-                        type={field.type || "text"}
-                        disabled={field.disabled}
-                      />
-                    )}
-                    <TextError
-                      err={errors?.[fn]?.message as string | undefined}
-                    />
-                  </div>
-                </>
-              )}
-            </Fragment>
-          );
-        })
+                      )}
+                      {errors?.[fn]?.message ? (
+                        <FieldError>{errors[fn]?.message as string}</FieldError>
+                      ) : null}
+                    </>
+                  )}
+                </Field>
+              );
+            })}
+          </FieldGroup>
+        </FieldSet>
       )}
       {children}
     </form>
   );
 }
 
-type TextErrorProps = { err: string | undefined };
-
-export function TextError({ err }: TextErrorProps) {
-  const t = useTranslations("common");
-  if (!err) return null;
-  const msg = err || t("navigation.required") || "Error";
-
-  return <p className="text-sm text-error mt-1">{msg}</p>;
-}
+// TextError is no longer needed as FieldError is used instead

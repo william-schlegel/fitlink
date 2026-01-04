@@ -239,7 +239,7 @@ function ModuleSelector({
   return (
     <div>
       <h4>{title}</h4>
-      <div className="flex flex-wrap gap-2 rounded-md border border-secondary bg-shadcn-card p-2">
+      <div className="flex flex-wrap gap-2 rounded-md border border-secondary bg-card p-2">
         {modules?.map((mod) => (
           <Button
             key={mod.id}
@@ -271,7 +271,7 @@ function ActivitySelector({
   return (
     <div>
       <h4>{title}</h4>
-      <div className="flex flex-wrap gap-2 rounded-md border border-secondary bg-shadcn-card p-2">
+      <div className="flex flex-wrap gap-2 rounded-md border border-secondary bg-card p-2">
         {activities.map((act) => (
           <Button
             key={act.id}
@@ -763,12 +763,12 @@ function CertificationGroupForm({
             {t("certification.modules")}
           </h4>
           {data.modules.length > 0 && (
-            <ul className="overflow-hidden rounded-md border border-shadcn w-full">
+            <ul className="overflow-hidden rounded-md border border-border w-full">
               {data.modules.map((mod, idx) => (
                 <li key={mod.dbId ?? mod.name}>
                   <div
                     className={cn(
-                      "flex w-full items-center justify-between p-3 cursor-pointer hover:bg-shadcn-muted",
+                      "flex w-full items-center justify-between p-3 cursor-pointer hover:bg-muted",
                       moduleId === mod.dbId &&
                         "border border-primary bg-primary/10",
                     )}

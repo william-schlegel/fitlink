@@ -10,12 +10,15 @@
     "cssVariables": true,
     "prefix": ""
   },
+  "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
-    "ui": "@/components/ui",
+    "ui": "@/components/ui/shadcn",
     "lib": "@/lib",
     "hooks": "@/lib/hooks"
   },
-  "iconLibrary": "lucide"
+  "registries": {
+    "@blocks": "https://blocks.so/r/{name}.json"
+  }
 }

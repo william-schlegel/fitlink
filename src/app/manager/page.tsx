@@ -19,7 +19,7 @@ export default async function ManagerPage() {
 
   return (
     <div>
-      <section className="hero bg-shadcn-card">
+      <section className="hero bg-card">
         <div className="hero-content py-48 text-center">
           <div className="max-w-md">
             <h1 className="text-5xl font-bold">{t("manager-title")}</h1>
@@ -27,7 +27,7 @@ export default async function ManagerPage() {
           </div>
         </div>
       </section>
-      <section className="bg-shadcn-card">
+      <section className="bg-card">
         <div className="container mx-auto">
           <h2 className="pt-12">{t("features.manager")}</h2>
           <FeatureContainer>
@@ -58,7 +58,7 @@ export default async function ManagerPage() {
           </FeatureContainer>
         </div>
       </section>
-      <section className="bg-shadcn-muted">
+      <section className="bg-muted">
         <div className="container mx-auto">
           <h2 className="pt-12">{t("pricing.usage")}</h2>
           <p className="alert alert-info">{t("pricing.try-offer")}</p>

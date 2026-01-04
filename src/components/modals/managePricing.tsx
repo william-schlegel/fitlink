@@ -26,8 +26,27 @@ import {
   useFormContext,
 } from "react-hook-form";
 import { useEffect, useRef, type PropsWithoutRef } from "react";
+import { Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/shadcn/select";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
+import { Textarea } from "../ui/shadcn/textarea";
+import { Checkbox } from "../ui/shadcn/checkbox";
+import { Input } from "../ui/shadcn/input";
 
 import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
 import Modal, { type TModalVariant } from "../ui/modal";
@@ -38,6 +57,7 @@ import { trpc } from "@/lib/trpc/client";
 import { ROLE_LIST } from "@/lib/data";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
 
 type PricingFormValues = {
   title: string;
@@ -337,90 +357,138 @@ function PricingForm() {
 
   return (
     <div className="grid grid-cols-3 gap-4">
-      <form className={`grid grid-cols-[auto_1fr] items-center gap-2`}>
-        <label>{t("pricing.name")}</label>
-        <div className="flex flex-col gap-2">
-          <input
-            {...register("title", {
-              required: t("pricing.name-mandatory") ?? true,
-            })}
-            type={"text"}
-            className="input-bordered input w-full"
-          />
-          {errors.title ? (
-            <p className="text-sm text-error">{errors.title.message}</p>
-          ) : null}
-        </div>
-        <label className="self-start">{t("pricing.description")}</label>
-        <div className="flex flex-col gap-2">
-          <textarea
-            {...register("description", {
-              required: t("pricing.description-mandatory") ?? true,
-            })}
-            className="field-sizing-content"
-            rows={4}
-          />
-          {errors.description ? (
-            <p className="text-sm text-error">{errors.description.message}</p>
-          ) : null}
-        </div>
-        <label>{t("pricing.internalRole")}</label>
-        <select
-          className="max-w-xs"
-          {...register("roleTarget")}
-          defaultValue="MANAGER"
-        >
-          {ROLE_LIST.filter((rl) => rl.value !== "ADMIN").map((rl) => (
-            <option key={rl.value} value={rl.value}>
-              {tAuth(`${rl.label}`)}
-            </option>
-          ))}
-        </select>
-        <div className="form-control col-span-2">
-          <label className="label cursor-pointer justify-start gap-4">
-            <input
-              type="checkbox"
-              className="checkbox-primary checkbox"
-              {...register("free")}
-              defaultChecked={false}
-            />
-            <span className="label-text">{t("pricing.free")}</span>
-          </label>
-        </div>
-        {fields.free ? null : (
-          <>
-            <label>{t("pricing.monthly")}</label>
-            <div className="input-group">
-              <input
-                {...register("monthly")}
-                type={"number"}
-                className="input-bordered input w-full"
+      <form>
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="pricing-title" className="required">
+                {t("pricing.name")}
+              </FieldLabel>
+              <Input
+                id="pricing-title"
+                {...register("title", {
+                  required: t("pricing.name-mandatory") ?? true,
+                })}
+                type="text"
               />
-              <span>{t("pricing.euro-per-month")}</span>
-            </div>
-            <label>{t("pricing.yearly")}</label>
-            <div className="input-group">
-              <input
-                {...register("yearly")}
-                type={"number"}
-                className="input-bordered input w-full"
+              {errors.title && <FieldError>{errors.title.message}</FieldError>}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="pricing-description" className="required">
+                {t("pricing.description")}
+              </FieldLabel>
+              <Textarea
+                id="pricing-description"
+                {...register("description", {
+                  required: t("pricing.description-mandatory") ?? true,
+                })}
+                rows={4}
               />
-              <span>{t("pricing.euro-per-year")}</span>
-            </div>
-          </>
-        )}
-
-        <div className="form-control col-span-2">
-          <label className="label cursor-pointer justify-start gap-4">
-            <input
-              type="checkbox"
-              className="checkbox-primary checkbox"
-              {...register("highlighted")}
-              defaultChecked={false}
+              {errors.description && (
+                <FieldError>{errors.description.message}</FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="pricing-role">
+                {t("pricing.internalRole")}
+              </FieldLabel>
+              <Controller
+                name="roleTarget"
+                control={control}
+                defaultValue="MANAGER"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="pricing-role" className="max-w-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ROLE_LIST.filter((rl) => rl.value !== "ADMIN").map(
+                        (rl) => (
+                          <SelectItem key={rl.value} value={rl.value}>
+                            {tAuth(`${rl.label}`)}
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            <Controller
+              name="free"
+              control={control}
+              defaultValue={false}
+              render={({ field }) => (
+                <Field orientation="horizontal">
+                  <Checkbox
+                    id="pricing-free"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                  <FieldLabel htmlFor="pricing-free" className="font-normal">
+                    {t("pricing.free")}
+                  </FieldLabel>
+                </Field>
+              )}
             />
-            <span className="label-text">{t("pricing.highlighted")}</span>
-          </label>
-        </div>
+            {fields.free ? null : (
+              <>
+                <Field>
+                  <FieldLabel htmlFor="pricing-monthly">
+                    {t("pricing.monthly")}
+                  </FieldLabel>
+                  <div className="relative">
+                    <Input
+                      id="pricing-monthly"
+                      {...register("monthly", { valueAsNumber: true })}
+                      type="number"
+                      className="w-full pr-10"
+                    />
+                    <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-sm text-base-content/70">
+                      {t("pricing.euro-per-month")}
+                    </span>
+                  </div>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="pricing-yearly">
+                    {t("pricing.yearly")}
+                  </FieldLabel>
+                  <div className="relative">
+                    <Input
+                      id="pricing-yearly"
+                      {...register("yearly", { valueAsNumber: true })}
+                      type="number"
+                      className="w-full pr-10"
+                    />
+                    <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-sm text/70">
+                      {t("pricing.euro-per-year")}
+                    </span>
+                  </div>
+                </Field>
+              </>
+            )}
+            <Controller
+              name="highlighted"
+              control={control}
+              defaultValue={false}
+              render={({ field }) => (
+                <Field orientation="horizontal">
+                  <Checkbox
+                    id="pricing-highlighted"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                  <FieldLabel
+                    htmlFor="pricing-highlighted"
+                    className="font-normal"
+                  >
+                    {t("pricing.highlighted")}
+                  </FieldLabel>
+                </Field>
+              )}
+            />
+          </FieldGroup>
+        </FieldSet>
       </form>
       <div className="flex flex-col gap-4">
         <label>{t("pricing.options")}</label>
@@ -444,8 +512,8 @@ function PricingForm() {
           </SortableContext>
         </DndContext>
         <div className="flex items-center gap-2">
-          <input
-            type={"text"}
+          <Input
+            type="text"
             ref={refOpt}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -456,7 +524,7 @@ function PricingForm() {
                 e.currentTarget.value = "";
               }
             }}
-            className="input-bordered input w-full"
+            className="flex-1"
           />
           <ButtonIcon
             iconComponent={<i className="bx bx-plus bx-sm" />}
@@ -510,9 +578,10 @@ function DeleteZone({
   return (
     <li
       ref={setNodeRef}
-      className={`grid place-items-center rounded border border-secondary py-2 text-secondary ${
-        isOver ? "bg-secondary/10" : "bg-shadcn-card"
-      }`}
+      className={cn(
+        "grid place-items-center rounded border border-secondary py-2 text-secondary",
+        isOver ? "bg-secondary/10" : "bg-card",
+      )}
     >
       <i className="bx bx-trash bx-sm" />
     </li>
@@ -538,7 +607,7 @@ const Option = ({ option }: OptionProps) => {
       {...attributes}
       {...listeners}
       style={style}
-      className="my-2 flex items-center justify-between gap-4 border border-shadcn bg-shadcn-card p-2"
+      className="my-2 flex items-center justify-between gap-4 border border-border bg-card p-2"
     >
       <div className="flex items-center gap-2">
         <i className="bx bx-menu bx-sm text-base-300" />

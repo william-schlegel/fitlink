@@ -78,7 +78,7 @@ export function NotificationList({
           {t("notification.from")}
         </Link>
       </div>
-      <ul className="menu w-full overflow-hidden rounded bg-shadcn-card">
+      <ul className="menu w-full overflow-hidden rounded bg-card">
         {notifications.map((notification) => (
           <li key={notification._id}>
             <Link

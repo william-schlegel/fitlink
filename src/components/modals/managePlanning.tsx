@@ -12,6 +12,15 @@ import { isDate } from "date-fns";
 
 import { useRouter } from "next/navigation";
 
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
+import { Input } from "../ui/shadcn/input";
+import { Checkbox } from "../ui/shadcn/checkbox";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import Modal, { TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
@@ -98,35 +107,42 @@ export const CreatePlanning = ({
       <h3>{t("create-new-planning")}</h3>
       <form
         onSubmit={handleSubmit(onSubmit, onError)}
-        className="grid grid-cols-[auto_1fr] gap-2"
       >
-        <label>{t("name")}</label>
-        <input className="input-bordered input w-full" {...register("name")} />
-        <label className="required">{t("start-date")}</label>
-        <div className="flex flex-col gap-2">
-          <input
-            className="input-bordered input w-full"
-            {...register("startDate", {
-              valueAsDate: true,
-              required: t("date-mandatory") ?? true,
-            })}
-            type="date"
-            defaultValue={formatDateAsYYYYMMDD()}
-          />
-          {errors.startDate ? (
-            <p className="text-sm text-error">{t("date-mandatory")}</p>
-          ) : null}
-        </div>
-        <label>{t("end-date")}</label>
-        <input
-          className="input-bordered input w-full"
-          {...register("endDate", { valueAsDate: true })}
-          type="date"
-        />
-        <div className="form-control col-span-2">
-          <label className="label cursor-pointer justify-start gap-4">
-            <input
-              type="checkbox"
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="planning-name">{t("name")}</FieldLabel>
+              <Input id="planning-name" {...register("name")} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="planning-start-date" className="required">
+                {t("start-date")}
+              </FieldLabel>
+              <Input
+                id="planning-start-date"
+                {...register("startDate", {
+                  valueAsDate: true,
+                  required: t("date-mandatory") ?? true,
+                })}
+                type="date"
+                defaultValue={formatDateAsYYYYMMDD()}
+              />
+              {errors.startDate && (
+                <FieldError>{t("date-mandatory")}</FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="planning-end-date">{t("end-date")}</FieldLabel>
+              <Input
+                id="planning-end-date"
+                {...register("endDate", { valueAsDate: true })}
+                type="date"
+              />
+            </Field>
+            <Field orientation="horizontal">
+              <Checkbox
+                id="planning-for-site"
+                type="checkbox"
               className="checkbox-primary checkbox"
               {...register("forSite")}
               defaultChecked={false}
@@ -298,33 +314,40 @@ export function UpdatePlanning({
           ) : null}
         </div>
       ) : null}
-      <form
-        onSubmit={handleSubmit(onSubmit, onError)}
-        className="grid grid-cols-[auto_1fr] gap-2"
-      >
-        <label>{t("name")}</label>
-        <input className="input-bordered input w-full" {...register("name")} />
-        <label className="required">{t("start-date")}</label>
-        <div className="flex flex-col gap-2">
-          <input
-            className="input-bordered input w-full"
-            {...register("startDate", {
-              valueAsDate: true,
-              required: t("date-mandatory") ?? true,
-            })}
-            type="date"
-            defaultValue={formatDateAsYYYYMMDD()}
-          />
-          {errors.startDate ? (
-            <p className="text-sm text-error">{t("date-mandatory")}</p>
-          ) : null}
-        </div>
-        <label>{t("end-date")}</label>
-        <input
-          className="input-bordered input w-full"
-          {...register("endDate", { valueAsDate: true })}
-          type="date"
-        />
+      <form onSubmit={handleSubmit(onSubmit, onError)}>
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="update-planning-name">{t("name")}</FieldLabel>
+              <Input id="update-planning-name" {...register("name")} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="update-planning-start-date" className="required">
+                {t("start-date")}
+              </FieldLabel>
+              <Input
+                id="update-planning-start-date"
+                {...register("startDate", {
+                  valueAsDate: true,
+                  required: t("date-mandatory") ?? true,
+                })}
+                type="date"
+                defaultValue={formatDateAsYYYYMMDD()}
+              />
+              {errors.startDate && (
+                <FieldError>{t("date-mandatory")}</FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="update-planning-end-date">{t("end-date")}</FieldLabel>
+              <Input
+                id="update-planning-end-date"
+                {...register("endDate", { valueAsDate: true })}
+                type="date"
+              />
+            </Field>
+          </FieldGroup>
+        </FieldSet>
       </form>
     </Modal>
   );

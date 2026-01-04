@@ -3,7 +3,7 @@ import MapComponent, { Layer, Marker, Source } from "react-map-gl/mapbox";
 
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { SubmitHandler, useForm, useWatch, Controller } from "react-hook-form";
 import { isDate, startOfToday } from "date-fns";
 import { useLocalStorage } from "usehooks-ts";
 import { useRouter } from "next/navigation";
@@ -13,10 +13,27 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 import { inferProcedureOutput } from "@trpc/server";
 
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldError,
+  FieldSet,
+  FieldLegend,
+} from "@/components/ui/shadcn/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/shadcn/select";
 import { SubscriptionForm } from "@/components/modals/manageUser";
+import { Textarea } from "@/components/ui/shadcn/textarea";
 import AddressSearch from "@/components/ui/addressSearch";
 import generateCircle from "@/components/sections/utils";
 import Confirmation from "@/components/ui/confirmation";
+import { Input } from "@/components/ui/shadcn/input";
 import { TThemes } from "@/components/themeSelector";
 import { remainingDays } from "@/lib/formatDate";
 import { AppRouter } from "@/server/api/root";
@@ -155,181 +172,204 @@ export default function FormAccount({
       className={`flex flex-col gap-4 xl:grid xl:grid-cols-2 xl:items-start`}
       onSubmit={handleSubmit(onSubmit)}
     >
-      <section className={`grid grid-cols-[auto_1fr] gap-2 items-center`}>
-        <label htmlFor="select-internalRole">
-          {t("account.my-internalRole")}
-        </label>
-        {userData?.internalRole === "ADMIN" ? (
-          <div id="select-internalRole">{t("account.admin")}</div>
-        ) : (
-          <select
-            id="select-internalRole"
-            className="max-w-xs"
-            {...register("internalRole")}
-            defaultValue={userData?.internalRole ?? "MEMBER"}
-          >
-            {ROLE_LIST.filter((rl) => rl.value !== "ADMIN").map((rl) => (
-              <option key={rl.value} value={rl.value}>
-                {t(rl.label)}
-              </option>
-            ))}
-          </select>
-        )}
-        {fields?.internalRole === "COACH" ||
-        fields.internalRole === "MANAGER_COACH" ? (
-          <>
-            <label htmlFor="publicName">{t("account.public-name")}</label>
-            <input
-              id="publicName"
-              {...register("publicName")}
-              className="input-bordered input w-full"
-            />
-            <div className="col-span-2">
-              <label htmlFor="description">
-                {t("account.short-presentation")}
-              </label>
-              <textarea
-                id="description"
-                {...register("description")}
-                className="field-sizing-content"
-                rows={4}
-              />
-              <label htmlFor="aboutMe">{t("account.about-me")}</label>
-              <textarea
-                id="aboutMe"
-                {...register("aboutMe")}
-                className="field-sizing-content"
-                rows={4}
-              />
-              <label htmlFor="publicActivities">
-                {t("account.public-activities")}
-              </label>
-              <div className="input-group">
-                <input
-                  id="publicActivities"
-                  className="input-bordered input w-full"
-                  value={newActivity}
-                  onChange={(e) => setNewActivity(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleAddActivity();
-                    }
-                  }}
-                />
-                <span>
-                  <i
-                    className="bx bx-plus bx-sm cursor-pointer text-primary hover:text-secondary"
-                    onClick={handleAddActivity}
-                  />
-                </span>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {fields.coachingActivities?.map((activity, idx) => (
-                  <span
-                    key={`activity-${idx}`}
-                    className="pill w-fit space-x-2"
+      <FieldSet className="space-y-6">
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="select-internalRole">
+              {t("account.my-internalRole")}
+            </FieldLabel>
+            {userData?.internalRole === "ADMIN" ? (
+              <div id="select-internalRole">{t("account.admin")}</div>
+            ) : (
+              <Controller
+                name="internalRole"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={(value) => field.onChange(value as RoleEnum)}
                   >
-                    <span>{activity}</span>
-                    <i
-                      className="bx bx-trash bx-xs cursor-pointer text-error"
-                      onClick={() => handleDeleteActivity(idx)}
-                    />
-                  </span>
-                ))}
-              </div>
-            </div>
-          </>
-        ) : null}
-      </section>
+                    <SelectTrigger
+                      id="select-internalRole"
+                      className="max-w-xs"
+                    >
+                      <SelectValue placeholder={t("account.my-internalRole")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ROLE_LIST.filter((rl) => rl.value !== "ADMIN").map(
+                        (rl) => (
+                          <SelectItem key={rl.value} value={rl.value}>
+                            {t(rl.label)}
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            )}
+          </Field>
+          {fields?.internalRole === "COACH" ||
+          fields.internalRole === "MANAGER_COACH" ? (
+            <>
+              <Field>
+                <FieldLabel htmlFor="publicName">
+                  {t("account.public-name")}
+                </FieldLabel>
+                <Input id="publicName" {...register("publicName")} />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="description">
+                  {t("account.short-presentation")}
+                </FieldLabel>
+                <Textarea
+                  id="description"
+                  {...register("description")}
+                  rows={4}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="aboutMe">
+                  {t("account.about-me")}
+                </FieldLabel>
+                <Textarea id="aboutMe" {...register("aboutMe")} rows={4} />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="publicActivities">
+                  {t("account.public-activities")}
+                </FieldLabel>
+                <div className="flex gap-2">
+                  <Input
+                    id="publicActivities"
+                    value={newActivity}
+                    onChange={(e) => setNewActivity(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddActivity();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-square"
+                    onClick={handleAddActivity}
+                  >
+                    <i className="bx bx-plus bx-sm" />
+                  </button>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {fields.coachingActivities?.map((activity, idx) => (
+                    <span
+                      key={`activity-${idx}`}
+                      className="pill w-fit space-x-2"
+                    >
+                      <span>{activity}</span>
+                      <i
+                        className="bx bx-trash bx-xs cursor-pointer text-error"
+                        onClick={() => handleDeleteActivity(idx)}
+                      />
+                    </span>
+                  ))}
+                </div>
+              </Field>
+            </>
+          ) : null}
+        </FieldGroup>
+      </FieldSet>
 
       <section>
         {fields?.internalRole === "COACH" ||
         fields.internalRole === "MANAGER_COACH" ? (
-          <div className={`mb-2 grid grid-cols-[auto_1fr] gap-2`}>
-            <AddressSearch
-              label={t("account.google-address")}
-              defaultAddress={fields.searchAddress ?? ""}
-              onSearch={(adr) => {
-                setValue("searchAddress", adr.address);
-                setValue("latitude", adr.lat);
-                setValue("longitude", adr.lng);
-              }}
-              className="col-span-2"
-            />
-            <div className="col-span-2 flex justify-between items-center">
-              <label htmlFor="longitude">{t("account.longitude")}</label>
-              <input
-                id="longitude"
-                {...register("longitude")}
-                className="input-bordered input w-full"
-                disabled
+          <FieldSet className="mb-2">
+            <FieldGroup>
+              <AddressSearch
+                label={t("account.google-address")}
+                defaultAddress={fields.searchAddress ?? ""}
+                onSearch={(adr) => {
+                  setValue("searchAddress", adr.address);
+                  setValue("latitude", adr.lat);
+                  setValue("longitude", adr.lng);
+                }}
               />
-              <label htmlFor="latitude">{t("account.latitude")}</label>
-              <input
-                id="latitude"
-                {...register("latitude")}
-                className="input-bordered input w-full"
-                disabled
-              />
-            </div>
-            <div className="flex gap-2 items-center">
-              <label htmlFor="range">{t("account.range")}</label>
-              <div className="form-control">
-                <div className="input">
-                  <input
+              <div className="grid grid-cols-2 gap-4">
+                <Field>
+                  <FieldLabel htmlFor="longitude">
+                    {t("account.longitude")}
+                  </FieldLabel>
+                  <Input
+                    id="longitude"
+                    {...register("longitude", { valueAsNumber: true })}
+                    disabled
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="latitude">
+                    {t("account.latitude")}
+                  </FieldLabel>
+                  <Input
+                    id="latitude"
+                    {...register("latitude", { valueAsNumber: true })}
+                    disabled
+                  />
+                </Field>
+              </div>
+              <Field>
+                <FieldLabel htmlFor="range">{t("account.range")}</FieldLabel>
+                <div className="flex items-center gap-2">
+                  <Input
                     id="range"
                     type="number"
-                    className="grow"
-                    {...register("range")}
+                    {...register("range", { valueAsNumber: true })}
                     min={0}
                     max={100}
+                    className="w-auto flex-1"
                   />
-                  <span>km</span>
+                  <span className="text-sm text-base-content/70">km</span>
                 </div>
-              </div>
-            </div>
-            <div className="col-span-2 border-2 border-primary">
-              <MapComponent
-                initialViewState={{
-                  longitude: LONGITUDE,
-                  latitude: LATITUDE,
-                  zoom: 8,
-                }}
-                style={{ width: "100%", height: "20rem" }}
-                mapStyle="mapbox://styles/mapbox/streets-v9"
-                mapboxAccessToken={env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                attributionControl={false}
-                longitude={fields.longitude ?? LONGITUDE}
-                latitude={fields.latitude ?? LATITUDE}
-              >
-                <Source type="geojson" data={circle}>
-                  <Layer
-                    type="fill"
-                    paint={{
-                      "fill-color": hslToHex(theme, "--p"),
-                      "fill-opacity": 0.2,
-                    }}
-                  />
-                  <Layer
-                    type="line"
-                    paint={{
-                      "line-color": hslToHex(theme, "--p"),
-                      "line-opacity": 1,
-                      "line-width": 2,
-                    }}
-                  />
-                </Source>
-                <Marker
-                  anchor="bottom"
+              </Field>
+              <div className="border-2 border-primary">
+                <MapComponent
+                  initialViewState={{
+                    longitude: LONGITUDE,
+                    latitude: LATITUDE,
+                    zoom: 8,
+                  }}
+                  style={{ width: "100%", height: "20rem" }}
+                  mapStyle="mapbox://styles/mapbox/streets-v9"
+                  mapboxAccessToken={env.NEXT_PUBLIC_MAPBOX_TOKEN}
+                  attributionControl={false}
                   longitude={fields.longitude ?? LONGITUDE}
                   latitude={fields.latitude ?? LATITUDE}
                 >
-                  <i className="bx bxs-map bx-sm text-secondary" />
-                </Marker>
-              </MapComponent>
-            </div>
-          </div>
+                  <Source type="geojson" data={circle}>
+                    <Layer
+                      type="fill"
+                      paint={{
+                        "fill-color": hslToHex(theme, "--p"),
+                        "fill-opacity": 0.2,
+                      }}
+                    />
+                    <Layer
+                      type="line"
+                      paint={{
+                        "line-color": hslToHex(theme, "--p"),
+                        "line-opacity": 1,
+                        "line-width": 2,
+                      }}
+                    />
+                  </Source>
+                  <Marker
+                    anchor="bottom"
+                    longitude={fields.longitude ?? LONGITUDE}
+                    latitude={fields.latitude ?? LATITUDE}
+                  >
+                    <i className="bx bxs-map bx-sm text-secondary" />
+                  </Marker>
+                </MapComponent>
+              </div>
+            </FieldGroup>
+          </FieldSet>
         ) : null}
 
         <div className="rounded border border-primary p-4">
@@ -391,7 +431,7 @@ export default function FormAccount({
               }}
             />
             {errors.pricingId ? (
-              <p className="text-sm text-error">{errors.pricingId.message}</p>
+              <FieldError>{errors.pricingId.message}</FieldError>
             ) : null}
           </div>
         </div>

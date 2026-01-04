@@ -27,7 +27,7 @@ export default async function Subscription({
   );
 
   return (
-    <div className="card w-full bg-shadcn-card shadow-xl">
+    <div className="card w-full bg-card shadow-xl">
       <div className="card-body">
         <div className="flex items-center justify-between">
           <h3 className="card-title text-primary">{subscription.name}</h3>

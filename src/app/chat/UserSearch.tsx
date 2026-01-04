@@ -6,10 +6,12 @@ import Image from "next/image";
 
 import { useRouter } from "next/navigation";
 
+import { useAction } from "convex/react";
+
 import { api } from "../../../convex/_generated/api";
+import { Input } from "@/components/ui/shadcn/input";
 import ButtonIcon from "@/components/ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
-import { useAction } from "convex/react";
 
 type UserSearchProps = {
   currentUserId: string;
@@ -57,10 +59,10 @@ export function UserSearch({ currentUserId, onClose }: UserSearchProps) {
       <div className="modal-box">
         <h3 className="font-bold text-lg mb-4">{t("search-users")}</h3>
         <div className="flex gap-2 mb-4">
-          <input
+          <Input
             type="text"
             placeholder={t("search-placeholder")}
-            className="input input-bordered flex-1"
+            className="flex-1"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -89,7 +91,7 @@ export function UserSearch({ currentUserId, onClose }: UserSearchProps) {
         {isSearching && searchResults && (
           <div className="max-h-96 overflow-y-auto">
             {searchResults.length === 0 ? (
-              <p className="text-center text-[hsl(var(--foreground)/0.6)]">
+              <p className="text-center text-muted-foreground">
                 {t("no-users-found")}
               </p>
             ) : (
@@ -101,7 +103,7 @@ export function UserSearch({ currentUserId, onClose }: UserSearchProps) {
                       <button
                         type="button"
                         onClick={() => handleStartConversation(user.id)}
-                        className="flex items-center gap-3 p-3 hover:bg-shadcn-muted rounded-lg"
+                        className="flex items-center gap-3 p-3 hover:bg-muted rounded-lg"
                       >
                         <div className="avatar">
                           <div className="w-10 h-10 rounded-full">
@@ -117,7 +119,7 @@ export function UserSearch({ currentUserId, onClose }: UserSearchProps) {
                         <div className="flex-1 text-left">
                           <div className="font-semibold">{user.name}</div>
                           {user.email && (
-                            <div className="text-sm text-[hsl(var(--foreground)/0.6)]">
+                            <div className="text-sm text-muted-foreground">
                               {user.email}
                             </div>
                           )}

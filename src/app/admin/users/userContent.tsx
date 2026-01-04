@@ -3,7 +3,9 @@ import Link from "next/link";
 
 import { DeleteUser, UpdateUser } from "@/components/modals/manageUser";
 import { getUserFullById } from "@/server/api/routers/users";
+import CardGroup from "@/components/ui/cardGroup";
 import { formatMoney } from "@/lib/formatNumber";
+import { Badge } from "@/components/ui/shadcn";
 
 type UserContentProps = {
   userId: string;
@@ -43,9 +45,9 @@ export default async function UserContent({ userId }: UserContentProps) {
         <article className="flex flex-col gap-2 rounded-md border border-primary p-2">
           <h2 className="flex items-center justify-between gap-2">
             {t("admin.user.plan")}
-            <span className="badge-primary badge">
+            <Badge variant="info">
               {t(`common.roles.${userQuery?.internalRole ?? "MEMBER"}`)}
-            </span>
+            </Badge>
           </h2>
           {isInTrial && (
             <div className="alert alert-info">
@@ -58,7 +60,7 @@ export default async function UserContent({ userId }: UserContentProps) {
           )}
           <div className="flex items-center gap-2">
             <span>{t("admin.user.pricing")}</span>
-            <span className="rounded border border-secondary px-2 py-1 text-secondary">
+            <span className="rounded border border-secondary-content px-2 py-1 text-secondary-foreground">
               {userQuery?.pricing?.title}
             </span>
             <span>
@@ -77,79 +79,62 @@ export default async function UserContent({ userId }: UserContentProps) {
           userQuery?.internalRole === "MANAGER_COACH" ? (
             <>
               <h3>{t("admin.user.manager-activity")}</h3>
-              <div className="stats shadow">
-                <div className="stat">
-                  <div className="stat-title">
-                    {t("dashboard.clubs", {
+              <CardGroup
+                size="sm"
+                maxWidth={100}
+                cards={[
+                  {
+                    title: t("dashboard.clubs", {
                       count: userQuery?.managerData?.managedClubs?.length ?? 0,
-                    })}
-                  </div>
-                  <div className="stat-value text-primary">
-                    {userQuery?.managerData?.managedClubs?.length}
-                  </div>
-                </div>
-                <div className="stat">
-                  <div className="stat-title">
-                    {t("dashboard.sites", { count: managerCount.sites })}
-                  </div>
-                  <div className="stat-value text-primary">
-                    {managerCount.sites}
-                  </div>
-                </div>
-                <div className="stat">
-                  <div className="stat-title">
-                    {t("dashboard.activities", {
+                    }),
+                    value: userQuery?.managerData?.managedClubs?.length ?? 0,
+                  },
+                  {
+                    title: t("dashboard.sites", { count: managerCount.sites }),
+                    value: managerCount.sites,
+                  },
+                  {
+                    title: t("dashboard.activities", {
                       count: managerCount.activities,
-                    })}
-                  </div>
-                  <div className="stat-value text-primary">
-                    {managerCount.activities}
-                  </div>
-                </div>
-                <div className="stat">
-                  <div className="stat-title">
-                    {t("dashboard.members", { count: managerCount.members })}
-                  </div>
-                  <div className="stat-value text-primary">
-                    {managerCount.members}
-                  </div>
-                </div>
-              </div>
+                    }),
+                    value: managerCount.activities,
+                  },
+                  {
+                    title: t("dashboard.members", {
+                      count: managerCount.members,
+                    }),
+                    value: managerCount.members,
+                  },
+                ]}
+              />
             </>
           ) : null}
           {userQuery?.internalRole === "COACH" ||
           userQuery?.internalRole === "MANAGER_COACH" ? (
             <>
               <h3>{t("admin.user.coach-activity")}</h3>
-              <div className="stats shadow">
-                <div className="stat">
-                  <div className="stat-title">
-                    {t("dashboard.clubs", {
-                      count: 0, // userQuery?.coachData?.clubs?.length ?? 0,
-                    })}
-                  </div>
-                  <div className="stat-value text-primary">
-                    {/* {userQuery?.coachData?.clubs?.length ?? 0} */}
-                  </div>
-                </div>
-                <div className="stat">
-                  <div className="stat-title">
-                    {t("dashboard.certifications", {
+              <CardGroup
+                size="sm"
+                maxWidth={100}
+                cards={[
+                  {
+                    title: t("dashboard.clubs", { count: 0 }),
+                    value: 0,
+                  },
+                  {
+                    title: t("dashboard.certifications", {
                       count: userQuery.coachData?.certifications.length ?? 0,
-                    })}
-                  </div>
-                  <div className="stat-value text-primary">
-                    {userQuery.coachData?.certifications.length ?? 0}
-                  </div>
-                </div>
-                <div className="stat">
-                  <div className="stat-title">{t("dashboard.rating")}</div>
-                  <div className="stat-value text-primary">
-                    {userQuery.coachData?.rating?.toFixed(1) ??
-                      t("admin.user.unrated")}
-                  </div>
-                </div>
-              </div>
+                    }),
+                    value: userQuery.coachData?.certifications.length ?? 0,
+                  },
+                  {
+                    title: t("dashboard.rating"),
+                    value:
+                      userQuery.coachData?.rating?.toFixed(1) ??
+                      t("admin.user.unrated"),
+                  },
+                ]}
+              />
             </>
           ) : null}
           {(userQuery?.internalRole === "COACH" ||

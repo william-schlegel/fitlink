@@ -2,9 +2,9 @@ import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
-import { createTrpcCaller } from "@/lib/trpc/caller";
-import { Badge } from "@/components/ui/shadcn/badge";
 import { Button } from "@/components/ui/shadcn/button";
+import { Badge } from "@/components/ui/shadcn/badge";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import NotificationIcon from "./notificationIcon";
 import { RoleEnum } from "@/db/schema/enums";
 import ThemeButton from "./themeButton";
@@ -27,7 +27,7 @@ export default async function Navbar({
   if (!caller) return null;
 
   return (
-    <div className="flex items-center justify-between bg-shadcn-card px-4 py-2 border-b border-shadcn">
+    <div className="flex items-center justify-between bg-card px-4 py-2 border-b border-border">
       <div className="flex items-center gap-2">
         <div className="lg:hidden">
           <MobileMenu />
@@ -82,12 +82,13 @@ const Logo = () => {
   );
 };
 
+import { Menu as MenuIcon } from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
-import { Menu as MenuIcon } from "lucide-react";
 
 function MobileMenu() {
   return (

@@ -10,7 +10,15 @@ import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
-import { TextError } from "../ui/simpleform";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
+import { Input } from "../ui/shadcn/input";
+import { Textarea } from "../ui/shadcn/textarea";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -387,27 +395,43 @@ function PlanningForm({
           </div>
         ) : null}
 
-        <label className="required">{t("pages.planning.title")}</label>
-        <div>
-          <input
-            className="input-bordered input w-full"
-            {...register("title", {
-              required: t("pages.planning.title-mandatory") ?? true,
-            })}
-          />
-          <TextError err={errors?.title?.message} />
-        </div>
-        <label>{t("pages.planning.subtitle")}</label>
-        <input
-          className="input-bordered input w-full"
-          {...register("subtitle")}
-        />
-        <label className="self-start">{t("pages.planning.description")}</label>
-        <textarea
-          {...register("description")}
-          className="field-sizing-content"
-          rows={4}
-        />
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="planning-title" className="required">
+                {t("pages.planning.title")}
+              </FieldLabel>
+              <Input
+                id="planning-title"
+                {...register("title", {
+                  required: t("pages.planning.title-mandatory") ?? true,
+                })}
+              />
+              {errors?.title?.message && (
+                <FieldError>{errors.title.message}</FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="planning-subtitle">
+                {t("pages.planning.subtitle")}
+              </FieldLabel>
+              <Input
+                id="planning-subtitle"
+                {...register("subtitle")}
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="planning-description">
+                {t("pages.planning.description")}
+              </FieldLabel>
+              <Textarea
+                id="planning-description"
+                {...register("description")}
+                rows={4}
+              />
+            </Field>
+          </FieldGroup>
+        </FieldSet>
       </div>
       <div>
         <label>{t("pages.planning.sites")}</label>

@@ -7,12 +7,20 @@ import Link from "next/link";
 
 import { InferSelectModel } from "drizzle-orm";
 
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
+import { Textarea } from "../ui/shadcn/textarea";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
-import { TextError } from "../ui/simpleform";
+import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -158,20 +166,22 @@ export const ActivityGroupCreation = ({
           className="grid grid-cols-[auto_1fr] gap-2 rounded border border-primary p-2"
           onSubmit={handleSubmit(onSubmit)}
         >
-          <label htmlFor="title">{t("activity-group.title")}</label>
-          <input
-            {...register("title")}
-            id="title"
-            type="text"
-            className="input-bordered input w-full"
-          />
-          <label htmlFor="subtitle">{t("activity-group.subtitle")}</label>
-          <input
-            {...register("subTitle")}
-            id="subtitle"
-            type="text"
-            className="input-bordered input w-full"
-          />
+          <FieldSet>
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="title">
+                  {t("activity-group.title")}
+                </FieldLabel>
+                <Input {...register("title")} id="title" type="text" />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="subtitle">
+                  {t("activity-group.subtitle")}
+                </FieldLabel>
+                <Input {...register("subTitle")} id="subtitle" type="text" />
+              </Field>
+            </FieldGroup>
+          </FieldSet>
           <div className="col-span-2 flex justify-between">
             <button className="btn btn-primary" type="submit">
               {t("save-section")}
@@ -485,27 +495,40 @@ function ActivityGroupForm({
           </div>
         ) : null}
 
-        <label className="required">{t("activity-group.title")}</label>
-        <div>
-          <input
-            className="input-bordered input w-full"
-            {...register("title", {
-              required: t("activity-group.title-mandatory") ?? true,
-            })}
-          />
-          <TextError err={errors?.title?.message} />
-        </div>
-        <label>{t("activity-group.subtitle")}</label>
-        <input
-          className="input-bordered input w-full"
-          {...register("subTitle")}
-        />
-        <label className="self-start">{t("activity-group.description")}</label>
-        <textarea
-          {...register("description")}
-          className="field-sizing-content"
-          rows={4}
-        />
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="activity-group-title" className="required">
+                {t("activity-group.title")}
+              </FieldLabel>
+              <Input
+                id="activity-group-title"
+                {...register("title", {
+                  required: t("activity-group.title-mandatory") ?? true,
+                })}
+              />
+              {errors?.title?.message && (
+                <FieldError>{errors.title.message}</FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="activity-group-subtitle">
+                {t("activity-group.subtitle")}
+              </FieldLabel>
+              <Input id="activity-group-subtitle" {...register("subTitle")} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="activity-group-description">
+                {t("activity-group.description")}
+              </FieldLabel>
+              <Textarea
+                id="activity-group-description"
+                {...register("description")}
+                rows={4}
+              />
+            </Field>
+          </FieldGroup>
+        </FieldSet>
       </div>
       <div className="col-span-full mt-4 flex items-center justify-end gap-2">
         <button
@@ -600,7 +623,7 @@ function ActivityGroupContentCard({
           }`}
         >
           {elements?.map((activity) => (
-            <div key={activity.id} className="card bg-shadcn-card shadow-xl">
+            <div key={activity.id} className="card bg-card shadow-xl">
               {activity.imageUrls?.[0] ? (
                 <figure className="white">
                   {/* eslint-disable-next-line @next/next/no-img-element */}

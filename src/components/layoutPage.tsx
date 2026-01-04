@@ -93,12 +93,12 @@ export function LayoutPageList<T extends ListItem>({
           <p className="text-[hsl(var(--foreground)/0.7)]">{noItemsText}</p>
         </div>
       ) : (
-        <ul className="overflow-hidden rounded-md border border-shadcn bg-shadcn-card w-full">
+        <ul className="overflow-hidden rounded-md border border-border bg-card w-full">
           {list.map((item) => (
             <li key={item.id}>
               <Link
                 className={cn(
-                  "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-shadcn-muted",
+                  "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-muted",
                   itemId === item.id && "border border-primary bg-primary/10",
                 )}
                 href={item.link ?? ""}
@@ -152,17 +152,17 @@ export function LayoutPageLists<T extends ListItem>({
           <p className="text-[hsl(var(--foreground)/0.7)]">{noItemsText}</p>
         </div>
       ) : (
-        <ul className="overflow-hidden rounded-md border border-shadcn bg-shadcn-card w-full">
+        <ul className="overflow-hidden rounded-md border border-border bg-card w-full">
           {lists.map((group) => (
             <Fragment key={group.name}>
-              <h2 className="px-3 py-2 text-sm font-semibold text-[hsl(var(--foreground)/0.7)] bg-shadcn-muted">
+              <h2 className="px-3 py-2 text-sm font-semibold text-[hsl(var(--foreground)/0.7)] bg-muted">
                 {group.name}
               </h2>
               {group.items.map((item) => (
                 <li key={item.id}>
                   <Link
                     className={cn(
-                      "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-shadcn-muted",
+                      "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-muted",
                       itemId === item.id &&
                         "border border-primary bg-primary/10",
                     )}

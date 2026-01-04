@@ -19,8 +19,10 @@ import {
   UpdatePlanning,
 } from "@/components/modals/managePlanning";
 import { getPlanningById } from "@/server/api/routers/planning";
+import { FieldError } from "@/components/ui/shadcn/field";
 import { PlanningName } from "@/components/planningName";
 import Confirmation from "@/components/ui/confirmation";
+import { Input } from "@/components/ui/shadcn/input";
 import { useDayName } from "@/lib/dates/useDayName";
 import { DayName, DAYS } from "@/lib/dates/data";
 import Spinner from "@/components/ui/spinner";
@@ -220,7 +222,7 @@ export function PlanningContent({
             <div>
               <div className="h-12"></div>
               <div>
-                <div className="flex w-10 shrink-0 flex-col border-r border-shadcn bg-shadcn-card text-center">
+                <div className="flex w-10 shrink-0 flex-col border-r border-border bg-card text-center">
                   {Array.from(
                     { length: NB_HOUR },
                     (_, k) => k + START_HOUR,
@@ -374,7 +376,7 @@ function PlanningActivity({
   const w = 100 / nbPosition;
   return (
     <button
-      className="absolute flex cursor-pointer items-center justify-center rounded border border-secondary bg-shadcn-muted text-[hsl(var(--foreground))]"
+      className="absolute flex cursor-pointer items-center justify-center rounded border border-secondary bg-muted text-foreground"
       style={{ top, height, width: `${w}%`, left: `${position * w}%` }}
       onClick={(e) =>
         onActivatePopup(planningActivity.id, e.currentTarget.getClientRects())
@@ -434,7 +436,7 @@ function PopupActivityDetails({
 
   return (
     <div
-      className="absolute z-20 mb-4 w-max min-w-fit rounded bg-shadcn-muted p-2 shadow"
+      className="absolute z-20 mb-4 w-max min-w-fit rounded bg-muted p-2 shadow"
       style={{
         left: popupData.rect[0]?.left ?? 0,
         top: (popupData.rect[0]?.bottom ?? 0) + 5,
@@ -482,7 +484,7 @@ function DraggableActivity({ id, name }: { id: string; name: string }) {
       style={style}
       {...listeners}
       {...attributes}
-      className="pill z-10 mx-2 justify-center bg-shadcn-card"
+      className="pill z-10 mx-2 justify-center bg-card"
     >
       {name}
     </button>
@@ -503,7 +505,7 @@ function DropSite({ id, data, children }: DropSiteProps) {
   return (
     <div
       ref={setNodeRef}
-      className={`relative ${HSITE} ${isOver ? "bg-shadcn-muted" : "bg-shadcn-card"}`}
+      className={`relative ${HSITE} ${isOver ? "bg-muted" : "bg-card"}`}
     >
       {children}
     </div>
@@ -569,30 +571,28 @@ function FormActivity({
             {...register("startTime", {
               required: t("start-hour-mandatory") ?? true,
             })}
-            className="input-bordered input w-fit self-start"
+            className="w-fit self-start"
           />
           {errors.startTime && (
-            <p className="text-sm text-error">{errors.startTime.message}</p>
+            <FieldError>{errors.startTime.message}</FieldError>
           )}
         </div>
         <label className="required">{t("duration")}</label>
         <div className="flex flex-col gap-2">
-          <div className="form-control">
-            <div className="input-group">
-              <input
-                type="number"
-                {...register("duration", {
-                  valueAsNumber: true,
-                  validate: (v) => Number(v) > 1,
-                  required: t("duration-mandatory") ?? true,
-                })}
-                className="input-bordered input w-full"
-              />
-              <span>{t("minutes")}</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              {...register("duration", {
+                valueAsNumber: true,
+                validate: (v) => Number(v) > 1,
+                required: t("duration-mandatory") ?? true,
+              })}
+              className="w-auto flex-1"
+            />
+            <span className="text-sm text-base-content/70">{t("minutes")}</span>
           </div>
           {errors.duration && (
-            <p className="text-sm text-error">{errors.duration.message}</p>
+            <FieldError>{errors.duration.message}</FieldError>
           )}
         </div>
         <label>{t("coach")}</label>

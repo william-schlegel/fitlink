@@ -18,6 +18,15 @@ import ButtonIcon from "@/components/ui/buttonIcon";
 import { AppRouter } from "@/server/api/root";
 import { trpc } from "@/lib/trpc/client";
 import { toast } from "@/lib/toast";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldError,
+  FieldSet,
+} from "@/components/ui/shadcn/field";
+import { Input } from "@/components/ui/shadcn/input";
+import { Textarea } from "@/components/ui/shadcn/textarea";
 
 type FormValues = {
   name: string;
@@ -75,58 +84,66 @@ export default function FormProfile({
         className={`flex flex-col gap-4 xl:grid xl:grid-cols-2 xl:items-start`}
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <section className={`grid grid-cols-[auto_1fr] gap-2`}>
-          <label>{t("profile.change-name")}</label>
-          <div>
-            <input
-              {...form.register("name", {
-                required: t("profile.name-mandatory") ?? true,
-              })}
-              type={"text"}
-              className="input-bordered input w-full"
-            />
-            {form.formState.errors.name ? (
-              <p className="text-sm text-error">
-                {form.formState.errors.name.message}
-              </p>
-            ) : null}
-          </div>
-          <label>{t("profile.my-email")}</label>
-          <input
-            {...form.register("email")}
-            type={"email"}
-            className="input-bordered input w-full"
-          />
-          <label>{t("profile.phone")}</label>
-          <input
-            {...form.register("phone")}
-            type="tel"
-            className="input-bordered input w-full"
-          />
-          <label className="place-self-start">{t("profile.address")}</label>
-          <textarea
-            {...form.register("address")}
-            className="field-sizing-content"
-            rows={4}
-          />
-          <label>{t("profile.account-provider")}</label>
-          <div className="flex gap-2">
-            {!userData?.accounts?.length ? (
-              <span className="rounded border border-primary px-4 py-2">
-                email
-              </span>
-            ) : (
-              userData.accounts?.map((account) => (
-                <span
-                  key={account.id}
-                  className="rounded border border-primary px-4 py-2"
-                >
-                  {account.provider}
-                </span>
-              ))
-            )}
-          </div>
-        </section>
+        <FieldSet className="space-y-6">
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="name">{t("profile.change-name")}</FieldLabel>
+              <Input
+                id="name"
+                {...form.register("name", {
+                  required: t("profile.name-mandatory") ?? true,
+                })}
+                type="text"
+              />
+              {form.formState.errors.name ? (
+                <FieldError>{form.formState.errors.name.message}</FieldError>
+              ) : null}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="email">{t("profile.my-email")}</FieldLabel>
+              <Input
+                id="email"
+                {...form.register("email")}
+                type="email"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="phone">{t("profile.phone")}</FieldLabel>
+              <Input
+                id="phone"
+                {...form.register("phone")}
+                type="tel"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="address">{t("profile.address")}</FieldLabel>
+              <Textarea
+                id="address"
+                {...form.register("address")}
+                rows={4}
+              />
+            </Field>
+            <Field>
+              <FieldLabel>{t("profile.account-provider")}</FieldLabel>
+              <div className="flex gap-2">
+                {!userData?.accounts?.length ? (
+                  <span className="rounded border border-primary px-4 py-2">
+                    email
+                  </span>
+                ) : (
+                  userData.accounts?.map((account) => (
+                    <span
+                      key={account.id}
+                      className="rounded border border-primary px-4 py-2"
+                    >
+                      {account.provider}
+                    </span>
+                  ))
+                )}
+              </div>
+            </Field>
+          </FieldGroup>
+        </FieldSet>
         <ProfileImage />
         <button
           className="btn-primary btn col-span-2 w-fit"

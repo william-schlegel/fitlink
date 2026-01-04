@@ -74,12 +74,12 @@ export default function CoachPage() {
 
   return (
     <div>
-      <section className="bg-shadcn">
+      <section className="bg-background">
         <div className="container mx-auto">
           <h1 className="text-5xl font-bold">{t("home.company-title")}</h1>
           <p className="py-6 text-lg">{t("home.company-text")}</p>
           <form
-            className="mx-auto w-fit rounded border border-shadcn bg-shadcn-card p-4 shadow-xl"
+            className="mx-auto w-fit rounded border border-border bg-card p-4 shadow-xl"
             onSubmit={handleSubmit(onValid)}
           >
             <div className="mb-2 flex justify-around">
@@ -203,7 +203,7 @@ function OfferCard({ id }: { id: string }) {
   if (offer.data?.inHouse) options.push(t("coach.offer.in-house"));
 
   return (
-    <div className="card w-96 bg-shadcn-card shadow-xl">
+    <div className="card w-96 bg-card shadow-xl">
       <figure className="relative">
         <Image
           src={offer.data?.imageUrl ?? "/images/dummy.jpg"}

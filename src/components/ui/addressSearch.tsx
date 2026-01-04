@@ -5,9 +5,9 @@ import { useDebounceValue } from "usehooks-ts";
 import { useTranslations } from "next-intl";
 import { MapPin } from "lucide-react";
 
-import { Input } from "@/components/ui/shadcn/input";
-import { Label } from "@/components/ui/shadcn/label";
 import { Button } from "@/components/ui/shadcn/button";
+import { Label } from "@/components/ui/shadcn/label";
+import { Input } from "@/components/ui/shadcn/input";
 import { cn } from "@/lib/utils";
 import { env } from "@/env";
 
@@ -91,7 +91,7 @@ const AddressSearch = ({
         {label && (
           <Label
             className={cn(
-              required && "after:content-['*'] after:text-error after:ml-0.5"
+              required && "after:content-['*'] after:text-error after:ml-0.5",
             )}
           >
             {label}
@@ -119,13 +119,13 @@ const AddressSearch = ({
       </div>
       {error && <p className="text-sm text-error mt-1">{error}</p>}
       {isOpen && addresses.length > 0 && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-shadcn bg-shadcn-card shadow-lg">
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
           <ul className="max-h-60 overflow-auto py-1">
             {addresses.map((adr, idx) => (
               <li key={`ADR-${idx}`}>
                 <button
                   type="button"
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-shadcn-muted transition-colors"
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors"
                   onClick={() => {
                     setAddress(adr.address);
                     onSearch(adr);

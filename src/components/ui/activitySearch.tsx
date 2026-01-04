@@ -5,9 +5,9 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 
-import { Input } from "@/components/ui/shadcn/input";
-import { Label } from "@/components/ui/shadcn/label";
 import { Button } from "@/components/ui/shadcn/button";
+import { Label } from "@/components/ui/shadcn/label";
+import { Input } from "@/components/ui/shadcn/input";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +44,7 @@ const ActivitySearch = ({
 
   const activities = trpc.coachs.getOfferActivityByName.useQuery(
     debouncedActivity,
-    { enabled: debouncedActivity !== "" }
+    { enabled: debouncedActivity !== "" },
   );
 
   useEffect(() => {
@@ -63,7 +63,7 @@ const ActivitySearch = ({
         <Label
           className={cn(
             "mb-2",
-            required && "after:content-['*'] after:text-error after:ml-0.5"
+            required && "after:content-['*'] after:text-error after:ml-0.5",
           )}
         >
           {label}
@@ -83,13 +83,13 @@ const ActivitySearch = ({
       </div>
       {error && <p className="text-sm text-error mt-1">{error}</p>}
       {showList && activities.data?.length ? (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-shadcn bg-shadcn-card shadow-lg">
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
           <ul className="max-h-60 overflow-auto py-1">
             {activities.data?.map((act) => (
               <li key={act.id}>
                 <button
                   type="button"
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-shadcn-muted transition-colors"
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors"
                   onClick={() => {
                     setActivity(act.name);
                     onSearch({ id: act.id, name: act.name });

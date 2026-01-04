@@ -7,16 +7,24 @@ import Link from "next/link";
 
 import { InferSelectModel } from "drizzle-orm";
 
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
 import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
 import { List } from "@/app/member/[userId]/list";
+import { Textarea } from "../ui/shadcn/textarea";
 import { formatMoney } from "@/lib/formatNumber";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
-import { TextError } from "../ui/simpleform";
 import { useUser } from "@/lib/auth/client";
+import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -103,7 +111,7 @@ export const OfferCreation = ({ clubId, pageId }: OfferCreationProps) => {
           />
         </h3>
         <div data-theme={previewTheme}>
-          <div className="grid grid-cols-2 gap-4 bg-shadcn-muted p-4">
+          <div className="grid grid-cols-2 gap-4 bg-muted p-4">
             {querySection.data?.elements.map((card) => (
               <OfferContentCard
                 key={card.id}
@@ -394,27 +402,40 @@ function OfferForm({
           </div>
         ) : null}
 
-        <label className="required">{t("offer.title")}</label>
-        <div>
-          <input
-            className="input-bordered input w-full"
-            {...register("title", {
-              required: t("offer.title-mandatory") ?? true,
-            })}
-          />
-          <TextError err={errors?.title?.message} />
-        </div>
-        <label>{t("offer.subtitle")}</label>
-        <input
-          className="input-bordered input w-full"
-          {...register("subTitle")}
-        />
-        <label className="self-start">{t("offer.description")}</label>
-        <textarea
-          {...register("description")}
-          className="field-sizing-content"
-          rows={4}
-        />
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="offer-title" className="required">
+                {t("offer.title")}
+              </FieldLabel>
+              <Input
+                id="offer-title"
+                {...register("title", {
+                  required: t("offer.title-mandatory") ?? true,
+                })}
+              />
+              {errors?.title?.message && (
+                <FieldError>{errors.title.message}</FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="offer-subtitle">
+                {t("offer.subtitle")}
+              </FieldLabel>
+              <Input id="offer-subtitle" {...register("subTitle")} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="offer-description">
+                {t("offer.description")}
+              </FieldLabel>
+              <Textarea
+                id="offer-description"
+                {...register("description")}
+                rows={4}
+              />
+            </Field>
+          </FieldGroup>
+        </FieldSet>
         <label>{t("offer.offer")}</label>
         <select defaultValue={getValues("offerId")} {...register("offerId")}>
           {offers.data?.map((offer) => (
@@ -464,7 +485,7 @@ export const OfferDisplayCard = ({ pageId, clubId }: OfferDisplayProps) => {
   if (!querySection.data) return <div>Offers section unavailable</div>;
 
   return (
-    <div className="grid grid-flow-col justify-center gap-4 bg-shadcn-muted p-4">
+    <div className="grid grid-flow-col justify-center gap-4 bg-muted p-4">
       {querySection.data?.elements
         .filter((e) => e.elementType === "CARD")
         .map((e) => (
@@ -507,7 +528,7 @@ function OfferContentCard({
     <div
       className={`card ${
         preview ? "card-compact w-full" : "w-96"
-      } bg-shadcn-card shadow-xl`}
+      } bg-card shadow-xl`}
     >
       <figure>
         {/* eslint-disable-next-line @next/next/no-img-element */}

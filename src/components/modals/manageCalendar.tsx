@@ -6,6 +6,12 @@ import { useTranslations } from "next-intl";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { DayName, DAYS } from "@/lib/dates/data";
 import { fieldSet } from "@/lib/fieldGetSet";
+import {
+  Field,
+  FieldLabel,
+} from "../ui/shadcn/field";
+import { Input } from "../ui/shadcn/input";
+import { Checkbox } from "../ui/shadcn/checkbox";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { toast } from "@/lib/toast";
@@ -73,15 +79,16 @@ function FormCalendar({ calendarValues, onCalendarChange }: FormCalendarProps) {
   };
   return (
     <>
-      <div className="mb-2 grid grid-cols-[max-content,1fr] gap-4">
-        <label>{t("start-date")}</label>
-        <input
+      <Field>
+        <FieldLabel htmlFor="calendar-start-date">{t("start-date")}</FieldLabel>
+        <Input
+          id="calendar-start-date"
           type="date"
           value={formatDateAsYYYYMMDD(calendarValues.startDate)}
           onChange={(e) => onChange("startDate", new Date(e.target.value))}
-          className="input-bordered input w-full text-center"
+          className="text-center"
         />
-      </div>
+      </Field>
       <table className="w-full table-auto">
         {/* header */}
         <thead>
@@ -123,7 +130,7 @@ function FormCalendar({ calendarValues, onCalendarChange }: FormCalendarProps) {
                   {!calendarValues.openingTime[idx]?.closed ? (
                     <>
                       <td className="flex gap-2">
-                        <input
+                        <Input
                           type="time"
                           value={
                             calendarValues.openingTime[idx]?.workingHours?.[0]
@@ -135,9 +142,9 @@ function FormCalendar({ calendarValues, onCalendarChange }: FormCalendarProps) {
                               e.target.value,
                             )
                           }
-                          className="input-bordered input input-sm w-fit text-center"
+                          className="w-fit text-center"
                         />
-                        <input
+                        <Input
                           type="time"
                           value={
                             calendarValues.openingTime[idx]?.workingHours?.[0]
@@ -149,7 +156,7 @@ function FormCalendar({ calendarValues, onCalendarChange }: FormCalendarProps) {
                               e.target.value,
                             )
                           }
-                          className="input-bordered input input-sm w-fit text-center"
+                          className="w-fit text-center"
                         />
                       </td>
                       <td>

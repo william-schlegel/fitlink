@@ -83,7 +83,7 @@ export function MessageItem({ message, userId }: MessageItemProps) {
         </time>
       </div>
       <div
-        className="chat-bubble bg-shadcn-muted text-[hsl(var(--foreground))] relative"
+        className="chat-bubble bg-muted text-foreground relative"
         ref={msgRef}
       >
         {message.content && <p>{message.content}</p>}
@@ -178,7 +178,7 @@ const EmojiPicker = ({
 
   return createPortal(
     <div
-      className="absolute mb-2 flex gap-1 bg-shadcn-card p-2 rounded-lg shadow-lg z-10"
+      className="absolute mb-2 flex gap-1 bg-card p-2 rounded-lg shadow-lg z-10"
       style={{ top: position.top, left: position.left }}
     >
       {commonEmojis.map((emoji) => (

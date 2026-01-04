@@ -60,7 +60,7 @@ export default function DailyPlanning({ memberId, day }: DailyPlanningProps) {
       {planning.data.map((plan) => (
         <div
           key={plan.id}
-          className="flex flex-col items-center rounded border border-secondary bg-shadcn-card"
+          className="flex flex-col items-center rounded border border-secondary bg-card"
         >
           <div className="w-full  bg-secondary text-center text-secondary-content">
             {plan.club.name}
@@ -69,7 +69,7 @@ export default function DailyPlanning({ memberId, day }: DailyPlanningProps) {
             {plan.activities.map((activity) => (
               <div
                 key={activity.id}
-                className="border border-shadcn bg-shadcn-card p-2"
+                className="border border-border bg-card p-2"
               >
                 <p>
                   <span className="text-xs">{activity.startTime}</span>
@@ -245,7 +245,7 @@ function Wnc({ activity, day, memberId, reservations }: WncProps) {
       {activity.rooms.map((room) => (
         <div
           key={`${room?.name}-${activity.id}`}
-          className="border border-shadcn bg-shadcn-card p-2"
+          className="border border-border bg-card p-2"
         >
           <p>
             <span className="text-xs">{openingText}</span>&nbsp;

@@ -12,7 +12,7 @@ export default async function SelectCoachManager({
   const t = await getTranslations("dashboard");
   return (
     <div className="grid grid-cols-2 gap-4">
-      <Link href={hrefCoach} className="card bg-shadcn-card w-96 shadow-sm">
+      <Link href={hrefCoach} className="card bg-card w-96 shadow-sm">
         <figure>
           <Image
             src="/images/coach-f.jpeg"
@@ -25,7 +25,7 @@ export default async function SelectCoachManager({
           <p className="card-title">{t("manager-coach.continue-as-coach")}</p>
         </div>
       </Link>
-      <Link href={hrefManager} className="card bg-shadcn-card w-96 shadow-sm">
+      <Link href={hrefManager} className="card bg-card w-96 shadow-sm">
         <figure>
           <Image
             src="/images/manager-f.jpeg"

@@ -12,6 +12,14 @@ import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { getButtonSize } from "../ui/modal";
 import ButtonIcon from "../ui/buttonIcon";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
+import { Input } from "../ui/shadcn/input";
+import { Textarea } from "../ui/shadcn/textarea";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
@@ -274,34 +282,42 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
               </div>
             </div>
           ) : null}
-          <label htmlFor="title">{t("hero.title")}</label>
-          <input
-            {...register("title")}
-            id="title"
-            type="text"
-            className="input-bordered input w-full"
-          />
-          <label htmlFor="subtitle">{t("hero.subtitle")}</label>
-          <input
-            {...register("subtitle")}
-            id="subtitle"
-            type="text"
-            className="input-bordered input w-full"
-          />
-          <label htmlFor="description">{t("hero.description")}</label>
-          <textarea
-            {...register("description")}
-            id="description"
-            className="field-sizing-content"
-            rows={4}
-          />
-          <label>{t("hero.button-cta")}</label>
-          <input
-            {...register("cta")}
-            id="cta"
-            type="text"
-            className="input-bordered input w-full"
-          />
+          <FieldSet>
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="hero-title">{t("hero.title")}</FieldLabel>
+                <Input
+                  {...register("title")}
+                  id="hero-title"
+                  type="text"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="hero-subtitle">{t("hero.subtitle")}</FieldLabel>
+                <Input
+                  {...register("subtitle")}
+                  id="hero-subtitle"
+                  type="text"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="hero-description">{t("hero.description")}</FieldLabel>
+                <Textarea
+                  {...register("description")}
+                  id="hero-description"
+                  rows={4}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="hero-cta">{t("hero.button-cta")}</FieldLabel>
+                <Input
+                  {...register("cta")}
+                  id="hero-cta"
+                  type="text"
+                />
+              </Field>
+            </FieldGroup>
+          </FieldSet>
           {fields.cta ? (
             <>
               <label htmlFor="linkedPage">{t("hero.linked-page")}</label>
@@ -337,22 +353,25 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
               <label className="label" htmlFor="protocol">
                 <span>{t("hero.external-url")}</span>
               </label>
-              <label className="input-group" htmlFor="protocol">
-                <select
-                  defaultValue={"https:"}
-                  {...register("protocol")}
-                  className="w-fit bg-primary text-primary-content"
-                >
-                  <option value="https:">https://</option>
-                  <option value="http:">http://</option>
-                </select>
-                <input
-                  id="url"
-                  type="text"
-                  {...register("url")}
-                  className="input-bordered input w-full"
-                />
-              </label>
+              <Field>
+                <FieldLabel htmlFor="hero-url">{t("hero.external-url")}</FieldLabel>
+                <div className="flex items-center gap-2">
+                  <select
+                    defaultValue={"https:"}
+                    {...register("protocol")}
+                    className="w-fit bg-primary text-primary-content rounded-md px-2 py-1"
+                  >
+                    <option value="https:">https://</option>
+                    <option value="http:">http://</option>
+                  </select>
+                  <Input
+                    {...register("url")}
+                    id="hero-url"
+                    type="text"
+                    className="flex-1"
+                  />
+                </div>
+              </Field>
             </>
           ) : null}
           <div className="col-span-2 flex justify-between">

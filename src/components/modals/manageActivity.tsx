@@ -6,9 +6,18 @@ import { useTranslations } from "next-intl";
 
 import { useRouter } from "next/navigation";
 
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
 import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
+import { Checkbox } from "../ui/shadcn/checkbox";
 import Confirmation from "../ui/confirmation";
 import { ButtonSize } from "../ui/buttonIcon";
+import { Input } from "../ui/shadcn/input";
 import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -79,14 +88,14 @@ const AddActivity = ({
       <div className="flex gap-4">
         <aside className="space-y-4">
           <h4>{t("group.group")}</h4>
-          <div className="flex max-h-[70vh] flex-col flex-wrap rounded border border-secondary bg-shadcn-card">
+          <div className="flex max-h-[70vh] flex-col flex-wrap rounded border border-secondary bg-card">
             {queryGroups.data?.map((group) => (
               <div
                 key={group.id}
                 className={`inline-flex cursor-pointer py-4 px-8 ${
                   groupId === group.id
                     ? "bg-primary text-primary-content"
-                    : "bg-shadcn-card text-[hsl(var(--foreground))] hover:bg-shadcn-muted"
+                    : "bg-card text-foreground hover:bg-muted"
                 }`}
               >
                 <span tabIndex={0} onClick={() => setGroupId(group.id)}>
@@ -183,40 +192,48 @@ function ActivityForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSuccess)} className="space-y-2">
-      <input
-        className="input-bordered input w-full"
-        {...register("name", { required: t("club.name-mandatory") ?? true })}
-      />
-      {errors.name && (
-        <p className="text-sm text-error">{errors.name.message}</p>
-      )}
-      <div className="form-control">
-        <label className="label cursor-pointer justify-start gap-4">
-          <input
-            type="checkbox"
-            className="checkbox-primary checkbox"
-            {...register("noCalendar")}
-          />
-          <span className="label-text">{t("club.activity.no-calendar")}</span>
-        </label>
-      </div>
-      <div className="grid grid-cols-[auto_1fr] gap-4">
-        {fields.noCalendar ? (
-          <>
-            <label>{t("club.activity.duration")}</label>
-            <div className="input-group">
-              <input
-                type="text"
-                className="input-bordered input w-full"
-                {...register("reservationDuration", { valueAsNumber: true })}
-              />
-              <span>{t("club.activity.minutes")}</span>
-            </div>
-          </>
-        ) : null}
-      </div>
-      <div className="col-span-2 flex items-center justify-end gap-2">
+    <form onSubmit={handleSubmit(onSuccess)}>
+      <FieldSet>
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="activity-name" className="required">
+              {t("club.activity.name")}
+            </FieldLabel>
+            <Input
+              id="activity-name"
+              {...register("name", {
+                required: t("club.name-mandatory") ?? true,
+              })}
+            />
+            {errors.name && <FieldError>{errors.name.message}</FieldError>}
+          </Field>
+          <Field orientation="horizontal">
+            <Checkbox id="activity-no-calendar" {...register("noCalendar")} />
+            <FieldLabel htmlFor="activity-no-calendar" className="font-normal">
+              {t("club.activity.no-calendar")}
+            </FieldLabel>
+          </Field>
+          {fields.noCalendar ? (
+            <Field>
+              <FieldLabel htmlFor="activity-duration">
+                {t("club.activity.duration")}
+              </FieldLabel>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="activity-duration"
+                  type="number"
+                  {...register("reservationDuration", { valueAsNumber: true })}
+                  className="w-auto flex-1"
+                />
+                <span className="text-sm text-base-content/70">
+                  {t("club.activity.minutes")}
+                </span>
+              </div>
+            </Field>
+          ) : null}
+        </FieldGroup>
+      </FieldSet>
+      <div className="flex items-center justify-end gap-2">
         <button
           type="button"
           className="btn-outline btn btn-secondary"
@@ -407,14 +424,17 @@ export const NewGroup = ({ userId, variant = "Primary" }: NewGroupProps) => {
   return (
     <Modal title={t("group.new")} variant={variant} handleSubmit={addNewGroup}>
       <h3>Créer un nouveau groupe d&apos;activités</h3>
-      <input
-        className="input-bordered input w-full"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      {error && (
-        <p className="text-sm text-error">Le nom doit être renseigné</p>
-      )}
+      <Field>
+        <FieldLabel htmlFor="group-name">
+          {t("club.activity-group.name")}
+        </FieldLabel>
+        <Input
+          id="group-name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </Field>
+      {error && <FieldError>Le nom doit être renseigné</FieldError>}
     </Modal>
   );
 };
@@ -490,12 +510,17 @@ export function UpdateGroup({
         <Spinner />
       ) : (
         <>
-          <input
-            className="input-bordered input w-full"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          {error && <p className="text-sm text-error">{t("name-mandatory")}</p>}
+          <Field>
+            <FieldLabel htmlFor="update-group-name">
+              {t("club.activity-group.name")}
+            </FieldLabel>
+            <Input
+              id="update-group-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            {error && <FieldError>{t("name-mandatory")}</FieldError>}
+          </Field>
           {userId ? null : (
             <div className="form-control">
               <label className="label cursor-pointer justify-start gap-4">

@@ -4,6 +4,17 @@ import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { useState } from "react";
+
+import { Search } from "lucide-react";
+
+import {
+  Badge,
+  Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/shadcn";
 import SimpleForm from "@/components/ui/simpleform";
 import { RoleEnum } from "@/db/schema/enums";
 import { ROLE_LIST } from "@/lib/data";
@@ -25,6 +36,7 @@ export default function UserFilter({ filter }: { filter: TUserFilter }) {
   const tAdmin = useTranslations("admin");
   const t = useTranslations("auth");
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   const onSubmit: SubmitHandler<TUserFilter> = (data) => {
     const flt: TUserFilter = {};
@@ -38,42 +50,58 @@ export default function UserFilter({ filter }: { filter: TUserFilter }) {
     console.error("errors", errors);
   };
   return (
-    <>
-      <SimpleForm
-        errors={errors}
-        register={register}
-        fields={[
-          {
-            label: t("name"),
-            name: "name",
-          },
-          {
-            label: t("email"),
-            name: "email",
-          },
-          {
-            label: t("internalRole"),
-            name: "internalRole",
-            component: (
-              <select className="max-w-xs" {...register("internalRole")}>
-                <option></option>
-                {ROLE_LIST.filter((rl) => rl.value !== "ADMIN").map((rl) => (
-                  <option key={rl.value} value={rl.value}>
-                    {t(rl.label)}
-                  </option>
-                ))}
-              </select>
-            ),
-          },
-        ]}
-      />
-      <button
-        onClick={handleSubmit(onSubmit, onError)}
-        className="btn btn-primary btn-block mt-2 flex gap-4"
-      >
-        <i className="bx bx-search bx-sm" />
-        {tAdmin("user.search")}
-      </button>
-    </>
+    <Collapsible open={open} onOpenChange={setOpen} className="space-y-4">
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="ghost"
+          className="flex items-center gap-4 w-full p-4 border border-muted"
+        >
+          {tAdmin("user.filter")}
+          <Badge variant="info">{Object.keys(filter).length}</Badge>
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="mb-4 p-4 border border-muted rounded-md space-y-4">
+          <SimpleForm
+            errors={errors}
+            register={register}
+            fields={[
+              {
+                label: t("name"),
+                name: "name",
+              },
+              {
+                label: t("email"),
+                name: "email",
+              },
+              {
+                label: t("internalRole"),
+                name: "internalRole",
+                component: (
+                  <select className="max-w-xs" {...register("internalRole")}>
+                    <option></option>
+                    {ROLE_LIST.filter((rl) => rl.value !== "ADMIN").map(
+                      (rl) => (
+                        <option key={rl.value} value={rl.value}>
+                          {t(rl.label)}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                ),
+              },
+            ]}
+          />
+          <Button
+            onClick={handleSubmit(onSubmit, onError)}
+            variant="default"
+            className="w-full"
+          >
+            <Search className="size-4" />
+            {tAdmin("user.search")}
+          </Button>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

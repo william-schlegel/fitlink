@@ -2,18 +2,18 @@
 
 import { useTranslations } from "next-intl";
 import { useQuery } from "convex/react";
-import Link from "next/link";
 import { Lock } from "lucide-react";
+import Link from "next/link";
 
-import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
-import { api } from "../../../convex/_generated/api";
-import { Badge } from "@/components/ui/shadcn/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
+import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
+import { api } from "../../../convex/_generated/api";
+import { Badge } from "@/components/ui/shadcn/badge";
 import { useUser } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -110,7 +110,7 @@ const Menu = () => {
           userId: user.id,
           isAdmin,
         }
-      : "skip"
+      : "skip",
   );
 
   return (
@@ -182,7 +182,7 @@ function MenuItem({
     <Link
       className={cn(
         "flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm font-medium",
-        "hover:bg-shadcn-muted transition-colors"
+        "hover:bg-muted transition-colors",
       )}
       href={page}
     >

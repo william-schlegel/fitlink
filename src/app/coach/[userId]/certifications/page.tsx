@@ -90,10 +90,7 @@ export default async function ManageCertifications({
       <div className="flex gap-4">
         <div className="flex flex-wrap gap-4">
           {(certificationQuery?.certifications ?? []).map((certification) => (
-            <div
-              key={certification.id}
-              className="card w-96 bg-shadcn-card shadow-xl"
-            >
+            <div key={certification.id} className="card w-96 bg-card shadow-xl">
               <div className="card-body">
                 <h2 className="card-title">{certification.name}</h2>
                 <h3>{t("coach.modules")}</h3>
@@ -112,7 +109,7 @@ export default async function ManageCertifications({
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 flex items-center gap-4 border-t border-base-200 pt-4">
+                <div className="mt-4 flex items-center gap-4 border-t border-border pt-4">
                   <DocButton documentUrl={certification.documentUrl ?? ""} />
                 </div>
                 <div className="card-actions justify-end">

@@ -6,12 +6,20 @@ import { useTranslations } from "next-intl";
 
 import { InferSelectModel } from "drizzle-orm";
 
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
+import { Textarea } from "../ui/shadcn/textarea";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
-import { TextError } from "../ui/simpleform";
+import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -91,7 +99,7 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
           {groups.data?.map((group) => (
             <Fragment key={group.id}>
               <h2 className="text-center">{group.title}</h2>
-              <section id="ACTIVITIES" className={`w-full bg-shadcn-muted p-4`}>
+              <section id="ACTIVITIES" className={`w-full bg-muted p-4`}>
                 <div className={`container mx-auto p-4`}>
                   <p className={`text-3xl font-bold text-primary-content`}>
                     {querySection.data?.title}
@@ -405,27 +413,40 @@ function ActivityForm({
           </div>
         ) : null}
 
-        <label className="required">{t("activity.title")}</label>
-        <div>
-          <input
-            className="input-bordered input w-full"
-            {...register("title", {
-              required: t("activity.title-mandatory") ?? true,
-            })}
-          />
-          <TextError err={errors?.title?.message} />
-        </div>
-        <label>{t("activity.subtitle")}</label>
-        <input
-          className="input-bordered input w-full"
-          {...register("subtitle")}
-        />
-        <label className="self-start">{t("activity.description")}</label>
-        <textarea
-          {...register("description")}
-          className="field-sizing-content"
-          rows={4}
-        />
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="activity-title" className="required">
+                {t("activity.title")}
+              </FieldLabel>
+              <Input
+                id="activity-title"
+                {...register("title", {
+                  required: t("activity.title-mandatory") ?? true,
+                })}
+              />
+              {errors?.title?.message && (
+                <FieldError>{errors.title.message}</FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="activity-subtitle">
+                {t("activity.subtitle")}
+              </FieldLabel>
+              <Input id="activity-subtitle" {...register("subtitle")} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="activity-description">
+                {t("activity.description")}
+              </FieldLabel>
+              <Textarea
+                id="activity-description"
+                {...register("description")}
+                rows={4}
+              />
+            </Field>
+          </FieldGroup>
+        </FieldSet>
       </div>
       <div>
         <label>{t("activity.activity-group")}</label>
@@ -511,7 +532,7 @@ function ActivityContentCard({
   activity,
 }: ActivitiesContentCardProps) {
   return (
-    <div key={activity.id} className="card bg-shadcn-card shadow-xl">
+    <div key={activity.id} className="card bg-card shadow-xl">
       {activity.imageUrls?.[0] ? (
         <figure className="white">
           {/* eslint-disable-next-line @next/next/no-img-element */}
