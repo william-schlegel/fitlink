@@ -14,6 +14,7 @@ import {
 import { GetPricingById } from "@/server/api/routers/pricing";
 import { Button } from "@/components/ui/shadcn/button";
 import { Badge } from "@/components/ui/shadcn/badge";
+import { ButtonGroup } from "./shadcn/button-group";
 import { cn } from "@/lib/utils";
 
 type Props = Readonly<{
@@ -53,14 +54,17 @@ export function PricingComponent({
           </Badge>
         )}
         <CardTitle className="text-3xl font-bold">{data?.title}</CardTitle>
-        <p className="text-base-content/80">{data?.description}</p>
+        <p className="text-card-foreground/80">{data?.description}</p>
       </CardHeader>
       <CardContent className={cn("items-center text-center", compact && "p-2")}>
         {!compact && (
           <ul className="self-start py-4 space-y-2">
             {data?.options.map((option) => (
-              <li key={option.id} className="flex items-center gap-2">
-                <ChevronRight className="h-5 w-5 text-accent" />
+              <li
+                key={option.id}
+                className="flex items-center gap-2 text-card-foreground"
+              >
+                <ChevronRight className="text-primary" />
                 <span className="text-start">{option.name}</span>
               </li>
             ))}
@@ -77,9 +81,9 @@ export function PricingComponent({
           </p>
         ) : (
           <>
-            <div className="flex items-center gap-2 justify-center">
+            <ButtonGroup orientation="horizontal" className="mx-auto">
               <Button
-                variant={monthlyPrice ? "default" : "outline"}
+                variant={monthlyPrice ? "secondary" : "default"}
                 size="sm"
                 onClick={() => setMonthlyPrice(true)}
                 type="button"
@@ -87,17 +91,17 @@ export function PricingComponent({
                 {t("pricing.monthly")}
               </Button>
               <Button
-                variant={!monthlyPrice ? "default" : "outline"}
+                variant={!monthlyPrice ? "secondary" : "default"}
                 size="sm"
                 onClick={() => setMonthlyPrice(false)}
                 type="button"
               >
                 {t("pricing.yearly")}
               </Button>
-            </div>
+            </ButtonGroup>
             <p
               className={cn(
-                "py-4 text-xl font-bold text-accent",
+                "py-4 text-xl font-bold text-card-foreground",
                 compact && "py-1",
               )}
             >

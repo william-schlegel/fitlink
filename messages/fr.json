@@ -30,7 +30,8 @@
       "updated": "Tarif mis à jour",
       "deleted": "Tarif supprimé",
       "restored": "Tarif restoré",
-      "features": "Fonctionnalités associées à ce tarif"
+      "features": "Fonctionnalités associées à ce tarif",
+      "option": "Ajouter une option"
     },
     "feature": {
       "coach-certification": "Gestion des certifications",
@@ -147,6 +148,7 @@
     "welcome": "Bienvenue",
     "internalRole": "Rôle",
     "user": "Utilisateur",
+    "member": "Membre",
     "coach": "Coach",
     "manager": "Manager",
     "manager-coach": "Manager & Coach",
@@ -228,7 +230,8 @@
       "check-your-mail": "Vérifiez votre boite mail à l'adresse {email} et cliquez sur le lien fourni pour accéder à l'application",
       "close-page": "Vous pouvez fermer cette page",
       "wrong-credentials": "Erreur dans l'email ou le mot de passe"
-    }
+    },
+    "all-roles": "Tous les rôles"
   },
   "calendar": {
     "day": "Jour",
@@ -362,7 +365,8 @@
       "default": "Par défaut",
       "created": "Groupe d'activité créé",
       "updated": "Groupe d'activité mis à jour",
-      "deleted": "Groupe d'activité supprimé"
+      "deleted": "Groupe d'activité supprimé",
+      "create-group": "Créer un nouveau groupe d'activités"
     },
     "coach": {
       "find": "Trouver un coach",

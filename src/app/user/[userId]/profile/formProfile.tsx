@@ -13,11 +13,8 @@ import { inferProcedureOutput } from "@trpc/server";
 
 import { useRouter } from "next/navigation";
 
-import { UploadButton } from "@/components/uploadthing";
-import ButtonIcon from "@/components/ui/buttonIcon";
-import { AppRouter } from "@/server/api/root";
-import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
+import { Trash } from "lucide-react";
+
 import {
   Field,
   FieldGroup,
@@ -25,8 +22,13 @@ import {
   FieldError,
   FieldSet,
 } from "@/components/ui/shadcn/field";
-import { Input } from "@/components/ui/shadcn/input";
 import { Textarea } from "@/components/ui/shadcn/textarea";
+import { UploadButton } from "@/components/uploadthing";
+import { Input } from "@/components/ui/shadcn/input";
+import ButtonIcon from "@/components/ui/buttonIcon";
+import { AppRouter } from "@/server/api/root";
+import { trpc } from "@/lib/trpc/client";
+import { toast } from "@/lib/toast";
 
 type FormValues = {
   name: string;
@@ -101,27 +103,15 @@ export default function FormProfile({
             </Field>
             <Field>
               <FieldLabel htmlFor="email">{t("profile.my-email")}</FieldLabel>
-              <Input
-                id="email"
-                {...form.register("email")}
-                type="email"
-              />
+              <Input id="email" {...form.register("email")} type="email" />
             </Field>
             <Field>
               <FieldLabel htmlFor="phone">{t("profile.phone")}</FieldLabel>
-              <Input
-                id="phone"
-                {...form.register("phone")}
-                type="tel"
-              />
+              <Input id="phone" {...form.register("phone")} type="tel" />
             </Field>
             <Field>
               <FieldLabel htmlFor="address">{t("profile.address")}</FieldLabel>
-              <Textarea
-                id="address"
-                {...form.register("address")}
-                rows={4}
-              />
+              <Textarea id="address" {...form.register("address")} rows={4} />
             </Field>
             <Field>
               <FieldLabel>{t("profile.account-provider")}</FieldLabel>
@@ -191,10 +181,12 @@ function ProfileImage() {
               height={100}
             />
             <ButtonIcon
-              iconComponent={<i className="bx bx-trash" />}
+              iconComponent={
+                <Trash className="fill-destructive stroke-destructive" />
+              }
               title={t("delete-image")}
-              buttonVariant="Icon-Secondary"
-              buttonSize="sm"
+              size="icon"
+              variant="default"
               onClick={handleDeleteImage}
               className="absolute right-2 bottom-2 z-10"
             />

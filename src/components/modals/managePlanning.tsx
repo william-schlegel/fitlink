@@ -19,21 +19,22 @@ import {
   FieldLabel,
   FieldSet,
 } from "../ui/shadcn/field";
-import { Input } from "../ui/shadcn/input";
-import { Checkbox } from "../ui/shadcn/checkbox";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import Modal, { TModalVariant } from "../ui/modal";
+import Modal from "../ui/modal";
+import { Checkbox } from "../ui/shadcn/checkbox";
 import Confirmation from "../ui/confirmation";
 import { useUser } from "@/lib/auth/client";
+import { Input } from "../ui/shadcn/input";
 import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
+import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type CreatePlanningProps = {
   clubId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
 };
 
 type CreatePlanningFormValues = {
@@ -48,7 +49,7 @@ type CreatePlanningFormValues = {
 
 export const CreatePlanning = ({
   clubId,
-  variant = "Primary",
+  variant = "default",
 }: CreatePlanningProps) => {
   const utils = trpc.useUtils();
   const t = useTranslations("planning");
@@ -105,9 +106,7 @@ export const CreatePlanning = ({
       handleSubmit={handleSubmit(onSubmit, onError)}
     >
       <h3>{t("create-new-planning")}</h3>
-      <form
-        onSubmit={handleSubmit(onSubmit, onError)}
-      >
+      <form onSubmit={handleSubmit(onSubmit, onError)}>
         <FieldSet>
           <FieldGroup>
             <Field>
@@ -132,7 +131,9 @@ export const CreatePlanning = ({
               )}
             </Field>
             <Field>
-              <FieldLabel htmlFor="planning-end-date">{t("end-date")}</FieldLabel>
+              <FieldLabel htmlFor="planning-end-date">
+                {t("end-date")}
+              </FieldLabel>
               <Input
                 id="planning-end-date"
                 {...register("endDate", { valueAsDate: true })}
@@ -142,14 +143,14 @@ export const CreatePlanning = ({
             <Field orientation="horizontal">
               <Checkbox
                 id="planning-for-site"
-                type="checkbox"
-              className="checkbox-primary checkbox"
-              {...register("forSite")}
-              defaultChecked={false}
-            />
-            <span className="label-text">{t("for-site")}</span>
-          </label>
-        </div>
+                className="checkbox-primary checkbox"
+                {...register("forSite")}
+                defaultChecked={false}
+              />
+              <span className="label-text">{t("for-site")}</span>
+            </Field>
+          </FieldGroup>
+        </FieldSet>
         {fields.forSite ? (
           <>
             <label>{t("site")}</label>
@@ -195,7 +196,8 @@ export const CreatePlanning = ({
 type UpdatePlanningProps = {
   clubId: string;
   planningId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
   duplicate?: boolean;
 };
 
@@ -210,7 +212,8 @@ type UpdatePlanningFormValues = {
 export function UpdatePlanning({
   clubId,
   planningId,
-  variant = "Icon-Outlined-Primary",
+  variant = "outline",
+  buttonSize = "icon",
   duplicate = false,
 }: UpdatePlanningProps) {
   const [siteName, setSiteName] = useState("");
@@ -296,6 +299,7 @@ export function UpdatePlanning({
       }
       handleSubmit={handleSubmit(onSubmit, onError)}
       variant={variant}
+      buttonSize={buttonSize}
     >
       <h3 className="flex gap-2">
         {t(duplicate ? "duplicate-planning" : "update-planning")}
@@ -318,11 +322,16 @@ export function UpdatePlanning({
         <FieldSet>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="update-planning-name">{t("name")}</FieldLabel>
+              <FieldLabel htmlFor="update-planning-name">
+                {t("name")}
+              </FieldLabel>
               <Input id="update-planning-name" {...register("name")} />
             </Field>
             <Field>
-              <FieldLabel htmlFor="update-planning-start-date" className="required">
+              <FieldLabel
+                htmlFor="update-planning-start-date"
+                className="required"
+              >
                 {t("start-date")}
               </FieldLabel>
               <Input
@@ -339,7 +348,9 @@ export function UpdatePlanning({
               )}
             </Field>
             <Field>
-              <FieldLabel htmlFor="update-planning-end-date">{t("end-date")}</FieldLabel>
+              <FieldLabel htmlFor="update-planning-end-date">
+                {t("end-date")}
+              </FieldLabel>
               <Input
                 id="update-planning-end-date"
                 {...register("endDate", { valueAsDate: true })}
@@ -356,7 +367,8 @@ export function UpdatePlanning({
 export function DeletePlanning({
   clubId,
   planningId,
-  variant = "Icon-Outlined-Secondary",
+  variant = "outline",
+  buttonSize = "icon",
 }: UpdatePlanningProps) {
   const utils = trpc.useUtils();
   const t = useTranslations("planning");
@@ -380,6 +392,7 @@ export function DeletePlanning({
       }}
       buttonIcon={<i className="bx bx-trash bx-sm" />}
       variant={variant}
+      buttonSize={buttonSize}
     />
   );
 }

@@ -238,9 +238,9 @@ function UpdatePlanning({ clubId, pageId, planningId }: UpdatePlanningProps) {
       onCloseModal={() => setClose(false)}
       closeModal={close}
       cancelButtonText=""
-      variant="Icon-Outlined-Primary"
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize("sm")}`} />}
-      buttonSize="sm"
+      variant="outline"
+      buttonIcon={<i className={`bx bx-edit ${getButtonSize("icon")}`} />}
+      buttonSize="icon"
       className="w-11/12 max-w-4xl"
     >
       <h3>
@@ -278,12 +278,12 @@ function DeletePlanning({ pageId, planningId }: UpdatePlanningProps) {
     <Confirmation
       message={t("planning.deletion-message")}
       title={t("planning.deletion")}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize("sm")}`} />}
+      buttonIcon={<i className={`bx bx-trash ${getButtonSize("icon")}`} />}
       onConfirm={() => {
         deletePlanning.mutate(planningId);
       }}
-      variant={"Icon-Outlined-Secondary"}
-      buttonSize={"sm"}
+      variant="outline"
+      buttonSize="icon"
     />
   );
 }
@@ -387,8 +387,8 @@ function PlanningForm({
             <ButtonIcon
               iconComponent={<i className="bx bx-trash" />}
               title={t("pages.planning.delete-image")}
-              buttonVariant="Icon-Outlined-Secondary"
-              buttonSize="md"
+              size="icon"
+              variant="outlines"
               onClick={handleDeleteImage}
               className="absolute right-2 bottom-2"
             />

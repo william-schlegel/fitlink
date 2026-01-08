@@ -249,9 +249,9 @@ function UpdateActivity({ pageId, activityId }: UpdateActivityProps) {
       onCloseModal={() => setClose(false)}
       closeModal={close}
       cancelButtonText=""
-      variant="Icon-Outlined-Primary"
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize("sm")}`} />}
-      buttonSize="sm"
+      variant="outline"
+      buttonIcon={<i className={`bx bx-edit ${getButtonSize("icon")}`} />}
+      buttonSize="icon"
       className="w-11/12 max-w-4xl"
     >
       <h3>
@@ -289,12 +289,12 @@ function DeleteActivity({ pageId, activityId }: UpdateActivityProps) {
     <Confirmation
       message={t("activity.deletion-message")}
       title={t("activity.deletion")}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize("sm")}`} />}
+      buttonIcon={<i className={`bx bx-trash ${getButtonSize("icon")}`} />}
       onConfirm={() => {
         deleteActivity.mutate(activityId);
       }}
-      variant={"Icon-Outlined-Secondary"}
-      buttonSize={"sm"}
+      variant="outline"
+      buttonSize="icon"
     />
   );
 }
@@ -405,8 +405,8 @@ function ActivityForm({
             <ButtonIcon
               iconComponent={<i className="bx bx-trash" />}
               title={t("activity.delete-image")}
-              buttonVariant="Icon-Outlined-Secondary"
-              buttonSize="md"
+              size="icon"
+              variant="outlines"
               onClick={handleDeleteImage}
               className="absolute right-2 bottom-2"
             />

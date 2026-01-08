@@ -17,9 +17,8 @@ import {
   TARGET_SECTIONS,
 } from "@/lib/sections/data";
 import { usePageSection } from "@/lib/sections/useGetSection";
-import { getButtonSize, TModalVariant } from "../ui/modal";
+import { getButtonSize } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
-import { ButtonSize } from "../ui/buttonIcon";
 import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
@@ -27,10 +26,11 @@ import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
 import Modal from "../ui/modal";
+import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type CreatePageProps = {
   clubId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
   className?: string;
 };
 
@@ -41,7 +41,7 @@ type CreatePageFormValues = {
 
 export const CreatePage = ({
   clubId,
-  variant = "Primary",
+  variant = "default",
   className,
 }: CreatePageProps) => {
   const utils = trpc.useUtils();
@@ -119,15 +119,15 @@ export const CreatePage = ({
 type UpdatePageProps = {
   clubId: string;
   pageId: string;
-  variant?: TModalVariant;
-  size?: ButtonSize;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export function UpdatePage({
   clubId,
   pageId,
-  variant = "Icon-Outlined-Primary",
-  size = "sm",
+  variant = "outline",
+  buttonSize = "icon",
 }: UpdatePageProps) {
   const utils = trpc.useUtils();
   const pageQuery = trpc.pages.getPageById.useQuery(pageId, {
@@ -176,9 +176,9 @@ export function UpdatePage({
     <Modal
       title={t("club.update-page")}
       handleSubmit={handleSubmit(onSubmit, onError)}
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize(size)}`} />}
+      buttonIcon={<i className={`bx bx-edit ${getButtonSize(buttonSize)}`} />}
       variant={variant}
-      buttonSize={size}
+      buttonSize={buttonSize}
     >
       <h3 className="space-x-2">
         {t("club.update-page")}
@@ -224,15 +224,15 @@ export function UpdatePage({
 type DeletePageProps = {
   clubId: string;
   pageId: string;
-  variant?: TModalVariant;
-  size?: ButtonSize;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export function DeletePage({
   pageId,
   clubId,
-  size = "sm",
-  variant = "Icon-Outlined-Secondary",
+  buttonSize = "icon",
+  variant = "outline",
 }: DeletePageProps) {
   const utils = trpc.useUtils();
   const deletePage = trpc.pages.deletePage.useMutation({
@@ -251,10 +251,10 @@ export function DeletePage({
       title={t("club.page-deletion")}
       message={t("club.page-deletion-message")}
       onConfirm={() => deletePage.mutate(pageId)}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize(size)}`} />}
+      buttonIcon={<i className={`bx bx-trash ${getButtonSize(buttonSize)}`} />}
       variant={variant}
       textConfirmation={t("club.page-deletion-confirmation")}
-      buttonSize={size}
+      buttonSize={buttonSize}
     />
   );
 }

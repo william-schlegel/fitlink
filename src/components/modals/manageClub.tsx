@@ -146,7 +146,8 @@ export const UpdateClub = ({ clubId }: PropsUpdateDelete) => {
     <Modal
       title={t("club.update")}
       buttonIcon={<Edit className="h-5 w-5" />}
-      variant={"Icon-Outlined-Primary"}
+      variant="outline"
+      buttonSize="icon"
       cancelButtonText=""
       closeModal={closeModal}
       onCloseModal={() => setCloseModal(false)}
@@ -379,7 +380,8 @@ export const DeleteClub = ({ clubId }: PropsUpdateDelete) => {
         deleteClub.mutate(clubId);
       }}
       buttonIcon={<Trash2 className="h-5 w-5" />}
-      variant={"Icon-Outlined-Secondary"}
+      variant="outline"
+      buttonSize="icon"
     />
   );
 };
@@ -433,7 +435,7 @@ export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
       title={t("coach.add")}
       closeModal={closeModal}
       buttonIcon={<Plus className="h-5 w-5" />}
-      variant={"Primary"}
+      variant="default"
       className="w-11/12 max-w-4xl"
       onCloseModal={() => {
         setCloseModal(false);

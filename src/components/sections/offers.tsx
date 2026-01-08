@@ -255,9 +255,9 @@ function UpdateOffer({ clubId, pageId, offerId }: UpdateOfferProps) {
       onCloseModal={() => setClose(false)}
       closeModal={close}
       cancelButtonText=""
-      variant="Icon-Outlined-Primary"
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize("sm")}`} />}
-      buttonSize="sm"
+      variant="outline"
+      buttonIcon={<i className={`bx bx-edit ${getButtonSize("icon")}`} />}
+      buttonSize="icon"
     >
       <h3>
         <span>{t("offer.update-offer")}</span>
@@ -295,12 +295,12 @@ function DeleteOffer({ pageId, offerId }: UpdateOfferProps) {
     <Confirmation
       message={t("offer.deletion-message")}
       title={t("offer.deletion")}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize("sm")}`} />}
+      buttonIcon={<i className={`bx bx-trash ${getButtonSize("icon")}`} />}
       onConfirm={() => {
         deleteOffer.mutate(offerId);
       }}
-      variant={"Icon-Outlined-Secondary"}
-      buttonSize={"sm"}
+      variant="outline"
+      buttonSize="icon"
     />
   );
 }
@@ -394,8 +394,8 @@ function OfferForm({
             <ButtonIcon
               iconComponent={<i className="bx bx-trash" />}
               title={t("offer.delete-image")}
-              buttonVariant="Icon-Outlined-Secondary"
-              buttonSize="md"
+              size="icon"
+              variant="outlines"
               onClick={handleDeleteImage}
               className="absolute right-2 bottom-2"
             />

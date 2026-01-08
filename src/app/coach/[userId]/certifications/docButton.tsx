@@ -22,8 +22,8 @@ export default function DocButton({ documentUrl }: { documentUrl: string }) {
       <ButtonIcon
         iconComponent={<Eye className="h-5 w-5" />}
         title={t("view-document")}
-        buttonSize="md"
-        buttonVariant="Icon-Outlined-Primary"
+        size="icon"
+        variant="outlines"
         onClick={handleViewDocument}
       />
     </>

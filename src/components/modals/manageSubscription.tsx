@@ -17,7 +17,7 @@ import {
   SubscriptionRestrictionEnum,
 } from "@/db/schema/enums";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import Modal, { TModalVariant } from "../ui/modal";
+import Modal from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { useUser } from "@/lib/auth/client";
 import createLink from "@/lib/createLink";
@@ -25,6 +25,7 @@ import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import { toast } from "@/lib/toast";
+import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type SubscriptionFormValues = {
   name: string;
@@ -167,7 +168,8 @@ export const UpdateSubscription = ({
       submitButtonText={t("subscription.update")}
       errors={form.formState.errors}
       buttonIcon={<i className="bx bx-edit bx-sm" />}
-      variant={"Icon-Outlined-Primary"}
+      variant="outline"
+      buttonSize="icon"
       className="w-11/12 max-w-3xl"
     >
       <div className="flex items-center justify-between">
@@ -186,13 +188,15 @@ export const UpdateSubscription = ({
 type PropsUpdateDelete = {
   clubId: string;
   subscriptionId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export const DeleteSubscription = ({
   clubId,
   subscriptionId,
-  variant = "Icon-Outlined-Secondary",
+  variant = "outline",
+  buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
   const user = useUser();
@@ -221,6 +225,7 @@ export const DeleteSubscription = ({
         deleteSubscription.mutate(subscriptionId);
       }}
       variant={variant}
+      buttonSize={buttonSize}
     />
   );
 };

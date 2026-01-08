@@ -93,8 +93,8 @@ export default function PageContent({
             <i className="bx bx-link-external bx-xs" />
           </Link>
 
-          <UpdatePage clubId={clubId} pageId={pageId} size="md" />
-          <DeletePage clubId={clubId} pageId={pageId} size="md" />
+          <UpdatePage clubId={clubId} pageId={pageId} />
+          <DeletePage clubId={clubId} pageId={pageId} />
         </div>
       </div>
       <div className="join flex-wrap">

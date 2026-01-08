@@ -5,6 +5,7 @@ import { BuildingIcon, HomeIcon, MapPinIcon, UserIcon } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/shadcn";
 import { getAdminData } from "@/server/api/routers/dashboard";
 import CardGroup from "@/components/ui/cardGroup";
+import Title from "@/components/title";
 
 export default async function AdminDashboard() {
   const adminData = await getAdminData();
@@ -21,10 +22,8 @@ export default async function AdminDashboard() {
   const memberCount = adminData?.members?.length;
 
   return (
-    <div
-      // title={t("admin-dashboard")}
-      className="container mx-auto my-2 space-y-2 p-2"
-    >
+    <div className="container mx-auto my-2 space-y-2 p-2">
+      <Title title={t("admin-dashboard")} />
       <h1 className="flex justify-between">{t("admin-dashboard")}</h1>
       <CardGroup
         cards={[

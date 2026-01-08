@@ -189,8 +189,8 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
                 <ButtonIcon
                   iconComponent={<i className="bx bx-trash" />}
                   title={t("hero.delete-image")}
-                  buttonVariant="Icon-Secondary"
-                  buttonSize="sm"
+                  size="icon"
+                  variant="default"
                   onClick={handleDeleteImage}
                   className="absolute right-2 bottom-2 z-10"
                 />

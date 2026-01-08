@@ -9,6 +9,22 @@ import Link from "next/link";
 
 import { inferProcedureOutput } from "@trpc/server";
 
+import { ExternalLink, Search } from "lucide-react";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/shadcn/table";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "../ui/shadcn/input-group";
+import { Badge, Button, Field, FieldContent, FieldLabel } from "../ui/shadcn";
 import AddressSearch, { AddressData } from "../ui/addressSearch";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { type TThemes } from "../themeSelector";
@@ -109,26 +125,26 @@ function FindCoach({
     }, [isHovered, onHover, coach]);
 
     return (
-      <tr className={`hover ${className ?? ""}`} ref={ref}>
-        <td>{coach.publicName}</td>
-        <td>{coach.distance.toFixed(0)}&nbsp;km</td>
-        <td>
+      <TableRow className={`hover ${className ?? ""}`} ref={ref}>
+        <TableCell>{coach.publicName}</TableCell>
+        <TableCell>{coach.distance.toFixed(0)}&nbsp;km</TableCell>
+        <TableCell>
           <Rating note={coach.rating ?? 0} />
-        </td>
-        <td>
+        </TableCell>
+        <TableCell>
           <div className="flex flex-wrap gap-1">
             {coach.coachingActivities?.length ? (
               coach.coachingActivities.map((activity, idx) => (
-                <span key={`${idx}-${activity}`} className="pill pill-xs">
+                <Badge key={`${idx}-${activity}`} variant="info">
                   {activity}
-                </span>
+                </Badge>
               ))
             ) : (
               <span>&nbsp;</span>
             )}
           </div>
-        </td>
-        <td>
+        </TableCell>
+        <TableCell>
           {coach?.page?.published ? (
             <Link
               href={`/presentation-page/coach/${coach.userId}/${coach.page.id}`}
@@ -137,17 +153,17 @@ function FindCoach({
             >
               <ButtonIcon
                 title={t("page-coach", { name: coach.publicName ?? "" })}
-                iconComponent={<i className="bx bx-link-external bx-xs" />}
-                buttonSize="sm"
-                buttonVariant="Icon-Outlined-Primary"
+                iconComponent={<ExternalLink />}
+                size="icon"
+                variant="outlines"
               />
             </Link>
           ) : (
             <span>&nbsp;</span>
           )}
-        </td>
+        </TableCell>
         {withSelect ? (
-          <td>
+          <TableCell>
             <span
               className="btn-primary btn-xs btn"
               tabIndex={0}
@@ -155,19 +171,19 @@ function FindCoach({
             >
               {t("select")}
             </span>
-          </td>
+          </TableCell>
         ) : null}
         {withSelectMultiple ? (
-          <td>
+          <TableCell>
             <input
               type="checkbox"
               checked={selectedCoachs.has(coach.userId)}
               className="checkbox-primary checkbox"
               onChange={(e) => handleSelect(coach.userId, e.target.checked)}
             />
-          </td>
+          </TableCell>
         ) : null}
-      </tr>
+      </TableRow>
     );
   }
 
@@ -182,43 +198,43 @@ function FindCoach({
             className="w-full"
           />
         </div>
-        <div className="w-full max-w-sm text-start">
-          <label htmlFor="range" className="input">
-            {t("search-radius")}
-            <input
-              id="range"
-              type="number"
-              value={range}
-              onChange={(e) => setRange(e.target.valueAsNumber)}
-              className="text-end"
-              min={0}
-              max={50}
-            />
-            <span>km</span>
-          </label>
-        </div>
+        <Field orientation="horizontal">
+          <FieldLabel htmlFor="range">{t("search-radius")}</FieldLabel>
+          <FieldContent>
+            <InputGroup>
+              <InputGroupAddon align="inline-end">km</InputGroupAddon>
+              <InputGroupInput
+                id="range"
+                type="number"
+                value={range}
+                onChange={(e) => setRange(e.target.valueAsNumber)}
+                min={0}
+                max={100}
+              />
+            </InputGroup>
+          </FieldContent>
+        </Field>
 
-        <button
-          className="btn-primary btn flex items-center gap-4"
-          onClick={() => handleSearch()}
-        >
+        <Button size="lg" onClick={() => handleSearch()}>
           {t("search-coach")}
-          <i className="bx bx-search bx-xs" />
-        </button>
+          <Search />
+        </Button>
         <div className="mt-8">
-          <table className="table-zebra table border border-shadcn">
-            <thead>
-              <tr>
-                <th>{t("coach")}</th>
-                <th>{t("distance")}</th>
-                <th>{t("rating")}</th>
-                <th>{t("activities")}</th>
-                <th>{t("page")}</th>
-                {withSelect ? <th>{t("action")}</th> : null}
-                {withSelectMultiple ? <th>{t("select")}</th> : null}
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("coach")}</TableHead>
+                <TableHead>{t("distance")}</TableHead>
+                <TableHead>{t("rating")}</TableHead>
+                <TableHead>{t("activities")}</TableHead>
+                <TableHead>{t("page")}</TableHead>
+                {withSelect ? <TableHead>{t("action")}</TableHead> : null}
+                {withSelectMultiple ? (
+                  <TableHead>{t("select")}</TableHead>
+                ) : null}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {coachSearch.data?.map((res) => (
                 <CoachRow
                   key={res.id}
@@ -226,8 +242,8 @@ function FindCoach({
                   onHover={(id) => setHoveredId(id)}
                 />
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
           {withSelectMultiple && selectedCoachs.size > 0 ? (
             <div className="mt-2 flex justify-end">
               <button

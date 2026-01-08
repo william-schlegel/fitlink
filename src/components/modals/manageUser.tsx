@@ -6,15 +6,24 @@ import {
   SubmitErrorHandler,
   FormProvider,
   useFormContext,
+  Controller,
 } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
+import { Pencil, Trash } from "lucide-react";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/shadcn";
 import {
   PricingComponent as PricingCard,
   PricingContainer,
 } from "../ui/pricing";
-import Modal, { type TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { RoleEnum } from "@/db/schema/enums";
 import SimpleForm from "../ui/simpleform";
@@ -22,6 +31,9 @@ import { trpc } from "@/lib/trpc/client";
 import { ROLE_LIST } from "@/lib/data";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
+import Modal from "../ui/modal";
+
+import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type UserFormValues = {
   name: string;
@@ -31,12 +43,14 @@ type UserFormValues = {
 
 type PropsUpdateDelete = {
   userId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export const UpdateUser = ({
   userId,
-  variant = "Icon-Outlined-Primary",
+  variant = "outline",
+  buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
   const form = useForm<UserFormValues>();
@@ -82,8 +96,9 @@ export const UpdateUser = ({
       <Modal
         title={t("update-user")}
         handleSubmit={form.handleSubmit(onSubmit, onError)}
-        buttonIcon={<i className="bx bx-edit bx-sm" />}
+        buttonIcon={<Pencil />}
         variant={variant}
+        buttonSize={buttonSize}
       >
         <h3>{t("update-user")}</h3>
         {queryUser.isLoading ? (
@@ -100,7 +115,8 @@ export const UpdateUser = ({
 
 export const DeleteUser = ({
   userId,
-  variant = "Icon-Outlined-Secondary",
+  variant = "outline",
+  buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
   const t = useTranslations("auth");
@@ -119,11 +135,12 @@ export const DeleteUser = ({
     <Confirmation
       message={t("user-deletion-message")}
       title={t("user-deletion")}
-      buttonIcon={<i className="bx bx-trash bx-sm" />}
+      buttonIcon={<Trash className="stroke-destructive" />}
       onConfirm={() => {
         deleteUser.mutate(userId);
       }}
       variant={variant}
+      buttonSize={buttonSize}
     />
   );
 };
@@ -152,13 +169,24 @@ function UserForm() {
           label: t("auth.internalRole"),
           name: "internalRole",
           component: (
-            <select className="max-w-xs" {...form.register("internalRole")}>
-              {ROLE_LIST.map((rl) => (
-                <option key={rl.value} value={rl.value}>
-                  {t(`common.roles.${rl.value}`)}
-                </option>
-              ))}
-            </select>
+            <Controller
+              control={form.control}
+              name="internalRole"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("auth.internalRole")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLE_LIST.filter((rl) => rl.value !== "ADMIN").map((rl) => (
+                      <SelectItem key={rl.value} value={rl.value}>
+                        {t(`common.roles.${rl.value}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           ),
         },
       ]}

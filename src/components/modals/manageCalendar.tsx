@@ -163,8 +163,8 @@ function FormCalendar({ calendarValues, onCalendarChange }: FormCalendarProps) {
                         <ButtonIcon
                           title={t("more-times")}
                           iconComponent={<i className="bx bx-plus bx-xs" />}
-                          buttonVariant="Icon-Outlined-Secondary"
-                          buttonSize="sm"
+                          size="icon"
+                          variant="outlines"
                         />
                       </td>
                     </>
@@ -203,7 +203,8 @@ export const CreateClubCalendar = ({ clubId }: ClubCalendarProps) => {
       handleSubmit={onSubmit}
       submitButtonText={t("save-calendar")}
       buttonIcon={<i className="bx bx-time bx-sm" />}
-      variant="Icon-Outlined-Primary"
+      variant="outline"
+      buttonSize="icon"
       className="w-2/3 max-w-xl"
     >
       <h3>{t("create-club-calendar")}</h3>
@@ -240,7 +241,8 @@ export const CreateSiteCalendar = ({ siteId, clubId }: SiteCalendarProps) => {
       handleSubmit={onSubmit}
       submitButtonText={t("save-calendar")}
       buttonIcon={<i className="bx bx-time bx-sm" />}
-      variant="Icon-Outlined-Primary"
+      variant="outline"
+      buttonSize="icon"
       className="w-2/3 max-w-xl"
     >
       <h3>{t("create-site-calendar")}</h3>
@@ -324,7 +326,8 @@ export const CreateRoomCalendar = ({
       handleSubmit={onSubmit}
       submitButtonText={t("save-calendar")}
       buttonIcon={<i className="bx bx-time bx-sm" />}
-      variant="Icon-Outlined-Primary"
+      variant="outline"
+      buttonSize="icon"
       className="w-2/3 max-w-xl"
     >
       <h3>{t("create-room-calendar")}</h3>

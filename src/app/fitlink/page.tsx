@@ -28,13 +28,13 @@ export default async function FitlinkPage() {
             </h1>
             <p className="py-6">{t("hero-text")}</p>
             <div className="flex flex-wrap gap-2">
-              <ButtonLink className="btn btn-accent" href="#find-club">
+              <ButtonLink size="xl" href="#find-club">
                 {t("btn-visitor")}
               </ButtonLink>
-              <ButtonLink className="btn btn-primary" href="/manager">
+              <ButtonLink size="xl" href="/manager">
                 {t("btn-manager")}
               </ButtonLink>
-              <ButtonLink className="btn btn-secondary" href="/coach">
+              <ButtonLink size="xl" href="/coach">
                 {t("btn-coach")}
               </ButtonLink>
             </div>

@@ -7,6 +7,22 @@ import { useTranslations } from "next-intl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Link from "next/link";
 
+import { Search } from "lucide-react";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/shadcn/table";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "../ui/shadcn/input-group";
+import { Badge, Button, Field, FieldContent, FieldLabel } from "../ui/shadcn";
 import AddressSearch, { AddressData } from "../ui/addressSearch";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { type TThemes } from "../themeSelector";
@@ -89,24 +105,24 @@ function FindClub({ address = "" }: FindClubProps) {
     }, [isHovered, onHover, item]);
 
     return (
-      <tr ref={ref} className="hover">
-        <td>
+      <TableRow ref={ref} className="hover">
+        <TableCell>
           <div className="flex flex-wrap items-center gap-2">
             <span>{item.club.name}</span>
             <span className="badge-primary badge">{item.name}</span>
           </div>
-        </td>
-        <td>{item.distance.toFixed(0)}&nbsp;km</td>
-        <td>
+        </TableCell>
+        <TableCell>{item.distance.toFixed(0)}&nbsp;km</TableCell>
+        <TableCell>
           <div className="flex flex-wrap gap-1">
             {getGroups(item).map((g) => (
-              <span key={g} className="pill pill-xs">
+              <Badge key={g} variant="info">
                 {g}
-              </span>
+              </Badge>
             ))}
           </div>
-        </td>
-        <td>
+        </TableCell>
+        <TableCell>
           {item.club.pages.find((p) => p.target === "HOME")?.published ? (
             <Link
               href={`/presentation-page/club/${item.clubId}/${
@@ -118,15 +134,15 @@ function FindClub({ address = "" }: FindClubProps) {
               <ButtonIcon
                 title={t("page-club", { name: item.club.name })}
                 iconComponent={<i className="bx bx-link-external bx-xs" />}
-                buttonSize="sm"
-                buttonVariant="Icon-Outlined-Primary"
+                size="icon"
+                variant="outlines"
               />
             </Link>
           ) : (
             <span></span>
           )}
-        </td>
-      </tr>
+        </TableCell>
+      </TableRow>
     );
   }
 
@@ -141,39 +157,37 @@ function FindClub({ address = "" }: FindClubProps) {
             className="w-full"
           />
         </div>
-        <div className="w-full max-w-sm text-start">
-          <label htmlFor="range" className="input">
-            {t("search-radius")}
-            <input
-              id="range"
-              type="number"
-              value={range}
-              onChange={(e) => setRange(e.target.valueAsNumber)}
-              className="text-end"
-              min={0}
-              max={50}
-            />
-            <span>km</span>
-          </label>
-        </div>
-        <button
-          className="btn btn-primary flex items-center gap-4"
-          onClick={() => handleSearch()}
-        >
+        <Field orientation="horizontal">
+          <FieldLabel htmlFor="range">{t("search-radius")}</FieldLabel>
+          <FieldContent>
+            <InputGroup>
+              <InputGroupAddon align="inline-end">km</InputGroupAddon>
+              <InputGroupInput
+                id="range"
+                type="number"
+                value={range}
+                onChange={(e) => setRange(e.target.valueAsNumber)}
+                min={0}
+                max={100}
+              />
+            </InputGroup>
+          </FieldContent>
+        </Field>
+        <Button size="lg" onClick={() => handleSearch()}>
           {t("search-club")}
-          <i className="bx bx-search bx-xs" />
-        </button>
+          <Search />
+        </Button>
         <div className="mt-8 max-h-[40vh]">
-          <table className="table-zebra table border border-shadcn">
-            <thead>
-              <tr>
-                <th>{t("club")}</th>
-                <th>{t("distance")}</th>
-                <th>{t("activities")}</th>
-                <th>{t("page")}</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table className="table-zebra table border border-shadcn">
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("club")}</TableHead>
+                <TableHead>{t("distance")}</TableHead>
+                <TableHead>{t("activities")}</TableHead>
+                <TableHead>{t("page")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {clubSearch.data?.map((res) => (
                 <ClubRow
                   key={res.id}
@@ -181,8 +195,8 @@ function FindClub({ address = "" }: FindClubProps) {
                   onHover={(id) => setHoveredId(id)}
                 />
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
       <div className="min-h-[30vh]">

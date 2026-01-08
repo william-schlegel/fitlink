@@ -17,10 +17,11 @@ import { format } from "date-fns";
 
 import { useRouter } from "next/navigation";
 
-import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
+import Modal, { getButtonSize } from "../ui/modal";
 import AddressSearch, { AddressData } from "../ui/addressSearch";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import ButtonIcon, { ButtonSize } from "../ui/buttonIcon";
+import ButtonIcon from "../ui/buttonIcon";
+import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { formatMoney } from "@/lib/formatNumber";
@@ -128,8 +129,8 @@ export const CreateEvent = ({ clubId }: CreateEventProps) => {
 
 export const UpdateEvent = ({
   eventId,
-  variant = "Icon-Outlined-Primary",
-  buttonSize = "sm",
+  variant = "outline",
+  buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const { data: user } = useUser();
   const utils = trpc.useUtils();
@@ -229,15 +230,15 @@ export const UpdateEvent = ({
 type PropsUpdateDelete = {
   clubId: string;
   eventId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
   buttonSize?: ButtonSize;
 };
 
 export const DeleteEvent = ({
   clubId,
   eventId,
-  variant = "Icon-Outlined-Secondary",
-  buttonSize = "sm",
+  variant = "outline",
+  buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
   const user = useUser();
@@ -354,8 +355,8 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
               <ButtonIcon
                 iconComponent={<i className="bx bx-trash" />}
                 title={t("event.delete-image")}
-                buttonVariant="Icon-Outlined-Secondary"
-                buttonSize="md"
+                size="icon"
+                variant="outlines"
                 onClick={handleDeleteImage}
                 className="absolute right-2 bottom-2"
               />
@@ -526,7 +527,6 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
             </Field>
           </FieldGroup>
         </FieldSet>
-        </div>
         <DisplayEventCard />
         <div className="col-span-full flex items-center justify-end gap-2">
           <button
@@ -598,8 +598,8 @@ function DisplayEventCard() {
                 <i className={`bx ${showMap ? "bx-x" : "bx-map"} bx-sm`} />
               }
               title={t("event.view-map")}
-              buttonVariant="Icon-Outlined-Secondary"
-              buttonSize="md"
+              size="icon"
+              variant="outlines"
               onClick={() => setShowMap((prev) => !prev)}
             />
           ) : null}
@@ -667,8 +667,8 @@ export function ShowEventCard({ eventId }: { eventId: string }) {
     <Modal
       title={t("event.show")}
       className="w-11/12 max-w-4xl"
-      variant="Icon-Primary"
-      buttonSize="sm"
+      variant="default"
+      buttonSize="icon"
       buttonIcon={<i className="bx bx-show bx-xs" />}
     >
       {event.isLoading ? (

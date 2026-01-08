@@ -10,6 +10,8 @@ import { useTranslations } from "next-intl";
 
 import { Controller } from "react-hook-form";
 
+import { Pencil, Trash } from "lucide-react";
+
 import {
   Select,
   SelectContent,
@@ -191,8 +193,9 @@ export const UpdateOffer = ({ userId, offerId }: PropsUpdateDelete) => {
   return (
     <Modal
       title={t("offer.update")}
-      buttonIcon={<i className="bx bx-edit bx-sm" />}
-      variant={"Icon-Outlined-Primary"}
+      buttonIcon={<Pencil />}
+      variant="outline"
+      buttonSize="icon"
       className="w-11/12 max-w-5xl"
       cancelButtonText=""
       closeModal={closeModal}
@@ -237,8 +240,9 @@ export const DeleteOffer = ({ offerId, userId }: PropsUpdateDelete) => {
       onConfirm={() => {
         deleteOffer.mutate(offerId);
       }}
-      buttonIcon={<i className="bx bx-trash bx-sm" />}
-      variant={"Icon-Outlined-Secondary"}
+      buttonIcon={<Trash className="stroke-destructive" />}
+      variant="outline"
+      buttonSize="icon"
     />
   );
 };

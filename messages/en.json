@@ -30,7 +30,8 @@
       "updated": "Pricing updated",
       "deleted": "Pricing deleted",
       "restored": "Pricing restored",
-      "features": "Features associated with this pricing"
+      "features": "Features associated with this pricing",
+      "option": "Add an option"
     },
     "feature": {
       "coach-certification": "Certification management",
@@ -146,6 +147,7 @@
     "welcome": "Welcome",
     "internalRole": "Role",
     "user": "User",
+    "member": "Member",
     "coach": "Coach",
     "manager": "Manager",
     "manager-coach": "Manager & Coach",
@@ -226,7 +228,8 @@
       "check-your-mail": "Check your mailbox at {email} and click on the provided link to access the application",
       "close-page": "You can close this page",
       "wrong-credentials": "Error in email or password"
-    }
+    },
+    "all-roles": "All the roles"
   },
   "calendar": {
     "day": "Day",
@@ -359,7 +362,8 @@
       "default": "Default",
       "created": "Activity group created",
       "updated": "Activity group updated",
-      "deleted": "Activity group deleted"
+      "deleted": "Activity group deleted",
+      "create-group": "Create a new activity group"
     },
     "coach": {
       "find": "Find a coach",

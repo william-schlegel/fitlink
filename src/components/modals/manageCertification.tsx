@@ -9,26 +9,30 @@ import {
   useState,
 } from "react";
 import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Trash, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { LayoutPage, LayoutPageMain, LayoutPageList } from "../layoutPage";
-import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
-import ButtonIcon, { ButtonSize } from "../ui/buttonIcon";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { Button } from "@/components/ui/shadcn/button";
 import { Label } from "@/components/ui/shadcn/label";
 import { Input } from "@/components/ui/shadcn/input";
 import { Badge } from "@/components/ui/shadcn/badge";
+import Modal, { getButtonSize } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
+import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+
+import { Field, FieldError, FieldLabel } from "../ui/shadcn";
+
+import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type CertificationFormValues = {
   name: string;
@@ -290,15 +294,15 @@ function ActivitySelector({
 type UpdateCertificationProps = {
   userId: string;
   certificationId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
   buttonSize?: ButtonSize;
 };
 
 export const UpdateCertification = ({
   certificationId,
   userId,
-  variant = "Icon-Outlined-Primary",
-  buttonSize = "sm",
+  variant = "outline",
+  buttonSize = "icon",
 }: UpdateCertificationProps) => {
   const utils = trpc.useUtils();
   const {
@@ -367,8 +371,8 @@ export const UpdateCertification = ({
 export const DeleteCertification = ({
   userId,
   certificationId,
-  variant = "Icon-Outlined-Secondary",
-  buttonSize = "sm",
+  variant = "outline",
+  buttonSize = "icon",
 }: UpdateCertificationProps) => {
   const utils = trpc.useUtils();
   const t = useTranslations("coach");
@@ -410,13 +414,13 @@ type CertificationGroupForm = {
 };
 
 type CreateCertificationGroupProps = {
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
 };
 
 const emptyData: CertificationGroupForm = { name: "", modules: [] };
 
 export const CreateCertificationOrganism = ({
-  variant = "Primary",
+  variant = "default",
 }: CreateCertificationGroupProps) => {
   const t = useTranslations("admin");
   const utils = trpc.useUtils();
@@ -448,7 +452,7 @@ export const CreateCertificationOrganism = ({
   return (
     <Modal
       title={t("certification.new-group")}
-      buttonIcon={<Plus className="h-5 w-5" />}
+      buttonIcon={<Plus />}
       variant={variant}
       className="w-10/12 max-w-3xl"
       handleSubmit={onSubmit}
@@ -461,12 +465,14 @@ export const CreateCertificationOrganism = ({
 
 type UpdateGroupProps = {
   groupId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export function UpdateCertificationGroup({
   groupId,
-  variant = "Icon-Outlined-Primary",
+  variant = "outline",
+  buttonSize = "icon",
 }: UpdateGroupProps) {
   const t = useTranslations("admin");
   const utils = trpc.useUtils();
@@ -515,8 +521,9 @@ export function UpdateCertificationGroup({
   return (
     <Modal
       title={t("certification.update-group")}
-      buttonIcon={<Edit className="h-5 w-5" />}
+      buttonIcon={<Pencil />}
       variant={variant}
+      buttonSize={buttonSize}
       className="w-10/12 max-w-3xl"
       handleSubmit={onSubmit}
     >
@@ -556,10 +563,10 @@ export function DeleteCertificationGroup({ groupId }: DeleteGroupProps) {
       title={t("group-deletion")}
       message={t("group-deletion-message")}
       onConfirm={() => deleteGroup.mutate(groupId)}
-      buttonIcon={<Trash2 className="h-4 w-4" />}
-      variant={"Icon-Outlined-Secondary"}
+      buttonIcon={<Trash />}
+      variant="destructive"
       textConfirmation={t("group-deletion-confirmation")}
-      buttonSize="sm"
+      buttonSize="icon"
     />
   );
 }
@@ -686,20 +693,24 @@ function CertificationGroupForm({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-[auto_1fr] gap-2 items-center">
-        <Label htmlFor="name">{t("certification.group-name")}</Label>
-        <Input
-          id="name"
-          value={data.name}
-          onChange={(e) => setData({ ...data, name: e.currentTarget.value })}
-          type="text"
-        />
+      <Field>
+        <div className="flex flex-row items-center gap-2">
+          <FieldLabel htmlFor="name">
+            {t("certification.group-name")}
+          </FieldLabel>
+          <Input
+            id="name"
+            value={data.name}
+            onChange={(e) => setData({ ...data, name: e.currentTarget.value })}
+            type="text"
+            required
+          />
+        </div>
+
         {data.name === "" && (
-          <p className="col-span-2 text-sm text-error">
-            {t("certification.name-mandatory")}
-          </p>
+          <FieldError>{t("certification.name-mandatory")}</FieldError>
         )}
-      </div>
+      </Field>
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col items-center gap-2">
           <div className="flex flex-col gap-2 rounded-md border border-primary p-4 w-full">
@@ -792,7 +803,7 @@ function CertificationGroupForm({
                           handleDeleteModule(idx);
                         }}
                       >
-                        <Trash2 className="h-4 w-4 text-error" />
+                        <Trash className="size-4 text-destructive" />
                       </Button>
                     </div>
                   </div>

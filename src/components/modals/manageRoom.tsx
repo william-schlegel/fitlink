@@ -13,7 +13,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { roomReservationEnum } from "@/db/schema/enums";
-import Modal, { TModalVariant } from "../ui/modal";
+import Modal from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
@@ -21,6 +21,7 @@ import { RESERVATIONS } from "@/lib/data";
 import { trpc } from "@/lib/trpc/client";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
+import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type RoomFormValues = {
   name: string;
@@ -31,12 +32,14 @@ type RoomFormValues = {
 
 type CreateRoomProps = {
   siteId?: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export const CreateRoom = ({
   siteId,
-  variant = "Icon-Outlined-Primary",
+  variant = "outline",
+  buttonSize = "icon",
 }: CreateRoomProps) => {
   const t = useTranslations("club");
   const utils = trpc.useUtils();
@@ -77,6 +80,7 @@ export const CreateRoom = ({
         handleSubmit={form.handleSubmit(onSubmit, onError)}
         buttonIcon={<i className="bx bx-plus bx-sm" />}
         variant={variant}
+        buttonSize={buttonSize}
       >
         <h3>{t("room.new")}</h3>
         <FormProvider {...form}>
@@ -90,13 +94,15 @@ export const CreateRoom = ({
 type PropsUpdateDelete = {
   siteId: string;
   roomId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export const UpdateRoom = ({
   siteId,
   roomId,
-  variant = "Icon-Outlined-Primary",
+  variant = "outline",
+  buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
   const queryRoom = trpc.sites.getRoomById.useQuery(roomId);
@@ -144,6 +150,7 @@ export const UpdateRoom = ({
         handleSubmit={form.handleSubmit(onSubmit, onError)}
         buttonIcon={<i className="bx bx-edit bx-sm" />}
         variant={variant}
+        buttonSize={buttonSize}
       >
         <h3>{t("room.update")}</h3>
         {queryRoom.isLoading ? (
@@ -161,7 +168,8 @@ export const UpdateRoom = ({
 export const DeleteRoom = ({
   roomId,
   siteId,
-  variant = "Icon-Outlined-Secondary",
+  variant = "outline",
+  buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
   const t = useTranslations("club");
@@ -185,6 +193,7 @@ export const DeleteRoom = ({
         deleteRoom.mutate(roomId);
       }}
       variant={variant}
+      buttonSize={buttonSize}
     />
   );
 };

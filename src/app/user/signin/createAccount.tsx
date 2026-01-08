@@ -40,16 +40,16 @@ export default function CreateAccount() {
   };
 
   return (
-    <Modal
-      title={t("signin.create-account")}
-      handleSubmit={handleSubmit(onSubmit, onError)}
-      errors={errors}
-      buttonIcon={<UserPlus className="h-4 w-4" />}
-      variant={"Outlined-Primary"}
-    >
-      <SimpleForm
+      <Modal
+        title={t("signin.create-account")}
+        handleSubmit={handleSubmit(onSubmit, onError)}
         errors={errors}
-        register={register}
+        buttonIcon={<UserPlus className="h-4 w-4" />}
+        variant="outline"
+      >
+        <SimpleForm
+          errors={errors}
+          register={register}
         fields={[
           { name: "name", label: t("signin.name"), required: true },
           {

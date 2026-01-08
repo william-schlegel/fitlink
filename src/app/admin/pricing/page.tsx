@@ -7,14 +7,14 @@ import {
   UndeletePricing,
   UpdatePricing,
 } from "@/components/modals/managePricing";
-import { getAllPricing, getPricingById } from "@/server/api/routers/pricing";
-import { PricingComponent } from "@/components/ui/pricing";
 import {
   LayoutPage,
   LayoutPageMain,
   LayoutPageLists,
   LayoutPageContent,
 } from "@/components/layoutPage";
+import { getAllPricing, getPricingById } from "@/server/api/routers/pricing";
+import { PricingComponent } from "@/components/ui/pricing";
 import { getRoleName } from "@/server/lib/userTools";
 import { pricing } from "@/db/schema/subscription";
 import { getActualUser } from "@/lib/auth/server";
@@ -104,7 +104,7 @@ async function PricingContent({ pricingId }: PricingContentProps) {
   return (
     <div className="flex w-full flex-col gap-4">
       <PricingComponent data={pricingQuery} />
-      <div className="flex items-center gap-2">
+      <div className="space-x-2">
         <UpdatePricing pricingId={pricingId} />
 
         {pricingQuery?.deleted ? (

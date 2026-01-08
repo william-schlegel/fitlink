@@ -274,8 +274,8 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
                 <ButtonIcon
                   iconComponent={<i className="bx bx-trash" />}
                   title={t("hero.delete-image")}
-                  buttonVariant="Icon-Secondary"
-                  buttonSize="sm"
+                  size="icon"
+                  variant="default"
                   onClick={handleDeleteImage}
                   className="absolute right-2 bottom-2 z-10"
                 />
@@ -382,11 +382,11 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
               <Confirmation
                 title={t("section-deletion")}
                 message={t("section-deletion-message")}
-                variant={"Icon-Outlined-Secondary"}
+                variant="outline"
                 buttonIcon={
-                  <i className={`bx bx-trash ${getButtonSize("md")}`} />
+                  <i className={`bx bx-trash ${getButtonSize("icon")}`} />
                 }
-                buttonSize="md"
+                buttonSize="icon"
                 textConfirmation={t("section-deletion-confirm")}
                 onConfirm={() => handleDeleteSection()}
               />

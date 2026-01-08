@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
+import { Star } from "lucide-react";
+
 import { DeleteGroup, UpdateGroup } from "@/components/modals/manageActivity";
 import { Item, ItemActions, ItemContent } from "@/components/ui/shadcn/item";
 import { Badge } from "@/components/ui/shadcn";
@@ -57,18 +59,14 @@ export function AGContent({ agId }: AGContentProps) {
         <div className="flex items-center gap-2">
           <h2>{agQuery.data?.name}</h2>
           {agQuery.data?.default ? (
-            <i className="bx bxs-star bx-sm text-accent" />
+            <Star className="fill-accent" />
           ) : (
             <p className="badge">({agQuery.data?.name})</p>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <UpdateGroup
-            groupId={agId}
-            variant="Icon-Outlined-Primary"
-            size="sm"
-          />
-          <DeleteGroup groupId={agId} size="sm" />
+          <UpdateGroup groupId={agId} variant="outline" buttonSize="icon" />
+          <DeleteGroup groupId={agId} buttonSize="icon" />
         </div>
       </div>
       <section className="grid max-h-screen grid-cols-2 gap-2 overflow-y-auto overflow-x-hidden">

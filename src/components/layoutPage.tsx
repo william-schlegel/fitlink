@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useMemo, useRef } from "react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/shadcn/badge";
@@ -85,24 +85,72 @@ export function LayoutPageList<T extends ListItem>({
   itemId?: string;
   noItemsText: string;
 }) {
+  const itemRefs = useRef<Array<HTMLAnchorElement | null>>([]);
+  const selectedIndex = useMemo(() => {
+    if (!itemId) {
+      return -1;
+    }
+    return list.findIndex((item) => item.id === itemId);
+  }, [itemId, list]);
+  const defaultIndex = selectedIndex >= 0 ? selectedIndex : 0;
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
+    if (list.length === 0) {
+      return;
+    }
+
+    const currentIndex = itemRefs.current.findIndex(
+      (el) => el === document.activeElement,
+    );
+    const startIndex = currentIndex >= 0 ? currentIndex : defaultIndex;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      const nextIndex = (startIndex + 1) % list.length;
+      itemRefs.current[nextIndex]?.focus();
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      const nextIndex = (startIndex - 1 + list.length) % list.length;
+      itemRefs.current[nextIndex]?.focus();
+      return;
+    }
+
+    if (event.key === " " || event.key === "Spacebar") {
+      if (startIndex >= 0) {
+        event.preventDefault();
+        itemRefs.current[startIndex]?.click();
+      }
+    }
+  };
+
   return (
     <aside>
       {children}
       {list.length === 0 ? (
-        <div className="text-center">
-          <p className="text-[hsl(var(--foreground)/0.7)]">{noItemsText}</p>
+        <div className="text-center bg-muted">
+          <p className="text-muted-foreground]">{noItemsText}</p>
         </div>
       ) : (
-        <ul className="overflow-hidden rounded-md border border-border bg-card w-full">
-          {list.map((item) => (
+        <ul
+          className="overflow-hidden rounded-md border border-border bg-card w-full p-1 space-y-1"
+          onKeyDown={handleKeyDown}
+        >
+          {list.map((item, index) => (
             <li key={item.id}>
               <Link
+                ref={(el) => {
+                  itemRefs.current[index] = el;
+                }}
                 className={cn(
                   "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-muted",
                   itemId === item.id && "border border-primary bg-primary/10",
                 )}
                 href={item.link ?? ""}
                 onClick={item.onClick}
+                tabIndex={index === defaultIndex ? 0 : -1}
               >
                 {typeof item.name === "string" ? (
                   <span>{item.name}</span>
@@ -144,6 +192,51 @@ export function LayoutPageLists<T extends ListItem>({
   itemId?: string;
   noItemsText: string;
 }) {
+  const itemRefs = useRef<Array<HTMLAnchorElement | null>>([]);
+  const flatItems = useMemo(
+    () => lists.flatMap((group) => group.items),
+    [lists],
+  );
+  const selectedIndex = useMemo(() => {
+    if (!itemId) {
+      return -1;
+    }
+    return flatItems.findIndex((item) => item.id === itemId);
+  }, [flatItems, itemId]);
+  const defaultIndex = selectedIndex >= 0 ? selectedIndex : 0;
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
+    if (flatItems.length === 0) {
+      return;
+    }
+
+    const currentIndex = itemRefs.current.findIndex(
+      (el) => el === document.activeElement,
+    );
+    const startIndex = currentIndex >= 0 ? currentIndex : defaultIndex;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      const nextIndex = (startIndex + 1) % flatItems.length;
+      itemRefs.current[nextIndex]?.focus();
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      const nextIndex = (startIndex - 1 + flatItems.length) % flatItems.length;
+      itemRefs.current[nextIndex]?.focus();
+      return;
+    }
+
+    if (event.key === " " || event.key === "Spacebar") {
+      if (startIndex >= 0) {
+        event.preventDefault();
+        itemRefs.current[startIndex]?.click();
+      }
+    }
+  };
+
   return (
     <aside>
       {children}
@@ -152,41 +245,60 @@ export function LayoutPageLists<T extends ListItem>({
           <p className="text-[hsl(var(--foreground)/0.7)]">{noItemsText}</p>
         </div>
       ) : (
-        <ul className="overflow-hidden rounded-md border border-border bg-card w-full">
-          {lists.map((group) => (
-            <Fragment key={group.name}>
-              <h2 className="px-3 py-2 text-sm font-semibold text-[hsl(var(--foreground)/0.7)] bg-muted">
-                {group.name}
-              </h2>
-              {group.items.map((item) => (
-                <li key={item.id}>
-                  <Link
-                    className={cn(
-                      "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-muted",
-                      itemId === item.id &&
-                        "border border-primary bg-primary/10",
-                    )}
-                    href={item.link ?? ""}
-                    onClick={item.onClick}
-                  >
-                    {typeof item.name === "string" ? (
-                      <span>{item.name}</span>
-                    ) : (
-                      item.name
-                    )}
-                    <div className="flex items-center gap-2">
-                      {item.badgeText && (
-                        <Badge variant="outline" className={item.badgeColor}>
-                          {item.badgeText}
-                        </Badge>
-                      )}
-                      {item.badgeIcon && <i className={item.badgeIcon} />}
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </Fragment>
-          ))}
+        <ul
+          className="overflow-hidden rounded-md border border-border bg-card w-full p-1 space-y-1"
+          onKeyDown={handleKeyDown}
+        >
+          {(() => {
+            let runningIndex = 0;
+            return lists.map((group) => (
+              <Fragment key={group.name}>
+                <h2 className="px-3 py-2 text-sm font-semibold text-[hsl(var(--foreground)/0.7)] bg-muted">
+                  {group.name}
+                </h2>
+                {group.items.map((item) => (
+                  <li key={item.id}>
+                    {(() => {
+                      const index = runningIndex;
+                      runningIndex += 1;
+                      return (
+                        <Link
+                          ref={(el) => {
+                            itemRefs.current[index] = el;
+                          }}
+                          className={cn(
+                            "flex w-full items-center justify-between p-3 rounded-md transition-colors hover:bg-muted",
+                            itemId === item.id &&
+                              "border border-primary bg-primary/10",
+                          )}
+                          href={item.link ?? ""}
+                          onClick={item.onClick}
+                          tabIndex={index === defaultIndex ? 0 : -1}
+                        >
+                          {typeof item.name === "string" ? (
+                            <span>{item.name}</span>
+                          ) : (
+                            item.name
+                          )}
+                          <div className="flex items-center gap-2">
+                            {item.badgeText && (
+                              <Badge
+                                variant="outline"
+                                className={item.badgeColor}
+                              >
+                                {item.badgeText}
+                              </Badge>
+                            )}
+                            {item.badgeIcon && <i className={item.badgeIcon} />}
+                          </div>
+                        </Link>
+                      );
+                    })()}
+                  </li>
+                ))}
+              </Fragment>
+            ));
+          })()}
         </ul>
       )}
     </aside>

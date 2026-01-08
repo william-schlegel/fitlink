@@ -1,11 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useQuery } from "convex/react";
 import { Bell } from "lucide-react";
+import Link from "next/link";
 
-import { api } from "../../../convex/_generated/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
 import { Button } from "@/components/ui/shadcn/button";
+import { api } from "../../../convex/_generated/api";
 import { Badge } from "@/components/ui/shadcn/badge";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +27,7 @@ function formatMessage(
     type: string;
     message: string;
     data?: unknown;
-  }
+  },
 ) {
   if (notification.type === "NEW_SUBSCRIPTION")
     return t("common.api.new-subscription");
@@ -55,7 +55,7 @@ export default function NotificationIcon({ userId }: NotificationIconProps) {
       userId,
       limit: 10,
       skip: 0,
-    }
+    },
   );
 
   const notifications = notificationsData?.notifications ?? [];
@@ -73,7 +73,7 @@ export default function NotificationIcon({ userId }: NotificationIconProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5 text-primary" />
+          <Bell className="size-6 text-primary" />
           {unread > 0 && (
             <Badge
               variant="secondary"
@@ -98,7 +98,7 @@ export default function NotificationIcon({ userId }: NotificationIconProps) {
                 <span
                   className={cn(
                     "line-clamp-2",
-                    !notification.viewedAt && "font-bold text-secondary"
+                    !notification.viewedAt && "font-bold text-secondary",
                   )}
                 >
                   {formatMessage(t, notification)}

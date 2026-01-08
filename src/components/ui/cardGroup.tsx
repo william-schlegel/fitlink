@@ -30,16 +30,16 @@ export default function CardGroup({
 }) {
   return (
     <section
-      className={cn(
-        "grid gap-2 ",
-        `grid-cols-[repeat(auto-fit,minmax(${maxWidth ?? 200}px,1fr))]`,
-      )}
+      className="grid gap-2 "
+      style={{
+        gridTemplateColumns: `repeat(auto-fit,minmax(${maxWidth ?? 200}px,1fr))`,
+      }}
     >
       {cards.map((card) => (
         <Card key={card.title} className="relative w-full">
           {card.icon ? (
             <div className="absolute top-1/2 -translate-y-1/2 right-6">
-              <div className="flex items-center justify-center text-accent-foreground/60 w-full h-full">
+              <div className="flex items-center justify-center text-accent/60 w-full h-full">
                 <card.icon
                   width={size === "md" ? 60 : size === "sm" ? 40 : 80}
                   height={size === "md" ? 60 : size === "sm" ? 40 : 80}
@@ -54,7 +54,7 @@ export default function CardGroup({
             <CardTitle>
               <h2
                 className={cn(
-                  "text-3xl font-bold my-0",
+                  "text-3xl font-bold my-0 py-0",
                   size === "md" && "text-2xl",
                   size === "sm" && "text-xl",
                 )}
@@ -68,7 +68,7 @@ export default function CardGroup({
           >
             <p
               className={cn(
-                "text-5xl font-bold text-accent-foreground",
+                "text-5xl font-bold text-accent",
                 size === "md" && "text-3xl",
                 size === "sm" && "text-2xl",
               )}

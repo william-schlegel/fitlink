@@ -122,8 +122,7 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
             <ButtonIcon
               iconComponent={<i className="bx bx-user bx-sm" />}
               title={t("club.manage-coachs")}
-              buttonVariant="Icon-Primary"
-              buttonSize="md"
+              variant="default"
               fullButton
             />
           </Link>
@@ -134,8 +133,7 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
           <ButtonIcon
             iconComponent={<i className="bx bx-euro bx-sm" />}
             title={t("subscription.manage-subscriptions")}
-            buttonVariant="Icon-Primary"
-            buttonSize="md"
+            variant="default"
             fullButton
           />
         </Link>

@@ -11,6 +11,8 @@ import { createPortal } from "react-dom";
 
 import { useMutation } from "convex/react";
 
+import { Trash } from "lucide-react";
+
 import { Id } from "../../../convex/_generated/dataModel";
 import Confirmation from "@/components/ui/confirmation";
 import { api } from "../../../convex/_generated/api";
@@ -127,9 +129,11 @@ export function MessageItem({ message, userId }: MessageItemProps) {
             message={t("deleted-message-message")}
             title={t("deleted-message")}
             onConfirm={handleDelete}
-            buttonIcon={<i className="bx bx-trash" />}
-            variant="Icon-Only-Secondary"
-            buttonSize="xs"
+            buttonIcon={
+              <Trash className="fill-destructive stroke-destructive" />
+            }
+            variant="ghost"
+            buttonSize="icon"
           />
         </div>
       )}

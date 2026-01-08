@@ -5,9 +5,13 @@ import { useDebounceValue } from "usehooks-ts";
 import { useTranslations } from "next-intl";
 import { MapPin } from "lucide-react";
 
-import { Button } from "@/components/ui/shadcn/button";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "./shadcn/input-group";
 import { Label } from "@/components/ui/shadcn/label";
-import { Input } from "@/components/ui/shadcn/input";
 import { cn } from "@/lib/utils";
 import { env } from "@/env";
 
@@ -97,25 +101,21 @@ const AddressSearch = ({
             {label}
           </Label>
         )}
-        <div className="flex gap-2">
-          {iconSearch && (
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={handleClickIcon}
-              className="shrink-0"
-            >
-              <MapPin className="h-4 w-4" />
-            </Button>
-          )}
-          <Input
+        <InputGroup>
+          <InputGroupInput
             value={address}
             onChange={(e) => handleSelect(e.currentTarget.value)}
             placeholder={t("location") ?? ""}
             required={required}
           />
-        </div>
+          {iconSearch && (
+            <InputGroupAddon>
+              <InputGroupButton onClick={handleClickIcon}>
+                <MapPin />
+              </InputGroupButton>
+            </InputGroupAddon>
+          )}
+        </InputGroup>
       </div>
       {error && <p className="text-sm text-error mt-1">{error}</p>}
       {isOpen && addresses.length > 0 && (

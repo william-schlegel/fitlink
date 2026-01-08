@@ -22,6 +22,12 @@ import { cn } from "@/lib/utils";
 
 import Spinner from "./spinner";
 
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "./shadcn/input-group";
+
 import type {
   UseFormRegister,
   FieldErrors,
@@ -62,10 +68,7 @@ export default function SimpleForm<T extends FieldValues>({
   isLoading = false,
 }: SimpleFormProps<T>): ReactNode {
   return (
-    <form
-      className={cn(className)}
-      onSubmit={typeof onSubmit === "function" ? (e) => onSubmit(e) : undefined}
-    >
+    <form className={cn(className)} onSubmit={(e) => onSubmit?.(e)}>
       {isLoading ? (
         <Spinner />
       ) : (
@@ -121,8 +124,6 @@ export default function SimpleForm<T extends FieldValues>({
                         {field.label}
                       </FieldLabel>
                     </>
-                  ) : field.component ? (
-                    <div className="col-span-2">{field.component}</div>
                   ) : (
                     <>
                       {field.label !== undefined ? (
@@ -130,15 +131,15 @@ export default function SimpleForm<T extends FieldValues>({
                           htmlFor={fn}
                           className={cn(
                             field.required &&
-                              "after:content-['*'] after:text-error after:ml-0.5",
+                              "after:content-['*'] after:text-destructive after:ml-0.5",
                           )}
                         >
                           {field.label}
                         </FieldLabel>
                       ) : null}
                       {field.unit !== undefined ? (
-                        <div className="flex items-center gap-2">
-                          <Input
+                        <InputGroup>
+                          <InputGroupInput
                             id={fn}
                             {...register(
                               fn as Path<T>,
@@ -151,10 +152,10 @@ export default function SimpleForm<T extends FieldValues>({
                             disabled={field.disabled}
                             className="w-auto flex-1"
                           />
-                          <span className="text-sm text-base-content/70">
+                          <InputGroupAddon align="inline-end">
                             {field.unit}
-                          </span>
-                        </div>
+                          </InputGroupAddon>
+                        </InputGroup>
                       ) : isTextArea ? (
                         <Textarea
                           id={fn}
@@ -168,6 +169,8 @@ export default function SimpleForm<T extends FieldValues>({
                           disabled={field.disabled}
                           rows={field.rows}
                         />
+                      ) : field.component ? (
+                        <div className="col-span-2">{field.component}</div>
                       ) : (
                         <Input
                           id={fn}

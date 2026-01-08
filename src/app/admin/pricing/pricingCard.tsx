@@ -2,6 +2,8 @@
 import { useRouter } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 
+import { Trash } from "lucide-react";
+
 import { formatMoney } from "@/lib/formatNumber";
 import createLink from "@/lib/createLink";
 import { Pricing } from "./page";
@@ -33,7 +35,7 @@ export default function PricingCard({
           <i className="bx bxs-star bx-xs text-accent" />
         ) : null}
         {pricing.deleted ? (
-          <i className="bx bx-trash bx-sm text-red-600" />
+          <Trash className="fill-destructive stroke-destructive" />
         ) : null}
       </span>
     </button>

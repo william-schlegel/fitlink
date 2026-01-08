@@ -3,8 +3,8 @@
 import { useTranslations } from "next-intl";
 import { type ReactNode } from "react";
 
-import Modal, { type TModalVariant } from "./modal";
-import { type ButtonSize } from "./buttonIcon";
+import Modal from "./modal";
+import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type Props = {
   title: string;
@@ -14,7 +14,7 @@ type Props = {
   onConfirm: () => void;
   onCancel?: () => void;
   buttonIcon?: ReactNode;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
   buttonSize?: ButtonSize;
 };
 
@@ -26,8 +26,8 @@ function Confirmation({
   onConfirm,
   onCancel,
   buttonIcon,
-  variant = "Secondary",
-  buttonSize = "md",
+  variant = "secondary",
+  buttonSize = "default",
 }: Props) {
   const t = useTranslations("common");
   return (

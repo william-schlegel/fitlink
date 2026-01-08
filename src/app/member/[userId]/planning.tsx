@@ -347,8 +347,8 @@ function ReserveDuration({
       ) : (
         <Modal
           title={t("member.reserve")}
-          variant="Primary"
-          buttonSize="xs"
+          variant="default"
+          buttonSize="sm"
           cancelButtonText=""
           closeModal={closeModal}
           onCloseModal={() => setCloseModal(false)}

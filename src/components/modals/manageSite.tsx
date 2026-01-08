@@ -14,7 +14,7 @@ import { Plus, Edit, Trash2, MapPin } from "lucide-react";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import Modal, { TModalVariant } from "../ui/modal";
+import Modal from "../ui/modal";
 import { Button } from "@/components/ui/shadcn/button";
 import { Input } from "@/components/ui/shadcn/input";
 import { Label } from "@/components/ui/shadcn/label";
@@ -25,6 +25,7 @@ import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { toast } from "@/lib/toast";
 import { env } from "@/env";
+import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type SiteFormValues = {
   name: string;
@@ -123,7 +124,8 @@ export const UpdateSite = ({ siteId, clubId }: UpdateSiteProps) => {
     <Modal
       title={t("site.update", { siteName: querySite.data?.name ?? "" })}
       buttonIcon={<Edit className="h-5 w-5" />}
-      variant={"Icon-Outlined-Primary"}
+      variant="outline"
+      buttonSize="icon"
       className="w-2/3 max-w-5xl"
       cancelButtonText=""
       closeModal={closeModal}
@@ -147,13 +149,15 @@ export const UpdateSite = ({ siteId, clubId }: UpdateSiteProps) => {
 type PropsUpdateDelete = {
   clubId: string;
   siteId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export const DeleteSite = ({
   clubId,
   siteId,
-  variant = "Icon-Outlined-Secondary",
+  variant = "outline",
+  buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
   const t = useTranslations("club");
@@ -182,6 +186,7 @@ export const DeleteSite = ({
         deleteSite.mutate(siteId);
       }}
       variant={variant}
+      buttonSize={buttonSize}
     />
   );
 };

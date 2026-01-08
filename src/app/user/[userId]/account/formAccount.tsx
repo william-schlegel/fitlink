@@ -439,7 +439,7 @@ export default function FormAccount({
           <Confirmation
             message={t("account.cancel-plan-message")}
             title={t("account.cancel-plan")}
-            variant="Outlined-Secondary"
+            variant="outline"
             buttonIcon={<i className="bx bx-x bx-sm" />}
             textConfirmation={t("account.cancel-plan-confirm")}
             onConfirm={() => setValue("cancelationDate", startOfToday())}

@@ -82,7 +82,7 @@ export default async function ManageRooms({
       })}
       titleComponents={
         <div className="flex flex-wrap items-center gap-4">
-          <CreateRoom siteId={siteId} variant={"Primary"} />
+          <CreateRoom siteId={siteId} variant="default" buttonSize="default" />
           <Link
             className="btn-outline btn btn-primary"
             href={createHref(href, ["manager", userId, "clubs"], { clubId })}

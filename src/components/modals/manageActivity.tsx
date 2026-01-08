@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 
 import { useRouter } from "next/navigation";
 
+import { Pencil, Plus, Trash } from "lucide-react";
+
 import {
   Field,
   FieldError,
@@ -13,16 +15,17 @@ import {
   FieldLabel,
   FieldSet,
 } from "../ui/shadcn/field";
-import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
+import Modal, { getButtonSize } from "../ui/modal";
 import { Checkbox } from "../ui/shadcn/checkbox";
 import Confirmation from "../ui/confirmation";
-import { ButtonSize } from "../ui/buttonIcon";
 import { Input } from "../ui/shadcn/input";
 import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
+
+import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type AddActivityProps = {
   userId: string;
@@ -81,7 +84,7 @@ const AddActivity = ({
       title={t("activity.select-activities")}
       handleSubmit={onSubmit}
       submitButtonText={t("activity.save-activity")}
-      buttonIcon={<i className="bx bx-plus bx-xs" />}
+      buttonIcon={<Plus />}
       className="w-11/12 max-w-5xl"
     >
       <h3>{t("activity.select-club-activities")}</h3>
@@ -330,9 +333,9 @@ function UpdateActivity({ clubId, groupId, id }: UpdateActivityProps) {
   return (
     <Modal
       title={t("activity.update")}
-      buttonIcon={<i className="bx bx-edit bx-xs" />}
-      variant={"Icon-Only-Primary"}
-      buttonSize="xs"
+      buttonIcon={<Pencil />}
+      variant="ghost"
+      buttonSize="icon"
       onCloseModal={() => setClose(false)}
       closeModal={close}
       cancelButtonText=""
@@ -377,20 +380,20 @@ function DeleteActivity({ clubId, activityId }: DeleteActivityProps) {
       title={t("activity.deletion")}
       message={t("activity.deletion-message")}
       onConfirm={() => deleteActivity.mutate({ clubId, activityId })}
-      buttonIcon={<i className="bx bx-trash bx-xs" />}
-      variant={"Icon-Only-Secondary"}
+      buttonIcon={<Trash className="stroke-destructive" />}
+      variant="ghost"
       textConfirmation={t("activity.deletion-confirmation")}
-      buttonSize="xs"
+      buttonSize="icon"
     />
   );
 }
 
 type NewGroupProps = {
   userId?: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
 };
 
-export const NewGroup = ({ userId, variant = "Primary" }: NewGroupProps) => {
+export const NewGroup = ({ userId, variant = "default" }: NewGroupProps) => {
   const utils = trpc.useUtils();
   const router = useRouter();
   const createGroup = trpc.activities.createGroup.useMutation({
@@ -423,7 +426,7 @@ export const NewGroup = ({ userId, variant = "Primary" }: NewGroupProps) => {
 
   return (
     <Modal title={t("group.new")} variant={variant} handleSubmit={addNewGroup}>
-      <h3>Créer un nouveau groupe d&apos;activités</h3>
+      <h3>{t("group.create-group")}</h3>
       <Field>
         <FieldLabel htmlFor="group-name">
           {t("club.activity-group.name")}
@@ -432,9 +435,10 @@ export const NewGroup = ({ userId, variant = "Primary" }: NewGroupProps) => {
           id="group-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          required
         />
       </Field>
-      {error && <FieldError>Le nom doit être renseigné</FieldError>}
+      {error && <FieldError>{t("name-mandatory")}</FieldError>}
     </Modal>
   );
 };
@@ -442,15 +446,15 @@ export const NewGroup = ({ userId, variant = "Primary" }: NewGroupProps) => {
 type UpdateGroupProps = {
   userId?: string;
   groupId: string;
-  variant?: TModalVariant;
-  size?: ButtonSize;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export function UpdateGroup({
   userId,
   groupId,
-  variant = "Icon-Outlined-Secondary",
-  size = "sm",
+  variant = "outline",
+  buttonSize = "icon",
 }: UpdateGroupProps) {
   const utils = trpc.useContext();
   const groupQuery = trpc.activities.getActivityGroupById.useQuery(groupId, {
@@ -498,9 +502,9 @@ export function UpdateGroup({
     <Modal
       title={t("group.update")}
       handleSubmit={update}
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize(size)}`} />}
+      buttonIcon={<Pencil />}
       variant={variant}
-      buttonSize={size}
+      buttonSize={buttonSize}
     >
       <h3>
         {t("group.update")}&nbsp;
@@ -522,18 +526,14 @@ export function UpdateGroup({
             {error && <FieldError>{t("name-mandatory")}</FieldError>}
           </Field>
           {userId ? null : (
-            <div className="form-control">
-              <label className="label cursor-pointer justify-start gap-4">
-                <input
-                  type="checkbox"
-                  checked={defaultGroup}
-                  className="checkbox-primary checkbox"
-                  onChange={(e) => setDefaultGroup(e.currentTarget.checked)}
-                  disabled={!groupQuery.data?.coachId}
-                />
-                <span className="label-text">{t("group.default")}</span>
-              </label>
-            </div>
+            <Field orientation="horizontal">
+              <Checkbox
+                checked={defaultGroup}
+                onCheckedChange={(checked) => setDefaultGroup(Boolean(checked))}
+                disabled={!groupQuery.data?.coachId}
+              />
+              <FieldLabel>{t("group.default")}</FieldLabel>
+            </Field>
           )}
         </>
       )}
@@ -544,15 +544,15 @@ export function UpdateGroup({
 type DeleteGroupProps = {
   userId?: string;
   groupId: string;
-  variant?: TModalVariant;
-  size?: ButtonSize;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export function DeleteGroup({
   groupId,
   userId,
-  size = "sm",
-  variant = "Icon-Outlined-Secondary",
+  buttonSize = "icon",
+  variant = "destructive",
 }: DeleteGroupProps) {
   const utils = trpc.useUtils();
   const deleteGroup = trpc.activities.deleteGroup.useMutation({
@@ -572,10 +572,10 @@ export function DeleteGroup({
       title={t("group.deletion")}
       message={t("group.deletion-message")}
       onConfirm={() => deleteGroup.mutate({ groupId })}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize(size)}`} />}
+      buttonIcon={<Trash />}
       variant={variant}
       textConfirmation={t("group.deletion-confirmation")}
-      buttonSize={size}
+      buttonSize={buttonSize}
     />
   );
 }

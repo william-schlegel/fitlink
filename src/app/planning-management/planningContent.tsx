@@ -14,6 +14,8 @@ import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 
+import { Trash } from "lucide-react";
+
 import {
   DeletePlanning,
   UpdatePlanning,
@@ -622,8 +624,11 @@ function FormActivity({
               onConfirm={() => {
                 if (typeof handleDelete === "function") handleDelete();
               }}
-              variant="Icon-Outlined-Secondary"
-              buttonIcon={<i className="bx bx-trash bx-sm" />}
+              variant="outline"
+              buttonSize="icon"
+              buttonIcon={
+                <Trash className="fill-destructive stroke-destructive" />
+              }
             />
           ) : null}
           <button className="btn-primary btn ml-2">

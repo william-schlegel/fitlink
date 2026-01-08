@@ -190,11 +190,11 @@ export const ActivityGroupCreation = ({
               <Confirmation
                 title={t("section-deletion")}
                 message={t("section-deletion-message")}
-                variant={"Icon-Outlined-Secondary"}
+                variant="outline"
                 buttonIcon={
-                  <i className={`bx bx-trash ${getButtonSize("md")}`} />
+                  <i className={`bx bx-trash ${getButtonSize("icon")}`} />
                 }
-                buttonSize="md"
+                buttonSize="icon"
                 textConfirmation={t("section-deletion-confirm")}
                 onConfirm={() => handleDeleteSection()}
               />
@@ -368,9 +368,9 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
       onCloseModal={() => setClose(false)}
       closeModal={close}
       cancelButtonText=""
-      variant="Icon-Outlined-Primary"
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize("sm")}`} />}
-      buttonSize="sm"
+      variant="outline"
+      buttonIcon={<i className={`bx bx-edit ${getButtonSize("icon")}`} />}
+      buttonSize="icon"
     >
       <h3>
         <span>{t("activity-group.update-activity")}</span>
@@ -405,12 +405,12 @@ function DeleteActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
     <Confirmation
       message={t("activity-group.deletion-message")}
       title={t("activity-group.deletion")}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize("sm")}`} />}
+      buttonIcon={<i className={`bx bx-trash ${getButtonSize("icon")}`} />}
       onConfirm={() => {
         deleteActivity.mutate(activityId);
       }}
-      variant={"Icon-Outlined-Secondary"}
-      buttonSize={"sm"}
+      variant="outline"
+      buttonSize="icon"
     />
   );
 }
@@ -487,8 +487,8 @@ function ActivityGroupForm({
             <ButtonIcon
               iconComponent={<i className="bx bx-trash" />}
               title={t("activity.delete-image")}
-              buttonVariant="Icon-Outlined-Secondary"
-              buttonSize="md"
+              size="icon"
+              variant="outlines"
               onClick={handleDeleteImage}
               className="absolute right-2 bottom-2"
             />

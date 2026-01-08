@@ -31,25 +31,34 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "../ui/shadcn/field";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "../ui/shadcn/select";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldSet,
-} from "../ui/shadcn/field";
 import { Textarea } from "../ui/shadcn/textarea";
 import { Checkbox } from "../ui/shadcn/checkbox";
 import { Input } from "../ui/shadcn/input";
 
+import { Pencil, PlusCircle, Trash, Undo } from "lucide-react";
+
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "../ui/shadcn/input-group";
 import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
-import Modal, { type TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import ButtonIcon from "../ui/buttonIcon";
 import { CSS } from "@dnd-kit/utilities";
@@ -58,6 +67,9 @@ import { ROLE_LIST } from "@/lib/data";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import Modal from "../ui/modal";
+
+import type { ButtonVariant } from "@/components/ui/shadcn/button";
 
 type PricingFormValues = {
   title: string;
@@ -72,10 +84,10 @@ type PricingFormValues = {
 };
 
 type CreatePricingProps = {
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
 };
 
-export const CreatePricing = ({ variant = "Primary" }: CreatePricingProps) => {
+export const CreatePricing = ({ variant = "default" }: CreatePricingProps) => {
   const t = useTranslations("admin");
   const utils = trpc.useUtils();
   const router = useRouter();
@@ -140,12 +152,12 @@ export const CreatePricing = ({ variant = "Primary" }: CreatePricingProps) => {
 
 type PropsUpdateDelete = {
   pricingId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
 };
 
 export const UpdatePricing = ({
   pricingId,
-  variant = "Primary",
+  variant = "default",
 }: PropsUpdateDelete) => {
   const t = useTranslations("admin");
   const utils = trpc.useUtils();
@@ -224,7 +236,7 @@ export const UpdatePricing = ({
       <Modal
         title={t("pricing.update")}
         handleSubmit={form.handleSubmit(onSubmit, onError)}
-        buttonIcon={<i className="bx bx-edit bx-sm" />}
+        buttonIcon={<Pencil />}
         variant={variant}
         className="w-10/12 max-w-[90vw]"
       >
@@ -243,7 +255,7 @@ export const UpdatePricing = ({
 
 export const DeletePricing = ({
   pricingId,
-  variant = "Outlined-Secondary",
+  variant = "destructive",
 }: PropsWithoutRef<PropsUpdateDelete>) => {
   const utils = trpc.useUtils();
   const t = useTranslations("admin");
@@ -263,7 +275,7 @@ export const DeletePricing = ({
     <Confirmation
       message={t("pricing.deletion-message")}
       title={t("pricing.deletion")}
-      buttonIcon={<i className="bx bx-trash bx-sm" />}
+      buttonIcon={<Trash />}
       onConfirm={() => {
         deletePricing.mutate(pricingId);
       }}
@@ -274,7 +286,7 @@ export const DeletePricing = ({
 
 export const UndeletePricing = ({
   pricingId,
-  variant = "Outlined-Secondary",
+  variant = "outline",
 }: PropsWithoutRef<PropsUpdateDelete>) => {
   const utils = trpc.useUtils();
   const t = useTranslations("admin");
@@ -294,7 +306,7 @@ export const UndeletePricing = ({
     <Confirmation
       message={t("pricing.undelete-message")}
       title={t("pricing.undelete")}
-      buttonIcon={<i className="bx bx-undo bx-sm" />}
+      buttonIcon={<Undo />}
       onConfirm={() => {
         undeletePricing.mutate(pricingId);
       }}
@@ -437,33 +449,31 @@ function PricingForm() {
                   <FieldLabel htmlFor="pricing-monthly">
                     {t("pricing.monthly")}
                   </FieldLabel>
-                  <div className="relative">
-                    <Input
+                  <InputGroup>
+                    <InputGroupInput
                       id="pricing-monthly"
                       {...register("monthly", { valueAsNumber: true })}
                       type="number"
-                      className="w-full pr-10"
                     />
-                    <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-sm text-base-content/70">
+                    <InputGroupAddon align="inline-end">
                       {t("pricing.euro-per-month")}
-                    </span>
-                  </div>
+                    </InputGroupAddon>
+                  </InputGroup>
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="pricing-yearly">
                     {t("pricing.yearly")}
                   </FieldLabel>
-                  <div className="relative">
-                    <Input
+                  <InputGroup>
+                    <InputGroupInput
                       id="pricing-yearly"
                       {...register("yearly", { valueAsNumber: true })}
                       type="number"
-                      className="w-full pr-10"
                     />
-                    <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-sm text/70">
+                    <InputGroupAddon align="inline-end">
                       {t("pricing.euro-per-year")}
-                    </span>
-                  </div>
+                    </InputGroupAddon>
+                  </InputGroup>
                 </Field>
               </>
             )}
@@ -490,76 +500,82 @@ function PricingForm() {
           </FieldGroup>
         </FieldSet>
       </form>
-      <div className="flex flex-col gap-4">
-        <label>{t("pricing.options")}</label>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={fields.options ?? []}
-            strategy={verticalListSortingStrategy}
+      <FieldSet className="border border-border p-2">
+        <FieldLegend>{t("pricing.options")}</FieldLegend>
+        <FieldGroup>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            <ul className="rounded border border-base-content/20  p-2">
-              {fields.options?.map((option, idx) => (
-                <Option key={idx} option={option} />
-              ))}
-              <DeleteZone
-                notifyIsOver={(isOver) => (deleteIsOver.current = isOver)}
-              />
-            </ul>
-          </SortableContext>
-        </DndContext>
-        <div className="flex items-center gap-2">
-          <Input
-            type="text"
-            ref={refOpt}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                addOption(e.currentTarget.value);
-                e.currentTarget.value = "";
-              }
-              if (e.key === "Escape") {
-                e.currentTarget.value = "";
-              }
-            }}
-            className="flex-1"
-          />
-          <ButtonIcon
-            iconComponent={<i className="bx bx-plus bx-sm" />}
-            title={t("pricing.add-option")}
-            buttonVariant="Icon-Outlined-Primary"
-            buttonSize="md"
-            onClick={() => {
-              if (!refOpt.current) return;
-              addOption(refOpt.current.value);
-              refOpt.current.value = "";
-            }}
-          />
-        </div>
-      </div>
-      <div>
-        <label>{t("pricing.features")}</label>
-        <div className="border border-primary p-2 flex flex-wrap gap-2">
-          {getListForRole(fields.roleTarget ?? "MEMBER").map((f, idx) => (
-            <label
-              key={f.value}
-              className="label cursor-pointer justify-start gap-4 hover:bg-primary/10"
-              htmlFor={f.value}
+            <SortableContext
+              items={fields.options ?? []}
+              strategy={verticalListSortingStrategy}
             >
-              <input
+              <ul>
+                {fields.options?.map((option, idx) => (
+                  <Option key={idx} option={option} />
+                ))}
+                <DeleteZone
+                  notifyIsOver={(isOver) => (deleteIsOver.current = isOver)}
+                />
+              </ul>
+            </SortableContext>
+          </DndContext>
+        </FieldGroup>
+        <div className="flex items-center gap-2">
+          <Field>
+            <FieldLabel htmlFor="pricing-option">
+              {t("pricing.option")}
+            </FieldLabel>
+            <FieldContent>
+              <InputGroup>
+                <InputGroupInput
+                  type="text"
+                  ref={refOpt}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      addOption(e.currentTarget.value);
+                      e.currentTarget.value = "";
+                    }
+                    if (e.key === "Escape") {
+                      e.currentTarget.value = "";
+                    }
+                  }}
+                  className="flex-1"
+                />
+                <InputGroupButton
+                  title={t("pricing.add-option")}
+                  onClick={() => {
+                    if (!refOpt.current) return;
+                    addOption(refOpt.current.value);
+                    refOpt.current.value = "";
+                  }}
+                >
+                  <PlusCircle className="size-4 stroke-foreground" />
+                </InputGroupButton>
+              </InputGroup>
+            </FieldContent>
+          </Field>
+        </div>
+      </FieldSet>
+      <FieldSet className="border border-border p-2">
+        <FieldLegend>{t("pricing.features")}</FieldLegend>
+        <FieldGroup>
+          {getListForRole(fields.roleTarget ?? "MEMBER").map((f, idx) => (
+            <Field orientation="horizontal" key={f.value}>
+              <Checkbox
                 id={f.value}
-                type="checkbox"
-                className="checkbox-primary checkbox"
                 {...register(`features.${idx}`)}
                 defaultChecked={false}
               />
-              <span className="text-wrap">{t(f.label)}</span>
-            </label>
+              <FieldLabel htmlFor={f.value} className="font-normal">
+                {t(f.label)}
+              </FieldLabel>
+            </Field>
           ))}
-        </div>
-      </div>
+        </FieldGroup>
+      </FieldSet>
     </div>
   );
 }
@@ -579,11 +595,11 @@ function DeleteZone({
     <li
       ref={setNodeRef}
       className={cn(
-        "grid place-items-center rounded border border-secondary py-2 text-secondary",
-        isOver ? "bg-secondary/10" : "bg-card",
+        "flex items-center justify-center rounded border border-destructive py-2 text-destructive bg-card",
+        isOver && "bg-destructive/10",
       )}
     >
-      <i className="bx bx-trash bx-sm" />
+      <Trash className="size-8 stroke-destructive" />
     </li>
   );
 }
