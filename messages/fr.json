@@ -882,7 +882,7 @@
       "offer-created": "Offre créée",
       "new-offer": "Nouvelle offre",
       "offer-updated": "Offre mis à jour",
-      "update-offer": "Modifier l'offre'",
+      "update-offer": "Modifier l'offre",
       "deleted": "Offre supprimé",
       "deletion": "Supprimer cette offre",
       "deletion-message": "La suppression de cette offre est irréversible|Confirmez-vous ?",
@@ -1034,7 +1034,8 @@
     "activity-deletion-message": "Supprimer cette activité ?",
     "activity-deletion-confirmation": "Supprimer",
     "update-course": "Mettre l'activité à jour",
-    "update": "Modifier"
+    "update": "Modifier",
+    "add-activity": "Nouveau cours"
   },
   "message": {
     "my-chat": "Ma messagerie",
@@ -1086,5 +1087,6 @@
     "message-not-found": "Message introuvable",
     "only-message-author-can-edit": "Seul l'auteur peut modifier ce message",
     "only-message-author-or-admin-can-delete": "Seul l'auteur du message peut le supprimer"
-  }
+  },
+  "no-events": "Aucun événement programmé"
 }

@@ -1,29 +1,42 @@
 "use client";
 
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { startTransition, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { Trash } from "lucide-react";
+
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Separator,
+} from "../ui/shadcn";
+import {
+  InputGroup,
+  InputGroupButton,
+  InputGroupInput,
+} from "../ui/shadcn/input-group";
+import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/shadcn/field";
 import { usePageSection } from "@/lib/sections/useGetSection";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { PageSectionModelEnum } from "@/db/schema/enums";
+import { Textarea } from "../ui/shadcn/textarea";
+import DeleteButton from "../ui/deleteButton";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
-import { getButtonSize } from "../ui/modal";
-import ButtonIcon from "../ui/buttonIcon";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldSet,
-} from "../ui/shadcn/field";
 import { Input } from "../ui/shadcn/input";
-import { Textarea } from "../ui/shadcn/textarea";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
+
+import "@/app/pageComponents.css";
+import "@/app/pageTheme.css";
 
 type HeroCreationProps = {
   clubId: string;
@@ -252,10 +265,23 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
   return (
     <div className="grid w-full auto-rows-auto gap-2 lg:grid-cols-2">
       <div>
-        <h3>{t(updating ? "updating-section" : "creation-section")}</h3>
+        <h3 className="flex items-center gap-2 justify-between">
+          <span>{t(updating ? "updating-section" : "creation-section")}</span>
+          {updating ? (
+            <Confirmation
+              title={t("section-deletion")}
+              message={t("section-deletion-message")}
+              variant="destructive"
+              buttonIcon={<Trash />}
+              buttonSize="icon"
+              textConfirmation={t("section-deletion-confirm")}
+              onConfirm={() => handleDeleteSection()}
+            />
+          ) : null}
+        </h3>
 
         <form
-          className="grid grid-cols-[auto_1fr] gap-2 rounded border border-primary p-2"
+          className="space-y-2 rounded border border-primary p-2"
           onSubmit={handleSubmit(onSubmit)}
         >
           <UploadButton
@@ -264,18 +290,15 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
               setValue("imageUrl", result[0].ufsUrl)
             }
             buttonText={t("hero.image")}
-            className="col-span-2"
           />
           {imagePreview ? (
-            <div className="col-span-2 flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2">
               <div className="relative w-60 max-w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imagePreview} alt="" />
-                <ButtonIcon
-                  iconComponent={<i className="bx bx-trash" />}
-                  title={t("hero.delete-image")}
-                  size="icon"
-                  variant="default"
+                <DeleteButton
+                  icon
+                  label={t("hero.delete-image")}
                   onClick={handleDeleteImage}
                   className="absolute right-2 bottom-2 z-10"
                 />
@@ -286,14 +309,12 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="hero-title">{t("hero.title")}</FieldLabel>
-                <Input
-                  {...register("title")}
-                  id="hero-title"
-                  type="text"
-                />
+                <Input {...register("title")} id="hero-title" type="text" />
               </Field>
               <Field>
-                <FieldLabel htmlFor="hero-subtitle">{t("hero.subtitle")}</FieldLabel>
+                <FieldLabel htmlFor="hero-subtitle">
+                  {t("hero.subtitle")}
+                </FieldLabel>
                 <Input
                   {...register("subtitle")}
                   id="hero-subtitle"
@@ -301,7 +322,9 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="hero-description">{t("hero.description")}</FieldLabel>
+                <FieldLabel htmlFor="hero-description">
+                  {t("hero.description")}
+                </FieldLabel>
                 <Textarea
                   {...register("description")}
                   id="hero-description"
@@ -309,91 +332,110 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="hero-cta">{t("hero.button-cta")}</FieldLabel>
-                <Input
-                  {...register("cta")}
-                  id="hero-cta"
-                  type="text"
-                />
+                <FieldLabel htmlFor="hero-cta">
+                  {t("hero.button-cta")}
+                </FieldLabel>
+                <Input {...register("cta")} id="hero-cta" type="text" />
               </Field>
             </FieldGroup>
-          </FieldSet>
-          {fields.cta ? (
-            <>
-              <label htmlFor="linkedPage">{t("hero.linked-page")}</label>
+            {fields.cta ? (
               <div className="grid grid-cols-2 gap-2">
-                <select
-                  defaultValue={getValues("linkedPage")}
-                  {...register("linkedPage")}
-                  id="linkedPage"
-                >
-                  {queryPages.data?.map((page) => (
-                    <option key={page.id} value={page.id}>
-                      {page.name}
-                    </option>
-                  ))}
-                  <option value={"url"}>{t("hero.external-url")}</option>
-                </select>
-                <select
-                  defaultValue={getValues("pageSection")}
-                  {...register("pageSection")}
-                  id="pageSection"
-                >
-                  {sections.map((sec) => (
-                    <option key={sec} value={sec}>
-                      {getSectionName(sec)}
-                    </option>
-                  ))}
-                </select>
+                <Field>
+                  <FieldLabel>{t("hero.linked-page")}</FieldLabel>
+                  <Controller
+                    control={control}
+                    name="linkedPage"
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder={t("hero.linked-page")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {queryPages.data?.map((page) => (
+                            <SelectItem key={page.id} value={page.id}>
+                              {page.name}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="url">
+                            {t("hero.external-url")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>{t("hero.linked-section")}</FieldLabel>
+                  <Controller
+                    control={control}
+                    name="pageSection"
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder={t("hero.linked-section")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {sections.map((sec) => (
+                            <SelectItem key={sec} value={sec}>
+                              {getSectionName(sec)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </Field>
               </div>
-            </>
-          ) : null}
-          {fields.cta && fields.linkedPage === "url" ? (
-            <>
-              <label className="label" htmlFor="protocol">
-                <span>{t("hero.external-url")}</span>
-              </label>
+            ) : null}
+            {fields.cta && fields.linkedPage === "url" ? (
               <Field>
-                <FieldLabel htmlFor="hero-url">{t("hero.external-url")}</FieldLabel>
-                <div className="flex items-center gap-2">
-                  <select
-                    defaultValue={"https:"}
-                    {...register("protocol")}
-                    className="w-fit bg-primary text-primary-content rounded-md px-2 py-1"
-                  >
-                    <option value="https:">https://</option>
-                    <option value="http:">http://</option>
-                  </select>
-                  <Input
+                <FieldLabel htmlFor="hero-url">
+                  {t("hero.external-url")}
+                </FieldLabel>
+                <InputGroup>
+                  <InputGroupButton>
+                    <Controller
+                      control={control}
+                      name="protocol"
+                      render={({ field }) => (
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger className="w-full border-none">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="https:">https://</SelectItem>
+                            <SelectItem value="http:">http://</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </InputGroupButton>
+                  <InputGroupInput
                     {...register("url")}
                     id="hero-url"
                     type="text"
                     className="flex-1"
                   />
-                </div>
+                </InputGroup>
               </Field>
-            </>
-          ) : null}
-          <div className="col-span-2 flex justify-between">
-            <button className="btn btn-primary" type="submit">
-              {t("save-section")}
-            </button>
-            {updating ? (
-              <Confirmation
-                title={t("section-deletion")}
-                message={t("section-deletion-message")}
-                variant="outline"
-                buttonIcon={
-                  <i className={`bx bx-trash ${getButtonSize("icon")}`} />
-                }
-                buttonSize="icon"
-                textConfirmation={t("section-deletion-confirm")}
-                onConfirm={() => handleDeleteSection()}
-              />
             ) : null}
-          </div>
+            <Separator />
+            <Button className="ml-auto" type="submit">
+              {t("save-section")}
+            </Button>
+          </FieldSet>
         </form>
       </div>
+
       <div className={`space-y-2`}>
         <h3 className="flex flex-wrap items-center justify-between">
           <span>{t("preview")}</span>

@@ -24,6 +24,7 @@ export default function DeleteButton({
       size={icon ? "icon" : size}
       className={className}
       onClick={onClick}
+      title={label}
     >
       <Trash
         className={cn(
@@ -32,7 +33,7 @@ export default function DeleteButton({
           size === "xl" && "size-8",
         )}
       />
-      {label && (
+      {label && !icon && (
         <span
           className={cn(
             "text-xs",

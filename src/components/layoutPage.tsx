@@ -135,7 +135,7 @@ export function LayoutPageList<T extends ListItem>({
         </div>
       ) : (
         <ul
-          className="overflow-hidden rounded-md border border-border bg-card w-full p-1 space-y-1"
+          className="overflow-hidden rounded-md border border-border w-full p-1 space-y-1"
           onKeyDown={handleKeyDown}
         >
           {list.map((item, index) => (
@@ -242,18 +242,18 @@ export function LayoutPageLists<T extends ListItem>({
       {children}
       {lists.length === 0 ? (
         <div className="text-center">
-          <p className="text-[hsl(var(--foreground)/0.7)]">{noItemsText}</p>
+          <p className="text-muted-foreground">{noItemsText}</p>
         </div>
       ) : (
         <ul
-          className="overflow-hidden rounded-md border border-border bg-card w-full p-1 space-y-1"
+          className="overflow-hidden rounded-md border border-border w-full p-1 space-y-1"
           onKeyDown={handleKeyDown}
         >
           {(() => {
             let runningIndex = 0;
             return lists.map((group) => (
               <Fragment key={group.name}>
-                <h2 className="px-3 py-2 text-sm font-semibold text-[hsl(var(--foreground)/0.7)] bg-muted">
+                <h2 className="px-3 py-2 text-sm font-semibold text-muted-foreground bg-muted">
                   {group.name}
                 </h2>
                 {group.items.map((item) => (

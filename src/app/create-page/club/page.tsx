@@ -1,6 +1,10 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { Check, X } from "lucide-react";
+
+import Head from "next/head";
+
 import {
   LayoutPage,
   LayoutPageMain,
@@ -67,11 +71,11 @@ export default async function ClubPage({
     badgeText: (
       <div className="flex items-center gap-2">
         <TargetName target={page.target ?? "HOME"} />
-        <i
-          className={`bx bx-xs aspect-square rounded-full bg-card ${
-            page.published ? "bx-check text-success" : "bx-x text-error"
-          }`}
-        />
+        {page.published ? (
+          <Check className="text-green-500 size-4" />
+        ) : (
+          <X className="text-red-500 size-4" />
+        )}
       </div>
     ),
   }));

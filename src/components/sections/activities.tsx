@@ -7,6 +7,8 @@ import Link from "next/link";
 
 import { InferSelectModel } from "drizzle-orm";
 
+import { Pencil, Trash } from "lucide-react";
+
 import {
   Field,
   FieldError,
@@ -14,6 +16,7 @@ import {
   FieldLabel,
   FieldSet,
 } from "../ui/shadcn/field";
+import { Button, Card, CardContent, Separator } from "../ui/shadcn";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
@@ -163,7 +166,7 @@ export const ActivityGroupCreation = ({
       <div className="space-y-2">
         <h3>{t(updating ? "updating-section" : "creation-section")}</h3>
         <form
-          className="grid grid-cols-[auto_1fr] gap-2 rounded border border-primary p-2"
+          className="space-y-2 rounded border border-primary p-2"
           onSubmit={handleSubmit(onSubmit)}
         >
           <FieldSet>
@@ -183,17 +186,13 @@ export const ActivityGroupCreation = ({
             </FieldGroup>
           </FieldSet>
           <div className="col-span-2 flex justify-between">
-            <button className="btn btn-primary" type="submit">
-              {t("save-section")}
-            </button>
+            <Button type="submit">{t("save-section")}</Button>
             {updating ? (
               <Confirmation
                 title={t("section-deletion")}
                 message={t("section-deletion-message")}
-                variant="outline"
-                buttonIcon={
-                  <i className={`bx bx-trash ${getButtonSize("icon")}`} />
-                }
+                variant="destructive"
+                buttonIcon={<Trash />}
                 buttonSize="icon"
                 textConfirmation={t("section-deletion-confirm")}
                 onConfirm={() => handleDeleteSection()}
@@ -205,22 +204,22 @@ export const ActivityGroupCreation = ({
           <>
             <div className="flex flex-wrap gap-2">
               {querySection.data.elements.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="rounded border border-primary p-4"
-                >
-                  <p>{activity.title}</p>
-                  <div className="mt-2 flex items-center justify-between gap-4">
-                    <UpdateActivityGroup
-                      pageId={pageId}
-                      activityId={activity.id!}
-                    />
-                    <DeleteActivityGroup
-                      pageId={pageId}
-                      activityId={activity.id!}
-                    />
-                  </div>
-                </div>
+                <Card key={activity.id}>
+                  <CardContent>
+                    <h4 className="text-center">{activity.title}</h4>
+                    <Separator />
+                    <div className="flex items-center justify-center gap-2">
+                      <UpdateActivityGroup
+                        pageId={pageId}
+                        activityId={activity.id!}
+                      />
+                      <DeleteActivityGroup
+                        pageId={pageId}
+                        activityId={activity.id!}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
             <AddActivityGroup
@@ -369,7 +368,7 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
       closeModal={close}
       cancelButtonText=""
       variant="outline"
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize("icon")}`} />}
+      buttonIcon={<Pencil />}
       buttonSize="icon"
     >
       <h3>
@@ -405,11 +404,11 @@ function DeleteActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
     <Confirmation
       message={t("activity-group.deletion-message")}
       title={t("activity-group.deletion")}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize("icon")}`} />}
+      buttonIcon={<Trash />}
       onConfirm={() => {
         deleteActivity.mutate(activityId);
       }}
-      variant="outline"
+      variant="destructive"
       buttonSize="icon"
     />
   );
@@ -530,10 +529,11 @@ function ActivityGroupForm({
           </FieldGroup>
         </FieldSet>
       </div>
-      <div className="col-span-full mt-4 flex items-center justify-end gap-2">
-        <button
+      <Separator className="my-4" />
+      <div className="mt-4 flex items-center justify-end gap-2">
+        <Button
           type="button"
-          className="btn btn-outline btn-secondary"
+          variant="outline"
           onClick={(e) => {
             e.preventDefault();
             reset();
@@ -541,10 +541,8 @@ function ActivityGroupForm({
           }}
         >
           {tCommon("cancel")}
-        </button>
-        <button className="btn btn-primary" type="submit">
-          {tCommon("save")}
-        </button>
+        </Button>
+        <Button type="submit">{tCommon("save")}</Button>
       </div>
     </form>
   );

@@ -24,7 +24,14 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "../ui/shadcn/input-group";
-import { Badge, Button, Field, FieldContent, FieldLabel } from "../ui/shadcn";
+import {
+  Badge,
+  Button,
+  Checkbox,
+  Field,
+  FieldContent,
+  FieldLabel,
+} from "../ui/shadcn";
 import AddressSearch, { AddressData } from "../ui/addressSearch";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { type TThemes } from "../themeSelector";
@@ -34,6 +41,7 @@ import { trpc } from "@/lib/trpc/client";
 import hslToHex from "@/lib/hslToHex";
 import generateCircle from "./utils";
 import Rating from "../ui/rating";
+import { cn } from "@/lib/utils";
 import { env } from "@/env";
 
 type FindCoachProps = {
@@ -125,7 +133,7 @@ function FindCoach({
     }, [isHovered, onHover, coach]);
 
     return (
-      <TableRow className={`hover ${className ?? ""}`} ref={ref}>
+      <TableRow className={cn("hover", className)} ref={ref}>
         <TableCell>{coach.publicName}</TableCell>
         <TableCell>{coach.distance.toFixed(0)}&nbsp;km</TableCell>
         <TableCell>
@@ -164,22 +172,18 @@ function FindCoach({
         </TableCell>
         {withSelect ? (
           <TableCell>
-            <span
-              className="btn-primary btn-xs btn"
-              tabIndex={0}
-              onClick={() => onSelect(coach.userId)}
-            >
+            <Button onClick={() => onSelect(coach.userId)}>
               {t("select")}
-            </span>
+            </Button>
           </TableCell>
         ) : null}
         {withSelectMultiple ? (
           <TableCell>
-            <input
-              type="checkbox"
+            <Checkbox
               checked={selectedCoachs.has(coach.userId)}
-              className="checkbox-primary checkbox"
-              onChange={(e) => handleSelect(coach.userId, e.target.checked)}
+              onCheckedChange={(checked) =>
+                handleSelect(coach.userId, Boolean(checked))
+              }
             />
           </TableCell>
         ) : null}
@@ -245,14 +249,13 @@ function FindCoach({
             </TableBody>
           </Table>
           {withSelectMultiple && selectedCoachs.size > 0 ? (
-            <div className="mt-2 flex justify-end">
-              <button
-                className="btn-primary btn-sm btn"
+            <div className="mt-2 text-end">
+              <Button
                 type="button"
                 onClick={() => onSelectMultiple(Array.from(selectedCoachs))}
               >
                 {t("select")}
-              </button>
+              </Button>
             </div>
           ) : null}
         </div>

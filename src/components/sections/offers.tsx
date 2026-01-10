@@ -1,12 +1,25 @@
 "use client";
 
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { InferSelectModel } from "drizzle-orm";
 
+import { Pencil, Trash } from "lucide-react";
+
+import {
+  Button,
+  Card,
+  CardContent,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Separator,
+} from "../ui/shadcn";
 import {
   Field,
   FieldError,
@@ -74,24 +87,24 @@ export const OfferCreation = ({ clubId, pageId }: OfferCreationProps) => {
           <>
             <div className="flex flex-wrap gap-2">
               {querySection.data.elements.map((offer) => (
-                <div
-                  key={offer.id}
-                  className="rounded border border-primary p-4"
-                >
-                  <p>{offer.title}</p>
-                  <div className="mt-2 flex items-center justify-between gap-4">
-                    <UpdateOffer
-                      clubId={clubId}
-                      pageId={pageId}
-                      offerId={offer.id}
-                    />
-                    <DeleteOffer
-                      clubId={clubId}
-                      pageId={pageId}
-                      offerId={offer.id}
-                    />
-                  </div>
-                </div>
+                <Card key={offer.id}>
+                  <CardContent>
+                    <h4>{offer.title}</h4>
+                    <Separator />
+                    <div className="flex items-center justify-center gap-2">
+                      <UpdateOffer
+                        clubId={clubId}
+                        pageId={pageId}
+                        offerId={offer.id}
+                      />
+                      <DeleteOffer
+                        clubId={clubId}
+                        pageId={pageId}
+                        offerId={offer.id}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
             <AddOffer
@@ -171,6 +184,7 @@ function AddOffer({ clubId, pageId, sectionId }: OfferProps) {
       onCloseModal={() => setClose(false)}
       closeModal={close}
       cancelButtonText=""
+      className="w-11/12 max-w-2xl"
     >
       <h3>
         <span>{t("offer.new-offer")}</span>
@@ -256,8 +270,9 @@ function UpdateOffer({ clubId, pageId, offerId }: UpdateOfferProps) {
       closeModal={close}
       cancelButtonText=""
       variant="outline"
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize("icon")}`} />}
+      buttonIcon={<Pencil />}
       buttonSize="icon"
+      className="w-11/12 max-w-2xl"
     >
       <h3>
         <span>{t("offer.update-offer")}</span>
@@ -295,11 +310,11 @@ function DeleteOffer({ pageId, offerId }: UpdateOfferProps) {
     <Confirmation
       message={t("offer.deletion-message")}
       title={t("offer.deletion")}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize("icon")}`} />}
+      buttonIcon={<Trash />}
       onConfirm={() => {
         deleteOffer.mutate(offerId);
       }}
-      variant="outline"
+      variant="destructive"
       buttonSize="icon"
     />
   );
@@ -330,7 +345,6 @@ function OfferForm({
     formState: { errors },
     reset,
     control,
-    getValues,
     setValue,
   } = useForm<OfferFormValues>({
     defaultValues: {
@@ -370,7 +384,7 @@ function OfferForm({
 
   return (
     <form onSubmit={handleSubmit(onSuccess)}>
-      <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1 space-y-2">
+      <div className="space-y-2">
         <UploadButton
           endpoint="imageAttachment"
           onClientUploadComplete={(result) =>
@@ -435,20 +449,37 @@ function OfferForm({
               />
             </Field>
           </FieldGroup>
+          <Field orientation="horizontal">
+            <FieldLabel htmlFor="offer-offer">{t("offer.offer")}</FieldLabel>
+            <Controller
+              control={control}
+              name="offerId"
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={(value) => field.onChange(value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("offer.offer")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {offers.data?.map((offer) => (
+                      <SelectItem key={offer.id} value={offer.id}>
+                        {offer.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </Field>
         </FieldSet>
-        <label>{t("offer.offer")}</label>
-        <select defaultValue={getValues("offerId")} {...register("offerId")}>
-          {offers.data?.map((offer) => (
-            <option key={offer.id} value={offer.id}>
-              {offer.name}
-            </option>
-          ))}
-        </select>
       </div>
-      <div className="col-span-full mt-4 flex items-center justify-end gap-2">
-        <button
+      <Separator className="my-4" />
+      <div className="mt-4 flex items-center justify-end gap-2">
+        <Button
           type="button"
-          className="btn-outline btn btn-secondary"
+          variant="outline"
           onClick={(e) => {
             e.preventDefault();
             reset();
@@ -456,10 +487,8 @@ function OfferForm({
           }}
         >
           {tCommon("cancel")}
-        </button>
-        <button className="btn btn-primary" type="submit">
-          {tCommon("save")}
-        </button>
+        </Button>
+        <Button type="submit">{tCommon("save")}</Button>
       </div>
     </form>
   );

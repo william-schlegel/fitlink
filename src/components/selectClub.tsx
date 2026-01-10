@@ -2,9 +2,18 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { twMerge } from "tailwind-merge";
-
+import {
+  Field,
+  FieldLabel,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/shadcn";
 import createLink from "@/lib/createLink";
+import { cn } from "@/lib/utils";
 
 type SelectClubProps = {
   clubId: string;
@@ -15,29 +24,31 @@ export default function SelectClub({ clubId, clubs }: SelectClubProps) {
   const t = useTranslations("club");
 
   return (
-    <div className="ml-auto flex items-center gap-2">
-      <label
-        className={twMerge(
-          "text-sm shrink-0",
-          clubs.length <= 1 && "text-color-disabled",
-        )}
-      >
-        {t("select-club")}
-      </label>
-      <select
-        className="w-48 min-w-fit"
-        value={clubId}
-        onChange={(e) => {
-          router.push(createLink({ clubId: e.target.value }));
-        }}
+    <Field
+      orientation="horizontal"
+      className={cn(
+        "ml-auto w-fit",
+        clubs.length <= 1 && "text-muted-foreground",
+      )}
+    >
+      <FieldLabel>{t("select-club")}</FieldLabel>
+
+      <Select
+        defaultValue={clubId}
+        onValueChange={(value) => router.push(createLink({ clubId: value }))}
         disabled={clubs.length <= 1}
       >
-        {clubs.map((club) => (
-          <option key={club.id} value={club.id}>
-            {club.name}
-          </option>
-        ))}
-      </select>
-    </div>
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {clubs.map((club) => (
+            <SelectItem key={club.id} value={club.id}>
+              {club.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </Field>
   );
 }

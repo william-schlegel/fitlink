@@ -5,11 +5,8 @@ import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import ThemeSelector, { TThemes } from "../themeSelector";
-import { pageSectionElement } from "@/db/schema/page";
-import Modal, { getButtonSize } from "../ui/modal";
-import Confirmation from "../ui/confirmation";
-import { UploadButton } from "../uploadthing";
+import { Pencil, Trash } from "lucide-react";
+
 import {
   Field,
   FieldError,
@@ -17,13 +14,19 @@ import {
   FieldLabel,
   FieldSet,
 } from "../ui/shadcn/field";
-import { Input } from "../ui/shadcn/input";
+import { Button, Card, CardContent, Checkbox, Separator } from "../ui/shadcn";
+import ThemeSelector, { TThemes } from "../themeSelector";
+import { pageSectionElement } from "@/db/schema/page";
 import { Textarea } from "../ui/shadcn/textarea";
+import Confirmation from "../ui/confirmation";
+import { UploadButton } from "../uploadthing";
+import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
+import Modal from "../ui/modal";
 
 type PlanningCreationProps = {
   clubId: string;
@@ -67,24 +70,24 @@ export const PlanningCreation = ({ clubId, pageId }: PlanningCreationProps) => {
           <>
             <div className="flex flex-wrap gap-2">
               {querySection.data.elements.map((planning) => (
-                <div
-                  key={planning.id}
-                  className="rounded border border-primary p-4"
-                >
-                  <p>{planning.title}</p>
-                  <div className="mt-2 flex items-center justify-between gap-4">
-                    <UpdatePlanning
-                      clubId={clubId}
-                      pageId={pageId}
-                      planningId={planning.id}
-                    />
-                    <DeletePlanning
-                      clubId={clubId}
-                      pageId={pageId}
-                      planningId={planning.id}
-                    />
-                  </div>
-                </div>
+                <Card key={planning.id}>
+                  <CardContent>
+                    <h4>{planning.title}</h4>
+                    <Separator />
+                    <div className="mt-2 flex items-center justify-center gap-4">
+                      <UpdatePlanning
+                        clubId={clubId}
+                        pageId={pageId}
+                        planningId={planning.id}
+                      />
+                      <DeletePlanning
+                        clubId={clubId}
+                        pageId={pageId}
+                        planningId={planning.id}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
             <AddPlanning
@@ -239,13 +242,11 @@ function UpdatePlanning({ clubId, pageId, planningId }: UpdatePlanningProps) {
       closeModal={close}
       cancelButtonText=""
       variant="outline"
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize("icon")}`} />}
+      buttonIcon={<Pencil />}
       buttonSize="icon"
       className="w-11/12 max-w-4xl"
     >
-      <h3>
-        <span>{t("planning.update-planning")}</span>
-      </h3>
+      <h4>{t("planning.update-planning")}</h4>
       <PlanningForm
         onSubmit={(data) => handleSubmit(data)}
         onCancel={() => setClose(true)}
@@ -278,11 +279,11 @@ function DeletePlanning({ pageId, planningId }: UpdatePlanningProps) {
     <Confirmation
       message={t("planning.deletion-message")}
       title={t("planning.deletion")}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize("icon")}`} />}
+      buttonIcon={<Trash />}
       onConfirm={() => {
         deletePlanning.mutate(planningId);
       }}
-      variant="outline"
+      variant="destructive"
       buttonSize="icon"
     />
   );
@@ -359,11 +360,8 @@ function PlanningForm({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSuccess)}
-      className="grid grid-cols-[3fr_2fr] gap-2"
-    >
-      <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">
+    <form onSubmit={handleSubmit(onSuccess)}>
+      <div className="place-content-start gap-y-1">
         <UploadButton
           endpoint="imageAttachment"
           onClientUploadComplete={(result) =>
@@ -415,10 +413,7 @@ function PlanningForm({
               <FieldLabel htmlFor="planning-subtitle">
                 {t("pages.planning.subtitle")}
               </FieldLabel>
-              <Input
-                id="planning-subtitle"
-                {...register("subtitle")}
-              />
+              <Input id="planning-subtitle" {...register("subtitle")} />
             </Field>
             <Field>
               <FieldLabel htmlFor="planning-description">
@@ -434,31 +429,28 @@ function PlanningForm({
         </FieldSet>
       </div>
       <div>
-        <label>{t("pages.planning.sites")}</label>
-        <div className="rounded border border-primary p-2">
+        <h4>{t("pages.planning.sites")}</h4>
+        <FieldSet className="rounded border border-primary p-2">
           {sites.data?.map((group, idx) => (
-            <div key={group.id} className="form-control">
-              <div className="label cursor-pointer justify-start gap-4">
-                <input
-                  type="checkbox"
-                  className="checkbox-primary checkbox"
-                  checked={planningGroups[idx] ?? false}
-                  onChange={(e) => {
-                    const ags = [...planningGroups];
-                    ags[idx] = e.target.checked;
-                    setPlanningGroups(ags);
-                  }}
-                />
-                <span className="label-text">{group.name}</span>
-              </div>
-            </div>
+            <Field orientation="horizontal" key={group.id}>
+              <Checkbox
+                id={group.id}
+                checked={planningGroups[idx] ?? false}
+                onCheckedChange={(checked) => {
+                  const ags = [...planningGroups];
+                  ags[idx] = Boolean(checked);
+                  setPlanningGroups(ags);
+                }}
+              />
+              <FieldLabel htmlFor={group.id}>{group.name}</FieldLabel>
+            </Field>
           ))}
-        </div>
+        </FieldSet>
       </div>
-      <div className="col-span-full mt-4 flex items-center justify-end gap-2">
-        <button
-          type="button"
-          className="btn-outline btn btn-secondary"
+      <Separator className="my-4" />
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          variant="outline"
           onClick={(e) => {
             e.preventDefault();
             reset();
@@ -466,10 +458,8 @@ function PlanningForm({
           }}
         >
           {t("common.cancel")}
-        </button>
-        <button className="btn btn-primary" type="submit">
-          {t("common.save")}
-        </button>
+        </Button>
+        <Button type="submit">{t("common.save")}</Button>
       </div>
     </form>
   );
@@ -516,13 +506,13 @@ function PlanningContentCard({
   planning,
 }: PlanningsContentCardProps) {
   return (
-    <>
+    <div>
       <h2
         className={`${
           preview
             ? "text-xl"
             : "text-[clamp(4rem,5vw,6rem)] leading-[clamp(6rem,7.5vw,9rem)]"
-        } text-center font-bold text-white`}
+        } text-center font-bold text-foreground`}
       >
         {planning.title}
       </h2>
@@ -534,12 +524,12 @@ function PlanningContentCard({
           backgroundImage: `${
             planning?.imageUrls?.[0] ? `url(${planning.imageUrls[0]})` : "unset"
           }`,
-          backgroundColor: "rgb(255 255 255 / 0.5)",
+          backgroundColor: "var(--color-muted)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundBlendMode: "lighten",
         }}
       ></div>
-    </>
+    </div>
   );
 }

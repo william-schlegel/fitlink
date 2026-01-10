@@ -3,6 +3,7 @@
 import {
   SubmitErrorHandler,
   SubmitHandler,
+  Controller,
   useForm,
   useWatch,
 } from "react-hook-form";
@@ -20,7 +21,6 @@ import {
   FieldSet,
 } from "../ui/shadcn/field";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import Modal from "../ui/modal";
 import { Checkbox } from "../ui/shadcn/checkbox";
 import Confirmation from "../ui/confirmation";
 import { useUser } from "@/lib/auth/client";
@@ -30,6 +30,19 @@ import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
+import Modal from "../ui/modal";
+
+import {
+  Badge,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/shadcn";
+
+import { Copy, Pencil, Trash } from "lucide-react";
+
 import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type CreatePlanningProps = {
@@ -77,9 +90,16 @@ export const CreatePlanning = ({
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<CreatePlanningFormValues>();
+  } = useForm<CreatePlanningFormValues>({
+    defaultValues: {
+      forSite: false,
+      forRoom: false,
+    },
+  });
 
-  const fields = useWatch({ control });
+  const forSite = useWatch({ control, name: "forSite" });
+  const siteId = useWatch({ control, name: "siteId" });
+  const forRoom = useWatch({ control, name: "forRoom" });
 
   const onSubmit: SubmitHandler<CreatePlanningFormValues> = (data) => {
     createPlanning.mutate({
@@ -141,50 +161,93 @@ export const CreatePlanning = ({
               />
             </Field>
             <Field orientation="horizontal">
-              <Checkbox
-                id="planning-for-site"
-                className="checkbox-primary checkbox"
-                {...register("forSite")}
-                defaultChecked={false}
+              <Controller
+                control={control}
+                name="forSite"
+                render={({ field }) => (
+                  <Checkbox
+                    id="planning-for-site"
+                    className="checkbox-primary checkbox"
+                    checked={Boolean(field.value)}
+                    onCheckedChange={(checked) =>
+                      field.onChange(checked === true)
+                    }
+                  />
+                )}
               />
-              <span className="label-text">{t("for-site")}</span>
+              <FieldLabel htmlFor="planning-for-site">
+                {t("for-site")}
+              </FieldLabel>
             </Field>
           </FieldGroup>
         </FieldSet>
-        {fields.forSite ? (
+        {forSite ? (
           <>
-            <label>{t("site")}</label>
-            <select {...register("siteId")}>
-              {queryClub.data?.sites?.map((site) => (
-                <option key={site.id} value={site.id}>
-                  {site.name}
-                </option>
-              ))}
-            </select>
-            <div className="form-control col-span-2">
-              <label className="label cursor-pointer justify-start gap-4">
-                <input
-                  type="checkbox"
-                  className="checkbox-primary checkbox"
-                  {...register("forRoom")}
-                  defaultChecked={false}
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="planning-site">{t("site")}</FieldLabel>
+              <Controller
+                control={control}
+                name="siteId"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {queryClub.data?.sites?.map((site) => (
+                        <SelectItem key={site.id} value={site.id}>
+                          {site.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+
+            <Field orientation="horizontal">
+              <Controller
+                control={control}
+                name="forRoom"
+                render={({ field }) => (
+                  <Checkbox
+                    id="planning-for-room"
+                    className="checkbox-primary checkbox"
+                    checked={Boolean(field.value)}
+                    onCheckedChange={(checked) =>
+                      field.onChange(checked === true)
+                    }
+                  />
+                )}
+              />
+              <FieldLabel htmlFor="planning-for-room">
+                {t("for-room")}
+              </FieldLabel>
+            </Field>
+            {forRoom && siteId ? (
+              <Field orientation="horizontal">
+                <FieldLabel htmlFor="planning-room">{t("room")}</FieldLabel>
+                <Controller
+                  control={control}
+                  name="roomId"
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {queryClub.data?.sites
+                          ?.find((s) => s.id === siteId)
+                          ?.rooms.map((room) => (
+                            <SelectItem key={room.id} value={room.id}>
+                              {room.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
-                <span className="label-text">{t("for-room")}</span>
-              </label>
-            </div>
-            {fields.forRoom && fields.siteId ? (
-              <>
-                <label>{t("room")}</label>
-                <select {...register("roomId")}>
-                  {queryClub.data?.sites
-                    ?.find((s) => s.id === fields.siteId)
-                    ?.rooms.map((room) => (
-                      <option key={room.id} value={room.id}>
-                        {room.name}
-                      </option>
-                    ))}
-                </select>
-              </>
+              </Field>
             ) : null}
           </>
         ) : null}
@@ -294,9 +357,7 @@ export function UpdatePlanning({
   return (
     <Modal
       title={t(duplicate ? "duplicate-planning" : "update-planning")}
-      buttonIcon={
-        <i className={`bx ${duplicate ? "bx-duplicate" : "bx-edit"} bx-sm`} />
-      }
+      buttonIcon={duplicate ? <Copy /> : <Pencil />}
       handleSubmit={handleSubmit(onSubmit, onError)}
       variant={variant}
       buttonSize={buttonSize}
@@ -306,15 +367,15 @@ export function UpdatePlanning({
       </h3>
       {siteName ? (
         <div className="mb-2 flex gap-2">
-          <span className="badge badge-primary flex gap-2">
+          <Badge>
             <span>{t("site")}:</span>
             <span>{siteName}</span>
-          </span>
+          </Badge>
           {roomName ? (
-            <span className="badge badge-primary flex gap-2">
+            <Badge>
               <span>{t("room")}:</span>
               <span>{roomName}</span>
-            </span>
+            </Badge>
           ) : null}
         </div>
       ) : null}
@@ -367,7 +428,7 @@ export function UpdatePlanning({
 export function DeletePlanning({
   clubId,
   planningId,
-  variant = "outline",
+  variant = "destructive",
   buttonSize = "icon",
 }: UpdatePlanningProps) {
   const utils = trpc.useUtils();
@@ -390,7 +451,7 @@ export function DeletePlanning({
       onConfirm={() => {
         deletePlanning.mutate(planningId);
       }}
-      buttonIcon={<i className="bx bx-trash bx-sm" />}
+      buttonIcon={<Trash />}
       variant={variant}
       buttonSize={buttonSize}
     />

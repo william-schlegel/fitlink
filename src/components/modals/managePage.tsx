@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Controller,
   Path,
   SubmitErrorHandler,
   SubmitHandler,
@@ -11,14 +12,16 @@ import { useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { Pencil, Trash } from "lucide-react";
+
 import {
   PAGE_TARGET_LIST,
   PageTarget,
   TARGET_SECTIONS,
 } from "@/lib/sections/data";
 import { usePageSection } from "@/lib/sections/useGetSection";
-import { getButtonSize } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
+import { getButtonSize } from "../ui/modal";
 import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
@@ -26,6 +29,11 @@ import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
 import Modal from "../ui/modal";
+
+import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/shadcn";
+
+import { SelectValue } from "@radix-ui/react-select";
+
 import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type CreatePageProps = {
@@ -145,6 +153,7 @@ export function UpdatePage({
   });
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
@@ -176,12 +185,12 @@ export function UpdatePage({
     <Modal
       title={t("club.update-page")}
       handleSubmit={handleSubmit(onSubmit, onError)}
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize(buttonSize)}`} />}
+      buttonIcon={<Pencil />}
       variant={variant}
       buttonSize={buttonSize}
     >
       <h3 className="space-x-2">
-        {t("club.update-page")}
+        <span>{t("club.update-page")}</span>
         <span className="text-primary">{pageQuery.data?.name}</span>
       </h3>
       {pageQuery.isLoading ? (
@@ -200,18 +209,24 @@ export function UpdatePage({
               label: t("club.page-target"),
               name: "target",
               component: (
-                <select
-                  defaultValue={getValues(
-                    "target" as Path<CreatePageFormValues>,
+                <Controller
+                  control={control}
+                  name="target"
+                  render={({ field }) => (
+                    <Select {...field}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={t("club.page-target")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PAGE_TARGET_LIST.map((target) => (
+                          <SelectItem key={target.value} value={target.value}>
+                            {t(target.label)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
-                  {...register("target" as Path<CreatePageFormValues>)}
-                >
-                  {PAGE_TARGET_LIST.map((target) => (
-                    <option key={target.value} value={target.value}>
-                      {t(target.label)}
-                    </option>
-                  ))}
-                </select>
+                />
               ),
             },
           ]}
@@ -232,7 +247,7 @@ export function DeletePage({
   pageId,
   clubId,
   buttonSize = "icon",
-  variant = "outline",
+  variant = "destructive",
 }: DeletePageProps) {
   const utils = trpc.useUtils();
   const deletePage = trpc.pages.deletePage.useMutation({
@@ -251,7 +266,7 @@ export function DeletePage({
       title={t("club.page-deletion")}
       message={t("club.page-deletion-message")}
       onConfirm={() => deletePage.mutate(pageId)}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize(buttonSize)}`} />}
+      buttonIcon={<Trash />}
       variant={variant}
       textConfirmation={t("club.page-deletion-confirmation")}
       buttonSize={buttonSize}

@@ -1,12 +1,20 @@
 "use client";
 
 import {
+  Plus,
+  Edit,
+  Trash2,
+  MapPin,
+  ExternalLink,
+  Search,
+  Mail,
+} from "lucide-react";
+import {
   SubmitErrorHandler,
   SubmitHandler,
   useForm,
   useWatch,
 } from "react-hook-form";
-import { Plus, Edit, Trash2, MapPin, ExternalLink } from "lucide-react";
 import { startTransition, useEffect, useState } from "react";
 import MapComponent, { Marker } from "react-map-gl/mapbox";
 import { useRouter } from "next/navigation";
@@ -389,8 +397,8 @@ export const DeleteClub = ({ clubId }: PropsUpdateDelete) => {
 export default CreateClub;
 
 const AddCoachToClubSteps = [
-  { content: String.fromCodePoint(0x1f50d), label: "coach.search" },
-  { content: String.fromCodePoint(0x2709), label: "coach.write" },
+  { content: <Search />, label: "coach.search" },
+  { content: <Mail />, label: "coach.write" },
 ];
 
 type AddCoachToClubProps = { clubId: string; userId: string };
@@ -434,26 +442,25 @@ export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
     <Modal
       title={t("coach.add")}
       closeModal={closeModal}
-      buttonIcon={<Plus className="h-5 w-5" />}
+      buttonIcon={<Plus />}
       variant="default"
-      className="w-11/12 max-w-4xl"
       onCloseModal={() => {
         setCloseModal(false);
         setStep(0);
       }}
     >
       <h3>{t("coach.find")}</h3>
-      <div className="grid grid-cols-[auto,1fr] gap-4">
+      <div className="grid grid-cols-[auto_1fr] gap-4">
         <div className="flex flex-col gap-2">
           {AddCoachToClubSteps.map((s, idx) => (
             <div
               key={idx}
               className={cn(
-                "flex items-center gap-2 p-2 rounded-md",
+                "flex items-center gap-2 p-4 rounded-md",
                 idx <= step ? "bg-primary/10" : "bg-muted",
               )}
             >
-              <span className="text-xl">{s.content}</span>
+              {s.content}
               <span
                 className={cn(
                   "text-sm",

@@ -3,6 +3,16 @@ import { useLocalStorage } from "usehooks-ts";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
+import {
+  Button,
+  Field,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/shadcn";
+
 export const Themes = [
   "light",
   "dark",
@@ -61,24 +71,26 @@ const ThemeSelector = ({ onSelect, onSave }: Props) => {
   }, [theme, onSelect]);
 
   return (
-    <div className="flex items-center gap-2">
-      <select
+    <Field orientation="horizontal">
+      <Select
         value={theme}
-        onChange={(e) => handleChangeTheme(e.target.value as TThemes)}
-        className="w-fit"
+        onValueChange={(value) => handleChangeTheme(value as TThemes)}
       >
-        {Themes.map((theme) => (
-          <option key={theme} value={theme}>
-            {theme}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger>
+          <SelectValue placeholder="Select a theme" />
+        </SelectTrigger>
+        <SelectContent>
+          {Themes.map((theme) => (
+            <SelectItem key={theme} value={theme}>
+              {theme}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       {onSave ? (
-        <button className="btn-primary btn" onClick={() => onSave(theme)}>
-          {t("save-style")}
-        </button>
+        <Button onClick={() => onSave(theme)}>{t("save-style")}</Button>
       ) : null}
-    </div>
+    </Field>
   );
 };
 

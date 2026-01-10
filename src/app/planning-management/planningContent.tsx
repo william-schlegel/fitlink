@@ -11,17 +11,43 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 
-import { Trash } from "lucide-react";
+import { Trash, X } from "lucide-react";
 
+import {
+  Button,
+  Dialog,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogClose,
+  DialogContent,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  Separator,
+  Badge,
+} from "@/components/ui/shadcn";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/shadcn/input-group";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/shadcn/popover";
 import {
   DeletePlanning,
   UpdatePlanning,
 } from "@/components/modals/managePlanning";
+import { Field, FieldError, FieldLabel } from "@/components/ui/shadcn/field";
 import { getPlanningById } from "@/server/api/routers/planning";
-import { FieldError } from "@/components/ui/shadcn/field";
 import { PlanningName } from "@/components/planningName";
 import Confirmation from "@/components/ui/confirmation";
 import { Input } from "@/components/ui/shadcn/input";
@@ -63,11 +89,6 @@ type DropFormData = {
   coachId: string;
 };
 
-type PopupData = {
-  activityId: string | null;
-  rect: DOMRectList;
-};
-
 export function PlanningContent({
   planningId,
   clubId,
@@ -85,7 +106,8 @@ export function PlanningContent({
       enabled: isCUID(clubId) && Boolean(userId),
     },
   );
-  const refModalDrop = useRef<HTMLInputElement>(null);
+
+  const [isOpen, setIsOpen] = useState(false);
   const [dropData, setDropData] = useState<DropData>({
     day: "MONDAY",
     dayName: "",
@@ -110,7 +132,6 @@ export function PlanningContent({
     },
   });
   const { getName } = useDayName();
-  const [popupData, setPopupData] = useState<PopupData | null>(null);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -134,7 +155,7 @@ export function PlanningContent({
       rooms,
       activityId: active.id as string,
     });
-    if (refModalDrop.current) refModalDrop.current.checked = true;
+    setIsOpen(true);
   }
 
   function handleSaveActivity(data: DropFormData) {
@@ -148,52 +169,26 @@ export function PlanningContent({
       startTime: data.startTime,
       duration: data.duration,
     });
-    if (refModalDrop.current) refModalDrop.current.checked = false;
-  }
-
-  function handleActivityIsActivated(
-    activityId: string | null,
-    rect: DOMRectList,
-  ) {
-    setPopupData({ activityId, rect });
+    setIsOpen(false);
   }
 
   if (queryPlanning.isLoading) return <Spinner />;
   return (
     <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
-      {popupData ? (
-        <PopupActivityDetails
-          popupData={popupData}
-          onClose={() => setPopupData(null)}
-          clubId={clubId}
-        />
-      ) : null}
-      {/* add activity modal */}
-      <input
-        type="checkbox"
-        id="modal-drop"
-        className="modal-toggle"
-        ref={refModalDrop}
-      />
-      <div className="modal">
-        <div className="modal-box relative">
-          <label
-            htmlFor="modal-drop"
-            className="btn-secondary btn-sm btn-circle btn absolute right-2 top-2"
-          >
-            <i className="bx bx-x bx-sm" />
-          </label>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent>
+          <DialogTitle>{t("add-activity")}</DialogTitle>
           <FormActivity
             clubId={clubId}
             handleSaveActivity={handleSaveActivity}
             {...dropData}
           />
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
       {/* planning content */}
       <article className="flex grow flex-col gap-4">
         <section className="flex items-center justify-between">
-          <h2>
+          <h2 className="text-lg">
             {queryPlanning.data ? (
               <PlanningName actualPlanning={queryPlanning.data} />
             ) : (
@@ -208,7 +203,7 @@ export function PlanningContent({
         </section>
         <section className="grid grid-cols-[auto_1fr] gap-2">
           <aside className="flex flex-col gap-1 border border-secondary">
-            <span className="bg-secondary px-4 text-center text-secondary-content">
+            <span className="bg-title text-title-foregroundpx-4 text-center">
               {t("activities")}
             </span>
             {queryActivities.data?.activities.map((activity) => (
@@ -231,7 +226,7 @@ export function PlanningContent({
                   ).map((hour) => (
                     <p
                       key={hour}
-                      className={`${HHOUR} border-b border-base-200 text-xs ${LEADINGHOUR} text-base-300`}
+                      className={`${HHOUR} border-b border-border text-xs ${LEADINGHOUR} text-primary-foreground`}
                     >
                       {`0${hour}`.slice(-2)}:00
                     </p>
@@ -263,6 +258,7 @@ export function PlanningContent({
                             data={{ day: day.value, site: site.id }}
                           >
                             <PlanningActivities
+                              clubId={clubId}
                               activities={
                                 queryPlanning.data?.planningActivities.filter(
                                   (pa) =>
@@ -270,7 +266,6 @@ export function PlanningContent({
                                     pa.siteId === site.id,
                                 ) ?? []
                               }
-                              onActivatePopup={handleActivityIsActivated}
                             />
                           </DropSite>
                         </div>
@@ -291,7 +286,7 @@ export function PlanningContent({
 function DayLabel({ day }: { day: (typeof DAYS)[number]["label"] }) {
   const t = useTranslations("calendar");
   return (
-    <span className="h-6 bg-primary text-center leading-6 text-primary-content">
+    <span className="h-6 bg-primary text-center leading-6 text-accent-foreground">
       {t(day)}
     </span>
   );
@@ -303,13 +298,10 @@ type PlanningActivityCompleted = NonNullable<
 
 type PlanningActivitiesProps = {
   activities: PlanningActivityCompleted[];
-  onActivatePopup: (id: string | null, rect: DOMRectList) => void;
+  clubId: string;
 };
 
-function PlanningActivities({
-  activities,
-  onActivatePopup,
-}: PlanningActivitiesProps) {
+function PlanningActivities({ activities, clubId }: PlanningActivitiesProps) {
   const HSlots = useMemo(() => {
     if (!activities) return [];
     const hs = activities.map((activity) => ({
@@ -347,9 +339,9 @@ function PlanningActivities({
     <>
       {HSlots.map((slot) => (
         <PlanningActivity
+          clubId={clubId}
           key={slot.activity.id}
           planningActivity={slot.activity}
-          onActivatePopup={onActivatePopup}
           position={slot.position}
           nbPosition={slot.nbPosition}
         />
@@ -360,53 +352,63 @@ function PlanningActivities({
 
 type PlanningActivityProps = {
   planningActivity: PlanningActivityCompleted;
-  onActivatePopup: (id: string | null, rect: DOMRectList) => void;
   position: number;
   nbPosition: number;
+  clubId: string;
 };
 
 function PlanningActivity({
   planningActivity,
-  onActivatePopup,
   position,
   nbPosition,
+  clubId,
 }: PlanningActivityProps) {
   const hm = planningActivity.startTime.split(":");
   const top = HHOUR_PX * (Number(hm[0]) - START_HOUR + Number(hm[1]) / 60);
   const height = HHOUR_PX * (planningActivity.duration / 60);
-  const ref = useRef<HTMLButtonElement | null>(null);
   const w = 100 / nbPosition;
+  const [open, setOpen] = useState(false);
+
+  function onClose() {
+    setOpen(false);
+  }
   return (
-    <button
-      className="absolute flex cursor-pointer items-center justify-center rounded border border-secondary bg-muted text-foreground"
-      style={{ top, height, width: `${w}%`, left: `${position * w}%` }}
-      onClick={(e) =>
-        onActivatePopup(planningActivity.id, e.currentTarget.getClientRects())
-      }
-      ref={ref}
-    >
-      <div className="pointer-events-none text-xs">
-        {planningActivity.activity.name} ({planningActivity.duration}
-        {"'"})
-      </div>
-    </button>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        asChild
+        className="absolute"
+        style={{ top, height, width: `${w}%`, left: `${position * w}%` }}
+      >
+        <Button variant="outline" onClick={() => setOpen(true)}>
+          {planningActivity.activity.name} ({planningActivity.duration}
+          {"'"})
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent>
+        <PopupActivityDetails
+          activityId={planningActivity.id}
+          clubId={clubId}
+          onClose={onClose}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
 
 type PopupActivityDetailsProps = {
-  popupData: PopupData;
-  onClose: () => void;
+  activityId: string;
   clubId: string;
+  onClose: () => void;
 };
 
 function PopupActivityDetails({
-  popupData,
-  onClose,
+  activityId,
   clubId,
+  onClose,
 }: PopupActivityDetailsProps) {
   const queryPlanning = trpc.plannings.getPlanningActivityById.useQuery(
-    popupData.activityId,
-    { enabled: popupData.activityId !== "" && popupData.activityId !== null },
+    activityId,
+    { enabled: activityId !== "" && activityId !== null },
   );
   const utils = trpc.useUtils();
   const updatePlanning = trpc.plannings.updatePlanningActivity.useMutation({
@@ -421,9 +423,9 @@ function PopupActivityDetails({
   });
   const { getName } = useDayName();
   function handleSaveActivity(data: DropFormData) {
-    if (popupData.activityId)
+    if (activityId)
       updatePlanning.mutate({
-        id: popupData.activityId,
+        id: activityId,
         coachId: data.coachId ? data.coachId : undefined,
         roomId: data.roomId ? data.roomId : undefined,
         startTime: data.startTime,
@@ -432,24 +434,12 @@ function PopupActivityDetails({
     onClose();
   }
   function handleDelete() {
-    if (popupData.activityId) deletePlanning.mutate(popupData.activityId);
+    if (activityId) deletePlanning.mutate(activityId);
     onClose();
   }
 
   return (
-    <div
-      className="absolute z-20 mb-4 w-max min-w-fit rounded bg-muted p-2 shadow"
-      style={{
-        left: popupData.rect[0]?.left ?? 0,
-        top: (popupData.rect[0]?.bottom ?? 0) + 5,
-      }}
-    >
-      <button
-        className="btn-secondary btn-sm btn-circle btn absolute right-1 top-1"
-        onClick={onClose}
-      >
-        <i className="bx bx-x bx-sm" />
-      </button>
+    <div>
       {queryPlanning.isLoading ? (
         <Spinner />
       ) : (
@@ -481,15 +471,15 @@ function DraggableActivity({ id, name }: { id: string; name: string }) {
   };
 
   return (
-    <button
+    <Badge
       ref={setNodeRef}
       style={style}
       {...listeners}
       {...attributes}
-      className="pill z-10 mx-2 justify-center bg-card"
+      className="bg-card text-card-foreground w-full z-50 cursor-grab"
     >
       {name}
-    </button>
+    </Badge>
   );
 }
 
@@ -541,6 +531,7 @@ function FormActivity({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     reset,
   } = useForm<DropFormData>();
@@ -551,90 +542,103 @@ function FormActivity({
   }, [initialData, reset]);
 
   return (
-    <form onSubmit={handleSubmit(handleSaveActivity)}>
-      <h3 className="text-lg font-bold">
-        {t(update ? "update-course" : "new-course")}
-      </h3>
+    <form onSubmit={handleSubmit(handleSaveActivity)} className="space-y-2">
       <h2 className="flex items-center gap-4">
         {t("day")}
-        <span className="text-secondary">{dayName}</span>
+        <span className="text-primary">{dayName}</span>
       </h2>
-      <div className="flex items-center gap-4">
+      <div className="space-x-4">
         <label>{t("site")}</label>
-        <span>{siteName}</span>
+        <span className="text-primary">{siteName}</span>
+      </div>
+      <div className="space-x-4">
         <label>{t("activity")}</label>
-        <span>{activityName}</span>
+        <span className="text-primary">{activityName}</span>
       </div>
-      <div className="grid grid-cols-[auto_1fr] gap-2">
-        <label className="required">{t("start-hour")}</label>
-        <div className="flex flex-col gap-2">
-          <input
-            type="time"
-            {...register("startTime", {
-              required: t("start-hour-mandatory") ?? true,
+      <Field orientation="horizontal">
+        <FieldLabel className="required">{t("start-hour")}</FieldLabel>
+        <Input
+          type="time"
+          {...register("startTime", {
+            required: t("start-hour-mandatory") ?? true,
+          })}
+        />
+      </Field>
+      <Field orientation="horizontal">
+        <FieldLabel className="required">{t("duration")}</FieldLabel>
+        <InputGroup>
+          <InputGroupInput
+            type="number"
+            {...register("duration", {
+              valueAsNumber: true,
+              validate: (v) => Number(v) > 1,
+              required: t("duration-mandatory") ?? true,
             })}
-            className="w-fit self-start"
+            className="w-auto flex-1"
           />
-          {errors.startTime && (
-            <FieldError>{errors.startTime.message}</FieldError>
+          <InputGroupAddon align="inline-end">{t("minutes")}</InputGroupAddon>
+        </InputGroup>
+
+        {errors.duration && <FieldError>{errors.duration.message}</FieldError>}
+      </Field>
+      <Field orientation="horizontal">
+        <FieldLabel>{t("coach")}</FieldLabel>
+        <Controller
+          control={control}
+          name="coachId"
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {queryCoachs.data?.map((coach) => (
+                  <SelectItem key={coach.id} value={coach.id}>
+                    {coach.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
-        </div>
-        <label className="required">{t("duration")}</label>
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              {...register("duration", {
-                valueAsNumber: true,
-                validate: (v) => Number(v) > 1,
-                required: t("duration-mandatory") ?? true,
-              })}
-              className="w-auto flex-1"
-            />
-            <span className="text-sm text-base-content/70">{t("minutes")}</span>
-          </div>
-          {errors.duration && (
-            <FieldError>{errors.duration.message}</FieldError>
+        />
+      </Field>
+      <Field orientation="horizontal">
+        <FieldLabel>{t("room")}</FieldLabel>
+        <Controller
+          control={control}
+          name="roomId"
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {rooms?.map((room) => (
+                  <SelectItem key={room.id} value={room.id}>
+                    {room.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
-        </div>
-        <label>{t("coach")}</label>
-        <select className="w-full" {...register("coachId")}>
-          {queryCoachs.data?.map((coach) => (
-            <option key={coach.id} value={coach.id}>
-              {coach.name}
-            </option>
-          ))}
-        </select>
-        <label>{t("room")}</label>
-        <select className="w-full" {...register("roomId")}>
-          {rooms?.map((room) => (
-            <option key={room.id} value={room.id}>
-              {room.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="modal-action">
-        <label htmlFor="modal-drop">
-          {update ? (
-            <Confirmation
-              title={t("activity-deletion")}
-              message={t("activity-deletion-message")}
-              textConfirmation={t("activity-deletion-confirmation")}
-              onConfirm={() => {
-                if (typeof handleDelete === "function") handleDelete();
-              }}
-              variant="outline"
-              buttonSize="icon"
-              buttonIcon={
-                <Trash className="fill-destructive stroke-destructive" />
-              }
-            />
-          ) : null}
-          <button className="btn-primary btn ml-2">
-            {t(update ? "update" : "validation")}
-          </button>
-        </label>
+        />
+      </Field>
+      <Separator />
+      <div className="flex justify-end gap-2">
+        {update ? (
+          <Confirmation
+            title={t("activity-deletion")}
+            message={t("activity-deletion-message")}
+            textConfirmation={t("activity-deletion-confirmation")}
+            onConfirm={() => {
+              if (typeof handleDelete === "function") handleDelete();
+            }}
+            variant="destructive"
+            buttonSize="icon"
+            buttonIcon={<Trash />}
+          />
+        ) : null}
+        <Button>{t(update ? "update" : "validation")}</Button>
       </div>
     </form>
   );

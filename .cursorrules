@@ -8,7 +8,6 @@ This is a Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRP
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
-- **Styling**: DaisyUI (primary) + shadcn/ui (specific components)
 - **Database**: PostgreSQL with Drizzle ORM
 - **API**: tRPC for type-safe APIs
 - **State Management**: React Query (TanStack Query)
@@ -52,12 +51,10 @@ This is a Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRP
 
 ### Styling
 
-- Use DaisyUI class names first and Tailwind CSS v4 utilities for details
-- Use shadcn/ui components from `@/components/ui/shadcn` when DaisyUI doesn't provide the needed component
+- Use shadcn/ui components from `@/components/ui/shadcn`
 - shadcn/ui uses "new-york" style with zinc base color
 - Follow mobile-first responsive design
 - Use semantic class names
-- Leverage DaisyUI's design system as the primary UI framework
 - Import shadcn components from `@/components/ui/shadcn` or the index file
 
 ## File Structure Guidelines
@@ -337,7 +334,7 @@ const user = assertDefined(maybeUser, "User not found", ErrorCode.NOT_FOUND);
 
 ## shadcn/ui Components
 
-The project uses shadcn/ui components alongside DaisyUI for specific UI needs.
+The project uses shadcn/ui components.
 
 ### Location and Import
 
@@ -355,19 +352,12 @@ The project uses shadcn/ui components alongside DaisyUI for specific UI needs.
 ### Usage Pattern
 
 ```typescript
-// Import shadcn components when DaisyUI doesn't provide what you need
 import { Button } from "@/components/ui/shadcn/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/shadcn/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
 
-// Use alongside DaisyUI classes
-<Button className="btn btn-primary">Click me</Button>
+<Button>Click me</Button>
 ```
-
-### When to Use shadcn vs DaisyUI
-
-- **DaisyUI**: Primary UI framework - use for most components (buttons, cards, modals, forms, etc.)
-- **shadcn/ui**: Use when you need specific components not available in DaisyUI (e.g., complex dropdowns, tooltips, collapsible menus)
 
 ## Common Patterns to Follow
 
@@ -379,4 +369,3 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/
 - Always use DAL functions instead of direct database queries
 - Use shared schemas from `src/schemas/` for validation
 - Use error handling utilities and error classes consistently
-- Prefer DaisyUI components, use shadcn/ui when needed

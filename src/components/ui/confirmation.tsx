@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { type ReactNode } from "react";
 
 import Modal from "./modal";
+
 import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type Props = {
@@ -42,14 +43,14 @@ function Confirmation({
       buttonSize={buttonSize}
     >
       <div className="py-4">
-        <h3 className="text-lg font-semibold mb-2">{title}</h3>
+        <h4 className="text-lg font-semibold mb-2">{title}</h4>
         <div className="flex flex-col gap-2">
           {message &&
-            message
-              .split("|")
-              .map((p: string, idx: number) => (
-                <p key={idx} className="text-base-content/80">{p}</p>
-              ))}
+            message.split("|").map((p: string, idx: number) => (
+              <p key={idx} className="text-base-content/80">
+                {p}
+              </p>
+            ))}
         </div>
       </div>
     </Modal>

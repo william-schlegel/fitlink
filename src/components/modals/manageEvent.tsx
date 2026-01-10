@@ -17,33 +17,48 @@ import { format } from "date-fns";
 
 import { useRouter } from "next/navigation";
 
-import Modal, { getButtonSize } from "../ui/modal";
-import AddressSearch, { AddressData } from "../ui/addressSearch";
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import ButtonIcon from "../ui/buttonIcon";
-import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
-import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import { formatDateLocalized } from "@/lib/formatDate";
-import { formatMoney } from "@/lib/formatNumber";
-import Confirmation from "../ui/confirmation";
-import { UploadButton } from "../uploadthing";
+import { Pencil, Trash } from "lucide-react";
+
 import {
   Field,
+  FieldContent,
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
   FieldSet,
 } from "../ui/shadcn/field";
-import { Input } from "../ui/shadcn/input";
+import AddressSearch, { AddressData } from "../ui/addressSearch";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
+import { formatDateLocalized } from "@/lib/formatDate";
+import Modal, { getButtonSize } from "../ui/modal";
 import { Textarea } from "../ui/shadcn/textarea";
 import { Checkbox } from "../ui/shadcn/checkbox";
+import { formatMoney } from "@/lib/formatNumber";
+import Confirmation from "../ui/confirmation";
+import { UploadButton } from "../uploadthing";
 import { useUser } from "@/lib/auth/client";
+import { Input } from "../ui/shadcn/input";
+import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
 import { toast } from "@/lib/toast";
 import Ribbon from "../ui/ribbon";
 import { env } from "@/env";
+
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "../ui/shadcn/input-group";
+
+import {
+  Button,
+  type ButtonSize,
+  type ButtonVariant,
+} from "@/components/ui/shadcn/button";
 
 type EventFormValues = {
   name: string;
@@ -202,7 +217,7 @@ export const UpdateEvent = ({
   return (
     <Modal
       title={t("event.update")}
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize(buttonSize)}`} />}
+      buttonIcon={<Pencil />}
       variant={variant}
       buttonSize={buttonSize}
       cancelButtonText=""
@@ -237,7 +252,7 @@ type PropsUpdateDelete = {
 export const DeleteEvent = ({
   clubId,
   eventId,
-  variant = "outline",
+  variant = "destructive",
   buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
@@ -262,7 +277,7 @@ export const DeleteEvent = ({
     <Confirmation
       message={t("event.deletion-message")}
       title={t("event.deletion")}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize(buttonSize)}`} />}
+      buttonIcon={<Trash />}
       onConfirm={() => {
         deleteEvent.mutate(eventId);
       }}
@@ -353,7 +368,7 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
                 className="max-h-40 w-full object-cover"
               />
               <ButtonIcon
-                iconComponent={<i className="bx bx-trash" />}
+                iconComponent={<Trash className="text-destructive" />}
                 title={t("event.delete-image")}
                 size="icon"
                 variant="outlines"
@@ -363,7 +378,7 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
             </div>
           ) : null}
 
-          <FieldSet>
+          <FieldSet className="col-span-full">
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="event-name" className="required">
@@ -409,10 +424,11 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
         </div>
         <FieldSet>
           <FieldGroup>
-            <Field>
+            <Field orientation="horizontal" className="grid grid-cols-2">
               <FieldLabel htmlFor="event-start-date" className="required">
                 {t("event.start-date")}
               </FieldLabel>
+
               <Input
                 id="event-start-date"
                 type="datetime-local"
@@ -421,10 +437,12 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
                 })}
               />
               {form.formState.errors?.startDate?.message && (
-                <FieldError>{form.formState.errors.startDate.message}</FieldError>
+                <FieldError className="col-span-2">
+                  {form.formState.errors.startDate.message}
+                </FieldError>
               )}
             </Field>
-            <Field>
+            <Field orientation="horizontal" className="grid grid-cols-2">
               <FieldLabel htmlFor="event-end-date" className="required">
                 {t("event.end-date")}
               </FieldLabel>
@@ -436,10 +454,12 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
                 })}
               />
               {form.formState.errors?.endDate?.message && (
-                <FieldError>{form.formState.errors.endDate.message}</FieldError>
+                <FieldError className="col-span-2">
+                  {form.formState.errors.endDate.message}
+                </FieldError>
               )}
             </Field>
-            <Field>
+            <Field orientation="horizontal" className="grid grid-cols-2">
               <FieldLabel htmlFor="event-start-display" className="required">
                 {t("event.start-display")}
               </FieldLabel>
@@ -451,10 +471,12 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
                 })}
               />
               {form.formState.errors?.startDisplay?.message && (
-                <FieldError>{form.formState.errors.startDisplay.message}</FieldError>
+                <FieldError className="col-span-2">
+                  {form.formState.errors.startDisplay.message}
+                </FieldError>
               )}
             </Field>
-            <Field>
+            <Field orientation="horizontal" className="grid grid-cols-2">
               <FieldLabel htmlFor="event-end-display" className="required">
                 {t("event.end-display")}
               </FieldLabel>
@@ -466,56 +488,57 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
                 })}
               />
               {form.formState.errors?.endDisplay?.message && (
-                <FieldError>{form.formState.errors.endDisplay.message}</FieldError>
+                <FieldError className="col-span-2">
+                  {form.formState.errors.endDisplay.message}
+                </FieldError>
               )}
             </Field>
             <Field>
-              <FieldLabel htmlFor="event-banner">{t("event.banner")}</FieldLabel>
-              <Input
-                id="event-banner"
-                {...form.register("bannerText")}
-              />
-            </Field>
-            <Field orientation="horizontal">
-              <Checkbox
-                id="event-cancelled"
-                {...form.register("cancelled")}
-                defaultChecked={false}
-              />
-              <FieldLabel htmlFor="event-cancelled" className="font-normal">
-                {t("event.cancelled")}
+              <FieldLabel htmlFor="event-banner">
+                {t("event.banner")}
               </FieldLabel>
+              <Input id="event-banner" {...form.register("bannerText")} />
             </Field>
-            <Field orientation="horizontal">
-              <Checkbox
-                id="event-free"
-                {...form.register("free")}
-                defaultChecked={false}
-              />
-              <FieldLabel htmlFor="event-free" className="font-normal">
-                {t("event.free")}
-              </FieldLabel>
-            </Field>
+            <div className="grid grid-cols-2">
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="event-cancelled"
+                  {...form.register("cancelled")}
+                  defaultChecked={false}
+                />
+                <FieldLabel htmlFor="event-cancelled">
+                  {t("event.cancelled")}
+                </FieldLabel>
+              </Field>
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="event-free"
+                  {...form.register("free")}
+                  defaultChecked={false}
+                />
+                <FieldLabel htmlFor="event-free">{t("event.free")}</FieldLabel>
+              </Field>
+            </div>
             {free ? null : (
-              <Field>
-                <FieldLabel htmlFor="event-price">{t("event.price")}</FieldLabel>
-                <div className="flex items-center gap-2">
-                  <Input
+              <Field orientation="horizontal">
+                <FieldLabel htmlFor="event-price">
+                  {t("event.price")}
+                </FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
                     id="event-price"
                     type="number"
                     {...form.register("price")}
-                    className="w-auto flex-1"
                   />
-                  <span className="text-sm text-base-content/70">€</span>
-                </div>
+                  <InputGroupAddon align="inline-end">€</InputGroupAddon>
+                </InputGroup>
               </Field>
             )}
             <Field>
-              <FieldLabel htmlFor="event-address">{t("event.address")}</FieldLabel>
-              <Input
-                id="event-address"
-                {...form.register("address")}
-              />
+              <FieldLabel htmlFor="event-address">
+                {t("event.address")}
+              </FieldLabel>
+              <Input id="event-address" {...form.register("address")} />
             </Field>
             <Field>
               <FieldLabel>{t("event.location")}</FieldLabel>
@@ -528,10 +551,12 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
           </FieldGroup>
         </FieldSet>
         <DisplayEventCard />
-        <div className="col-span-full flex items-center justify-end gap-2">
-          <button
+        <FieldSeparator />
+        <Field orientation="horizontal" className="justify-end">
+          <Button
+            size="xl"
             type="button"
-            className="btn btn-outline btn-secondary"
+            variant="outline"
             onClick={(e) => {
               e.preventDefault();
               form.reset();
@@ -539,11 +564,11 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
             }}
           >
             {tCommon("cancel")}
-          </button>
-          <button className="btn btn-primary" type="submit">
+          </Button>
+          <Button type="submit" size="xl">
             {tCommon("save")}
-          </button>
-        </div>
+          </Button>
+        </Field>
       </form>
     </FormProvider>
   );

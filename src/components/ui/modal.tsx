@@ -3,13 +3,11 @@
 import { type ReactNode, useState, useEffect, useCallback } from "react";
 import { type FieldErrors } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { X } from "lucide-react";
 
 import {
   Dialog,
   DialogContent,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/shadcn/dialog";
@@ -122,30 +120,32 @@ export default function Modal({
         aria-describedby={title}
       >
         {children}
-        <DialogFooter className="gap-2 sm:gap-0">
-          {cancelButtonText !== "" && (
-            <Button
-              variant="outline"
-              onClick={(e) => {
-                e.preventDefault();
-                handleCancel?.();
-                close();
-              }}
-            >
-              {cancelButtonText ?? t("cancel")}
-            </Button>
-          )}
-          {typeof handleSubmit === "function" && (
-            <Button
-              onClick={(e) => {
-                e.preventDefault();
-                handleClickSubmit();
-              }}
-            >
-              {submitButtonText ?? t("save")}
-            </Button>
-          )}
-        </DialogFooter>
+        {(cancelButtonText !== "" || typeof handleSubmit === "function") && (
+          <DialogFooter className="gap-2 sm:gap-0">
+            {cancelButtonText !== "" && (
+              <Button
+                variant="outline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleCancel?.();
+                  close();
+                }}
+              >
+                {cancelButtonText ?? t("cancel")}
+              </Button>
+            )}
+            {typeof handleSubmit === "function" && (
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleClickSubmit();
+                }}
+              >
+                {submitButtonText ?? t("save")}
+              </Button>
+            )}
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );
