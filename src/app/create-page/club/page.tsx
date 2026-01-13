@@ -1,12 +1,20 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { Check, X } from "lucide-react";
+
+import Head from "next/head";
+
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import { CreatePage } from "@/components/modals/managePage";
 import { getPagesForClub } from "@/server/api/routers/page";
 import createLink, { createHref } from "@/lib/createLink";
 import { getDefaultSection } from "@/lib/sections/data";
 import { PageSectionModel } from "@/lib/sections/data";
-import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import SelectClub from "@/components/selectClub";
@@ -63,11 +71,11 @@ export default async function ClubPage({
     badgeText: (
       <div className="flex items-center gap-2">
         <TargetName target={page.target ?? "HOME"} />
-        <i
-          className={`bx bx-xs aspect-square rounded-full bg-base-100 ${
-            page.published ? "bx-check text-success" : "bx-x text-error"
-          }`}
-        />
+        {page.published ? (
+          <Check className="text-green-500 size-4" />
+        ) : (
+          <X className="text-red-500 size-4" />
+        )}
       </div>
     ),
   }));
@@ -77,14 +85,14 @@ export default async function ClubPage({
       title={t("club.manage-page")}
       titleComponents={<SelectClub clubId={clubId} clubs={queryClubs} />}
     >
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={listPages}
           itemId={pageId}
           noItemsText={t("club.no-page")}
         >
           <CreatePage clubId={clubId} className="mb-4" />
-        </LayoutPage.List>
+        </LayoutPageList>
 
         {pageId ? (
           <PageContent
@@ -93,7 +101,7 @@ export default async function ClubPage({
             section={section ?? getDefaultSection(target)}
           />
         ) : null}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

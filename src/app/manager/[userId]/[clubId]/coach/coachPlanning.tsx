@@ -71,16 +71,13 @@ export function CoachPlanning({
     <div className="flex flex-col gap-2">
       <div className="flex shrink-0 flex-wrap items-start gap-2 p-2">
         {weekData.activities.map((day) => (
-          <div
-            key={day.day}
-            className="rounded border border-primary bg-base-100"
-          >
+          <div key={day.day} className="rounded border border-primary bg-card">
             <div className="bg-primary py-1 text-center text-primary-content">
               {getName(day.day)}
             </div>
             <div className="space-y-2 p-2">
               {day.activities.map((activity) => (
-                <div key={activity.id} className="border border-base-300 p-2">
+                <div key={activity.id} className="border border-border p-2">
                   <p>
                     <span className="text-xs">{activity.startTime}</span>
                     {" ("}

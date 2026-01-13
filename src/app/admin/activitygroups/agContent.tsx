@@ -3,7 +3,11 @@
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
+import { Star } from "lucide-react";
+
 import { DeleteGroup, UpdateGroup } from "@/components/modals/manageActivity";
+import { Item, ItemActions, ItemContent } from "@/components/ui/shadcn/item";
+import { Badge } from "@/components/ui/shadcn";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 
@@ -55,18 +59,14 @@ export function AGContent({ agId }: AGContentProps) {
         <div className="flex items-center gap-2">
           <h2>{agQuery.data?.name}</h2>
           {agQuery.data?.default ? (
-            <i className="bx bxs-star bx-sm text-accent" />
+            <Star className="fill-yellow-500 size-4" />
           ) : (
             <p className="badge">({agQuery.data?.name})</p>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <UpdateGroup
-            groupId={agId}
-            variant="Icon-Outlined-Primary"
-            size="sm"
-          />
-          <DeleteGroup groupId={agId} size="sm" />
+          <UpdateGroup groupId={agId} variant="outline" buttonSize="icon" />
+          <DeleteGroup groupId={agId} buttonSize="icon" />
         </div>
       </div>
       <section className="grid max-h-screen grid-cols-2 gap-2 overflow-y-auto overflow-x-hidden">
@@ -74,12 +74,12 @@ export function AGContent({ agId }: AGContentProps) {
           <h3>{t("ag.group-activities")}</h3>
           <div className="flex flex-row flex-wrap gap-2">
             {activitiesQuery.data?.map((activity) => (
-              <div key={activity.id} className="pill">
-                <span>{activity.name}</span>
-                <span className="badge-primary badge">
-                  {activity.club.name}
-                </span>
-              </div>
+              <Item key={activity.id} variant="outline">
+                <ItemContent>{activity.name}</ItemContent>
+                <ItemActions>
+                  <Badge variant="default">{activity.club.name}</Badge>
+                </ItemActions>
+              </Item>
             ))}
           </div>
         </article>
@@ -87,10 +87,12 @@ export function AGContent({ agId }: AGContentProps) {
           <h3>{t("ag.group-clubs")}</h3>
           <div className="flex flex-row flex-wrap gap-2">
             {clubs.map((club) => (
-              <div key={club.id} className="pill">
-                <span>{club.name}</span>
-                <span className="badge-primary badge">{club.activities}</span>
-              </div>
+              <Item key={club.id} variant="outline">
+                <ItemContent>{club.name}</ItemContent>
+                <ItemActions>
+                  <Badge variant="default">{club.activities}</Badge>
+                </ItemActions>
+              </Item>
             ))}
           </div>
         </article>

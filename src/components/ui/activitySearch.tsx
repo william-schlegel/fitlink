@@ -3,8 +3,13 @@
 import { useDebounceValue } from "usehooks-ts";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
 
+import { Button } from "@/components/ui/shadcn/button";
+import { Label } from "@/components/ui/shadcn/label";
+import { Input } from "@/components/ui/shadcn/input";
 import { trpc } from "@/lib/trpc/client";
+import { cn } from "@/lib/utils";
 
 type Props = {
   label?: string;
@@ -53,49 +58,55 @@ const ActivitySearch = ({
   }, [initialActivity]);
 
   return (
-    <>
-      {label ? (
-        <label className={`label ${required ? "required" : ""}`}>{label}</label>
-      ) : null}
-      <div className={`dropdown-bottom dropdown ${className ?? ""}`}>
-        <div className="input-group">
-          {iconActivity ? (
-            <span>
-              <i className="bx bx-search bx-md text-primary" />
-            </span>
-          ) : null}
-          <input
-            className="input-bordered input w-full"
-            value={debouncedActivity}
-            onChange={(e) => setActivity(e.currentTarget.value)}
-            list="activities"
-            placeholder={t("enter-activity") ?? ""}
-          />
-        </div>
-        {error ? <p className="label-text-alt text-error">{error}</p> : null}
-        {showList && activities.data?.length ? (
-          <ul className="dropdown-content menu rounded-box w-full bg-base-100 p-2 shadow">
-            {activities.data?.map((activity) => (
-              <li key={activity.id}>
+    <div className={cn("relative", className)}>
+      {label && (
+        <Label
+          className={cn(
+            "mb-2",
+            required && "after:content-['*'] after:text-error after:ml-0.5",
+          )}
+        >
+          {label}
+        </Label>
+      )}
+      <div className="flex gap-2">
+        {iconActivity && (
+          <Button variant="outline" size="icon" className="shrink-0" disabled>
+            <Search className="h-4 w-4 text-primary" />
+          </Button>
+        )}
+        <Input
+          value={activity}
+          onChange={(e) => setActivity(e.currentTarget.value)}
+          placeholder={t("enter-activity") ?? ""}
+        />
+      </div>
+      {error && <p className="text-sm text-error mt-1">{error}</p>}
+      {showList && activities.data?.length ? (
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
+          <ul className="max-h-60 overflow-auto py-1">
+            {activities.data?.map((act) => (
+              <li key={act.id}>
                 <button
                   type="button"
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors"
                   onClick={() => {
-                    setActivity(activity.name);
-                    onSearch({ id: activity.id, name: activity.name });
+                    setActivity(act.name);
+                    onSearch({ id: act.id, name: act.name });
                     setShowList(false);
                   }}
                 >
                   <TextHighlighted
-                    text={activity.name}
+                    text={act.name}
                     highlight={debouncedActivity}
                   />
                 </button>
               </li>
             ))}
           </ul>
-        ) : null}
-      </div>
-    </>
+        </div>
+      ) : null}
+    </div>
   );
 };
 

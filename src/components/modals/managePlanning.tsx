@@ -3,6 +3,7 @@
 import {
   SubmitErrorHandler,
   SubmitHandler,
+  Controller,
   useForm,
   useWatch,
 } from "react-hook-form";
@@ -12,19 +13,41 @@ import { isDate } from "date-fns";
 
 import { useRouter } from "next/navigation";
 
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import Modal, { TModalVariant } from "../ui/modal";
+import { Checkbox } from "../ui/shadcn/checkbox";
 import Confirmation from "../ui/confirmation";
 import { useUser } from "@/lib/auth/client";
+import { Input } from "../ui/shadcn/input";
 import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
+import Modal from "../ui/modal";
+import { toast } from "sonner";
+
+import {
+  Badge,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/shadcn";
+
+import { Copy, Pencil, Trash } from "lucide-react";
+
+import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type CreatePlanningProps = {
   clubId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
 };
 
 type CreatePlanningFormValues = {
@@ -39,7 +62,7 @@ type CreatePlanningFormValues = {
 
 export const CreatePlanning = ({
   clubId,
-  variant = "Primary",
+  variant = "default",
 }: CreatePlanningProps) => {
   const utils = trpc.useUtils();
   const t = useTranslations("planning");
@@ -67,9 +90,16 @@ export const CreatePlanning = ({
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<CreatePlanningFormValues>();
+  } = useForm<CreatePlanningFormValues>({
+    defaultValues: {
+      forSite: false,
+      forRoom: false,
+    },
+  });
 
-  const fields = useWatch({ control });
+  const forSite = useWatch({ control, name: "forSite" });
+  const siteId = useWatch({ control, name: "siteId" });
+  const forRoom = useWatch({ control, name: "forRoom" });
 
   const onSubmit: SubmitHandler<CreatePlanningFormValues> = (data) => {
     createPlanning.mutate({
@@ -96,78 +126,128 @@ export const CreatePlanning = ({
       handleSubmit={handleSubmit(onSubmit, onError)}
     >
       <h3>{t("create-new-planning")}</h3>
-      <form
-        onSubmit={handleSubmit(onSubmit, onError)}
-        className="grid grid-cols-[auto_1fr] gap-2"
-      >
-        <label>{t("name")}</label>
-        <input className="input-bordered input w-full" {...register("name")} />
-        <label className="required">{t("start-date")}</label>
-        <div className="flex flex-col gap-2">
-          <input
-            className="input-bordered input w-full"
-            {...register("startDate", {
-              valueAsDate: true,
-              required: t("date-mandatory") ?? true,
-            })}
-            type="date"
-            defaultValue={formatDateAsYYYYMMDD()}
-          />
-          {errors.startDate ? (
-            <p className="text-sm text-error">{t("date-mandatory")}</p>
-          ) : null}
-        </div>
-        <label>{t("end-date")}</label>
-        <input
-          className="input-bordered input w-full"
-          {...register("endDate", { valueAsDate: true })}
-          type="date"
-        />
-        <div className="form-control col-span-2">
-          <label className="label cursor-pointer justify-start gap-4">
-            <input
-              type="checkbox"
-              className="checkbox-primary checkbox"
-              {...register("forSite")}
-              defaultChecked={false}
-            />
-            <span className="label-text">{t("for-site")}</span>
-          </label>
-        </div>
-        {fields.forSite ? (
+      <form onSubmit={handleSubmit(onSubmit, onError)}>
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="planning-name">{t("name")}</FieldLabel>
+              <Input id="planning-name" {...register("name")} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="planning-start-date" className="required">
+                {t("start-date")}
+              </FieldLabel>
+              <Input
+                id="planning-start-date"
+                {...register("startDate", {
+                  valueAsDate: true,
+                  required: t("date-mandatory") ?? true,
+                })}
+                type="date"
+                defaultValue={formatDateAsYYYYMMDD()}
+              />
+              {errors.startDate && (
+                <FieldError>{t("date-mandatory")}</FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="planning-end-date">
+                {t("end-date")}
+              </FieldLabel>
+              <Input
+                id="planning-end-date"
+                {...register("endDate", { valueAsDate: true })}
+                type="date"
+              />
+            </Field>
+            <Field orientation="horizontal">
+              <Controller
+                control={control}
+                name="forSite"
+                render={({ field }) => (
+                  <Checkbox
+                    id="planning-for-site"
+                    className="checkbox-primary checkbox"
+                    checked={Boolean(field.value)}
+                    onCheckedChange={(checked) =>
+                      field.onChange(checked === true)
+                    }
+                  />
+                )}
+              />
+              <FieldLabel htmlFor="planning-for-site">
+                {t("for-site")}
+              </FieldLabel>
+            </Field>
+          </FieldGroup>
+        </FieldSet>
+        {forSite ? (
           <>
-            <label>{t("site")}</label>
-            <select {...register("siteId")}>
-              {queryClub.data?.sites?.map((site) => (
-                <option key={site.id} value={site.id}>
-                  {site.name}
-                </option>
-              ))}
-            </select>
-            <div className="form-control col-span-2">
-              <label className="label cursor-pointer justify-start gap-4">
-                <input
-                  type="checkbox"
-                  className="checkbox-primary checkbox"
-                  {...register("forRoom")}
-                  defaultChecked={false}
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="planning-site">{t("site")}</FieldLabel>
+              <Controller
+                control={control}
+                name="siteId"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {queryClub.data?.sites?.map((site) => (
+                        <SelectItem key={site.id} value={site.id}>
+                          {site.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+
+            <Field orientation="horizontal">
+              <Controller
+                control={control}
+                name="forRoom"
+                render={({ field }) => (
+                  <Checkbox
+                    id="planning-for-room"
+                    className="checkbox-primary checkbox"
+                    checked={Boolean(field.value)}
+                    onCheckedChange={(checked) =>
+                      field.onChange(checked === true)
+                    }
+                  />
+                )}
+              />
+              <FieldLabel htmlFor="planning-for-room">
+                {t("for-room")}
+              </FieldLabel>
+            </Field>
+            {forRoom && siteId ? (
+              <Field orientation="horizontal">
+                <FieldLabel htmlFor="planning-room">{t("room")}</FieldLabel>
+                <Controller
+                  control={control}
+                  name="roomId"
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {queryClub.data?.sites
+                          ?.find((s) => s.id === siteId)
+                          ?.rooms.map((room) => (
+                            <SelectItem key={room.id} value={room.id}>
+                              {room.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
-                <span className="label-text">{t("for-room")}</span>
-              </label>
-            </div>
-            {fields.forRoom && fields.siteId ? (
-              <>
-                <label>{t("room")}</label>
-                <select {...register("roomId")}>
-                  {queryClub.data?.sites
-                    ?.find((s) => s.id === fields.siteId)
-                    ?.rooms.map((room) => (
-                      <option key={room.id} value={room.id}>
-                        {room.name}
-                      </option>
-                    ))}
-                </select>
-              </>
+              </Field>
             ) : null}
           </>
         ) : null}
@@ -179,7 +259,8 @@ export const CreatePlanning = ({
 type UpdatePlanningProps = {
   clubId: string;
   planningId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
   duplicate?: boolean;
 };
 
@@ -194,7 +275,8 @@ type UpdatePlanningFormValues = {
 export function UpdatePlanning({
   clubId,
   planningId,
-  variant = "Icon-Outlined-Primary",
+  variant = "outline",
+  buttonSize = "icon",
   duplicate = false,
 }: UpdatePlanningProps) {
   const [siteName, setSiteName] = useState("");
@@ -275,56 +357,69 @@ export function UpdatePlanning({
   return (
     <Modal
       title={t(duplicate ? "duplicate-planning" : "update-planning")}
-      buttonIcon={
-        <i className={`bx ${duplicate ? "bx-duplicate" : "bx-edit"} bx-sm`} />
-      }
+      buttonIcon={duplicate ? <Copy /> : <Pencil />}
       handleSubmit={handleSubmit(onSubmit, onError)}
       variant={variant}
+      buttonSize={buttonSize}
     >
       <h3 className="flex gap-2">
         {t(duplicate ? "duplicate-planning" : "update-planning")}
       </h3>
       {siteName ? (
         <div className="mb-2 flex gap-2">
-          <span className="badge badge-primary flex gap-2">
+          <Badge>
             <span>{t("site")}:</span>
             <span>{siteName}</span>
-          </span>
+          </Badge>
           {roomName ? (
-            <span className="badge badge-primary flex gap-2">
+            <Badge>
               <span>{t("room")}:</span>
               <span>{roomName}</span>
-            </span>
+            </Badge>
           ) : null}
         </div>
       ) : null}
-      <form
-        onSubmit={handleSubmit(onSubmit, onError)}
-        className="grid grid-cols-[auto_1fr] gap-2"
-      >
-        <label>{t("name")}</label>
-        <input className="input-bordered input w-full" {...register("name")} />
-        <label className="required">{t("start-date")}</label>
-        <div className="flex flex-col gap-2">
-          <input
-            className="input-bordered input w-full"
-            {...register("startDate", {
-              valueAsDate: true,
-              required: t("date-mandatory") ?? true,
-            })}
-            type="date"
-            defaultValue={formatDateAsYYYYMMDD()}
-          />
-          {errors.startDate ? (
-            <p className="text-sm text-error">{t("date-mandatory")}</p>
-          ) : null}
-        </div>
-        <label>{t("end-date")}</label>
-        <input
-          className="input-bordered input w-full"
-          {...register("endDate", { valueAsDate: true })}
-          type="date"
-        />
+      <form onSubmit={handleSubmit(onSubmit, onError)}>
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="update-planning-name">
+                {t("name")}
+              </FieldLabel>
+              <Input id="update-planning-name" {...register("name")} />
+            </Field>
+            <Field>
+              <FieldLabel
+                htmlFor="update-planning-start-date"
+                className="required"
+              >
+                {t("start-date")}
+              </FieldLabel>
+              <Input
+                id="update-planning-start-date"
+                {...register("startDate", {
+                  valueAsDate: true,
+                  required: t("date-mandatory") ?? true,
+                })}
+                type="date"
+                defaultValue={formatDateAsYYYYMMDD()}
+              />
+              {errors.startDate && (
+                <FieldError>{t("date-mandatory")}</FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="update-planning-end-date">
+                {t("end-date")}
+              </FieldLabel>
+              <Input
+                id="update-planning-end-date"
+                {...register("endDate", { valueAsDate: true })}
+                type="date"
+              />
+            </Field>
+          </FieldGroup>
+        </FieldSet>
       </form>
     </Modal>
   );
@@ -333,7 +428,8 @@ export function UpdatePlanning({
 export function DeletePlanning({
   clubId,
   planningId,
-  variant = "Icon-Outlined-Secondary",
+  variant = "destructive",
+  buttonSize = "icon",
 }: UpdatePlanningProps) {
   const utils = trpc.useUtils();
   const t = useTranslations("planning");
@@ -355,8 +451,9 @@ export function DeletePlanning({
       onConfirm={() => {
         deletePlanning.mutate(planningId);
       }}
-      buttonIcon={<i className="bx bx-trash bx-sm" />}
+      buttonIcon={<Trash />}
       variant={variant}
+      buttonSize={buttonSize}
     />
   );
 }

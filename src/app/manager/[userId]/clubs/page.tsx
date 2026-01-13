@@ -4,7 +4,11 @@ import { redirect, RedirectType } from "next/navigation";
 
 import CreateClub from "@/components/modals/manageClub";
 import LockedButton from "@/components/ui/lockedButton";
-import { LayoutPage } from "@/components/layoutPage";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { ClubContent } from "./clubContent";
@@ -65,15 +69,15 @@ export default async function ManageClubs({
         )
       }
     >
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={listClubs}
           itemId={clubId}
           noItemsText={t("club.no-club")}
         />
 
         {clubId === "" ? null : <ClubContent userId={userId} clubId={clubId} />}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

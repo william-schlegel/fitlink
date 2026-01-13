@@ -2,11 +2,20 @@
 
 import { useTranslations } from "next-intl";
 import { useQuery } from "convex/react";
+import { Lock } from "lucide-react";
 import Link from "next/link";
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/shadcn/tooltip";
 import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
 import { api } from "../../../convex/_generated/api";
+import { Badge } from "@/components/ui/shadcn/badge";
 import { useUser } from "@/lib/auth/client";
+import { cn } from "@/lib/utils";
 
 type MenuDefinitionType = {
   label: string;
@@ -90,6 +99,7 @@ const MENUS: MenuDefinitionType[] = [
     access: ["ADMIN"],
   },
 ];
+
 const Menu = () => {
   const { data: user } = useUser({ withFeatures: true });
   const isAdmin = user?.internalRole === "ADMIN";
@@ -149,19 +159,38 @@ function MenuItem({
   badgeCount?: number;
 }) {
   const t = useTranslations("common");
-  return locked ? (
-    <span
-      className="tooltip tooltip-bottom tooltip-error flex items-center gap-2 text-gray-300"
-      data-tip={t("navigation.insufficient-plan")}
+
+  if (locked) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="flex items-center gap-2 text-base-content/30 cursor-not-allowed px-3 py-2">
+              <Lock className="h-4 w-4" />
+              {t(label)}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent className="bg-error text-error-content">
+            <p>{t("navigation.insufficient-plan")}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return (
+    <Link
+      className={cn(
+        "flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm font-medium",
+        "hover:bg-muted transition-colors",
+      )}
+      href={page}
     >
-      <i className="bx bx-lock bx-xs" />
-      {t(label)}
-    </span>
-  ) : (
-    <Link className="justify-between" href={page}>
       {t(label)}
       {badgeCount !== undefined && badgeCount > 0 && (
-        <span className="badge badge-primary badge-sm">{badgeCount}</span>
+        <Badge variant="default" className="text-xs px-1.5 py-0">
+          {badgeCount}
+        </Badge>
       )}
     </Link>
   );

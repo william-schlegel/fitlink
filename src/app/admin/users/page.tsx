@@ -1,7 +1,13 @@
 import { getTranslations } from "next-intl/server";
 
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+  LayoutPageContent,
+} from "@/components/layoutPage";
+import { Badge, BadgeVariant } from "@/components/ui/shadcn";
 import { getAllUsers } from "@/server/api/routers/users";
-import { LayoutPage } from "@/components/layoutPage";
 import Pagination from "@/components/ui/pagination";
 import { getActualUser } from "@/lib/auth/server";
 import { TUserFilter } from "./userFilter";
@@ -32,44 +38,32 @@ export default async function UserManagement({
     id: user.id,
     name: user.name,
     link: `/admin/users?userId=${user.id}`,
-    badgeColor:
-      user.internalRole === "MEMBER" ? "badge-secondary" : "badge-accent",
+    badgeVariant:
+      user.internalRole === "MEMBER" ? "info" : ("warning" as BadgeVariant),
     badgeText: tCommon(`roles.${user.internalRole ?? "MEMBER"}`),
   }));
 
   return (
     <LayoutPage title={t("user.manage-users")}>
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={userList}
           itemId={userId}
           noItemsText={t("user.no-users")}
         >
-          <div className="collapse-arrow rounded-box collapse border border-base-300 bg-base-100 mb-4">
-            <input type="checkbox" className="hidden" />
-            <div className="collapse-title text-xl font-medium">
-              <span className="flex items-center gap-4">
-                {t("user.filter")}
-                <span className="badge-info badge">
-                  {Object.keys(parsedFilter).length}
-                </span>
-              </span>
-            </div>
-            <div className="collapse-content">
-              <UserFilter filter={parsedFilter} />
-            </div>
-          </div>
+          <UserFilter filter={parsedFilter} />
+
           <Pagination
             actualPage={page}
             count={userQuery.userCount ?? 0}
             perPage={PER_PAGE}
           />
-        </LayoutPage.List>
+        </LayoutPageList>
 
-        <LayoutPage.Content>
+        <LayoutPageContent>
           {userId === "" ? null : <UserContent userId={userId} />}
-        </LayoutPage.Content>
-      </LayoutPage.Main>
+        </LayoutPageContent>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

@@ -8,7 +8,6 @@ This is a Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRP
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
-- **Styling**: DaisyUI
 - **Database**: PostgreSQL with Drizzle ORM
 - **API**: tRPC for type-safe APIs
 - **State Management**: React Query (TanStack Query)
@@ -52,16 +51,21 @@ This is a Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRP
 
 ### Styling
 
-- Use DaisyUI class names first and Tailwind CSS v4 utilities for details
+- Use shadcn/ui components from `@/components/ui/shadcn`
+- shadcn/ui uses "new-york" style with zinc base color
 - Follow mobile-first responsive design
 - Use semantic class names
-- Leverage DaisyUI's design system
+- Import shadcn components from `@/components/ui/shadcn` or the index file
 
 ## File Structure Guidelines
 
 - Keep components in `src/app` for page-specific components
 - Use proper Next.js file conventions (`page.tsx`, `layout.tsx`, `loading.tsx`, etc.)
-- Database schema in `src/db/schema.ts`
+- Database schema in `src/db/schema/` (modular schema files)
+- DAL functions in `src/db/dal/` (one file per domain)
+- Shared Zod schemas in `src/schemas/` (one file per domain)
+- Error handling utilities in `src/lib/errors/`
+- shadcn/ui components in `src/components/ui/shadcn/`
 - Environment variables in `src/env.ts`
 - Follow the existing project structure
 
@@ -103,6 +107,258 @@ This is a Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRP
 - Use TypeScript strict mode
 - Test thoroughly before committing
 
+## Data Access Layer (DAL)
+
+The project uses a layered architecture with a centralized Data Access Layer.
+
+### Architecture
+
+```text
+Client Components → tRPC Routers/Server Actions → DAL → Database
+```
+
+### Key Principles
+
+1. **Single Source of Truth**: Zod schemas in `src/schemas/` define data shapes once
+2. **Validation at Entry Points**: Validate in routers/actions, NOT in DAL
+3. **Type Safety Without Runtime Overhead**: DAL uses inferred types from schemas (type-only imports)
+4. **Separation of Concerns**: Authorization in routers, data access in DAL
+5. **Transaction Support**: DAL functions accept optional `TxClient` parameter for atomicity
+
+### Schema Patterns
+
+- Base schemas: `{entity}Schema` (e.g., `activitySchema`)
+- Creation schemas: `create{Entity}Schema` (omits `id`)
+- Update schemas: `update{Entity}Schema` (partial)
+- Inferred types: `{Entity}`, `Create{Entity}Input`, `Update{Entity}Input`
+
+### DAL Function Patterns
+
+```typescript
+// src/db/dal/activities.ts
+import { db, TxClient } from "@/db";
+
+import type {
+  CreateActivityInput,
+  UpdateActivityInput,
+} from "@/schemas/activities";
+
+export async function createActivity(data: CreateActivityInput, tx?: TxClient) {
+  const client = tx ?? db;
+  return client.insert(activity).values(data).returning();
+}
+
+export async function updateActivity(data: UpdateActivityInput, tx?: TxClient) {
+  const client = tx ?? db;
+  return client
+    .update(activity)
+    .set(data)
+    .where(eq(activity.id, data.id ?? ""));
+}
+```
+
+### Using DAL in tRPC Routers
+
+```typescript
+import { createActivitySchema } from "@/schemas/activities";
+import { requireAdmin } from "@/server/lib/userTools";
+import { createActivity } from "@/db/dal";
+
+export const activityRouter = createTRPCRouter({
+  create: protectedProcedure
+    .input(createActivitySchema) // Validate here
+    .mutation(({ ctx, input }) => {
+      requireAdmin(ctx.user); // Authorize here
+      return createActivity(input); // DAL handles data access only
+    }),
+});
+```
+
+### Using DAL in Server Actions
+
+```typescript
+"use server";
+import { createActivitySchema } from "@/schemas/activities";
+import { getActualUser } from "@/lib/auth/server";
+import { createActivity } from "@/db/dal";
+
+export async function createActivityAction(rawInput: unknown) {
+  const user = await getActualUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const input = createActivitySchema.parse(rawInput); // Validate
+  // Authorization check...
+  return createActivity(input); // Call DAL
+}
+```
+
+### Transaction Support
+
+```typescript
+// In router/action
+return db.transaction(async (tx) => {
+  const club = await createClub(data, tx);
+  await createSite({ clubId: club[0].id, ...siteData }, tx);
+  return club[0];
+});
+```
+
+### DAL Best Practices
+
+- ✅ Define schemas once in `/schemas`
+- ✅ Use inferred types in DAL (type-only imports)
+- ✅ Validate in routers/actions, not DAL
+- ✅ Use authorization helpers in routers/actions
+- ✅ Pass transaction client when atomicity needed
+- ❌ Don't define inline schemas in routers
+- ❌ Don't validate in DAL functions
+- ❌ Don't put authorization in DAL
+
+## Error Management
+
+The project uses a comprehensive error handling system with centralized error classes and utilities.
+
+### Error Architecture
+
+- **ErrorProvider**: React context for error reporting (already configured in root layout)
+- **ErrorBoundary**: Catches React render errors
+- **Logger Service**: Centralized logging with extensibility for remote services
+- **Error Utilities**: Functional error handling patterns
+
+### Error Classes
+
+All custom errors extend `AppError` base class. Import from `@/lib/errors`:
+
+- `AppError`: Base error class with code, severity, userMessage, context
+- `ValidationError`: Input validation failures (severity: low)
+- `AuthError`: Authentication/authorization failures (severity: medium)
+- `NetworkError`: API/network failures (severity: medium)
+- `DatabaseError`: Database operations (severity: high)
+- `NotFoundError`: Missing resources (severity: low)
+- `BusinessError`: Domain rule violations (severity: medium)
+
+### Creating Errors
+
+```typescript
+import {
+  AppError,
+  ValidationError,
+  AuthError,
+  NotFoundError,
+  ErrorCode,
+} from "@/lib/errors";
+
+// Generic error
+throw new AppError({
+  message: "Operation failed",
+  code: ErrorCode.UNEXPECTED,
+  severity: "medium",
+  userMessage: "Something went wrong. Please try again.",
+});
+
+// Validation error
+throw new ValidationError({
+  message: "Invalid email format",
+  fields: { email: ["Must be a valid email address"] },
+  userMessage: "Please correct the highlighted fields.",
+});
+
+// Not found error
+throw new NotFoundError({
+  message: "User not found",
+  resourceType: "User",
+  resourceId: userId,
+  userMessage: "The requested user could not be found.",
+});
+```
+
+### Using Error Context in Components
+
+```typescript
+"use client";
+import { useError } from "@/lib/errors/context";
+
+function MyComponent() {
+  const { reportError, handleSilently, showError, clearErrors } = useError();
+
+  const handleAction = async () => {
+    try {
+      await operation();
+    } catch (error) {
+      reportError(error, {
+        userMessage: "Failed to complete the operation",
+      });
+    }
+  };
+}
+```
+
+### Error Utilities
+
+```typescript
+import { tryCatch, safeExecute, assertDefined } from "@/lib/errors/utils";
+
+// Async wrapper (returns Result type)
+const result = await tryCatch(fetchUser(userId), {
+  userMessage: "Failed to load user",
+});
+
+if (result.success) {
+  console.log(result.data);
+} else {
+  console.error(result.error.userMessage);
+}
+
+// Sync wrapper
+const result = safeExecute(() => JSON.parse(jsonString));
+
+// Assertions
+const user = assertDefined(maybeUser, "User not found", ErrorCode.NOT_FOUND);
+```
+
+### tRPC Error Handling
+
+- All tRPC mutation errors are automatically converted to `AppError`, logged, and displayed as toast notifications
+- For queries, use `onError` callback with `reportError` from `useError()` hook
+- In procedures, throw `TRPCError` which will be converted automatically
+
+### Error Handling Best Practices
+
+- ✅ Use specific error classes (ValidationError, AuthError, etc.)
+- ✅ Always provide user-friendly messages
+- ✅ Use `tryCatch` for external operations
+- ✅ Add context to errors (userId, orderId, etc.)
+- ✅ Handle errors at the right level (component for UI, router for business logic)
+- ❌ Don't expose technical details in user messages
+- ❌ Don't use generic `Error` class
+
+## shadcn/ui Components
+
+The project uses shadcn/ui components.
+
+### Location and Import
+
+- Components located in `src/components/ui/shadcn/`
+- Import from `@/components/ui/shadcn` or use the index file
+- Style: "new-york" with zinc base color
+- Uses CSS variables for theming
+
+### Available Components
+
+- Accordion, Avatar, Badge, Button, Card, Checkbox, Collapsible
+- Dialog, Dropdown Menu, Input, Label, Select, Separator
+- Tabs, Textarea, Tooltip
+
+### Usage Pattern
+
+```typescript
+import { Button } from "@/components/ui/shadcn/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/shadcn/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
+
+<Button>Click me</Button>
+```
+
 ## Common Patterns to Follow
 
 - Use the existing enum patterns for database constraints
@@ -110,3 +366,6 @@ This is a Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRP
 - Use proper user internalRole management
 - Implement proper subscription and coaching models
 - Follow the existing file upload and document management patterns
+- Always use DAL functions instead of direct database queries
+- Use shared schemas from `src/schemas/` for validation
+- Use error handling utilities and error classes consistently

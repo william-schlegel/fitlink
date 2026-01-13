@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 export default function PublishPageButton({
   userId,

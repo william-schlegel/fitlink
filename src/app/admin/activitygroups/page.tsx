@@ -1,8 +1,15 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { Star } from "lucide-react";
+
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import { NewGroup } from "@/components/modals/manageActivity";
-import { LayoutPage } from "@/components/layoutPage";
+import { BadgeVariant } from "@/components/ui/shadcn";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { AGContent } from "./agContent";
@@ -25,9 +32,11 @@ export default async function ActivityGroupManagement({
     id: ag.id,
     name: ag.name,
     link: `/admin/activitygroups?agId=${ag.id}`,
-    badgeColor: ag.default ? "badge-primary" : "badge-secondary",
+    badgeVariant: ag.default ? "default" : ("secondary" as BadgeVariant),
     badgeText: ag.default ? undefined : ag.coach?.user.name,
-    badgeIcon: ag.default ? "bx bxs-star bx-xs text-accent" : undefined,
+    badgeIcon: ag.default ? (
+      <Star className="fill-yellow-500 size-4" />
+    ) : undefined,
   }));
 
   if (!agId && agQuery[0]?.id)
@@ -38,16 +47,16 @@ export default async function ActivityGroupManagement({
 
   return (
     <LayoutPage title={t("ag.manage-ag")} titleComponents={<NewGroup />}>
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={agList}
           itemId={agId}
           noItemsText={t("ag.no-groups")}
         >
           <h3>{t("ag.groups")}</h3>
-        </LayoutPage.List>
+        </LayoutPageList>
         {agId ? <AGContent agId={agId} /> : null}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

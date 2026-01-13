@@ -1,80 +1,82 @@
-import { type ReactNode, useId } from "react";
+"use client";
 
-export type TIconButtonVariant =
-  | "Icon-Only-Primary"
-  | "Icon-Only-Secondary"
-  | "Icon-Primary"
-  | "Icon-Secondary"
-  | "Icon-Outlined-Primary"
-  | "Icon-Outlined-Secondary";
+import { type ReactNode } from "react";
 
-export type ButtonSize = "xs" | "sm" | "md" | "lg";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/shadcn/tooltip";
+import { Button } from "@/components/ui/shadcn/button";
+import type {
+  ButtonSize as ShadcnButtonSize,
+  ButtonVariant as ShadcnButtonVariant,
+} from "@/components/ui/shadcn/button";
+import { cn } from "@/lib/utils";
+
+type ButtonIconVariant = "default" | "outlines";
+type ButtonIconSize = "default" | "sm" | "lg" | "xl" | "icon";
 
 type Props = {
   title: string;
   iconComponent: ReactNode;
-  buttonVariant?: TIconButtonVariant;
-  buttonSize?: ButtonSize;
+  variant?: ButtonIconVariant;
+  size?: ButtonIconSize;
   fullButton?: boolean;
+  onClick?: () => void;
+  className?: string;
 };
 
 function ButtonIcon({
   title,
   iconComponent,
-  buttonVariant = "Icon-Outlined-Primary",
-  buttonSize = "md",
+  variant = "default",
+  size,
   fullButton,
+  onClick,
+  className,
 }: Props) {
-  const btnId = useId();
+  const resolvedVariant: ShadcnButtonVariant =
+    variant === "outlines" ? "outline" : "default";
+  const resolvedSize: ShadcnButtonSize = fullButton
+    ? size && size !== "icon"
+      ? size
+      : "default"
+    : size ?? "icon";
 
-  const noBorder =
-    buttonVariant === "Icon-Only-Primary" ||
-    buttonVariant === "Icon-Only-Secondary";
-  const primary =
-    buttonVariant === "Icon-Only-Primary" ||
-    buttonVariant === "Icon-Outlined-Primary" ||
-    buttonVariant === "Icon-Primary";
-  const outlined =
-    buttonVariant === "Icon-Outlined-Primary" ||
-    buttonVariant === "Icon-Outlined-Secondary"
-      ? "btn-outlined"
-      : "";
-
-  const color = noBorder
-    ? primary
-      ? "txt-primary"
-      : "txt-secondary"
-    : primary
-      ? "btn btn-primary"
-      : "btn btn-secondary";
-
-  const sz =
-    buttonSize === "lg"
-      ? "btn-lg"
-      : buttonSize === "md"
-        ? "btn-md"
-        : buttonSize === "sm"
-          ? "btn-sm"
-          : "btn-xs";
-
-  return fullButton ? (
-    <label
-      className={`${color} ${outlined} flex items-center gap-2 ${sz}`}
-      tabIndex={0}
-    >
-      {iconComponent}
-      {title}
-    </label>
-  ) : (
-    <div className={"tooltip z-50"} data-tip={title}>
-      <label
-        htmlFor={btnId}
-        className={`${color} ${outlined} gap-2 ${sz} `}
-        tabIndex={0}
+  if (fullButton) {
+    return (
+      <Button
+        variant={resolvedVariant}
+        size={resolvedSize}
+        className={cn("gap-2", className)}
+        onClick={onClick}
       >
         {iconComponent}
-      </label>
-    </div>
+        {title}
+      </Button>
+    );
+  }
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant={resolvedVariant}
+            size={resolvedSize}
+            className={className}
+            onClick={onClick}
+          >
+            {iconComponent}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{title}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 

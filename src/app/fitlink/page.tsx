@@ -28,26 +28,26 @@ export default async function FitlinkPage() {
             </h1>
             <p className="py-6">{t("hero-text")}</p>
             <div className="flex flex-wrap gap-2">
-              <ButtonLink className="btn btn-accent" href="#find-club">
+              <ButtonLink size="xl" href="#find-club">
                 {t("btn-visitor")}
               </ButtonLink>
-              <ButtonLink className="btn btn-primary" href="/manager">
+              <ButtonLink size="xl" href="/manager">
                 {t("btn-manager")}
               </ButtonLink>
-              <ButtonLink className="btn btn-secondary" href="/coach">
+              <ButtonLink size="xl" href="/coach">
                 {t("btn-coach")}
               </ButtonLink>
             </div>
           </div>
         </div>
       </section>
-      <section id="find-club" className="bg-base-200">
+      <section id="find-club" className="bg-muted">
         <div className="container mx-auto p-4">
           <h2>{t("find-club")}</h2>
           <FindClub />
         </div>
       </section>
-      <section id="find-coach" className="bg-base-100">
+      <section id="find-coach" className="bg-card">
         <div className="container mx-auto p-4 @container">
           <h2>{t("find-coach")}</h2>
           <FindCoach />

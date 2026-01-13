@@ -2,12 +2,18 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-
 import { useTranslations } from "next-intl";
+import { Search } from "lucide-react";
 
 import { Id } from "../../../convex/_generated/dataModel";
-import { LayoutPage } from "@/components/layoutPage";
-import ButtonIcon from "@/components/ui/buttonIcon";
+import { LayoutPage, LayoutPageMain } from "@/components/layoutPage";
+import { Button } from "@/components/ui/shadcn/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/shadcn/tooltip";
 import { MessageInput } from "./MessageInput";
 import { useUser } from "@/lib/auth/client";
 import { MessageList } from "./MessageList";
@@ -27,26 +33,36 @@ export default function ConvexChat() {
   const roomId = roomIdParam as Id<"chatRooms"> | null;
 
   if (!userId) {
-    return <div>{t("login-to-use-chat")}</div>;
+    return (
+      <div className="flex items-center justify-center h-64 text-[hsl(var(--foreground)/0.6)]">
+        {t("login-to-use-chat")}
+      </div>
+    );
   }
 
   return (
     <LayoutPage title={t("my-chat")}>
-      <LayoutPage.Main className="min-h-[calc(100vh-15rem)]">
+      <LayoutPageMain className="min-h-[calc(100vh-15rem)]">
         <div className="flex flex-col h-full">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-semibold">{t("conversations")}</h2>
-            <button
-              type="button"
-              onClick={() => setShowUserSearch(true)}
-              // className="btn btn-sm btn-primary"
-              title={t("search-users")}
-            >
-              <ButtonIcon
-                iconComponent={<i className="bx bx-search" />}
-                title={t("search-users")}
-              />
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowUserSearch(true)}
+                  >
+                    <Search className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t("search-users")}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <RoomList
             userId={userId}
@@ -64,7 +80,7 @@ export default function ConvexChat() {
                   isAdmin={isAdmin}
                 />
               </div>
-              <div className="border-t border-base-300">
+              <div className="border-t border-shadcn">
                 <MessageInput
                   roomId={roomId}
                   userId={userId}
@@ -74,12 +90,12 @@ export default function ConvexChat() {
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-full text-base-content/60">
+            <div className="flex items-center justify-center h-full text-[hsl(var(--foreground)/0.6)]">
               {t("no-room-selected")}
             </div>
           )}
         </div>
-      </LayoutPage.Main>
+      </LayoutPageMain>
       {showUserSearch && (
         <UserSearch
           currentUserId={userId}

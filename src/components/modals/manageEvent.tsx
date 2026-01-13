@@ -17,23 +17,48 @@ import { format } from "date-fns";
 
 import { useRouter } from "next/navigation";
 
-import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
+import { Pencil, Trash } from "lucide-react";
+
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+  FieldSet,
+} from "../ui/shadcn/field";
 import AddressSearch, { AddressData } from "../ui/addressSearch";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import ButtonIcon, { ButtonSize } from "../ui/buttonIcon";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { formatDateLocalized } from "@/lib/formatDate";
+import Modal, { getButtonSize } from "../ui/modal";
+import { Textarea } from "../ui/shadcn/textarea";
+import { Checkbox } from "../ui/shadcn/checkbox";
 import { formatMoney } from "@/lib/formatNumber";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
-import { TextError } from "../ui/simpleform";
 import { useUser } from "@/lib/auth/client";
+import { Input } from "../ui/shadcn/input";
+import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
 import Ribbon from "../ui/ribbon";
+import { toast } from "sonner";
 import { env } from "@/env";
+
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "../ui/shadcn/input-group";
+
+import {
+  Button,
+  type ButtonSize,
+  type ButtonVariant,
+} from "@/components/ui/shadcn/button";
 
 type EventFormValues = {
   name: string;
@@ -119,8 +144,8 @@ export const CreateEvent = ({ clubId }: CreateEventProps) => {
 
 export const UpdateEvent = ({
   eventId,
-  variant = "Icon-Outlined-Primary",
-  buttonSize = "sm",
+  variant = "outline",
+  buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const { data: user } = useUser();
   const utils = trpc.useUtils();
@@ -192,7 +217,7 @@ export const UpdateEvent = ({
   return (
     <Modal
       title={t("event.update")}
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize(buttonSize)}`} />}
+      buttonIcon={<Pencil />}
       variant={variant}
       buttonSize={buttonSize}
       cancelButtonText=""
@@ -220,15 +245,15 @@ export const UpdateEvent = ({
 type PropsUpdateDelete = {
   clubId: string;
   eventId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
   buttonSize?: ButtonSize;
 };
 
 export const DeleteEvent = ({
   clubId,
   eventId,
-  variant = "Icon-Outlined-Secondary",
-  buttonSize = "sm",
+  variant = "destructive",
+  buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
   const user = useUser();
@@ -252,7 +277,7 @@ export const DeleteEvent = ({
     <Confirmation
       message={t("event.deletion-message")}
       title={t("event.deletion")}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize(buttonSize)}`} />}
+      buttonIcon={<Trash />}
       onConfirm={() => {
         deleteEvent.mutate(eventId);
       }}
@@ -342,156 +367,196 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
                 alt=""
                 className="max-h-40 w-full object-cover"
               />
-              <button
-                className="absolute right-2 bottom-2"
-                type="button"
+              <ButtonIcon
+                iconComponent={<Trash className="text-destructive" />}
+                title={t("event.delete-image")}
+                size="icon"
+                variant="outlines"
                 onClick={handleDeleteImage}
-              >
-                <ButtonIcon
-                  iconComponent={<i className="bx bx-trash" />}
-                  title={t("event.delete-image")}
-                  buttonVariant="Icon-Outlined-Secondary"
-                  buttonSize="md"
-                />
-              </button>
+                className="absolute right-2 bottom-2"
+              />
             </div>
           ) : null}
 
-          <label className="required">{t("event.name")}</label>
-          <div>
-            <input
-              className="input-bordered input w-full"
-              {...form.register("name", {
-                required: t("event.name-mandatory") ?? true,
-              })}
-            />
-            {form.formState.errors.name ? (
-              <p className="text-xs text-error">
-                {form.formState.errors.name.message}
-              </p>
-            ) : null}
-          </div>
-          <label className="required self-start">{t("event.brief")}</label>
-          <div>
-            <textarea
-              {...form.register("brief", {
-                required: t("event.brief-mandatory") ?? true,
-              })}
-              className="field-sizing-content"
-              rows={4}
-            />
-            <TextError err={form.formState.errors?.brief?.message} />
-          </div>
-          <label className="self-start">{t("event.description")}</label>
-          <textarea
-            {...form.register("description")}
-            className="field-sizing-content"
-            rows={4}
-          />
-        </div>
-        <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">
-          <label className="required">{t("event.start-date")}</label>
-          <div>
-            <input
-              type="datetime-local"
-              className="input-bordered input w-full"
-              {...form.register("startDate", {
-                required: t("event.date-mandatory") ?? true,
-              })}
-            />
-            <TextError err={form.formState.errors?.startDate?.message} />
-          </div>
-          <label className="required">{t("event.end-date")}</label>
-          <div>
-            <input
-              type="datetime-local"
-              className="input-bordered input w-full"
-              {...form.register("endDate", {
-                required: t("event.date-mandatory") ?? true,
-              })}
-            />
-            <TextError err={form.formState.errors?.endDate?.message} />
-          </div>
-          <label className="required">{t("event.start-display")}</label>
-          <div>
-            <input
-              type="datetime-local"
-              className="input-bordered input w-full"
-              {...form.register("startDisplay", {
-                required: t("event.date-mandatory") ?? true,
-              })}
-            />
-            <TextError err={form.formState.errors?.startDisplay?.message} />
-          </div>
-          <label className="required">{t("event.end-display")}</label>
-          <div>
-            <input
-              type="datetime-local"
-              className="input-bordered input w-full"
-              {...form.register("endDisplay", {
-                required: t("event.date-mandatory") ?? true,
-              })}
-            />
-            <TextError err={form.formState.errors?.endDisplay?.message} />
-          </div>
-          <label>{t("event.banner")}</label>
-          <input
-            className="input-bordered input w-full"
-            {...form.register("bannerText")}
-          />
-          <div className="form-control col-span-full">
-            <label className="label cursor-pointer justify-start gap-4">
-              <input
-                type="checkbox"
-                className="checkbox-primary checkbox"
-                {...form.register("cancelled")}
-                defaultChecked={false}
-              />
-              <span className="label-text">{t("event.cancelled")}</span>
-            </label>
-          </div>
-          <div className="form-control col-span-full">
-            <label className="label cursor-pointer justify-start gap-4">
-              <input
-                type="checkbox"
-                className="checkbox-primary checkbox"
-                {...form.register("free")}
-                defaultChecked={false}
-              />
-              <span className="label-text">{t("event.free")}</span>
-            </label>
-          </div>
-          {free ? null : (
-            <>
-              <label>{t("event.price")}</label>
-              <div className="input-group">
-                <input
-                  type="number"
-                  className="input-bordered input w-full"
-                  {...form.register("price")}
+          <FieldSet className="col-span-full">
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="event-name" className="required">
+                  {t("event.name")}
+                </FieldLabel>
+                <Input
+                  id="event-name"
+                  {...form.register("name", {
+                    required: t("event.name-mandatory") ?? true,
+                  })}
                 />
-
-                <span>€</span>
-              </div>
-            </>
-          )}
-          <label>{t("event.address")}</label>
-          <input
-            className="input-bordered input w-full"
-            {...form.register("address")}
-          />
-          <label>{t("event.location")}</label>
-          <AddressSearch
-            defaultAddress={initialValues?.searchAddress ?? ""}
-            iconSearch
-            onSearch={(adr) => setAddress(adr)}
-          />
+                {form.formState.errors.name && (
+                  <FieldError>{form.formState.errors.name.message}</FieldError>
+                )}
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="event-brief" className="required">
+                  {t("event.brief")}
+                </FieldLabel>
+                <Textarea
+                  id="event-brief"
+                  {...form.register("brief", {
+                    required: t("event.brief-mandatory") ?? true,
+                  })}
+                  rows={4}
+                />
+                {form.formState.errors?.brief?.message && (
+                  <FieldError>{form.formState.errors.brief.message}</FieldError>
+                )}
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="event-description">
+                  {t("event.description")}
+                </FieldLabel>
+                <Textarea
+                  id="event-description"
+                  {...form.register("description")}
+                  rows={4}
+                />
+              </Field>
+            </FieldGroup>
+          </FieldSet>
         </div>
+        <FieldSet>
+          <FieldGroup>
+            <Field orientation="horizontal" className="grid grid-cols-2">
+              <FieldLabel htmlFor="event-start-date" className="required">
+                {t("event.start-date")}
+              </FieldLabel>
+
+              <Input
+                id="event-start-date"
+                type="datetime-local"
+                {...form.register("startDate", {
+                  required: t("event.date-mandatory") ?? true,
+                })}
+              />
+              {form.formState.errors?.startDate?.message && (
+                <FieldError className="col-span-2">
+                  {form.formState.errors.startDate.message}
+                </FieldError>
+              )}
+            </Field>
+            <Field orientation="horizontal" className="grid grid-cols-2">
+              <FieldLabel htmlFor="event-end-date" className="required">
+                {t("event.end-date")}
+              </FieldLabel>
+              <Input
+                id="event-end-date"
+                type="datetime-local"
+                {...form.register("endDate", {
+                  required: t("event.date-mandatory") ?? true,
+                })}
+              />
+              {form.formState.errors?.endDate?.message && (
+                <FieldError className="col-span-2">
+                  {form.formState.errors.endDate.message}
+                </FieldError>
+              )}
+            </Field>
+            <Field orientation="horizontal" className="grid grid-cols-2">
+              <FieldLabel htmlFor="event-start-display" className="required">
+                {t("event.start-display")}
+              </FieldLabel>
+              <Input
+                id="event-start-display"
+                type="datetime-local"
+                {...form.register("startDisplay", {
+                  required: t("event.date-mandatory") ?? true,
+                })}
+              />
+              {form.formState.errors?.startDisplay?.message && (
+                <FieldError className="col-span-2">
+                  {form.formState.errors.startDisplay.message}
+                </FieldError>
+              )}
+            </Field>
+            <Field orientation="horizontal" className="grid grid-cols-2">
+              <FieldLabel htmlFor="event-end-display" className="required">
+                {t("event.end-display")}
+              </FieldLabel>
+              <Input
+                id="event-end-display"
+                type="datetime-local"
+                {...form.register("endDisplay", {
+                  required: t("event.date-mandatory") ?? true,
+                })}
+              />
+              {form.formState.errors?.endDisplay?.message && (
+                <FieldError className="col-span-2">
+                  {form.formState.errors.endDisplay.message}
+                </FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="event-banner">
+                {t("event.banner")}
+              </FieldLabel>
+              <Input id="event-banner" {...form.register("bannerText")} />
+            </Field>
+            <div className="grid grid-cols-2">
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="event-cancelled"
+                  {...form.register("cancelled")}
+                  defaultChecked={false}
+                />
+                <FieldLabel htmlFor="event-cancelled">
+                  {t("event.cancelled")}
+                </FieldLabel>
+              </Field>
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="event-free"
+                  {...form.register("free")}
+                  defaultChecked={false}
+                />
+                <FieldLabel htmlFor="event-free">{t("event.free")}</FieldLabel>
+              </Field>
+            </div>
+            {free ? null : (
+              <Field orientation="horizontal">
+                <FieldLabel htmlFor="event-price">
+                  {t("event.price")}
+                </FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    id="event-price"
+                    type="number"
+                    {...form.register("price")}
+                  />
+                  <InputGroupAddon align="inline-end">€</InputGroupAddon>
+                </InputGroup>
+              </Field>
+            )}
+            <Field>
+              <FieldLabel htmlFor="event-address">
+                {t("event.address")}
+              </FieldLabel>
+              <Input id="event-address" {...form.register("address")} />
+            </Field>
+            <Field>
+              <FieldLabel>{t("event.location")}</FieldLabel>
+              <AddressSearch
+                defaultAddress={initialValues?.searchAddress ?? ""}
+                iconSearch
+                onSearch={(adr) => setAddress(adr)}
+              />
+            </Field>
+          </FieldGroup>
+        </FieldSet>
         <DisplayEventCard />
-        <div className="col-span-full flex items-center justify-end gap-2">
-          <button
+        <FieldSeparator />
+        <Field orientation="horizontal" className="justify-end">
+          <Button
+            size="xl"
             type="button"
-            className="btn btn-outline btn-secondary"
+            variant="outline"
             onClick={(e) => {
               e.preventDefault();
               form.reset();
@@ -499,11 +564,11 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
             }}
           >
             {tCommon("cancel")}
-          </button>
-          <button className="btn btn-primary" type="submit">
+          </Button>
+          <Button type="submit" size="xl">
             {tCommon("save")}
-          </button>
-        </div>
+          </Button>
+        </Field>
       </form>
     </FormProvider>
   );
@@ -553,16 +618,15 @@ function DisplayEventCard() {
         <p className="space-x-4 text-right text-xl font-bold">
           <span>{fields.address}</span>
           {fields.searchAddress ? (
-            <button type="button" onClick={() => setShowMap((prev) => !prev)}>
-              <ButtonIcon
-                iconComponent={
-                  <i className={`bx ${showMap ? "bx-x" : "bx-map"} bx-sm`} />
-                }
-                title={t("event.view-map")}
-                buttonVariant="Icon-Outlined-Secondary"
-                buttonSize="md"
-              />
-            </button>
+            <ButtonIcon
+              iconComponent={
+                <i className={`bx ${showMap ? "bx-x" : "bx-map"} bx-sm`} />
+              }
+              title={t("event.view-map")}
+              size="icon"
+              variant="outlines"
+              onClick={() => setShowMap((prev) => !prev)}
+            />
           ) : null}
         </p>
         <div
@@ -628,8 +692,8 @@ export function ShowEventCard({ eventId }: { eventId: string }) {
     <Modal
       title={t("event.show")}
       className="w-11/12 max-w-4xl"
-      variant="Icon-Primary"
-      buttonSize="sm"
+      variant="default"
+      buttonSize="icon"
       buttonIcon={<i className="bx bx-show bx-xs" />}
     >
       {event.isLoading ? (

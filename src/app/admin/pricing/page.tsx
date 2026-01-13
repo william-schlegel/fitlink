@@ -1,15 +1,23 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
+import { Star } from "lucide-react";
+
 import {
   CreatePricing,
   DeletePricing,
   UndeletePricing,
   UpdatePricing,
 } from "@/components/modals/managePricing";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageLists,
+  LayoutPageContent,
+} from "@/components/layoutPage";
 import { getAllPricing, getPricingById } from "@/server/api/routers/pricing";
 import { PricingComponent } from "@/components/ui/pricing";
-import { LayoutPage } from "@/components/layoutPage";
+import { BadgeVariant } from "@/components/ui/shadcn";
 import { getRoleName } from "@/server/lib/userTools";
 import { pricing } from "@/db/schema/subscription";
 import { getActualUser } from "@/lib/auth/server";
@@ -55,19 +63,19 @@ export default async function PricingManagement({
       id: pricing.id,
       name: pricing.title,
       link: createLink({ pricingId: pricing.id }, href),
-      badgeColor: pricing.free
-        ? "primary"
+      badgeVariant: pricing.free
+        ? "default"
         : pricing.deleted
-          ? "red"
-          : undefined,
+          ? "destructive"
+          : (undefined as BadgeVariant),
       badgeText: pricing.free
         ? "Free"
         : pricing.deleted
           ? "Deleted"
           : formatMoney(pricing.monthly),
-      badgeIcon: pricing.highlighted
-        ? "bx bxs-star bx-xs text-accent"
-        : undefined,
+      badgeIcon: pricing.highlighted ? (
+        <Star className="fill-yellow-500 size-4" />
+      ) : undefined,
     })),
   }));
 
@@ -76,15 +84,15 @@ export default async function PricingManagement({
       title={t("pricing.manage-my-pricing")}
       titleComponents={<CreatePricing />}
     >
-      <LayoutPage.Main>
-        <LayoutPage.Lists
+      <LayoutPageMain>
+        <LayoutPageLists
           lists={pricingList}
           itemId={pricingId}
           noItemsText={t("pricing.no-pricing")}
         />
 
         {pricingId === "" ? null : <PricingContent pricingId={pricingId} />}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }
@@ -99,7 +107,7 @@ async function PricingContent({ pricingId }: PricingContentProps) {
   return (
     <div className="flex w-full flex-col gap-4">
       <PricingComponent data={pricingQuery} />
-      <div className="flex items-center gap-2">
+      <div className="space-x-2">
         <UpdatePricing pricingId={pricingId} />
 
         {pricingQuery?.deleted ? (

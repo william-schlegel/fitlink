@@ -5,6 +5,8 @@ import { format, startOfToday } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { Trash } from "lucide-react";
+
 import Confirmation from "@/components/ui/confirmation";
 import { SelectDate } from "@/components/ui/selectDay";
 import { formatDateLocalized } from "@/lib/formatDate";
@@ -96,7 +98,7 @@ function MyReservation({ reservation, memberId, day }: MyReservationProps) {
   }
 
   return (
-    <div className="rounded border border-primary bg-base-100">
+    <div className="rounded border border-primary bg-card">
       <div className="flex items-center justify-between gap-4 bg-primary px-3 py-1 text-center text-primary-content">
         <span>
           {formatDateLocalized(reservation.date, {
@@ -107,10 +109,14 @@ function MyReservation({ reservation, memberId, day }: MyReservationProps) {
         <Confirmation
           message={t("member.reservation-delete-message")}
           title={t("member.delete-reservation")}
-          buttonIcon={<i className={`bx bx-trash ${getButtonSize("xs")}`} />}
+          buttonIcon={
+            <Trash
+              className={`fill-destructive stroke-destructive ${getButtonSize("icon")}`}
+            />
+          }
           onConfirm={() => handleDeleteReservation()}
-          buttonSize="xs"
-          variant="Icon-Only-Secondary"
+          buttonSize="icon"
+          variant="ghost"
         />
       </div>
       {reservation?.planningActivity ? (

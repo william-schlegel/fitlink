@@ -4,14 +4,21 @@ import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
+import { Trash } from "lucide-react";
+
+import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/shadcn/field";
 import ThemeSelector, { TThemes } from "../themeSelector";
+import { Textarea } from "../ui/shadcn/textarea";
+import DeleteButton from "../ui/deleteButton";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { getButtonSize } from "../ui/modal";
+import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
+import { Button } from "../ui/shadcn";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 type TitleCreationProps = {
   clubId: string;
@@ -149,10 +156,23 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
   return (
     <div className="grid w-full auto-rows-auto gap-2 lg:grid-cols-2">
       <div>
-        <h3>{t(updating ? "updating-section" : "creation-section")}</h3>
+        <h3 className="flex items-center gap-2 justify-between">
+          <span>{t(updating ? "updating-section" : "creation-section")}</span>
+          {updating ? (
+            <Confirmation
+              title={t("section-deletion")}
+              message={t("section-deletion-message")}
+              variant="destructive"
+              buttonIcon={<Trash />}
+              buttonSize="icon"
+              textConfirmation={t("section-deletion-confirm")}
+              onConfirm={() => handleDeleteSection()}
+            />
+          ) : null}
+        </h3>
 
         <form
-          className="grid grid-cols-[auto_1fr] gap-2 rounded border border-primary p-2"
+          className="space-y-2 rounded border border-primary p-2"
           onSubmit={handleSubmit(onSubmit)}
         >
           <UploadButton
@@ -164,64 +184,57 @@ export const TitleCreation = ({ clubId, pageId }: TitleCreationProps) => {
               )
             }
             buttonText={t("title.image")}
-            className="col-span-2"
           />
 
           {imageUrls && imageUrls.length > 0 ? (
-            <div className="col-span-2 flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2">
               <div className="relative w-60 max-w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imageUrls[0]} alt="" />
-                <button
+                <DeleteButton
+                  icon
+                  label={t("hero.delete-image")}
                   onClick={handleDeleteImage}
                   className="absolute right-2 bottom-2 z-10"
-                >
-                  <ButtonIcon
-                    iconComponent={<i className="bx bx-trash" />}
-                    title={t("title.delete-image")}
-                    buttonVariant="Icon-Secondary"
-                    buttonSize="sm"
-                  />
-                </button>
+                />
               </div>
             </div>
           ) : null}
-          <label>{t("title.title")}</label>
-          <input
-            {...register("title")}
-            type="text"
-            className="input-bordered input w-full"
-          />
-          <label>{t("title.subtitle")}</label>
-          <input
-            {...register("subtitle")}
-            type="text"
-            className="input-bordered input w-full"
-          />
-          <label>{t("title.description")}</label>
-          <textarea
-            {...register("description")}
-            className="field-sizing-content"
-            rows={4}
-          />
+          <FieldSet>
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="title-title">
+                  {t("title.title")}
+                </FieldLabel>
+                <Input id="title-title" {...register("title")} type="text" />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="title-subtitle">
+                  {t("title.subtitle")}
+                </FieldLabel>
+                <Input
+                  id="title-subtitle"
+                  {...register("subtitle")}
+                  type="text"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="title-description">
+                  {t("title.description")}
+                </FieldLabel>
+                <Textarea
+                  id="title-description"
+                  {...register("description")}
+                  rows={4}
+                />
+              </Field>
+            </FieldGroup>
+          </FieldSet>
 
           <div className="col-span-2 flex justify-between">
-            <button className="btn btn-primary" type="submit">
+            <Button className="ml-auto" type="submit">
               {t("save-section")}
-            </button>
-            {updating ? (
-              <Confirmation
-                title={t("section-deletion")}
-                message={t("section-deletion-message")}
-                variant={"Icon-Outlined-Secondary"}
-                buttonIcon={
-                  <i className={`bx bx-trash ${getButtonSize("md")}`} />
-                }
-                buttonSize="md"
-                textConfirmation={t("section-deletion-confirm")}
-                onConfirm={() => handleDeleteSection()}
-              />
-            ) : null}
+            </Button>
           </div>
         </form>
       </div>

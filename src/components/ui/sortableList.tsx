@@ -16,6 +16,7 @@ import React, { useMemo, useState } from "react";
 
 import { DragHandle, SortableItem } from "./sortableItem";
 import { SortableOverlay } from "./sortableOberlay";
+import { cn } from "@/lib/utils";
 
 import type { Active, UniqueIdentifier } from "@dnd-kit/core";
 import type { ReactNode } from "react";
@@ -70,7 +71,7 @@ export function SortableList<T extends BaseItem>({
     >
       <SortableContext items={items}>
         <ul
-          className={`flex list-none flex-col gap-2 p-0 ${className ?? ""}`}
+          className={cn("flex list-none flex-col gap-2 p-0", className)}
           role="application"
         >
           {items.map((item) => (

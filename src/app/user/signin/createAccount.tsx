@@ -1,14 +1,13 @@
 "use client";
 
-import { SubmitErrorHandler } from "react-hook-form";
-import { SubmitHandler } from "react-hook-form";
+import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
+import { UserPlus } from "lucide-react";
 
 import SimpleForm from "@/components/ui/simpleform";
 import Modal from "@/components/ui/modal";
 import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 type AccountFormValues = {
   name: string;
@@ -45,8 +44,8 @@ export default function CreateAccount() {
       title={t("signin.create-account")}
       handleSubmit={handleSubmit(onSubmit, onError)}
       errors={errors}
-      buttonIcon={<i className="bx bx-user bx-xs" />}
-      variant={"Outlined-Primary"}
+      buttonIcon={<UserPlus className="h-4 w-4" />}
+      variant="outline"
     >
       <SimpleForm
         errors={errors}

@@ -1,9 +1,18 @@
 "use client";
 
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { AlertTriangle } from "lucide-react";
 
 import { AppError, isAppError } from "@/lib/errors";
 import { logger } from "@/lib/errors/logger";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/shadcn/card";
+import { Button } from "@/components/ui/shadcn/button";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -83,28 +92,14 @@ interface ErrorFallbackProps {
 function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
   return (
     <div className="flex min-h-[400px] flex-col items-center justify-center p-8">
-      <div className="card bg-base-100 w-full max-w-md shadow-xl">
-        <div className="card-body items-center text-center">
-          {/* Error Icon */}
+      <Card className="w-full max-w-md">
+        <CardHeader className="items-center text-center">
           <div className="text-error mb-4">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-16 w-16"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
+            <AlertTriangle className="h-16 w-16" />
           </div>
-
-          <h2 className="card-title text-xl">Something went wrong</h2>
-
+          <CardTitle className="text-xl">Something went wrong</CardTitle>
+        </CardHeader>
+        <CardContent className="text-center">
           <p className="text-base-content/70">
             {error?.userMessage ??
               "An unexpected error occurred. Please try again."}
@@ -116,20 +111,17 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
               Error Code: {error.code}
             </p>
           )}
-
-          <div className="card-actions mt-6">
-            <button onClick={onReset} className="btn btn-primary">
-              Try Again
-            </button>
-            <button
-              onClick={() => (window.location.href = "/")}
-              className="btn btn-ghost"
-            >
-              Go Home
-            </button>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+        <CardFooter className="justify-center gap-2">
+          <Button onClick={onReset}>Try Again</Button>
+          <Button
+            variant="ghost"
+            onClick={() => (window.location.href = "/")}
+          >
+            Go Home
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
@@ -142,4 +134,3 @@ export function AppErrorBoundary({ children }: { children: ReactNode }) {
 }
 
 export default ErrorBoundary;
-

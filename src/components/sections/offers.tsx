@@ -1,27 +1,48 @@
 "use client";
 
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { InferSelectModel } from "drizzle-orm";
 
+import { Pencil, Trash } from "lucide-react";
+
+import {
+  Button,
+  Card,
+  CardContent,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Separator,
+} from "../ui/shadcn";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
 import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
 import { List } from "@/app/member/[userId]/list";
+import { Textarea } from "../ui/shadcn/textarea";
 import { formatMoney } from "@/lib/formatNumber";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
-import { TextError } from "../ui/simpleform";
 import { useUser } from "@/lib/auth/client";
+import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 type OfferCreationProps = {
   clubId: string;
@@ -66,24 +87,24 @@ export const OfferCreation = ({ clubId, pageId }: OfferCreationProps) => {
           <>
             <div className="flex flex-wrap gap-2">
               {querySection.data.elements.map((offer) => (
-                <div
-                  key={offer.id}
-                  className="rounded border border-primary p-4"
-                >
-                  <p>{offer.title}</p>
-                  <div className="mt-2 flex items-center justify-between gap-4">
-                    <UpdateOffer
-                      clubId={clubId}
-                      pageId={pageId}
-                      offerId={offer.id}
-                    />
-                    <DeleteOffer
-                      clubId={clubId}
-                      pageId={pageId}
-                      offerId={offer.id}
-                    />
-                  </div>
-                </div>
+                <Card key={offer.id}>
+                  <CardContent>
+                    <h4>{offer.title}</h4>
+                    <Separator />
+                    <div className="flex items-center justify-center gap-2">
+                      <UpdateOffer
+                        clubId={clubId}
+                        pageId={pageId}
+                        offerId={offer.id}
+                      />
+                      <DeleteOffer
+                        clubId={clubId}
+                        pageId={pageId}
+                        offerId={offer.id}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
             <AddOffer
@@ -103,7 +124,7 @@ export const OfferCreation = ({ clubId, pageId }: OfferCreationProps) => {
           />
         </h3>
         <div data-theme={previewTheme}>
-          <div className="grid grid-cols-2 gap-4 bg-base-200 p-4">
+          <div className="grid grid-cols-2 gap-4 bg-muted p-4">
             {querySection.data?.elements.map((card) => (
               <OfferContentCard
                 key={card.id}
@@ -163,6 +184,7 @@ function AddOffer({ clubId, pageId, sectionId }: OfferProps) {
       onCloseModal={() => setClose(false)}
       closeModal={close}
       cancelButtonText=""
+      className="w-11/12 max-w-2xl"
     >
       <h3>
         <span>{t("offer.new-offer")}</span>
@@ -247,9 +269,10 @@ function UpdateOffer({ clubId, pageId, offerId }: UpdateOfferProps) {
       onCloseModal={() => setClose(false)}
       closeModal={close}
       cancelButtonText=""
-      variant="Icon-Outlined-Primary"
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize("sm")}`} />}
-      buttonSize="sm"
+      variant="outline"
+      buttonIcon={<Pencil />}
+      buttonSize="icon"
+      className="w-11/12 max-w-2xl"
     >
       <h3>
         <span>{t("offer.update-offer")}</span>
@@ -287,12 +310,12 @@ function DeleteOffer({ pageId, offerId }: UpdateOfferProps) {
     <Confirmation
       message={t("offer.deletion-message")}
       title={t("offer.deletion")}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize("sm")}`} />}
+      buttonIcon={<Trash />}
       onConfirm={() => {
         deleteOffer.mutate(offerId);
       }}
-      variant={"Icon-Outlined-Secondary"}
-      buttonSize={"sm"}
+      variant="destructive"
+      buttonSize="icon"
     />
   );
 }
@@ -322,7 +345,6 @@ function OfferForm({
     formState: { errors },
     reset,
     control,
-    getValues,
     setValue,
   } = useForm<OfferFormValues>({
     defaultValues: {
@@ -362,7 +384,7 @@ function OfferForm({
 
   return (
     <form onSubmit={handleSubmit(onSuccess)}>
-      <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1 space-y-2">
+      <div className="space-y-2">
         <UploadButton
           endpoint="imageAttachment"
           onClientUploadComplete={(result) =>
@@ -383,55 +405,81 @@ function OfferForm({
               alt=""
               className="max-h-40 w-full object-contain"
             />
-            <button
-              className="absolute right-2 bottom-2"
-              type="button"
+            <ButtonIcon
+              iconComponent={<i className="bx bx-trash" />}
+              title={t("offer.delete-image")}
+              size="icon"
+              variant="outlines"
               onClick={handleDeleteImage}
-            >
-              <ButtonIcon
-                iconComponent={<i className="bx bx-trash" />}
-                title={t("offer.delete-image")}
-                buttonVariant="Icon-Outlined-Secondary"
-                buttonSize="md"
-              />
-            </button>
+              className="absolute right-2 bottom-2"
+            />
           </div>
         ) : null}
 
-        <label className="required">{t("offer.title")}</label>
-        <div>
-          <input
-            className="input-bordered input w-full"
-            {...register("title", {
-              required: t("offer.title-mandatory") ?? true,
-            })}
-          />
-          <TextError err={errors?.title?.message} />
-        </div>
-        <label>{t("offer.subtitle")}</label>
-        <input
-          className="input-bordered input w-full"
-          {...register("subTitle")}
-        />
-        <label className="self-start">{t("offer.description")}</label>
-        <textarea
-          {...register("description")}
-          className="field-sizing-content"
-          rows={4}
-        />
-        <label>{t("offer.offer")}</label>
-        <select defaultValue={getValues("offerId")} {...register("offerId")}>
-          {offers.data?.map((offer) => (
-            <option key={offer.id} value={offer.id}>
-              {offer.name}
-            </option>
-          ))}
-        </select>
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="offer-title" className="required">
+                {t("offer.title")}
+              </FieldLabel>
+              <Input
+                id="offer-title"
+                {...register("title", {
+                  required: t("offer.title-mandatory") ?? true,
+                })}
+              />
+              {errors?.title?.message && (
+                <FieldError>{errors.title.message}</FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="offer-subtitle">
+                {t("offer.subtitle")}
+              </FieldLabel>
+              <Input id="offer-subtitle" {...register("subTitle")} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="offer-description">
+                {t("offer.description")}
+              </FieldLabel>
+              <Textarea
+                id="offer-description"
+                {...register("description")}
+                rows={4}
+              />
+            </Field>
+          </FieldGroup>
+          <Field orientation="horizontal">
+            <FieldLabel htmlFor="offer-offer">{t("offer.offer")}</FieldLabel>
+            <Controller
+              control={control}
+              name="offerId"
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={(value) => field.onChange(value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("offer.offer")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {offers.data?.map((offer) => (
+                      <SelectItem key={offer.id} value={offer.id}>
+                        {offer.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </Field>
+        </FieldSet>
       </div>
-      <div className="col-span-full mt-4 flex items-center justify-end gap-2">
-        <button
+      <Separator className="my-4" />
+      <div className="mt-4 flex items-center justify-end gap-2">
+        <Button
           type="button"
-          className="btn-outline btn btn-secondary"
+          variant="outline"
           onClick={(e) => {
             e.preventDefault();
             reset();
@@ -439,10 +487,8 @@ function OfferForm({
           }}
         >
           {tCommon("cancel")}
-        </button>
-        <button className="btn btn-primary" type="submit">
-          {tCommon("save")}
-        </button>
+        </Button>
+        <Button type="submit">{tCommon("save")}</Button>
       </div>
     </form>
   );
@@ -468,7 +514,7 @@ export const OfferDisplayCard = ({ pageId, clubId }: OfferDisplayProps) => {
   if (!querySection.data) return <div>Offers section unavailable</div>;
 
   return (
-    <div className="grid grid-flow-col justify-center gap-4 bg-base-200 p-4">
+    <div className="grid grid-flow-col justify-center gap-4 bg-muted p-4">
       {querySection.data?.elements
         .filter((e) => e.elementType === "CARD")
         .map((e) => (
@@ -511,7 +557,7 @@ function OfferContentCard({
     <div
       className={`card ${
         preview ? "card-compact w-full" : "w-96"
-      } bg-base-100 shadow-xl`}
+      } bg-card shadow-xl`}
     >
       <figure>
         {/* eslint-disable-next-line @next/next/no-img-element */}

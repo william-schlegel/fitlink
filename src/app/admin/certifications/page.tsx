@@ -8,8 +8,15 @@ import {
   DeleteCertificationGroup,
   UpdateCertificationGroup,
 } from "@/components/modals/manageCertification";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+  LayoutPageContent,
+} from "@/components/layoutPage";
+import { Badge, Card, CardContent } from "@/components/ui/shadcn";
+import { Item, ItemContent } from "@/components/ui/shadcn/item";
 import createLink, { createHref } from "@/lib/createLink";
-import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { getHref } from "@/lib/getHref";
@@ -46,15 +53,15 @@ export default async function CertificationsManagement({
       title={t("certification.manage-cg")}
       titleComponents={<CreateCertificationOrganism />}
     >
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={cgList}
           itemId={cgId}
           noItemsText={t("certification.no-cg")}
         />
 
         {cgId === "" ? null : <CGContent cgId={cgId} />}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }
@@ -88,12 +95,12 @@ async function CGContent({ cgId }: CGContentProps) {
           <h3>{t("certification.group-modules")}</h3>
           <div className="flex flex-row flex-wrap gap-2">
             {cgQuery?.modules?.map((module) => (
-              <div key={module.id} className="pill">
-                <span>{module.name}</span>
-                <span className="badge-primary badge">
-                  {module.activities.length}
-                </span>
-              </div>
+              <Card key={module.id} className="bg-primary/20">
+                <CardContent className="flex flex-row items-center justify-between gap-2">
+                  <span>{module.name}</span>
+                  <Badge variant="default">{module.activities.length}</Badge>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </article>
@@ -106,10 +113,13 @@ async function CGContent({ cgId }: CGContentProps) {
                   userId: coach.id,
                 })}
                 key={coach.id}
-                className="pill"
               >
-                <span>{coach.name}</span>
-                <span className="badge-primary badge">{coach.count}</span>
+                <Card className="bg-primary/20">
+                  <CardContent className="flex flex-row items-center justify-between gap-2">
+                    <span>{coach.name}</span>
+                    <Badge variant="default">{coach.count}</Badge>
+                  </CardContent>
+                </Card>
               </Link>
             ))}
           </div>

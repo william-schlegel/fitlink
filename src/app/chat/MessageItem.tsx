@@ -11,6 +11,8 @@ import { createPortal } from "react-dom";
 
 import { useMutation } from "convex/react";
 
+import { Trash } from "lucide-react";
+
 import { Id } from "../../../convex/_generated/dataModel";
 import Confirmation from "@/components/ui/confirmation";
 import { api } from "../../../convex/_generated/api";
@@ -72,7 +74,7 @@ export function MessageItem({ message, userId }: MessageItemProps) {
     >
       <div className="chat-header">
         <span className="text-xs opacity-50">
-          {userInfo.isLoading ? <Spinner size={12} /> : userInfo.data?.name}
+          {userInfo.isLoading ? <Spinner size="sm" /> : userInfo.data?.name}
         </span>
         <time className="text-xs opacity-50">
           {userInfo.isLoading ? (
@@ -83,7 +85,7 @@ export function MessageItem({ message, userId }: MessageItemProps) {
         </time>
       </div>
       <div
-        className="chat-bubble bg-base-300 text-base-content relative"
+        className="chat-bubble bg-muted text-foreground relative"
         ref={msgRef}
       >
         {message.content && <p>{message.content}</p>}
@@ -127,9 +129,11 @@ export function MessageItem({ message, userId }: MessageItemProps) {
             message={t("deleted-message-message")}
             title={t("deleted-message")}
             onConfirm={handleDelete}
-            buttonIcon={<i className="bx bx-trash" />}
-            variant="Icon-Only-Secondary"
-            buttonSize="xs"
+            buttonIcon={
+              <Trash className="fill-destructive stroke-destructive" />
+            }
+            variant="ghost"
+            buttonSize="icon"
           />
         </div>
       )}
@@ -178,7 +182,7 @@ const EmojiPicker = ({
 
   return createPortal(
     <div
-      className="absolute mb-2 flex gap-1 bg-base-100 p-2 rounded-lg shadow-lg z-10"
+      className="absolute mb-2 flex gap-1 bg-card p-2 rounded-lg shadow-lg z-10"
       style={{ top: position.top, left: position.left }}
     >
       {commonEmojis.map((emoji) => (

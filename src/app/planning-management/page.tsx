@@ -4,7 +4,12 @@ import { getTranslations } from "next-intl/server";
 import { CreatePlanning } from "@/components/modals/managePlanning";
 import { getPlanningsForClub } from "@/server/api/routers/planning";
 import { PlanningName } from "@/components/planningName";
-import { LayoutPage } from "@/components/layoutPage";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+  LayoutPageContent,
+} from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { PlanningContent } from "./planningContent";
 import { getActualUser } from "@/lib/auth/server";
@@ -63,13 +68,13 @@ export default async function ClubPlanning({
       titleComponents={<SelectClub clubs={queryClubs} clubId={clubId} />}
     >
       <CreatePlanning clubId={clubId} />
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={planningList}
           itemId={planningId}
           noItemsText={t("no-plannings")}
         />
-        <LayoutPage.Content>
+        <LayoutPageContent>
           {planningId ? (
             <PlanningContent
               clubId={clubId}
@@ -77,8 +82,8 @@ export default async function ClubPlanning({
               userId={userId ?? user.id}
             />
           ) : null}
-        </LayoutPage.Content>
-      </LayoutPage.Main>
+        </LayoutPageContent>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

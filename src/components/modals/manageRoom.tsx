@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Controller,
   FormProvider,
   SubmitErrorHandler,
   SubmitHandler,
@@ -12,15 +13,31 @@ import { useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { toast } from "sonner";
+
 import { roomReservationEnum } from "@/db/schema/enums";
-import Modal, { TModalVariant } from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import { RESERVATIONS } from "@/lib/data";
 import { trpc } from "@/lib/trpc/client";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
+import Modal from "../ui/modal";
+
+import { Pencil, Plus, Trash } from "lucide-react";
+
+import {
+  Checkbox,
+  Field,
+  FieldLabel,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/shadcn";
+
+import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type RoomFormValues = {
   name: string;
@@ -31,12 +48,14 @@ type RoomFormValues = {
 
 type CreateRoomProps = {
   siteId?: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export const CreateRoom = ({
   siteId,
-  variant = "Icon-Outlined-Primary",
+  variant = "outline",
+  buttonSize = "icon",
 }: CreateRoomProps) => {
   const t = useTranslations("club");
   const utils = trpc.useUtils();
@@ -75,8 +94,10 @@ export const CreateRoom = ({
       <Modal
         title={t("room.new")}
         handleSubmit={form.handleSubmit(onSubmit, onError)}
-        buttonIcon={<i className="bx bx-plus bx-sm" />}
+        buttonIcon={<Plus />}
         variant={variant}
+        buttonSize={buttonSize}
+        size="sm"
       >
         <h3>{t("room.new")}</h3>
         <FormProvider {...form}>
@@ -90,13 +111,15 @@ export const CreateRoom = ({
 type PropsUpdateDelete = {
   siteId: string;
   roomId: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export const UpdateRoom = ({
   siteId,
   roomId,
-  variant = "Icon-Outlined-Primary",
+  variant = "outline",
+  buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
   const queryRoom = trpc.sites.getRoomById.useQuery(roomId);
@@ -142,8 +165,9 @@ export const UpdateRoom = ({
       <Modal
         title={t("room.update")}
         handleSubmit={form.handleSubmit(onSubmit, onError)}
-        buttonIcon={<i className="bx bx-edit bx-sm" />}
+        buttonIcon={<Pencil />}
         variant={variant}
+        buttonSize={buttonSize}
       >
         <h3>{t("room.update")}</h3>
         {queryRoom.isLoading ? (
@@ -161,7 +185,8 @@ export const UpdateRoom = ({
 export const DeleteRoom = ({
   roomId,
   siteId,
-  variant = "Icon-Outlined-Secondary",
+  variant = "destructive",
+  buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
   const t = useTranslations("club");
@@ -180,11 +205,12 @@ export const DeleteRoom = ({
     <Confirmation
       message={t("room.deletion-message")}
       title={t("room.deletion")}
-      buttonIcon={<i className="bx bx-trash bx-sm" />}
+      buttonIcon={<Trash />}
       onConfirm={() => {
         deleteRoom.mutate(roomId);
       }}
       variant={variant}
+      buttonSize={buttonSize}
     />
   );
 };
@@ -196,6 +222,7 @@ function RoomForm() {
     formState: { errors },
     register,
     getValues,
+    control,
   } = useFormContext<RoomFormValues>();
   return (
     <SimpleForm
@@ -214,33 +241,52 @@ function RoomForm() {
         },
         {
           name: "reservation",
+          label: t("room.reservation"),
           component: (
-            <select
-              defaultValue={getValues("reservation")}
-              {...register("reservation")}
-            >
-              {RESERVATIONS.map((reservation) => (
-                <option key={reservation.value} value={reservation.value}>
-                  {t(reservation.label)}
-                </option>
-              ))}
-            </select>
+            <Controller
+              control={control}
+              name="reservation"
+              render={({ field }) => (
+                <Select
+                  defaultValue={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RESERVATIONS.map((reservation) => (
+                      <SelectItem
+                        key={reservation.value}
+                        value={reservation.value}
+                      >
+                        {t(reservation.label)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           ),
         },
         {
           name: "unavailable",
           component: (
-            <div className="form-control">
-              <label className="label cursor-pointer justify-start gap-4">
-                <input
-                  type="checkbox"
-                  className="checkbox-primary checkbox"
-                  {...register("unavailable")}
-                  defaultChecked={false}
-                />
-                <span className="label-text">{t("room.unavailable")}</span>
-              </label>
-            </div>
+            <Controller
+              control={control}
+              name="unavailable"
+              render={({ field }) => (
+                <Field orientation="horizontal">
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                  <FieldLabel htmlFor="unavailable">
+                    {t("room.unavailable")}
+                  </FieldLabel>
+                </Field>
+              )}
+            />
           ),
         },
       ]}

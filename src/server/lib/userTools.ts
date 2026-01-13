@@ -35,7 +35,7 @@ export async function hasRole(roles: RoleEnum[], throwError: boolean = true) {
 }
 
 export function getRoleName(internalRole: RoleEnum) {
-  return ROLE_LIST.find((r) => r.value === internalRole)?.label ?? "???";
+  return ROLE_LIST.find((r) => r.value === internalRole)?.label ?? "MEMBER";
 }
 
 // ==================== SYNC AUTH HELPERS (use with tRPC ctx.user) ====================

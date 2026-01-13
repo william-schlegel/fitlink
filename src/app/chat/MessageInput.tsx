@@ -1,17 +1,27 @@
 "use client";
 
 import { useState } from "react";
-
 import Image from "next/image";
-
 import { useTranslations } from "next-intl";
-
 import { useMutation } from "convex/react";
+import { Send, ImagePlus, X } from "lucide-react";
 
 import { Id } from "../../../convex/_generated/dataModel";
 import { UploadButton } from "@/components/uploadthing";
 import { api } from "../../../convex/_generated/api";
-import ButtonIcon from "@/components/ui/buttonIcon";
+import { Button } from "@/components/ui/shadcn/button";
+import { Input } from "@/components/ui/shadcn/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/shadcn/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/shadcn/dropdown-menu";
 
 type MessageInputProps = {
   roomId: Id<"chatRooms">;
@@ -55,45 +65,57 @@ export function MessageInput({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2 p-4">
       {replyToMessageId && (
-        <div className="alert alert-info">
+        <div className="flex items-center justify-between rounded-md bg-info/10 border border-info p-2 text-sm">
           <span>Replying to message</span>
           {onReplyCancel && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={onReplyCancel}
-              className="btn btn-sm btn-ghost"
             >
               Cancel
-            </button>
+            </Button>
           )}
         </div>
       )}
       <div className="flex gap-2 items-center">
-        <input
+        <Input
           type="text"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={t("message-placeholder")}
-          className="input input-bordered flex-1"
+          className="flex-1"
         />
-        <button type="submit">
-          <ButtonIcon
-            iconComponent={<i className="bx bx-send" />}
-            title={t("send")}
-          />
-        </button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button type="submit" variant="outline" size="icon">
+                <Send className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("send")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
-        <div className="dropdown dropdown-top dropdown-end">
-          <div tabIndex={0} role="button" className="m-1">
-            <ButtonIcon
-              iconComponent={<i className="bx bx-image" />}
-              title={t("image-upload")}
-            />
-          </div>
-          <div
-            tabIndex={-1}
-            className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
-          >
+        <DropdownMenu>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" size="icon">
+                    <ImagePlus className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("image-upload")}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <DropdownMenuContent align="end" className="w-52 p-2">
             <UploadButton
               buttonText={t("image-upload")}
               endpoint="messageAttachment"
@@ -110,8 +132,8 @@ export function MessageInput({
                 alert("Failed to upload image");
               }}
             />
-          </div>
-        </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       {imageUrls.length > 0 && (
         <div className="flex gap-2 flex-wrap">
@@ -124,15 +146,17 @@ export function MessageInput({
                 height={100}
                 className="rounded-lg"
               />
-              <button
+              <Button
                 type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
                 onClick={() =>
                   setImageUrls((prev) => prev.filter((_, i) => i !== idx))
                 }
-                className="btn btn-xs btn-circle btn-error absolute top-0 right-0"
               >
-                ×
-              </button>
+                <X className="h-3 w-3" />
+              </Button>
             </div>
           ))}
         </div>

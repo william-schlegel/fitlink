@@ -12,7 +12,7 @@ export default async function OfferPage({
   if (!isCUID(offerId)) return notFound();
   return (
     <div>
-      <section className="bg-base-100 py-48">
+      <section className="bg-background py-48">
         <div className="container mx-auto">
           <CoachOfferPage offerId={offerId} withContact />
         </div>

@@ -9,6 +9,8 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import "./globals.css";
 
+import { Toaster } from "@/components/ui/shadcn/sonner";
+
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -27,7 +29,7 @@ export default async function RootLayout({
   const user = await getActualUser();
 
   return (
-    <html lang={locale} data-theme="cupcake">
+    <html lang={locale}>
       <head>
         <link
           href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
@@ -39,10 +41,11 @@ export default async function RootLayout({
           <ErrorProviders>
             <ConvexClientProvider>
               <TRPCProvider>
-                <div className="bg-base-200 grid min-h-screen grid-rows-[auto_1fr_auto]">
+                <div className="grid min-h-screen grid-rows-[auto_1fr_auto]">
                   <Navbar userId={user?.id} internalRole={user?.internalRole} />
                   <main>{children}</main>
                   <Footer />
+                  <Toaster />
                 </div>
               </TRPCProvider>
             </ConvexClientProvider>

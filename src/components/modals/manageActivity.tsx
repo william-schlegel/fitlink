@@ -1,19 +1,43 @@
 "use client";
 
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
-import { startTransition, useEffect, useState } from "react";
+import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { Fragment, startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { useRouter } from "next/navigation";
 
-import Modal, { getButtonSize, TModalVariant } from "../ui/modal";
+import { Pencil, Plus, Trash } from "lucide-react";
+
+import { toast } from "sonner";
+
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
+import Modal, { getButtonSize } from "../ui/modal";
+import { Checkbox } from "../ui/shadcn/checkbox";
 import Confirmation from "../ui/confirmation";
-import { ButtonSize } from "../ui/buttonIcon";
+import { Input } from "../ui/shadcn/input";
 import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
+
+import {
+  Button,
+  type ButtonSize,
+  type ButtonVariant,
+} from "@/components/ui/shadcn/button";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "../ui/shadcn/input-group";
+import { Separator } from "../ui/separator";
+import { Item } from "../ui/shadcn/item";
 
 type AddActivityProps = {
   userId: string;
@@ -72,26 +96,24 @@ const AddActivity = ({
       title={t("activity.select-activities")}
       handleSubmit={onSubmit}
       submitButtonText={t("activity.save-activity")}
-      buttonIcon={<i className="bx bx-plus bx-xs" />}
-      className="w-11/12 max-w-5xl"
+      buttonIcon={<Plus />}
     >
       <h3>{t("activity.select-club-activities")}</h3>
       <div className="flex gap-4">
         <aside className="space-y-4">
           <h4>{t("group.group")}</h4>
-          <div className="flex max-h-[70vh] flex-col flex-wrap rounded border border-secondary bg-base-100">
+          <div className="flex max-h-[70vh] flex-col flex-wrap rounded border border-border bg-card p-1">
             {queryGroups.data?.map((group) => (
-              <div
-                key={group.id}
-                className={`inline-flex cursor-pointer py-4 px-8 ${
-                  groupId === group.id
-                    ? "bg-primary text-primary-content"
-                    : "bg-base-100 text-base-content hover:bg-base-200"
-                }`}
-              >
-                <span tabIndex={0} onClick={() => setGroupId(group.id)}>
-                  {group.name}
-                </span>
+              <div key={group.id} className="flex items-center gap-2">
+                <Button
+                  asChild
+                  onClick={() => setGroupId(group.id)}
+                  className="w-full flex-1"
+                  variant={groupId === group.id ? "default" : "outline"}
+                  size="xl"
+                >
+                  <span>{group.name}</span>
+                </Button>
                 {withUpdate && !group.default && (
                   <>
                     <UpdateGroup groupId={group.id} userId={userId} />
@@ -170,7 +192,7 @@ function ActivityForm({
     control,
     reset,
   } = useForm<ActivityFormValues>();
-  const fields = useWatch({ control });
+  const noCalendar = useWatch({ control, name: "noCalendar" });
   const t = useTranslations();
 
   useEffect(() => {
@@ -183,43 +205,70 @@ function ActivityForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSuccess)} className="space-y-2">
-      <input
-        className="input-bordered input w-full"
-        {...register("name", { required: t("club.name-mandatory") ?? true })}
-      />
-      {errors.name && (
-        <p className="text-sm text-error">{errors.name.message}</p>
-      )}
-      <div className="form-control">
-        <label className="label cursor-pointer justify-start gap-4">
-          <input
-            type="checkbox"
-            className="checkbox-primary checkbox"
-            {...register("noCalendar")}
-          />
-          <span className="label-text">{t("club.activity.no-calendar")}</span>
-        </label>
-      </div>
-      <div className="grid grid-cols-[auto_1fr] gap-4">
-        {fields.noCalendar ? (
-          <>
-            <label>{t("club.activity.duration")}</label>
-            <div className="input-group">
-              <input
-                type="text"
-                className="input-bordered input w-full"
-                {...register("reservationDuration", { valueAsNumber: true })}
-              />
-              <span>{t("club.activity.minutes")}</span>
-            </div>
-          </>
-        ) : null}
-      </div>
-      <div className="col-span-2 flex items-center justify-end gap-2">
-        <button
+    <form onSubmit={handleSubmit(onSuccess)}>
+      <FieldSet>
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="activity-name" className="required">
+              {t("club.activity.name")}
+            </FieldLabel>
+            <Input
+              id="activity-name"
+              {...register("name", {
+                required: t("club.name-mandatory") ?? true,
+              })}
+            />
+            {errors.name && <FieldError>{errors.name.message}</FieldError>}
+          </Field>
+          <Field orientation="horizontal">
+            <Controller
+              control={control}
+              name="noCalendar"
+              render={({ field }) => (
+                <>
+                  <Checkbox
+                    id="activity-no-calendar"
+                    checked={field.value}
+                    onCheckedChange={(checked) =>
+                      field.onChange(Boolean(checked))
+                    }
+                  />
+                  <FieldLabel
+                    htmlFor="activity-no-calendar"
+                    className="font-normal"
+                  >
+                    {t("club.activity.no-calendar")}
+                  </FieldLabel>
+                </>
+              )}
+            />
+          </Field>
+          {!noCalendar ? (
+            <Field>
+              <FieldLabel htmlFor="activity-duration">
+                {t("club.activity.duration")}
+              </FieldLabel>
+              <InputGroup>
+                <InputGroupInput
+                  id="activity-duration"
+                  type="number"
+                  {...register("reservationDuration", { valueAsNumber: true })}
+                  className="w-auto flex-1"
+                />
+                <InputGroupAddon align="inline-end">
+                  {" "}
+                  {t("club.activity.minutes")}
+                </InputGroupAddon>
+              </InputGroup>
+            </Field>
+          ) : null}
+        </FieldGroup>
+      </FieldSet>
+      <Separator className="my-4" />
+      <div className="flex items-center justify-end gap-2">
+        <Button
           type="button"
-          className="btn-outline btn btn-secondary"
+          variant="outline"
           onClick={(e) => {
             e.preventDefault();
             reset();
@@ -227,10 +276,8 @@ function ActivityForm({
           }}
         >
           {t("common.cancel")}
-        </button>
-        <button className="btn btn-primary" type="submit">
-          {t("common.save")}
-        </button>
+        </Button>
+        <Button type="submit">{t("common.save")}</Button>
       </div>
     </form>
   );
@@ -264,6 +311,7 @@ const NewActivity = ({ clubId, groupId }: NewActivityProps) => {
       onCloseModal={() => setClose(false)}
       closeModal={close}
       cancelButtonText=""
+      size="sm"
     >
       <h3>
         <span>{t("activity.create-group")}</span>
@@ -313,12 +361,13 @@ function UpdateActivity({ clubId, groupId, id }: UpdateActivityProps) {
   return (
     <Modal
       title={t("activity.update")}
-      buttonIcon={<i className="bx bx-edit bx-xs" />}
-      variant={"Icon-Only-Primary"}
-      buttonSize="xs"
+      buttonIcon={<Pencil />}
+      variant="ghost"
+      buttonSize="icon"
       onCloseModal={() => setClose(false)}
       closeModal={close}
       cancelButtonText=""
+      size="sm"
     >
       <h3>
         <span>{t("activity.update")}</span>
@@ -360,20 +409,20 @@ function DeleteActivity({ clubId, activityId }: DeleteActivityProps) {
       title={t("activity.deletion")}
       message={t("activity.deletion-message")}
       onConfirm={() => deleteActivity.mutate({ clubId, activityId })}
-      buttonIcon={<i className="bx bx-trash bx-xs" />}
-      variant={"Icon-Only-Secondary"}
+      buttonIcon={<Trash className="stroke-destructive" />}
+      variant="ghost"
       textConfirmation={t("activity.deletion-confirmation")}
-      buttonSize="xs"
+      buttonSize="icon"
     />
   );
 }
 
 type NewGroupProps = {
   userId?: string;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
 };
 
-export const NewGroup = ({ userId, variant = "Primary" }: NewGroupProps) => {
+export const NewGroup = ({ userId, variant = "default" }: NewGroupProps) => {
   const utils = trpc.useUtils();
   const router = useRouter();
   const createGroup = trpc.activities.createGroup.useMutation({
@@ -405,16 +454,25 @@ export const NewGroup = ({ userId, variant = "Primary" }: NewGroupProps) => {
   }
 
   return (
-    <Modal title={t("group.new")} variant={variant} handleSubmit={addNewGroup}>
-      <h3>Créer un nouveau groupe d&apos;activités</h3>
-      <input
-        className="input-bordered input w-full"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      {error && (
-        <p className="text-sm text-error">Le nom doit être renseigné</p>
-      )}
+    <Modal
+      title={t("group.new")}
+      variant={variant}
+      handleSubmit={addNewGroup}
+      size="sm"
+    >
+      <h3>{t("group.create-group")}</h3>
+      <Field>
+        <FieldLabel htmlFor="group-name">
+          {t("club.activity-group.name")}
+        </FieldLabel>
+        <Input
+          id="group-name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      </Field>
+      {error && <FieldError>{t("name-mandatory")}</FieldError>}
     </Modal>
   );
 };
@@ -422,15 +480,15 @@ export const NewGroup = ({ userId, variant = "Primary" }: NewGroupProps) => {
 type UpdateGroupProps = {
   userId?: string;
   groupId: string;
-  variant?: TModalVariant;
-  size?: ButtonSize;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export function UpdateGroup({
   userId,
   groupId,
-  variant = "Icon-Outlined-Secondary",
-  size = "sm",
+  variant = "outline",
+  buttonSize = "icon",
 }: UpdateGroupProps) {
   const utils = trpc.useContext();
   const groupQuery = trpc.activities.getActivityGroupById.useQuery(groupId, {
@@ -478,37 +536,39 @@ export function UpdateGroup({
     <Modal
       title={t("group.update")}
       handleSubmit={update}
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize(size)}`} />}
+      buttonIcon={<Pencil />}
       variant={variant}
-      buttonSize={size}
+      buttonSize={buttonSize}
+      size="sm"
     >
       <h3>
         {t("group.update")}&nbsp;
-        <span className="text-primary">{groupQuery.data?.name}</span>
+        <span className="text-accent-foreground">{groupQuery.data?.name}</span>
       </h3>
       {groupQuery.isLoading ? (
         <Spinner />
       ) : (
         <>
-          <input
-            className="input-bordered input w-full"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          {error && <p className="text-sm text-error">{t("name-mandatory")}</p>}
+          <Field>
+            <FieldLabel htmlFor="update-group-name">
+              {t("club.activity-group.name")}
+            </FieldLabel>
+            <Input
+              id="update-group-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            {error && <FieldError>{t("name-mandatory")}</FieldError>}
+          </Field>
           {userId ? null : (
-            <div className="form-control">
-              <label className="label cursor-pointer justify-start gap-4">
-                <input
-                  type="checkbox"
-                  checked={defaultGroup}
-                  className="checkbox-primary checkbox"
-                  onChange={(e) => setDefaultGroup(e.currentTarget.checked)}
-                  disabled={!groupQuery.data?.coachId}
-                />
-                <span className="label-text">{t("group.default")}</span>
-              </label>
-            </div>
+            <Field orientation="horizontal">
+              <Checkbox
+                checked={defaultGroup}
+                onCheckedChange={(checked) => setDefaultGroup(Boolean(checked))}
+                disabled={!groupQuery.data?.coachId}
+              />
+              <FieldLabel>{t("group.default")}</FieldLabel>
+            </Field>
           )}
         </>
       )}
@@ -519,15 +579,15 @@ export function UpdateGroup({
 type DeleteGroupProps = {
   userId?: string;
   groupId: string;
-  variant?: TModalVariant;
-  size?: ButtonSize;
+  variant?: ButtonVariant;
+  buttonSize?: ButtonSize;
 };
 
 export function DeleteGroup({
   groupId,
   userId,
-  size = "sm",
-  variant = "Icon-Outlined-Secondary",
+  buttonSize = "icon",
+  variant = "destructive",
 }: DeleteGroupProps) {
   const utils = trpc.useUtils();
   const deleteGroup = trpc.activities.deleteGroup.useMutation({
@@ -547,10 +607,10 @@ export function DeleteGroup({
       title={t("group.deletion")}
       message={t("group.deletion-message")}
       onConfirm={() => deleteGroup.mutate({ groupId })}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize(size)}`} />}
+      buttonIcon={<Trash />}
       variant={variant}
       textConfirmation={t("group.deletion-confirmation")}
-      buttonSize={size}
+      buttonSize={buttonSize}
     />
   );
 }

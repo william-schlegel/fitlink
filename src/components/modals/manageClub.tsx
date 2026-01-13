@@ -1,6 +1,17 @@
 "use client";
 
 import {
+  Plus,
+  Edit,
+  Trash2,
+  MapPin,
+  ExternalLink,
+  Search,
+  Mail,
+  Pencil,
+  Trash,
+} from "lucide-react";
+import {
   SubmitErrorHandler,
   SubmitHandler,
   useForm,
@@ -16,19 +27,28 @@ import Link from "next/link";
 
 import { useMutation } from "convex/react";
 
+import { toast } from "sonner";
+
+import { Field, FieldError, FieldLabel } from "../ui/shadcn";
+import { Textarea } from "@/components/ui/shadcn/textarea";
+import { Checkbox } from "@/components/ui/shadcn/checkbox";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { Button } from "@/components/ui/shadcn/button";
 import CollapsableGroup from "../ui/collapsableGroup";
 import { api } from "../../../convex/_generated/api";
+import { Label } from "@/components/ui/shadcn/label";
+import { Input } from "@/components/ui/shadcn/input";
+import { Badge } from "@/components/ui/shadcn/badge";
 import AddressSearch from "../ui/addressSearch";
 import FindCoach from "../sections/findCoach";
+import DeleteButton from "../ui/deleteButton";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { useUser } from "@/lib/auth/client";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
+import { isCUID, cn } from "@/lib/utils";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
 import Rating from "../ui/rating";
 import Modal from "../ui/modal";
 import { env } from "@/env";
@@ -67,14 +87,16 @@ export const CreateClub = () => {
   return (
     <Modal
       title={t("club.create-new")}
-      buttonIcon={<i className="bx bx-plus bx-sm" />}
+      buttonIcon={<Plus className="h-5 w-5" />}
       className="w-11/12 max-w-4xl"
       cancelButtonText=""
       closeModal={closeModal}
       onCloseModal={() => setCloseModal(false)}
     >
       <h3>{t("club.create-new")}</h3>
-      <p className="py-4">{t("club.enter-new-club-info")}</p>
+      <p className="py-4 text-base-content/70">
+        {t("club.enter-new-club-info")}
+      </p>
       <ClubForm onSubmit={onSubmit} onCancel={() => setCloseModal(true)} />
     </Modal>
   );
@@ -136,8 +158,9 @@ export const UpdateClub = ({ clubId }: PropsUpdateDelete) => {
   return (
     <Modal
       title={t("club.update")}
-      buttonIcon={<i className="bx bx-edit bx-sm" />}
-      variant={"Icon-Outlined-Primary"}
+      buttonIcon={<Pencil />}
+      variant="outline"
+      buttonSize="icon"
       cancelButtonText=""
       closeModal={closeModal}
       onCloseModal={() => setCloseModal(false)}
@@ -223,53 +246,52 @@ function ClubForm({ onSubmit, onCancel, update, initialData }: ClubFormProps) {
   return (
     <form
       onSubmit={handleSubmit(onSubmitForm, onError)}
-      className={`${
-        update || !fields.isSite ? "" : "grid grid-cols-2"
-      } items-start gap-4`}
+      className={cn(
+        "items-start gap-4",
+        update || !fields.isSite ? "" : "grid grid-cols-2",
+      )}
     >
-      <div className="grid grid-cols-[auto_1fr] items-center gap-2">
-        <label className="required">{t("club.name")}</label>
-        <div>
-          <input
+      <div className="space-y-4">
+        <Field>
+          <FieldLabel htmlFor="name" className="required">
+            {t("club.name")}
+          </FieldLabel>
+          <Input
+            id="name"
             {...register("name", {
               required: t("name-mandatory") ?? true,
             })}
-            type={"text"}
-            className="input-bordered input w-full"
+            type="text"
           />
-          {errors.name ? (
-            <p className="text-sm text-error">{errors.name.message}</p>
-          ) : null}
-        </div>
-        {update ? null : (
-          <div className="form-control col-span-2">
-            <label className="label cursor-pointer justify-start gap-4">
-              <input
-                type="checkbox"
-                className="checkbox-primary checkbox"
-                {...register("isSite")}
-                defaultChecked={true}
-              />
-              <span className="label-text">{t("club.is-site")}</span>
-            </label>
-          </div>
+          {errors.name && <FieldError>{errors.name.message}</FieldError>}
+        </Field>
+        {!update && (
+          <Field orientation="horizontal">
+            <Checkbox
+              id="isSite"
+              checked={fields.isSite}
+              onCheckedChange={(checked) => setValue("isSite", !!checked)}
+            />
+            <FieldLabel htmlFor="isSite">{t("club.is-site")}</FieldLabel>
+          </Field>
         )}
 
-        <label className="required">{t("club.address")}</label>
-        <div>
-          <input
+        <Field>
+          <FieldLabel htmlFor="address" className="required">
+            {t("club.address")}
+          </FieldLabel>
+          <Input
+            id="address"
             {...register("address", {
               required: t("address-mandatory") ?? true,
             })}
-            type={"text"}
-            className="input-bordered input w-full"
+            type="text"
           />
-          {errors.address ? (
-            <p className="text-sm text-error">{errors.address.message}</p>
-          ) : null}
-        </div>
+          {errors.address && <FieldError>{errors.address.message}</FieldError>}
+        </Field>
+
         <div className="col-span-2 flex flex-col items-center justify-start gap-4">
-          <div className="w-full ">
+          <div className="w-full">
             <UploadButton
               endpoint="imageAttachment"
               onClientUploadComplete={(result) =>
@@ -278,40 +300,30 @@ function ClubForm({ onSubmit, onCancel, update, initialData }: ClubFormProps) {
               buttonText={t("club.logo")}
             />
           </div>
-          {fields.logoUrl ? (
+          {fields.logoUrl && (
             <div className="relative w-40 max-w-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={fields.logoUrl} alt="" />
-              <button
+              <img src={fields.logoUrl} alt="" className="rounded-md" />
+              <DeleteButton
                 onClick={handleDeleteImage}
-                className="absolute right-2 bottom-2 z-10"
-              >
-                <ButtonIcon
-                  iconComponent={<i className="bx bx-trash" />}
-                  title={t("club.delete-logo")}
-                  buttonVariant="Icon-Secondary"
-                  buttonSize="sm"
-                />
-              </button>
+                className="absolute right-2 bottom-2"
+              />
             </div>
-          ) : null}
+          )}
         </div>
       </div>
-      {!update && fields.isSite ? (
-        <div className="flex flex-col gap-2">
-          <div className="grid grid-cols-[auto_1fr] items-center gap-2">
-            <AddressSearch
-              label={t("club.search-address")}
-              defaultAddress={fields.searchAddress}
-              onSearch={(adr) => {
-                setValue("searchAddress", adr.address);
-                setValue("latitude", adr.lat);
-                setValue("longitude", adr.lng);
-              }}
-              className="col-span-2"
-              required
-            />
-          </div>
+      {!update && fields.isSite && (
+        <div className="flex flex-col gap-4">
+          <AddressSearch
+            label={t("club.search-address")}
+            defaultAddress={fields.searchAddress}
+            onSearch={(adr) => {
+              setValue("searchAddress", adr.address);
+              setValue("latitude", adr.lat);
+              setValue("longitude", adr.lng);
+            }}
+            required
+          />
           <MapComponent
             initialViewState={{ zoom: 8 }}
             style={{ width: "100%", height: "20rem" }}
@@ -326,24 +338,23 @@ function ClubForm({ onSubmit, onCancel, update, initialData }: ClubFormProps) {
               latitude={fields.latitude ?? LATITUDE}
               anchor="bottom"
             >
-              <i className="bx bx-pin bx-sm text-secondary" />
+              <MapPin className="h-6 w-6 text-secondary" />
             </Marker>
           </MapComponent>
         </div>
-      ) : null}
-      <div className="col-span-2 flex items-center justify-end gap-2">
-        <button
-          className="btn btn-outline btn-secondary"
+      )}
+      <div className="col-span-2 flex items-center justify-end gap-2 mt-4">
+        <Button
+          type="button"
+          variant="outline"
           onClick={(e) => {
             e.preventDefault();
             onCancel();
           }}
         >
           {t2("cancel")}
-        </button>
-        <button className="btn btn-primary" type="submit">
-          {t2("save")}
-        </button>
+        </Button>
+        <Button type="submit">{t2("save")}</Button>
       </div>
     </form>
   );
@@ -373,8 +384,9 @@ export const DeleteClub = ({ clubId }: PropsUpdateDelete) => {
       onConfirm={() => {
         deleteClub.mutate(clubId);
       }}
-      buttonIcon={<i className="bx bx-trash bx-sm" />}
-      variant={"Icon-Outlined-Secondary"}
+      buttonIcon={<Trash />}
+      variant="destructive"
+      buttonSize="icon"
     />
   );
 };
@@ -382,8 +394,8 @@ export const DeleteClub = ({ clubId }: PropsUpdateDelete) => {
 export default CreateClub;
 
 const AddCoachToClubSteps = [
-  { content: String.fromCodePoint(0x1f50d), label: "coach.search" },
-  { content: String.fromCodePoint(0x2709), label: "coach.write" },
+  { content: <Search />, label: "coach.search" },
+  { content: <Mail />, label: "coach.write" },
 ];
 
 type AddCoachToClubProps = { clubId: string; userId: string };
@@ -427,60 +439,69 @@ export const AddCoachToClub = ({ clubId, userId }: AddCoachToClubProps) => {
     <Modal
       title={t("coach.add")}
       closeModal={closeModal}
-      buttonIcon={<i className="bx bx-plus bx-sm" />}
-      variant={"Primary"}
-      className="w-11/12 max-w-4xl @container"
+      buttonIcon={<Plus />}
+      variant="default"
       onCloseModal={() => {
         setCloseModal(false);
         setStep(0);
       }}
     >
       <h3>{t("coach.find")}</h3>
-      <div className="grid grid-cols-[auto,1fr] gap-2">
-        <ul className="steps">
+      <div className="grid grid-cols-[auto_1fr] gap-4">
+        <div className="flex flex-col gap-2">
           {AddCoachToClubSteps.map((s, idx) => (
-            <li
+            <div
               key={idx}
-              data-content={s.content}
-              className={`step ${idx <= step ? "step-primary" : ""}`}
+              className={cn(
+                "flex items-center gap-2 p-4 rounded-md",
+                idx <= step ? "bg-primary/10" : "bg-muted",
+              )}
             >
-              <span className={idx === step ? "font-bold text-primary" : ""}>
+              {s.content}
+              <span
+                className={cn(
+                  "text-sm",
+                  idx === step && "font-bold text-primary",
+                )}
+              >
                 {t(s.label)}
               </span>
-            </li>
+            </div>
           ))}
-        </ul>
-        {step === 0 ? (
+        </div>
+        {step === 0 && (
           <FindCoach
             onSelectMultiple={(ids) => {
               setCoachIds(ids);
               setStep((prev) => prev + 1);
             }}
           />
-        ) : null}
-        {step === 1 ? (
+        )}
+        {step === 1 && (
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSendMessage();
             }}
+            className="space-y-4"
           >
-            <label className="required w-fit">{t("coach.message")}</label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="field-sizing-content"
-              rows={4}
-              placeholder={t("coach.message-placeholder") ?? ""}
-              required
-            />
-            <div className="mt-4 flex justify-end gap-2">
-              <button className="btn btn-primary" type="submit">
-                {t("coach.write")}
-              </button>
+            <div className="space-y-2">
+              <Label className="after:content-['*'] after:text-error after:ml-0.5">
+                {t("coach.message")}
+              </Label>
+              <Textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={4}
+                placeholder={t("coach.message-placeholder") ?? ""}
+                required
+              />
+            </div>
+            <div className="flex justify-end">
+              <Button type="submit">{t("coach.write")}</Button>
             </div>
           </form>
-        ) : null}
+        )}
       </div>
     </Modal>
   );
@@ -511,7 +532,7 @@ export function CoachDataPresentation({
   const t = useTranslations("club");
   return (
     <>
-      {url ? (
+      {url && (
         <Image
           src={url}
           width={300}
@@ -520,49 +541,53 @@ export function CoachDataPresentation({
           style={{ objectFit: "contain" }}
           className="rounded-md shadow"
         />
-      ) : null}
+      )}
 
-      <div className="flex flex-col gap-2">
-        <label>{t("activity.activities")}</label>
-        <div className="flex flex-wrap gap-2">
-          {activityGroups.map((ag) => (
-            <span key={ag.id} className="pill bg-base-100">
-              {ag.name}
-            </span>
-          ))}
+      <div className="flex flex-col gap-3">
+        <div>
+          <h3>{t("activity.activities")}</h3>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {activityGroups.map((ag) => (
+              <Badge key={ag.id} variant="outline">
+                {ag.name}
+              </Badge>
+            ))}
+          </div>
         </div>
-        <label>{t("coach.certifications")}</label>
-        <div className="flex flex-wrap gap-2">
-          {certifications.map((cert) => (
-            <CollapsableGroup
-              key={cert.id}
-              groupName={cert.name}
-              className="bg-base-100 normal-case"
-            >
-              {cert.modules.map((mod) => (
-                <span key={mod.id} className="pill pill-xs">
-                  {mod.name}
-                </span>
-              ))}
-            </CollapsableGroup>
-          ))}
+        <div>
+          <h3>{t("coach.certifications")}</h3>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {certifications.map((cert) => (
+              <CollapsableGroup
+                key={cert.id}
+                groupName={cert.name}
+                className="bg-card"
+              >
+                {cert.modules.map((mod) => (
+                  <Badge key={mod.id} variant="secondary" className="text-xs">
+                    {mod.name}
+                  </Badge>
+                ))}
+              </CollapsableGroup>
+            ))}
+          </div>
         </div>
         <div className="flex items-center gap-4">
-          <label>{t("coach.rating")}</label>
+          <h3>{t("coach.rating")}</h3>
           <Rating note={rating} />
         </div>
-        {pageId ? (
-          <Link
-            href={`/presentation-page/coach/${id}/${pageId}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <button className="btn btn-primary flex items-center gap-4">
-              <span>{t("coach.view-page")}</span>
-              <i className="bx bx-link-external bx-xs" />
-            </button>
-          </Link>
-        ) : null}
+        {pageId && (
+          <Button asChild className="w-fit gap-2">
+            <Link
+              href={`/presentation-page/coach/${id}/${pageId}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t("coach.view-page")}
+              <ExternalLink className="h-4 w-4" />
+            </Link>
+          </Button>
+        )}
       </div>
     </>
   );

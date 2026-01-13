@@ -16,7 +16,7 @@ export default async function CoachPage() {
   return (
     <div>
       <Title title={t("coach-title")} />
-      <section className="hero bg-base-100">
+      <section className="hero bg-card">
         <div className="hero-content py-48 text-center">
           <div className="max-w-md">
             <h1 className="text-5xl font-bold">{t("coach-title")}</h1>
@@ -24,7 +24,7 @@ export default async function CoachPage() {
           </div>
         </div>
       </section>
-      <section className="bg-base-100">
+      <section className="bg-card">
         <div className="container mx-auto">
           <h2 className="pt-12">{t("features.coach")}</h2>
           <FeatureContainer>
@@ -49,7 +49,7 @@ export default async function CoachPage() {
           </FeatureContainer>
         </div>
       </section>
-      <section className="bg-base-200">
+      <section className="bg-muted">
         <div className="container mx-auto">
           <h2 className="pt-12">{t("pricing.usage")}</h2>
           <p className="alert alert-info">{t("pricing.try-offer")}</p>

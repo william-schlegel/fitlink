@@ -22,7 +22,7 @@ export default function SendMessage({
       title={t("notification.send-message")}
       submitButtonText={t("notification.send-message")}
       buttonIcon={<i className="bx bx-envelope bx-sm" />}
-      variant="Outlined-Primary"
+      variant="outline"
       className="w-2/3 max-w-xl"
       cancelButtonText=""
       onCloseModal={() => setCloseModal(true)}

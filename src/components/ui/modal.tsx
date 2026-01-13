@@ -1,18 +1,29 @@
 "use client";
 
-import { type ReactNode, useRef, useId, useEffect, useCallback } from "react";
+import { type ReactNode, useState, useEffect, useCallback } from "react";
 import { type FieldErrors } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { twMerge } from "tailwind-merge";
 
-import { type ButtonSize, type TIconButtonVariant } from "./buttonIcon";
-
-export type TModalVariant =
-  | TIconButtonVariant
-  | "Primary"
-  | "Secondary"
-  | "Outlined-Primary"
-  | "Outlined-Secondary";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogSize,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/shadcn/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/shadcn/tooltip";
+import {
+  Button,
+  type ButtonSize,
+  type ButtonVariant,
+} from "@/components/ui/shadcn/button";
+import { cn } from "@/lib/utils";
 
 type Props = {
   title: string | undefined;
@@ -25,11 +36,12 @@ type Props = {
   buttonIcon?: ReactNode;
   onOpenModal?: () => void;
   onCloseModal?: () => void;
-  variant?: TModalVariant;
+  variant?: ButtonVariant;
   className?: string;
   buttonClassName?: string;
   buttonSize?: ButtonSize;
   closeModal?: boolean;
+  size?: DialogSize;
 };
 
 export default function Modal({
@@ -42,141 +54,118 @@ export default function Modal({
   errors,
   buttonIcon,
   onOpenModal,
-  variant = "Primary",
+  variant = "default",
   className = "",
   buttonClassName = "",
-  buttonSize = "md",
+  buttonSize = "default",
   closeModal,
   onCloseModal,
+  size = "lg",
 }: Props) {
-  const closeRef = useRef<HTMLInputElement>(null);
-  const modalId = useId();
+  const [open, setOpen] = useState(false);
   const t = useTranslations("common");
 
   const close = useCallback(() => {
-    if (!closeRef.current) return;
-    closeRef.current.checked = false;
+    setOpen(false);
     if (typeof onCloseModal === "function") onCloseModal();
   }, [onCloseModal]);
 
   useEffect(() => {
-    if (closeModal) close();
+    if (closeModal) {
+      Promise.resolve().then(() => close());
+    }
   }, [closeModal, close]);
 
   const handleClickSubmit = () => {
     if (typeof errors === "object" && Object.keys(errors).length > 0) return;
     close();
-    if (typeof handleSubmit === "function") handleSubmit();
+    handleSubmit?.();
   };
 
-  const primary =
-    variant === "Primary" ||
-    variant === "Outlined-Primary" ||
-    variant === "Icon-Primary" ||
-    variant === "Icon-Outlined-Primary" ||
-    variant === "Icon-Only-Primary";
-  const outlined =
-    variant === "Outlined-Primary" ||
-    variant === "Outlined-Secondary" ||
-    variant === "Icon-Outlined-Primary" ||
-    variant === "Icon-Outlined-Secondary"
-      ? "btn-outlined"
-      : "";
-  const iconOnly =
-    variant === "Icon-Outlined-Primary" ||
-    variant === "Icon-Outlined-Secondary" ||
-    variant === "Icon-Primary" ||
-    variant === "Icon-Secondary" ||
-    variant === "Icon-Only-Primary" ||
-    variant === "Icon-Only-Secondary";
-  const noBorder =
-    variant === "Icon-Only-Primary" || variant === "Icon-Only-Secondary";
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen) onOpenModal?.();
+    if (!isOpen) onCloseModal?.();
+  };
 
-  const color = noBorder
-    ? `hover:outline hover:outline-offset-2 rounded-full hover:outline-secondary cursor-pointer ${
-        primary ? "text-primary" : "text-secondary"
-      }`
-    : primary
-      ? "btn btn-primary"
-      : "btn btn-secondary";
+  const iconOnly = buttonSize === "icon";
+
+  const TriggerButton = (
+    <Button
+      variant={variant}
+      size={buttonSize}
+      className={cn(buttonClassName, "gap-2")}
+    >
+      {buttonIcon}
+      {!iconOnly && title}
+    </Button>
+  );
 
   return (
-    <>
-      <div
-        className={twMerge(buttonClassName, iconOnly && "tooltip")}
-        data-tip={title}
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <TooltipProvider>
+        {iconOnly ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>{TriggerButton}</DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{title}</p>
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <DialogTrigger asChild>{TriggerButton}</DialogTrigger>
+        )}
+      </TooltipProvider>
+      <DialogTitle className="sr-only">{title}</DialogTitle>
+      <DialogContent
+        className={cn("max-h-[90vh] overflow-y-auto", className)}
+        aria-describedby={title}
+        size={size}
       >
-        <label
-          htmlFor={modalId}
-          className={`${color} ${outlined} gap-2 py-0 btn-${buttonSize} `}
-          tabIndex={0}
-        >
-          {buttonIcon ? buttonIcon : null}
-          {iconOnly ? null : title}
-        </label>
-      </div>
-      <input
-        type="checkbox"
-        id={modalId}
-        className="modal-toggle"
-        ref={closeRef}
-        onChange={(e) => {
-          if (e.target.checked && typeof onOpenModal === "function")
-            onOpenModal();
-        }}
-      />
-      <div className="modal ">
-        <div
-          className={twMerge(
-            "modal-box relative overflow-y-auto overflow-x-hidden",
-            className,
-          )}
-        >
-          <label
-            htmlFor={modalId}
-            className="btn btn-secondary btn-sm btn-circle absolute right-1 top-1"
-          >
-            <i className="bx bx-x bx-sm" />
-          </label>
-          {children}
-          <div className="modal-action">
-            {cancelButtonText !== "" ? (
-              <button
-                className="btn-outline btn btn-secondary"
+        {children}
+        {(cancelButtonText !== "" || typeof handleSubmit === "function") && (
+          <DialogFooter className="space-x-2">
+            {cancelButtonText !== "" && (
+              <Button
+                variant="outline"
                 onClick={(e) => {
                   e.preventDefault();
-                  if (typeof handleCancel === "function") handleCancel();
+                  handleCancel?.();
                   close();
                 }}
               >
                 {cancelButtonText ?? t("cancel")}
-              </button>
-            ) : null}
-            {typeof handleSubmit === "function" ? (
-              <button
-                className="btn btn-primary"
+              </Button>
+            )}
+            {typeof handleSubmit === "function" && (
+              <Button
                 onClick={(e) => {
                   e.preventDefault();
                   handleClickSubmit();
                 }}
               >
                 {submitButtonText ?? t("save")}
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </div>
-    </>
+              </Button>
+            )}
+          </DialogFooter>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
 export function getButtonSize(size: ButtonSize) {
   switch (size) {
     case "lg":
-      return "bx-md";
-    case "md":
-      return "bx-sm";
+      return "h-6 w-6";
+    case "xl":
+      return "h-7 w-7";
+    case "default":
+      return "h-5 w-5";
+    case "icon":
+      return "h-4 w-4";
     default:
-      return "bx-xs";
+      return "h-4 w-4";
   }
 }

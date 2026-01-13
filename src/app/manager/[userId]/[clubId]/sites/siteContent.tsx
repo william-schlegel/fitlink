@@ -5,10 +5,18 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import Link from "next/link";
 
+import { Home } from "lucide-react";
+
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
+import { CreateSiteCalendar } from "@/components/modals/manageCalendar";
 import { DeleteSite, UpdateSite } from "@/components/modals/manageSite";
 import LockedButton from "@/components/ui/lockedButton";
 import CalendarWeek from "@/components/calendarWeek";
-import { LayoutPage } from "@/components/layoutPage";
+import { Button } from "@/components/ui/shadcn";
 import Spinner from "@/components/ui/spinner";
 import useUserInfo from "@/lib/useUserInfo";
 import createLink from "@/lib/createLink";
@@ -57,7 +65,7 @@ export default function SiteContent({ clubId, siteId }: SiteContentProps) {
     siteQuery.data?.rooms?.map((room) => ({
       id: room.id,
       name: room.name,
-      link: createLink({ roomId: room.id }),
+      link: createLink({ siteId, roomId: room.id }),
     })) ?? [];
 
   if (siteQuery.isLoading) return <Spinner />;
@@ -67,11 +75,13 @@ export default function SiteContent({ clubId, siteId }: SiteContentProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h2>{siteQuery.data?.name}</h2>
-          <p>({siteQuery.data?.address})</p>
+          <p className="text-sm text-muted-foreground">
+            ({siteQuery.data?.address})
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <UpdateSite clubId={clubId} siteId={siteId} />
-          {/* <CreateSiteCalendar siteId={siteId} clubId={clubId} /> */}
+          <CreateSiteCalendar siteId={siteId} clubId={clubId} />
           <DeleteSite clubId={clubId} siteId={siteId} />
         </div>
       </div>
@@ -84,23 +94,26 @@ export default function SiteContent({ clubId, siteId }: SiteContentProps) {
         title={t("room.room", { count: siteQuery?.data?.rooms?.length ?? 0 })}
         titleComponents={
           features.includes("MANAGER_ROOM") ? (
-            <Link className="btn btn-secondary" href={`${path}${siteId}/rooms`}>
-              {t("room.manage")}
-            </Link>
+            <Button asChild size="lg">
+              <Link href={`${path}${siteId}/rooms`}>
+                <Home />
+                {t("room.manage")}
+              </Link>
+            </Button>
           ) : (
             <LockedButton label={t("room.manage")} />
           )
         }
       >
-        <LayoutPage.Main>
+        <LayoutPageMain>
           {features.includes("MANAGER_ROOM") ? (
             <>
-              <LayoutPage.List
+              <LayoutPageList
                 list={roomList}
                 itemId={roomId}
                 noItemsText={t("room.no-rooms")}
               />
-              <div>
+              <div className="space-y-4">
                 <div className="flex-1 rounded border border-primary p-4 ">
                   Planning des activités
                 </div>
@@ -112,7 +125,7 @@ export default function SiteContent({ clubId, siteId }: SiteContentProps) {
               </div>
             </>
           ) : null}
-        </LayoutPage.Main>
+        </LayoutPageMain>
       </LayoutPage>
     </div>
   );

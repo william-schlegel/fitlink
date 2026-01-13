@@ -52,7 +52,7 @@ export async function getCalendarForSite(siteId: string, clubId: string) {
     });
 
     if (siteData?.openWithClub) {
-      return db.query.openingCalendar.findFirst({
+      const clubCal = await db.query.openingCalendar.findFirst({
         where: and(
           eq(openingCalendar.id, clubId),
           lte(openingCalendar.startDate, now),
@@ -60,7 +60,9 @@ export async function getCalendarForSite(siteId: string, clubId: string) {
         orderBy: desc(openingCalendar.startDate),
         with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
       });
+      return clubCal ?? null;
     }
+    return null;
   }
 
   return siteCal;
@@ -190,4 +192,3 @@ export async function createCalendar(data: {
     return calendar;
   });
 }
-

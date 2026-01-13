@@ -1,4 +1,13 @@
+"use client";
+
 import { type ReactNode } from "react";
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/shadcn/card";
 
 type FeatureProps = {
   title: string;
@@ -21,15 +30,19 @@ export function FeatureContainer({ children }: FeatureContainerProps) {
 export function Feature({ title, description, children }: FeatureProps) {
   return (
     <div className="w-full p-4 lg:w-1/2 xl:w-1/4">
-      <div className={`card h-full bg-base-200 shadow-xl`}>
-        <figure className="px-10 pt-10">{children}</figure>
-        <div className="card-body items-center text-center">
-          <h2 className="card-title text-3xl font-bold">{title}</h2>
+      <Card className="h-full bg-muted">
+        <CardHeader className="items-center">
+          <div className="px-10 pt-4">{children}</div>
+        </CardHeader>
+        <CardContent className="items-center text-center">
+          <CardTitle className="text-3xl font-bold mb-4">{title}</CardTitle>
           {description.split("|").map((desc, id) => (
-            <p key={`p-${id}`}>{desc}</p>
+            <p key={`p-${id}`} className="text-base-content/80">
+              {desc}
+            </p>
           ))}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

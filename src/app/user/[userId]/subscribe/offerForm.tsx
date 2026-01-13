@@ -9,7 +9,7 @@ import { formatDateLocalized } from "@/lib/formatDate";
 import { formatMoney } from "@/lib/formatNumber";
 import { AppRouter } from "@/server/api/root";
 import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 export default function OfferForm({
   offer,

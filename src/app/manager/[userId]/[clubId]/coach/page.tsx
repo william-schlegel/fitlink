@@ -2,14 +2,21 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
+import { ChevronLeft } from "lucide-react";
+
 import {
   AddCoachToClub,
   CoachDataPresentation,
 } from "@/components/modals/manageClub";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import createLink, { createHref } from "@/lib/createLink";
-import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
+import { Button } from "@/components/ui/shadcn";
 import { CoachPlanning } from "./coachPlanning";
 import { getHref } from "@/lib/getHref";
 
@@ -55,26 +62,28 @@ export default async function ManageCoachs({
       titleComponents={
         <div className="flex items-center gap-4 justify-between">
           <AddCoachToClub clubId={clubId} userId={userId} />
-          <Link
-            className="btn-outline btn btn-primary"
-            href={createHref(href, ["manager", userId, "clubs"], { clubId })}
-          >
-            {t("coach.back-to-clubs")}
-          </Link>
+          <Button asChild variant="outline" size="lg">
+            <Link
+              href={createHref(href, ["manager", userId, "clubs"], { clubId })}
+            >
+              <ChevronLeft />
+              {t("coach.back-to-clubs")}
+            </Link>
+          </Button>
         </div>
       }
     >
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={coachList}
           itemId={coachId}
           noItemsText={t("coach.no-coachs")}
-        ></LayoutPage.List>
+        />
 
         {Boolean(coachId) ? (
           <CoachContent clubId={clubId} coachId={coachId} />
         ) : null}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

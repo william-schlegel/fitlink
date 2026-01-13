@@ -1,3 +1,7 @@
+"use client";
+
+import { cn } from "@/lib/utils";
+
 type Props = {
   text: string | string[];
   offset: number | string;
@@ -5,32 +9,19 @@ type Props = {
   textColor?: string;
 };
 
-function Ribbon({ text, offset, bgColor, textColor = "text-neutral" }: Props) {
+function Ribbon({ text, offset, bgColor, textColor }: Props) {
   const folder = "1rem";
   const ribbonShape = "1rem";
   const topOffset = typeof offset === "number" ? `${offset}px` : offset;
 
-  let bgClass = "";
-  let txtClass = "";
-  let bgStyle = "";
-  let txtStyle = "";
-  switch (bgColor) {
-    case "primary":
-      bgClass = "bg-primary";
-      txtClass = "text-primary-content";
-      break;
-    case "secondary":
-      bgClass = "bg-secondary";
-      txtClass = "text-secondary-content";
-      break;
-    case "accent":
-      bgClass = "bg-accent";
-      txtClass = "text-accent-content";
-      break;
-    default:
-      bgStyle = bgColor;
-      txtStyle = textColor;
-  }
+  const bgClass =
+    bgColor === "primary"
+      ? "bg-primary text-primary-content"
+      : bgColor === "secondary"
+        ? "bg-secondary text-secondary-content"
+        : bgColor === "accent"
+          ? "bg-accent text-accent-content"
+          : "";
 
   const style = {
     inset: `${topOffset} calc(-1*${folder}) auto auto`,
@@ -38,18 +29,19 @@ function Ribbon({ text, offset, bgColor, textColor = "text-neutral" }: Props) {
     clipPath: `polygon(0 0,100% 0,100% calc(100% - ${folder}),calc(100% - ${folder}) 100%,
         calc(100% - ${folder}) calc(100% - ${folder}),0 calc(100% - ${folder}),
         ${ribbonShape} calc(50% - ${folder}/2))`,
-    backgroundColor: bgStyle,
-    textColor: txtStyle,
+    backgroundColor: !bgClass ? bgColor : undefined,
+    color: !bgClass ? textColor : undefined,
     boxShadow: `0 calc(-1*${folder}) 0 inset #0005`,
   };
 
   return (
     <div
-      className={`${bgClass} ${txtClass}`}
-      style={{ position: "absolute", ...style }}
+      className={cn("absolute text-sm font-medium", bgClass)}
+      style={style}
     >
       {Array.isArray(text) ? text.map((p, i) => <p key={i}>{p}</p>) : text}
     </div>
   );
 }
+
 export default Ribbon;

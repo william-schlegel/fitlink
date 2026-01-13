@@ -30,7 +30,8 @@
       "updated": "Tarif mis à jour",
       "deleted": "Tarif supprimé",
       "restored": "Tarif restoré",
-      "features": "Fonctionnalités associées à ce tarif"
+      "features": "Fonctionnalités associées à ce tarif",
+      "option": "Ajouter une option"
     },
     "feature": {
       "coach-certification": "Gestion des certifications",
@@ -147,6 +148,7 @@
     "welcome": "Bienvenue",
     "internalRole": "Rôle",
     "user": "Utilisateur",
+    "member": "Membre",
     "coach": "Coach",
     "manager": "Manager",
     "manager-coach": "Manager & Coach",
@@ -228,7 +230,8 @@
       "check-your-mail": "Vérifiez votre boite mail à l'adresse {email} et cliquez sur le lien fourni pour accéder à l'application",
       "close-page": "Vous pouvez fermer cette page",
       "wrong-credentials": "Erreur dans l'email ou le mot de passe"
-    }
+    },
+    "all-roles": "Tous les rôles"
   },
   "calendar": {
     "day": "Jour",
@@ -281,7 +284,10 @@
       "logo-size": "Taille maximum du logo : {size}",
       "delete-logo": "Supprimer le logo",
       "search-address": "Géolocalisation du club/site d'activité",
-      "manage-coachs": "Gestion de mes coachs"
+      "manage-coachs": "Gestion de mes coachs",
+      "activity-group": {
+        "name": "Nom"
+      }
     },
     "site": {
       "site": "{count, plural, =0 {Aucun site} =1 {Site} other {Sites}}",
@@ -325,7 +331,8 @@
       "start-time": "A partir de",
       "minutes": "minutes",
       "slot": "Créneau",
-      "no-slot": "Aucun créneau de défini"
+      "no-slot": "Aucun créneau de défini",
+      "name": "Nom de l'activité"
     },
     "room": {
       "room": "{count, plural, =0 {Aucune salle} =1 {Salle} other {Salles}}",
@@ -359,7 +366,8 @@
       "default": "Par défaut",
       "created": "Groupe d'activité créé",
       "updated": "Groupe d'activité mis à jour",
-      "deleted": "Groupe d'activité supprimé"
+      "deleted": "Groupe d'activité supprimé",
+      "create-group": "Créer un nouveau groupe d'activités"
     },
     "coach": {
       "find": "Trouver un coach",
@@ -875,7 +883,7 @@
       "offer-created": "Offre créée",
       "new-offer": "Nouvelle offre",
       "offer-updated": "Offre mis à jour",
-      "update-offer": "Modifier l'offre'",
+      "update-offer": "Modifier l'offre",
       "deleted": "Offre supprimé",
       "deletion": "Supprimer cette offre",
       "deletion-message": "La suppression de cette offre est irréversible|Confirmez-vous ?",
@@ -1027,7 +1035,8 @@
     "activity-deletion-message": "Supprimer cette activité ?",
     "activity-deletion-confirmation": "Supprimer",
     "update-course": "Mettre l'activité à jour",
-    "update": "Modifier"
+    "update": "Modifier",
+    "add-activity": "Nouveau cours"
   },
   "message": {
     "my-chat": "Ma messagerie",
@@ -1079,5 +1088,7 @@
     "message-not-found": "Message introuvable",
     "only-message-author-can-edit": "Seul l'auteur peut modifier ce message",
     "only-message-author-or-admin-can-delete": "Seul l'auteur du message peut le supprimer"
-  }
+  },
+  "no-events": "Aucun événement programmé",
+  "activity-removed": "Activité supprimée"
 }

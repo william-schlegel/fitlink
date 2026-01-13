@@ -46,7 +46,7 @@ export function MessageList({
 
   if (messages.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-base-content/60">
+      <div className="flex items-center justify-center h-full text-[hsl(var(--foreground)/0.6)]">
         {t("no-messages")}
       </div>
     );

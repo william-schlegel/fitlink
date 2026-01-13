@@ -2,21 +2,24 @@ import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { CalendarCheck, CalendarClock, ChevronLeft } from "lucide-react";
+
 import {
-  getRoomById,
-  getRoomsForSite,
-  getSiteById,
-} from "@/server/api/routers/sites";
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import {
   CreateRoom,
   DeleteRoom,
   UpdateRoom,
 } from "@/components/modals/manageRoom";
 import { CreateRoomCalendar } from "@/components/modals/manageCalendar";
+import { getRoomById, getSiteById } from "@/server/api/routers/sites";
 import createLink, { createHref } from "@/lib/createLink";
 import CalendarWeek from "@/components/calendarWeek";
-import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
+import { Button } from "@/components/ui/shadcn";
 import { RESERVATIONS } from "@/lib/data";
 import { getHref } from "@/lib/getHref";
 import { isCUID } from "@/lib/utils";
@@ -50,7 +53,7 @@ export default async function ManageRooms({
     return <div>{t("club.manager-only")}</div>;
 
   const siteQuery = await getSiteById(siteId);
-  const roomQuery = await getRoomsForSite(siteId, userId);
+  const roomQuery = await caller.sites.getRoomsForSite(siteId);
   if (!roomId && roomQuery.length > 0)
     redirect(createLink({ roomId: roomQuery[0]?.id }, href));
 
@@ -61,18 +64,20 @@ export default async function ManageRooms({
       </div>
     );
 
-  const roomList = roomQuery.map((room) => ({
-    id: room.id,
-    name: room.name,
-    link: createLink({ roomId: room.id }, href),
-    badgeIcon:
-      room.reservation === "MANDATORY"
-        ? "bx bx-calendar-exclamation bx-sm text-secondary"
-        : room.reservation === "POSSIBLE"
-          ? "bx bx-calendar-alt bx-sm text-secondary"
-          : undefined,
-    badgeText: room.unavailable ? t("club.room.closed") : null,
-  }));
+  const roomList = roomQuery.map(
+    (room: NonNullable<(typeof roomQuery)[number]>) => ({
+      id: room.id,
+      name: room.name,
+      link: createLink({ roomId: room.id }, href),
+      badgeIcon:
+        room.reservation === "MANDATORY" ? (
+          <CalendarCheck className="text-secondary" />
+        ) : room.reservation === "POSSIBLE" ? (
+          <CalendarClock className="text-primary" />
+        ) : undefined,
+      badgeText: room.unavailable ? t("club.room.closed") : null,
+    }),
+  );
 
   return (
     <LayoutPage
@@ -82,18 +87,20 @@ export default async function ManageRooms({
       })}
       titleComponents={
         <div className="flex flex-wrap items-center gap-4">
-          <CreateRoom siteId={siteId} variant={"Primary"} />
-          <Link
-            className="btn-outline btn btn-primary"
-            href={createHref(href, ["manager", userId, "clubs"], { clubId })}
-          >
-            {t("club.room.back-to-sites")}
-          </Link>
+          <CreateRoom siteId={siteId} variant="default" buttonSize="default" />
+          <Button asChild size="lg" variant="outline">
+            <Link
+              href={createHref(href, ["manager", userId, "clubs"], { clubId })}
+            >
+              <ChevronLeft />
+              {t("club.room.back-to-sites")}
+            </Link>
+          </Button>
         </div>
       }
     >
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={roomList}
           itemId={roomId}
           noItemsText={t("club.room.no-rooms")}
@@ -102,7 +109,7 @@ export default async function ManageRooms({
         {siteId === "" ? null : (
           <RoomContent clubId={clubId} roomId={roomId} siteId={siteId} />
         )}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }
@@ -144,7 +151,9 @@ async function RoomContent({ clubId, siteId, roomId }: RoomContentProps) {
       <CalendarWeek calendar={calendarQuery} isLoading={false} />
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <label className="label">{t("room.reservation")}</label>
+          <label className="font-bold text-primary">
+            {t("room.reservation")}
+          </label>
           <span>
             {t(
               RESERVATIONS.find((r) => r.value === roomQuery?.reservation)
@@ -153,7 +162,7 @@ async function RoomContent({ clubId, siteId, roomId }: RoomContentProps) {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <label className="label">{t("room.capacity")}</label>
+          <label className="font-bold text-primary">{t("room.capacity")}</label>
           <span>{roomQuery?.capacity}</span>
         </div>
       </div>

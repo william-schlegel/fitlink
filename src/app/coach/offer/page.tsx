@@ -7,9 +7,14 @@ import {
   DeleteOffer,
   UpdateOffer,
 } from "@/components/modals/manageCoach";
+import {
+  LayoutPage,
+  LayoutPageMain,
+  LayoutPageList,
+} from "@/components/layoutPage";
 import { CoachOfferPage } from "@/components/sections/coachOffer";
 import { getOfferName } from "@/lib/offers/serverOffer";
-import { LayoutPage } from "@/components/layoutPage";
+import { BadgeVariant } from "@/components/ui/shadcn";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
@@ -46,7 +51,7 @@ export default async function CoachOffer({
       id: offer.id,
       name: offer.name,
       link: createLink({ offerId: offer.id }, href),
-      badgeColor: "primary",
+      badgeVariant: "default" as BadgeVariant,
       badgeText: await getOfferName(offer.target ?? "INDIVIDUAL"),
     })),
   );
@@ -56,8 +61,8 @@ export default async function CoachOffer({
       title={t("offer.my-offer", { count: offerQuery?.length ?? 0 })}
       titleComponents={<CreateOffer userId={userId} />}
     >
-      <LayoutPage.Main>
-        <LayoutPage.List
+      <LayoutPageMain>
+        <LayoutPageList
           list={offerList}
           itemId={offerId}
           noItemsText={t("offer.no-offer")}
@@ -65,7 +70,7 @@ export default async function CoachOffer({
         {offerId === "" ? null : (
           <OfferContent userId={userId} offerId={offerId} />
         )}
-      </LayoutPage.Main>
+      </LayoutPageMain>
     </LayoutPage>
   );
 }

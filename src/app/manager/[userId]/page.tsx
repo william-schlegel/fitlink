@@ -4,16 +4,42 @@ import { startOfToday } from "date-fns";
 import Link from "next/link";
 
 import {
+  BuildingIcon,
+  Dumbbell,
+  Euro,
+  HomeIcon,
+  MapPinIcon,
+  TriangleAlert,
+  UserIcon,
+} from "lucide-react";
+
+import {
   CreateEvent,
   DeleteEvent,
   ShowEventCard,
   UpdateEvent,
 } from "@/components/modals/manageEvent";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/shadcn";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemTitle,
+} from "@/components/ui/shadcn/item";
 import { getManagerDataForUserId } from "@/server/api/routers/dashboard";
 import { getClubDailyPlanning } from "@/server/api/routers/planning";
+import { Alert, AlertTitle } from "@/components/ui/shadcn/alert";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { getToday } from "@/lib/dates/serverDayName";
 import { createTrpcCaller } from "@/lib/trpc/caller";
+import CardGroup from "@/components/ui/cardGroup";
 import { getActualUser } from "@/lib/auth/server";
 import Title from "@/components/title";
 /***
@@ -54,141 +80,119 @@ export default async function ManagerClubs({
       <Title title={t("dashboard.manager-dashboard")} />
       <h1 className="flex justify-between">
         {t("dashboard.manager-dashboard")}
-        <Link className="btn btn-secondary" href={`${userId}/clubs`}>
-          {t("dashboard.manage-club")}
-        </Link>
+        <Button asChild>
+          <Link href={`${userId}/clubs`}>{t("dashboard.manage-club")}</Link>
+        </Button>
       </h1>
-      <section className="stats shadow w-full">
-        <Link className="stat" href={`${userId}/clubs`}>
-          <div className="stat-figure text-primary">
-            <i className="bx bx-building bx-lg" />
-          </div>
-          <div className="stat-title">
-            {t("dashboard.clubs", { count: managerQuery?.clubCount ?? 0 })}
-          </div>
-          <div className="stat-value text-primary">
-            {managerQuery?.clubCount ?? 0}
-          </div>
-        </Link>
-        <div className="stat">
-          <div className="stat-figure text-primary">
-            <i className="bx bx-map-pin bx-lg" />
-          </div>
-          <div className="stat-title">
-            {t("dashboard.sites", { count: managerQuery?.sites ?? 0 })}
-          </div>
-          <div className="stat-value text-primary">
-            {managerQuery?.sites ?? 0}
-          </div>
-        </div>
-        <div className="stat">
-          <div className="stat-figure text-primary">
-            <i className="bx bx-home bx-lg" />
-          </div>
-          <div className="stat-title">
-            {t("dashboard.rooms", { count: managerQuery?.rooms ?? 0 })}
-          </div>
-          <div className="stat-value text-primary">
-            {managerQuery?.rooms ?? 0}
-          </div>
-        </div>
-        <div className="stat">
-          <div className="stat-figure text-primary">
-            <i className="bx bx-cycling bx-lg" />
-          </div>
-          <div className="stat-title">
-            {t("dashboard.activities", {
+      <CardGroup
+        cards={[
+          {
+            title: t("dashboard.clubs", {
+              count: managerQuery?.clubCount ?? 0,
+            }),
+            value: managerQuery?.clubCount ?? 0,
+            icon: BuildingIcon,
+            link: `${userId}/clubs`,
+          },
+          {
+            title: t("dashboard.sites", { count: managerQuery?.sites ?? 0 }),
+            value: managerQuery?.sites ?? 0,
+            icon: MapPinIcon,
+          },
+          {
+            title: t("dashboard.rooms", { count: managerQuery?.rooms ?? 0 }),
+            value: managerQuery?.rooms ?? 0,
+            icon: HomeIcon,
+          },
+          {
+            title: t("dashboard.activities", {
               count: managerQuery?.activities ?? 0,
-            })}
-          </div>
-          <div className="stat-value text-primary">
-            {managerQuery?.activities ?? 0}
-          </div>
-        </div>
-        <div className="stat">
-          <div className="stat-figure text-primary">
-            <i className="bx bx-euro bx-lg" />
-          </div>
-          <div className="stat-title">
-            {t("dashboard.subscriptions", {
+            }),
+            value: managerQuery?.activities ?? 0,
+            icon: Dumbbell,
+          },
+          {
+            title: t("dashboard.subscriptions", {
               count: managerQuery?.subscriptions ?? 0,
-            })}
-          </div>
-          <div className="stat-value text-primary">
-            {managerQuery?.subscriptions ?? 0}
-          </div>
-        </div>
-        <div className="stat">
-          <div className="stat-figure text-primary">
-            <i className="bx bx-user bx-lg" />
-          </div>
-          <div className="stat-title">
-            {t("dashboard.members", { count: managerQuery?.members ?? 0 })}
-          </div>
-          <div className="stat-value text-primary">
-            {managerQuery?.members ?? 0}
-          </div>
-        </div>
-      </section>
+            }),
+            value: managerQuery?.subscriptions ?? 0,
+            icon: Euro,
+          },
+          {
+            title: t("dashboard.members", {
+              count: managerQuery?.members ?? 0,
+            }),
+            value: managerQuery?.members ?? 0,
+            icon: UserIcon,
+          },
+        ]}
+      />
+
       <section className="grid auto-rows-auto gap-2 lg:grid-cols-2">
-        <article className="rounded-md border border-primary p-2">
-          <div className="flex items-center justify-between gap-4">
-            <h2>{t("dashboard.planning")}</h2>
-            <span className="rounded-full bg-primary px-8 text-primary-content">
+        <Card>
+          <CardHeader className="flex items-center justify-between gap-2">
+            <CardTitle>{t("dashboard.planning")}</CardTitle>
+            <Badge>
               {formatDateLocalized(startOfToday(), {
                 dateFormat: "long",
                 withDay: "long",
               })}
-            </span>
-          </div>
-          <div className="flex flex-col gap-2">
+            </Badge>
+          </CardHeader>
+          <CardContent>
             {managerQuery?.clubs?.map((club) => (
               <DailyPlanning key={club.id} clubId={club.id} />
             ))}
-          </div>
-        </article>
-        <article className="rounded-md border border-primary p-2">
-          <h2>{t("dashboard.event")}</h2>
-          {features.includes("MANAGER_EVENT") ? (
-            <div className="space-y-2">
-              {managerQuery?.clubs?.map((club) => (
-                <div
-                  key={club.id}
-                  className="rounded border border-secondary p-4"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <h3>{club.name}</h3>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("dashboard.event")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {features.includes("MANAGER_EVENT") ? (
+              managerQuery?.clubs?.map((club) => (
+                <Card key={club.id}>
+                  <CardHeader className="flex items-center justify-between gap-2">
+                    <CardTitle>{club.name}</CardTitle>
                     <CreateEvent clubId={club.id} />
-                  </div>
-                  <div className="flex gap-2">
-                    {club.events.map((event) => (
-                      <div key={event.id} className="border border-primary p-1">
-                        <p className="text-center font-bold text-primary">
-                          {event.name}
-                        </p>
-                        <p>
-                          {formatDateLocalized(event.startDate, {
-                            dateFormat: "number",
-                            withTime: true,
-                          })}
-                        </p>
-                        <div className="flex items-center justify-between gap-4">
-                          <UpdateEvent clubId={club.id} eventId={event.id} />
-                          <DeleteEvent clubId={club.id} eventId={event.id} />
-                          <ShowEventCard eventId={event.id} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="alert alert-error">
-              {t("common.navigation.insufficient-plan")}
-            </div>
-          )}
-        </article>
+                  </CardHeader>
+                  <CardContent>
+                    {club.events.length > 0 ? (
+                      club.events.map((event) => (
+                        <Item key={event.id}>
+                          <ItemTitle>{event.name}</ItemTitle>
+                          <ItemContent>
+                            {formatDateLocalized(event.startDate, {
+                              dateFormat: "number",
+                              withTime: true,
+                            })}
+                          </ItemContent>
+                          <ItemActions>
+                            <UpdateEvent clubId={club.id} eventId={event.id} />
+                            <DeleteEvent clubId={club.id} eventId={event.id} />
+                            <ShowEventCard eventId={event.id} />
+                          </ItemActions>
+                        </Item>
+                      ))
+                    ) : (
+                      <Alert variant="info">
+                        <AlertTitle>{t("no-events")}</AlertTitle>
+                      </Alert>
+                    )}
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Alert variant="destructive">
+                <TriangleAlert />
+                <AlertTitle>
+                  {t("common.navigation.insufficient-plan")}
+                </AlertTitle>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
       </section>
     </div>
   );
@@ -200,13 +204,13 @@ async function DailyPlanning({ clubId }: { clubId: string }) {
   const planning = await getClubDailyPlanning(clubId, day);
   if (!planning) return <div>{t("no-planning")}</div>;
   return (
-    <div className="flex flex-col items-center rounded border border-secondary bg-base-100">
-      <div className="w-full  bg-secondary text-center text-secondary-content">
+    <div className="flex flex-col items-center rounded border border-accent bg-card">
+      <h4 className="w-full  bg-accent text-center text-accent-foreground">
         {planning?.club?.name}
-      </div>
+      </h4>
       <div className="flex shrink-0 flex-wrap items-start gap-2 p-2">
         {planning.planningActivities.map((activity) => (
-          <div key={activity.id} className="border border-base-300 p-2">
+          <div key={activity.id} className="border border-border p-2">
             <p>
               <span className="text-xs">{activity.startTime}</span>
               {" ("}

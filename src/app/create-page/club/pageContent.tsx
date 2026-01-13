@@ -6,8 +6,20 @@ import Link from "next/link";
 
 import { useRouter } from "next/navigation";
 
+import { ExternalLink } from "lucide-react";
+
+import Head from "next/head";
+
+import {
+  Badge,
+  Button,
+  Checkbox,
+  Field,
+  FieldLabel,
+} from "@/components/ui/shadcn";
 import { ActivityGroupCreation } from "@/components/sections/activities";
 import { DeletePage, UpdatePage } from "@/components/modals/managePage";
+import { ButtonGroup } from "@/components/ui/shadcn/button-group";
 import { PlanningCreation } from "@/components/sections/planning";
 import { ActivityCreation } from "@/components/sections/activity";
 import { usePageSection } from "@/lib/sections/useGetSection";
@@ -19,7 +31,7 @@ import Spinner from "@/components/ui/spinner";
 import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 type PageContentProps = {
   pageId: string;
@@ -62,56 +74,56 @@ export default function PageContent({
 
   return (
     <article className="flex grow flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between">
+      <div className="flex flex-wrap items-center gap-2">
         <h2> {queryPage.data?.name}</h2>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="pill">
-            <div className="form-control">
-              <label className="label cursor-pointer gap-4">
-                <span className="label-text">{t("publish-page")}</span>
-                <input
-                  type="checkbox"
-                  className="checkbox-primary checkbox"
-                  checked={queryPage.data?.published ?? false}
-                  onChange={(e) =>
-                    publishPage.mutate({
-                      pageId,
-                      published: e.target.checked,
-                    })
-                  }
-                />
-              </label>
-            </div>
-          </div>
-          <Link
-            href={`/presentation-page/club/${clubId}/${pageId}`}
-            target="_blank"
-            referrerPolicy="no-referrer"
-            className="btn btn-primary flex gap-2"
-          >
-            {t("page-preview")}
-            <i className="bx bx-link-external bx-xs" />
-          </Link>
+          <Badge size="xl">
+            <Field orientation="horizontal">
+              <FieldLabel>{t("publish-page")}</FieldLabel>
+              <Checkbox
+                checked={queryPage.data?.published ?? false}
+                onCheckedChange={(checked) =>
+                  publishPage.mutate({
+                    pageId,
+                    published: checked === true,
+                  })
+                }
+              />
+            </Field>
+          </Badge>
+          <Button asChild>
+            <Link
+              href={`/presentation-page/club/${clubId}/${pageId}`}
+              target="_blank"
+              referrerPolicy="no-referrer"
+            >
+              {t("page-preview")}
+              <ExternalLink className="size-4" />
+            </Link>
+          </Button>
 
-          <UpdatePage clubId={clubId} pageId={pageId} size="md" />
-          <DeletePage clubId={clubId} pageId={pageId} size="md" />
+          <UpdatePage clubId={clubId} pageId={pageId} />
+          <DeletePage clubId={clubId} pageId={pageId} />
         </div>
       </div>
-      <div className="join flex-wrap">
+      <ButtonGroup>
         {sections.map((sec) => (
-          <button
+          <Button
             key={sec}
-            className={`btn btn-primary flex-1 join-item ${
-              sec === (section ?? defaultSection(target)) ? "" : "btn-outline"
-            }`}
+            variant={
+              sec === (section ?? defaultSection(target))
+                ? "default"
+                : "outline"
+            }
+            size="lg"
             onClick={() =>
               router.push(createLink({ clubId, pageId, section: sec }))
             }
           >
             {getSectionName(sec)}
-          </button>
+          </Button>
         ))}
-      </div>
+      </ButtonGroup>
       <div className="w-full">
         {section === "HERO" && <HeroCreation clubId={clubId} pageId={pageId} />}
         {section === "TITLE" && (

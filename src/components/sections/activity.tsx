@@ -6,17 +6,29 @@ import { useTranslations } from "next-intl";
 
 import { InferSelectModel } from "drizzle-orm";
 
+import { Pencil, Trash } from "lucide-react";
+
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "../ui/shadcn/field";
+import { Button, Card, CardContent, Checkbox } from "../ui/shadcn";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
+import { Textarea } from "../ui/shadcn/textarea";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
-import { TextError } from "../ui/simpleform";
+import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 type ActivityCreationProps = {
   clubId: string;
@@ -63,16 +75,21 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
           <Fragment key={querySection.data.id}>
             <div className="flex flex-wrap gap-2">
               {querySection.data.elements.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="rounded border border-primary p-4"
-                >
-                  <p>{activity.title}</p>
-                  <div className="mt-2 flex items-center justify-between gap-4">
-                    <UpdateActivity pageId={pageId} activityId={activity.id!} />
-                    <DeleteActivity pageId={pageId} activityId={activity.id!} />
-                  </div>
-                </div>
+                <Card key={activity.id}>
+                  <CardContent>
+                    <h4>{activity.title}</h4>
+                    <div className="flex items-center justify-center gap-2">
+                      <UpdateActivity
+                        pageId={pageId}
+                        activityId={activity.id!}
+                      />
+                      <DeleteActivity
+                        pageId={pageId}
+                        activityId={activity.id!}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
             <AddActivity pageId={pageId} sectionId={querySection.data.id} />
@@ -91,7 +108,7 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
           {groups.data?.map((group) => (
             <Fragment key={group.id}>
               <h2 className="text-center">{group.title}</h2>
-              <section id="ACTIVITIES" className={`w-full bg-base-200 p-4`}>
+              <section id="ACTIVITIES" className={`w-full bg-muted p-4`}>
                 <div className={`container mx-auto p-4`}>
                   <p className={`text-3xl font-bold text-primary-content`}>
                     {querySection.data?.title}
@@ -165,9 +182,7 @@ function AddActivity({ pageId, sectionId }: ActivityProps) {
       cancelButtonText=""
       className="w-11/12 max-w-4xl"
     >
-      <h3>
-        <span>{t("activity.new-activity")}</span>
-      </h3>
+      <h3>{t("activity.new-activity")}</h3>
       <ActivityForm
         onSubmit={(data) => handleSubmit(data)}
         onCancel={() => setClose(true)}
@@ -241,14 +256,12 @@ function UpdateActivity({ pageId, activityId }: UpdateActivityProps) {
       onCloseModal={() => setClose(false)}
       closeModal={close}
       cancelButtonText=""
-      variant="Icon-Outlined-Primary"
-      buttonIcon={<i className={`bx bx-edit ${getButtonSize("sm")}`} />}
-      buttonSize="sm"
+      variant="outline"
+      buttonIcon={<Pencil />}
+      buttonSize="icon"
       className="w-11/12 max-w-4xl"
     >
-      <h3>
-        <span>{t("activity.update-activity")}</span>
-      </h3>
+      <h3>{t("activity.update-activity")}</h3>
       <ActivityForm
         onSubmit={(data) => handleSubmit(data)}
         onCancel={() => setClose(true)}
@@ -281,12 +294,12 @@ function DeleteActivity({ pageId, activityId }: UpdateActivityProps) {
     <Confirmation
       message={t("activity.deletion-message")}
       title={t("activity.deletion")}
-      buttonIcon={<i className={`bx bx-trash ${getButtonSize("sm")}`} />}
+      buttonIcon={<Trash />}
       onConfirm={() => {
         deleteActivity.mutate(activityId);
       }}
-      variant={"Icon-Outlined-Secondary"}
-      buttonSize={"sm"}
+      variant="destructive"
+      buttonSize="icon"
     />
   );
 }
@@ -373,7 +386,7 @@ function ActivityForm({
       onSubmit={handleSubmit(onSuccess)}
       className="grid grid-cols-[3fr_2fr] gap-2"
     >
-      <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">
+      <div>
         <UploadButton
           endpoint="imageAttachment"
           onClientUploadComplete={(result) =>
@@ -394,69 +407,74 @@ function ActivityForm({
               alt=""
               className="max-h-40 w-full object-contain"
             />
-            <button
-              className="absolute right-2 bottom-2"
-              type="button"
+            <ButtonIcon
+              iconComponent={<i className="bx bx-trash" />}
+              title={t("activity.delete-image")}
+              size="icon"
+              variant="outlines"
               onClick={handleDeleteImage}
-            >
-              <ButtonIcon
-                iconComponent={<i className="bx bx-trash" />}
-                title={t("activity.delete-image")}
-                buttonVariant="Icon-Outlined-Secondary"
-                buttonSize="md"
-              />
-            </button>
+              className="absolute right-2 bottom-2"
+            />
           </div>
         ) : null}
 
-        <label className="required">{t("activity.title")}</label>
-        <div>
-          <input
-            className="input-bordered input w-full"
-            {...register("title", {
-              required: t("activity.title-mandatory") ?? true,
-            })}
-          />
-          <TextError err={errors?.title?.message} />
-        </div>
-        <label>{t("activity.subtitle")}</label>
-        <input
-          className="input-bordered input w-full"
-          {...register("subtitle")}
-        />
-        <label className="self-start">{t("activity.description")}</label>
-        <textarea
-          {...register("description")}
-          className="field-sizing-content"
-          rows={4}
-        />
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="activity-title" className="required">
+                {t("activity.title")}
+              </FieldLabel>
+              <Input
+                id="activity-title"
+                {...register("title", {
+                  required: t("activity.title-mandatory") ?? true,
+                })}
+              />
+              {errors?.title?.message && (
+                <FieldError>{errors.title.message}</FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="activity-subtitle">
+                {t("activity.subtitle")}
+              </FieldLabel>
+              <Input id="activity-subtitle" {...register("subtitle")} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="activity-description">
+                {t("activity.description")}
+              </FieldLabel>
+              <Textarea
+                id="activity-description"
+                {...register("description")}
+                rows={4}
+              />
+            </Field>
+          </FieldGroup>
+        </FieldSet>
       </div>
-      <div>
-        <label>{t("activity.activity-group")}</label>
-        <div className="rounded border border-primary p-2">
+      <FieldSet className="border border-primary rounded p-2">
+        <FieldLegend>{t("activity.activity-group")}</FieldLegend>
+        <FieldGroup>
           {groups.data?.map((group, idx) => (
-            <div key={group.id} className="form-control">
-              <div className="label cursor-pointer justify-start gap-4">
-                <input
-                  type="checkbox"
-                  className="checkbox-primary checkbox"
-                  checked={activityGroups[idx] ?? false}
-                  onChange={(e) => {
-                    const ags = [...activityGroups];
-                    ags[idx] = e.target.checked;
-                    setActivityGroups(ags);
-                  }}
-                />
-                <span className="label-text">{group.title}</span>
-              </div>
-            </div>
+            <Field orientation="horizontal" key={group.id}>
+              <Checkbox
+                id={group.id}
+                checked={activityGroups[idx] ?? false}
+                onCheckedChange={(checked) => {
+                  const ags = [...activityGroups];
+                  ags[idx] = Boolean(checked);
+                  setActivityGroups(ags);
+                }}
+              />
+              <FieldLabel htmlFor={group.id}>{group.title}</FieldLabel>
+            </Field>
           ))}
-        </div>
-      </div>
+        </FieldGroup>
+      </FieldSet>
       <div className="col-span-full mt-4 flex items-center justify-end gap-2">
-        <button
+        <Button
           type="button"
-          className="btn btn-outline btn-secondary"
           onClick={(e) => {
             e.preventDefault();
             reset();
@@ -464,10 +482,8 @@ function ActivityForm({
           }}
         >
           {tCommon("cancel")}
-        </button>
-        <button className="btn btn-primary" type="submit">
-          {tCommon("save")}
-        </button>
+        </Button>
+        <Button type="submit">{tCommon("save")}</Button>
       </div>
     </form>
   );
@@ -515,7 +531,7 @@ function ActivityContentCard({
   activity,
 }: ActivitiesContentCardProps) {
   return (
-    <div key={activity.id} className="card bg-base-100 shadow-xl">
+    <div key={activity.id} className="card bg-card shadow-xl">
       {activity.imageUrls?.[0] ? (
         <figure className="white">
           {/* eslint-disable-next-line @next/next/no-img-element */}
