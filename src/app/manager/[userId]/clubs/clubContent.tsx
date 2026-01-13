@@ -4,28 +4,49 @@ import {
   Data,
   DndContext,
   DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
   PointerSensor,
   useDraggable,
   useDroppable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useState, useEffect, ReactNode, startTransition } from "react";
+import {
+  useState,
+  useEffect,
+  ReactNode,
+  startTransition,
+  useMemo,
+} from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
+import { CalendarX, Euro, User } from "lucide-react";
+
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardTitle,
+} from "@/components/ui/shadcn";
+import { CreateClubCalendar } from "@/components/modals/manageCalendar";
 import { DeleteClub, UpdateClub } from "@/components/modals/manageClub";
+import { ButtonGroup } from "@/components/ui/shadcn/button-group";
 import CollapsableGroup from "@/components/ui/collapsableGroup";
 import AddActivity from "@/components/modals/manageActivity";
 import LockedButton from "@/components/ui/lockedButton";
+import DeleteButton from "@/components/ui/deleteButton";
 import CalendarWeek from "@/components/calendarWeek";
 import ButtonIcon from "@/components/ui/buttonIcon";
 import { activityGroup } from "@/db/schema/club";
 import Spinner from "@/components/ui/spinner";
 import useUserInfo from "@/lib/useUserInfo";
 import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
+import { cn, isCUID } from "@/lib/utils";
+import { toast } from "sonner";
 
 type ClubContentProps = {
   userId: string;
@@ -42,6 +63,7 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
   const [groups, setGroups] = useState<(typeof activityGroup.$inferSelect)[]>(
     [],
   );
+  const [activeActivityId, setActiveActivityId] = useState<string | null>(null);
 
   useEffect(() => {
     const groupsMap = new Map();
@@ -63,6 +85,7 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
   const removeActivity = trpc.activities.removeFromRoom.useMutation({
     onSuccess() {
       utils.clubs.getClubById.invalidate({ clubId, userId });
+      toast.success(t("activity-removed"));
     },
   });
   const utils = trpc.useUtils();
@@ -81,11 +104,36 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
     const roomId = e.over?.id.toString();
     const activityId = e.active.data.current?.activityId;
     const actualRoom = e.active.data.current?.roomId;
+    setActiveActivityId(null);
     if (actualRoom === roomId) return;
     if (actualRoom && actualRoom !== roomId && activityId)
       removeActivity.mutate({ activityId, roomId: actualRoom });
     if (roomId && activityId) addActivity.mutate({ activityId, roomId });
   }
+
+  function handleDragStart(e: DragStartEvent) {
+    const activityId = e.active.data.current?.activityId;
+    setActiveActivityId(activityId ?? null);
+  }
+
+  const activeActivity = useMemo(() => {
+    if (!activeActivityId) return null;
+    const clubActivity = clubQuery.data?.activities?.find(
+      (a) => a.id === activeActivityId,
+    );
+    if (clubActivity)
+      return { name: clubActivity.name, noCalendar: clubActivity.noCalendar };
+    const roomActivity = clubQuery.data?.sites
+      ?.flatMap((site) => site.rooms)
+      .flatMap((room) => room.activities ?? [])
+      .find((a) => a.activityId === activeActivityId);
+    if (roomActivity?.activity)
+      return {
+        name: roomActivity.activity.name,
+        noCalendar: roomActivity.activity.noCalendar,
+      };
+    return null;
+  }, [activeActivityId, clubQuery.data]);
 
   function handledeleteActivity(roomId: string, activityId: string) {
     removeActivity.mutate({ activityId, roomId });
@@ -108,35 +156,33 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
             </div>
           ) : null}
           <h2>{clubQuery.data?.name}</h2>
-          {/* <p>({clubQuery.data?.address})</p> */}
+          <p className="text-sm text-muted-foreground">
+            ({clubQuery.data?.address})
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <UpdateClub clubId={clubId} />
-          {/* <CreateClubCalendar clubId={clubId} /> */}
+          <CreateClubCalendar clubId={clubId} />
           <DeleteClub clubId={clubId} />
         </div>
       </div>
       <div className="flex items-center gap-2">
         {features.includes("MANAGER_COACH") ? (
-          <Link href={`/manager/${userId}/${clubId}/coach`}>
-            <ButtonIcon
-              iconComponent={<i className="bx bx-user bx-sm" />}
-              title={t("club.manage-coachs")}
-              variant="default"
-              fullButton
-            />
-          </Link>
+          <Button asChild>
+            <Link href={`/manager/${userId}/${clubId}/coach`}>
+              <User />
+              {t("club.manage-coachs")}
+            </Link>
+          </Button>
         ) : (
           <LockedButton label={t("club.manage-coachs")} limited />
         )}
-        <Link href={`/manager/${userId}/${clubId}/subscription`}>
-          <ButtonIcon
-            iconComponent={<i className="bx bx-euro bx-sm" />}
-            title={t("subscription.manage-subscriptions")}
-            variant="default"
-            fullButton
-          />
-        </Link>
+        <Button asChild>
+          <Link href={`/manager/${userId}/${clubId}/subscription`}>
+            <Euro />
+            {t("subscription.manage-subscriptions")}
+          </Link>
+        </Button>
       </div>
       {calendarQuery.data ? (
         <CalendarWeek
@@ -144,33 +190,33 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
           isLoading={calendarQuery.isLoading}
         />
       ) : null}
-      <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
+      <DndContext
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveActivityId(null)}
+        sensors={sensors}
+      >
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 rounded border border-primary p-4 ">
             <div className="flex flex-row items-center justify-between gap-4">
               <h3>
                 {t("site.site", { count: clubQuery?.data?.sites?.length ?? 0 })}
               </h3>
-              <Link
-                className="btn btn-secondary"
-                href={`/manager/${userId}/${clubId}/sites`}
-              >
-                {t("site.manage")}
-              </Link>
+              <Button asChild>
+                <Link href={`/manager/${userId}/${clubId}/sites`}>
+                  {t("site.manage")}
+                </Link>
+              </Button>
             </div>
             {clubQuery?.data?.sites?.map((site) => (
               <div key={site.id} className="my-2 flex items-center gap-4">
                 <span>
                   {site.name} ({site.address})
                 </span>
-                <div className="pill">
-                  {site.rooms.length > 0 && (
-                    <span className="mr-2 text-lg text-primary">
-                      {site.rooms.length}
-                    </span>
-                  )}
+                <Badge variant="info">
+                  {site.rooms.length > 0 && <span>{site.rooms.length}</span>}
                   {t("room.room", { count: site.rooms.length })}
-                </div>
+                </Badge>
               </div>
             ))}
           </div>
@@ -191,87 +237,88 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
                 withUpdate
               />
             </div>
-            <div className="join join-vertical flex">
+            <ButtonGroup>
               {groups.map((gp) => (
-                <CollapsableGroup
-                  key={gp.id}
-                  groupName={gp.name}
-                  className="join-item"
-                >
-                  {clubQuery.data?.activities
-                    ?.filter((a) => a.groupId === gp.id)
-                    ?.map((a) => (
-                      <DraggableElement
-                        key={a.id}
-                        elementId={a.id}
-                        data={{ activityId: a.id, roomId: "" }}
-                      >
-                        <span>
-                          {a.name}
-                          {a.noCalendar ? (
-                            <i className="bx bx-calendar-x bx-xs ml-2 text-primary" />
-                          ) : null}
-                        </span>
-                      </DraggableElement>
-                    ))}
-                </CollapsableGroup>
+                <Button key={gp.id} asChild>
+                  <CollapsableGroup groupName={gp.name}>
+                    {clubQuery.data?.activities
+                      ?.filter((a) => a.groupId === gp.id)
+                      ?.map((a) => (
+                        <DraggableElement
+                          key={a.id}
+                          elementId={a.id}
+                          data={{ activityId: a.id, roomId: "" }}
+                        >
+                          <span className="flex items-center gap-2">
+                            {a.name}
+                            {a.noCalendar ? (
+                              <CalendarX size={12} className="opacity-50" />
+                            ) : null}
+                          </span>
+                        </DraggableElement>
+                      ))}
+                  </CollapsableGroup>
+                </Button>
               ))}
-            </div>
+            </ButtonGroup>
           </div>
         </div>
         <div className="flex flex-col gap-2 rounded border border-primary p-4">
           <div className="flex items-center gap-4">
             <h3>{t("activity.manage-club-activities")}</h3>
-            <p>{t("activity.manage-club-activities-help")}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("activity.manage-club-activities-help")}
+            </p>
           </div>
-          <div className="join join-vertical">
+          <div className="flex flex-col gap-2">
             {clubQuery.data?.sites?.map((site) => (
-              <div
+              <CollapsableGroup
                 key={site.id}
-                className="collapse collapse-arrow join-item w-full bg-card border-secondary border"
+                groupName={site.name}
+                defaultOpen={site.rooms.length > 0}
               >
-                <input type="checkbox" defaultChecked={true} />
-                <div className="collapse-title">
-                  <h4>{site.name}</h4>
-                </div>
-                <div className="collapse-content">
-                  {site.rooms?.map((room) => (
-                    <DroppableArea
-                      key={room.id}
-                      areaId={room.id}
-                      title={room.name}
-                    >
-                      {room.activities?.map((a) => (
-                        <DraggableElement
-                          key={a.id}
-                          elementId={`${a.id} ${room.id}`}
-                          data={{ activityId: a.id, roomId: room.id }}
-                        >
-                          {a.activity.name}
-                          {a.activity.noCalendar ? (
-                            <i className="bx bx-calendar-x bx-xs text-primary" />
-                          ) : null}
-                          <div
-                            className="tooltip"
-                            data-tip={t("activity.remove")}
-                          >
-                            <i
-                              className="bx bx-x bx-sm cursor-pointer rounded-full bg-card text-secondary hover:bg-secondary hover:text-secondary-content"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handledeleteActivity(room.id, a.id);
-                              }}
-                            />
-                          </div>
-                        </DraggableElement>
-                      ))}
-                    </DroppableArea>
-                  ))}
-                </div>
-              </div>
+                {site.rooms?.map((room) => (
+                  <DroppableArea
+                    key={room.id}
+                    areaId={room.id}
+                    title={room.name}
+                  >
+                    {room.activities?.map((a) => (
+                      <DraggableElement
+                        key={a.id}
+                        elementId={`${a.activity.id} ${room.id}`}
+                        data={{ activityId: a.activity.id, roomId: room.id }}
+                      >
+                        {a.activity.name}
+                        {a.activity.noCalendar ? (
+                          <CalendarX size={12} className="opacity-50" />
+                        ) : null}
+
+                        <DeleteButton
+                          label={t("activity.remove")}
+                          icon
+                          onClick={() =>
+                            handledeleteActivity(room.id, a.activity.id)
+                          }
+                        />
+                      </DraggableElement>
+                    ))}
+                  </DroppableArea>
+                ))}
+              </CollapsableGroup>
             ))}
           </div>
         </div>
+        <DragOverlay>
+          {activeActivity ? (
+            <div className="flex items-center gap-2 rounded-full border border-neutral bg-card px-4 py-1 shadow-lg">
+              {activeActivity.name}
+              {activeActivity.noCalendar ? (
+                <CalendarX size={12} className="opacity-50" />
+              ) : null}
+            </div>
+          ) : null}
+        </DragOverlay>
       </DndContext>
     </div>
   );
@@ -289,17 +336,16 @@ function DroppableArea({ areaId, title, children }: DroppableAreaProps) {
   });
 
   return (
-    <div
+    <Card
       ref={setNodeRef}
-      className={`min-h-16 relative m-1 flex flex-wrap items-center gap-2 rounded border border-neutral p-2 ${
-        isOver ? "bg-muted" : "bg-card"
-      }`}
+      className={cn(
+        "min-h-16 relative m-1 rounded border border-neutral p-2",
+        isOver ? "bg-muted" : "bg-card",
+      )}
     >
-      <span className="absolute right-4 text-secondary opacity-70">
-        {title}
-      </span>
-      {children}
-    </div>
+      <CardTitle className="absolute right-4 opacity-70">{title}</CardTitle>
+      <CardContent className="flex flex-wrap gap-2">{children}</CardContent>
+    </Card>
   );
 }
 
@@ -325,9 +371,10 @@ function DraggableElement({
   return (
     <div
       ref={setNodeRef}
-      className={`z-50 ${
-        transform ? "cursor-grabbing" : "cursor-grab"
-      } flex items-center gap-2 rounded-full border border-neutral bg-card px-4 py-1`}
+      className={cn(
+        "flex items-center gap-2 rounded-full border border-neutral bg-card px-4 py-1",
+        transform ? "cursor-grabbing" : "cursor-grab",
+      )}
       style={style}
       {...listeners}
       {...attributes}

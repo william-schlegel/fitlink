@@ -29,8 +29,8 @@ import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
 import Modal from "../ui/modal";
+import { toast } from "sonner";
 
 import {
   Badge,

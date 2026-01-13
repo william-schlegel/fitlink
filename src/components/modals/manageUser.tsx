@@ -30,8 +30,8 @@ import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
 import { ROLE_LIST } from "@/lib/data";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
 import Modal from "../ui/modal";
+import { toast } from "sonner";
 
 import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
@@ -178,11 +178,13 @@ function UserForm() {
                     <SelectValue placeholder={t("auth.internalRole")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {ROLE_LIST.filter((rl) => rl.value !== "ADMIN").map((rl) => (
-                      <SelectItem key={rl.value} value={rl.value}>
-                        {t(`common.roles.${rl.value}`)}
-                      </SelectItem>
-                    ))}
+                    {ROLE_LIST.filter((rl) => rl.value !== "ADMIN").map(
+                      (rl) => (
+                        <SelectItem key={rl.value} value={rl.value}>
+                          {t(`common.roles.${rl.value}`)}
+                        </SelectItem>
+                      ),
+                    )}
                   </SelectContent>
                 </Select>
               )}

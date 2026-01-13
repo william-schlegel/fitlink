@@ -1,12 +1,15 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
-import { NewGroup } from "@/components/modals/manageActivity";
+import { Star } from "lucide-react";
+
 import {
   LayoutPage,
   LayoutPageMain,
   LayoutPageList,
 } from "@/components/layoutPage";
+import { NewGroup } from "@/components/modals/manageActivity";
+import { BadgeVariant } from "@/components/ui/shadcn";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { AGContent } from "./agContent";
@@ -29,9 +32,11 @@ export default async function ActivityGroupManagement({
     id: ag.id,
     name: ag.name,
     link: `/admin/activitygroups?agId=${ag.id}`,
-    badgeColor: ag.default ? "badge-primary" : "badge-secondary",
+    badgeVariant: ag.default ? "default" : ("secondary" as BadgeVariant),
     badgeText: ag.default ? undefined : ag.coach?.user.name,
-    badgeIcon: ag.default ? "bx bxs-star bx-xs text-accent" : undefined,
+    badgeIcon: ag.default ? (
+      <Star className="fill-yellow-500 size-4" />
+    ) : undefined,
   }));
 
   if (!agId && agQuery[0]?.id)

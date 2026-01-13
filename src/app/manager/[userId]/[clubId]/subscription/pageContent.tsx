@@ -3,6 +3,10 @@
 import { startTransition, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
+import { toast } from "sonner";
+
+import { UserIcon } from "lucide-react";
+
 import {
   DeleteSubscription,
   UpdateSubscription,
@@ -10,16 +14,24 @@ import {
   useSubscriptionRestriction,
 } from "@/components/modals/manageSubscription";
 import {
+  Button,
+  Card,
+  Checkbox,
+  Field,
+  FieldLabel,
+} from "@/components/ui/shadcn";
+import {
   SubscriptionModeEnum,
   SubscriptionRestrictionEnum,
 } from "@/db/schema/enums";
 import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
 import { formatDateLocalized } from "@/lib/formatDate";
+import { Alert } from "@/components/ui/shadcn/alert";
+import CardGroup from "@/components/ui/cardGroup";
 import { formatMoney } from "@/lib/formatNumber";
 import Spinner from "@/components/ui/spinner";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import { toast } from "@/lib/toast";
 
 type SubscriptionContentProps = {
   clubId: string;
@@ -165,26 +177,23 @@ export function SubscriptionContent({
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h2>{subQuery.data?.name}</h2>
-        </div>
+        <h2>{subQuery.data?.name}</h2>
         <div className="flex items-center gap-2">
           <UpdateSubscription clubId={clubId} subscriptionId={subscriptionId} />
           <DeleteSubscription clubId={clubId} subscriptionId={subscriptionId} />
         </div>
       </div>
       <section className="flex items-start gap-2">
-        <div className="stats w-fit shadow">
-          <div className="stat w-fit">
-            <div className="stat-figure text-primary">
-              <i className="bx bx-user bx-lg" />
-            </div>
-            <div className="stat-title">
-              {t("subscription.users", { count: userCount })}
-            </div>
-            <div className="stat-value text-primary">{userCount}</div>
-          </div>
-        </div>
+        <CardGroup
+          cards={[
+            {
+              title: t("subscription.users", { count: userCount }),
+              value: userCount,
+              icon: UserIcon,
+            },
+          ]}
+        />
+
         <div className="grid flex-1 self-stretch rounded border border-primary p-2 md:grid-cols-2 lg:grid-cols-4">
           <DataCell
             label={t("subscription.start-date")}
@@ -248,15 +257,17 @@ export function SubscriptionContent({
             />
           </div>
           <div className="flex-1 rounded border border-primary p-4">
-            <div className="alert alert-info justify-center font-bold">
+            <Alert variant="info" className="font-bold">
               {info}
-            </div>
-            <button
-              className="btn btn-primary btn-block mt-4"
+            </Alert>
+            <Button
+              variant="default"
+              size="lg"
+              className="mt-4"
               onClick={handleSaveSelection}
             >
               {t("subscription.validate-selection")}
-            </button>
+            </Button>
           </div>
         </div>
       </section>
@@ -334,13 +345,14 @@ type SelectableItemProps = {
 
 function SelectableItem({ state, item, onClick }: SelectableItemProps) {
   return (
-    <button
-      className="btn-outline btn mx-1 mt-1 flex items-center gap-4"
-      onClick={() => onClick(item.id)}
-    >
-      <i className={`bx ${state ? "bx-check-square" : "bx-checkbox"} bx-sm`} />
-      <span className="flex-1">{item.name}</span>
-    </button>
+    <Field orientation="horizontal" className="mx-4 mt-1">
+      <Checkbox
+        id={item.id}
+        checked={state}
+        onCheckedChange={() => onClick(item.id)}
+      />
+      <FieldLabel htmlFor={item.id}>{item.name}</FieldLabel>
+    </Field>
   );
 }
 
@@ -420,7 +432,7 @@ function DataCell({
 }) {
   return (
     <div className="flex flex-col gap-x-2">
-      <span className="font-semibold text-primary">{label}</span>
+      <label className="text-primary">{label}</label>
       <span>{value ?? ""}</span>
     </div>
   );

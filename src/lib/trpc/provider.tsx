@@ -7,7 +7,7 @@ import superjson from "superjson";
 
 import { AppError, ErrorCode, NetworkError, AuthError } from "@/lib/errors";
 import { logger } from "@/lib/errors/logger";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 import { trpc } from "./client";
 
@@ -44,7 +44,8 @@ function convertTRPCError(error: unknown): AppError {
           message: error.message,
           code: ErrorCode.VALIDATION_FAILED,
           severity: "low",
-          userMessage: error.message || "Invalid request. Please check your input.",
+          userMessage:
+            error.message || "Invalid request. Please check your input.",
         });
       case "TIMEOUT":
         return new NetworkError({

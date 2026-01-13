@@ -28,7 +28,7 @@ import { Input } from "@/components/ui/shadcn/input";
 import ButtonIcon from "@/components/ui/buttonIcon";
 import { AppRouter } from "@/server/api/root";
 import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 type FormValues = {
   name: string;

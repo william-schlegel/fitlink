@@ -2,16 +2,19 @@ import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-import { getSitesForClub } from "@/server/api/routers/sites";
-import { CreateSite } from "@/components/modals/manageSite";
-import createLink, { createHref } from "@/lib/createLink";
-import LockedButton from "@/components/ui/lockedButton";
+import { ChevronLeft } from "lucide-react";
+
 import {
   LayoutPage,
   LayoutPageMain,
   LayoutPageList,
 } from "@/components/layoutPage";
+import { getSitesForClub } from "@/server/api/routers/sites";
+import { CreateSite } from "@/components/modals/manageSite";
+import createLink, { createHref } from "@/lib/createLink";
+import LockedButton from "@/components/ui/lockedButton";
 import { createTrpcCaller } from "@/lib/trpc/caller";
+import { Button } from "@/components/ui/shadcn";
 import { getHref } from "@/lib/getHref";
 import SiteContent from "./siteContent";
 
@@ -48,11 +51,13 @@ export default async function ManageSites({
   if (siteQuery.length && !siteId)
     redirect(createLink({ siteId: siteQuery[0]?.id }, href), RedirectType.push);
 
-  const siteList = siteQuery.map((site: NonNullable<typeof siteQuery[number]>) => ({
-    id: site.id,
-    name: site.name,
-    link: createLink({ siteId: site.id }, href),
-  }));
+  const siteList = siteQuery.map(
+    (site: NonNullable<(typeof siteQuery)[number]>) => ({
+      id: site.id,
+      name: site.name,
+      link: createLink({ siteId: site.id }, href),
+    }),
+  );
 
   return (
     <LayoutPage
@@ -68,12 +73,14 @@ export default async function ManageSites({
           ) : (
             <LockedButton label={t("site.create")} limited />
           )}
-          <Link
-            className="btn-outline btn btn-primary"
-            href={createHref(href, ["manager", userId, "clubs"], { clubId })}
-          >
-            {t("site.back-to-clubs")}
-          </Link>
+          <Button asChild variant="outline" size="lg">
+            <Link
+              href={createHref(href, ["manager", userId, "clubs"], { clubId })}
+            >
+              <ChevronLeft />
+              {t("site.back-to-clubs")}
+            </Link>
+          </Button>
         </div>
       }
     >

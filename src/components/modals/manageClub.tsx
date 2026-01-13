@@ -8,6 +8,8 @@ import {
   ExternalLink,
   Search,
   Mail,
+  Pencil,
+  Trash,
 } from "lucide-react";
 import {
   SubmitErrorHandler,
@@ -25,6 +27,9 @@ import Link from "next/link";
 
 import { useMutation } from "convex/react";
 
+import { toast } from "sonner";
+
+import { Field, FieldError, FieldLabel } from "../ui/shadcn";
 import { Textarea } from "@/components/ui/shadcn/textarea";
 import { Checkbox } from "@/components/ui/shadcn/checkbox";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
@@ -36,6 +41,7 @@ import { Input } from "@/components/ui/shadcn/input";
 import { Badge } from "@/components/ui/shadcn/badge";
 import AddressSearch from "../ui/addressSearch";
 import FindCoach from "../sections/findCoach";
+import DeleteButton from "../ui/deleteButton";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { useUser } from "@/lib/auth/client";
@@ -43,7 +49,6 @@ import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID, cn } from "@/lib/utils";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
 import Rating from "../ui/rating";
 import Modal from "../ui/modal";
 import { env } from "@/env";
@@ -153,7 +158,7 @@ export const UpdateClub = ({ clubId }: PropsUpdateDelete) => {
   return (
     <Modal
       title={t("club.update")}
-      buttonIcon={<Edit className="h-5 w-5" />}
+      buttonIcon={<Pencil />}
       variant="outline"
       buttonSize="icon"
       cancelButtonText=""
@@ -246,48 +251,45 @@ function ClubForm({ onSubmit, onCancel, update, initialData }: ClubFormProps) {
         update || !fields.isSite ? "" : "grid grid-cols-2",
       )}
     >
-      <div className="grid grid-cols-[auto_1fr] items-center gap-3">
-        <Label className="after:content-['*'] after:text-error after:ml-0.5">
-          {t("club.name")}
-        </Label>
-        <div>
+      <div className="space-y-4">
+        <Field>
+          <FieldLabel htmlFor="name" className="required">
+            {t("club.name")}
+          </FieldLabel>
           <Input
+            id="name"
             {...register("name", {
               required: t("name-mandatory") ?? true,
             })}
             type="text"
           />
-          {errors.name && (
-            <p className="text-sm text-error mt-1">{errors.name.message}</p>
-          )}
-        </div>
+          {errors.name && <FieldError>{errors.name.message}</FieldError>}
+        </Field>
         {!update && (
-          <div className="col-span-2 flex items-center space-x-3">
+          <Field orientation="horizontal">
             <Checkbox
               id="isSite"
               checked={fields.isSite}
               onCheckedChange={(checked) => setValue("isSite", !!checked)}
             />
-            <Label htmlFor="isSite" className="cursor-pointer">
-              {t("club.is-site")}
-            </Label>
-          </div>
+            <FieldLabel htmlFor="isSite">{t("club.is-site")}</FieldLabel>
+          </Field>
         )}
 
-        <Label className="after:content-['*'] after:text-error after:ml-0.5">
-          {t("club.address")}
-        </Label>
-        <div>
+        <Field>
+          <FieldLabel htmlFor="address" className="required">
+            {t("club.address")}
+          </FieldLabel>
           <Input
+            id="address"
             {...register("address", {
               required: t("address-mandatory") ?? true,
             })}
             type="text"
           />
-          {errors.address && (
-            <p className="text-sm text-error mt-1">{errors.address.message}</p>
-          )}
-        </div>
+          {errors.address && <FieldError>{errors.address.message}</FieldError>}
+        </Field>
+
         <div className="col-span-2 flex flex-col items-center justify-start gap-4">
           <div className="w-full">
             <UploadButton
@@ -302,15 +304,10 @@ function ClubForm({ onSubmit, onCancel, update, initialData }: ClubFormProps) {
             <div className="relative w-40 max-w-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={fields.logoUrl} alt="" className="rounded-md" />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
+              <DeleteButton
                 onClick={handleDeleteImage}
-                className="absolute right-2 bottom-2 bg-card/80 hover:bg-card"
-              >
-                <Trash2 className="h-4 w-4 text-error" />
-              </Button>
+                className="absolute right-2 bottom-2"
+              />
             </div>
           )}
         </div>
@@ -387,8 +384,8 @@ export const DeleteClub = ({ clubId }: PropsUpdateDelete) => {
       onConfirm={() => {
         deleteClub.mutate(clubId);
       }}
-      buttonIcon={<Trash2 className="h-5 w-5" />}
-      variant="outline"
+      buttonIcon={<Trash />}
+      variant="destructive"
       buttonSize="icon"
     />
   );
@@ -548,9 +545,7 @@ export function CoachDataPresentation({
 
       <div className="flex flex-col gap-3">
         <div>
-          <Label className="text-base-content/70">
-            {t("activity.activities")}
-          </Label>
+          <h3>{t("activity.activities")}</h3>
           <div className="flex flex-wrap gap-2 mt-1">
             {activityGroups.map((ag) => (
               <Badge key={ag.id} variant="outline">
@@ -560,9 +555,7 @@ export function CoachDataPresentation({
           </div>
         </div>
         <div>
-          <Label className="text-base-content/70">
-            {t("coach.certifications")}
-          </Label>
+          <h3>{t("coach.certifications")}</h3>
           <div className="flex flex-wrap gap-2 mt-1">
             {certifications.map((cert) => (
               <CollapsableGroup
@@ -580,7 +573,7 @@ export function CoachDataPresentation({
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Label className="text-base-content/70">{t("coach.rating")}</Label>
+          <h3>{t("coach.rating")}</h3>
           <Rating note={rating} />
         </div>
         {pageId && (

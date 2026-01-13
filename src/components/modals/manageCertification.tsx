@@ -27,8 +27,8 @@ import SimpleForm from "../ui/simpleform";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 import { Field, FieldError, FieldLabel } from "../ui/shadcn";
 

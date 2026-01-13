@@ -6,10 +6,10 @@ import {
   LayoutPageList,
   LayoutPageContent,
 } from "@/components/layoutPage";
+import { Badge, BadgeVariant } from "@/components/ui/shadcn";
 import { getAllUsers } from "@/server/api/routers/users";
 import Pagination from "@/components/ui/pagination";
 import { getActualUser } from "@/lib/auth/server";
-import { Badge } from "@/components/ui/shadcn";
 import { TUserFilter } from "./userFilter";
 import UserContent from "./userContent";
 import UserFilter from "./userFilter";
@@ -38,8 +38,8 @@ export default async function UserManagement({
     id: user.id,
     name: user.name,
     link: `/admin/users?userId=${user.id}`,
-    badgeColor:
-      user.internalRole === "MEMBER" ? "badge-secondary" : "badge-accent",
+    badgeVariant:
+      user.internalRole === "MEMBER" ? "info" : ("warning" as BadgeVariant),
     badgeText: tCommon(`roles.${user.internalRole ?? "MEMBER"}`),
   }));
 

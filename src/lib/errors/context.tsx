@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 import { AppError, isAppError, type ErrorSeverity } from "./index";
 import { logger } from "./logger";

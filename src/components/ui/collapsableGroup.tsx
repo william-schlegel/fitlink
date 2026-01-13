@@ -29,23 +29,17 @@ function CollapsableGroup({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
-        <Button
-          variant="ghost"
-          className={cn(
-            "flex w-full justify-between rounded-md border border-border bg-muted px-3 py-2",
-            className,
-          )}
-        >
+        <Button variant="outline" className={className}>
           <span>{groupName}</span>
           <ChevronDown
             className={cn(
-              "h-4 w-4 transition-transform duration-200",
+              "size-4 transition-transform duration-200",
               isOpen && "rotate-180",
             )}
           />
         </Button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="mt-2 space-y-2 pl-4">
+      <CollapsibleContent className="space-y-2 mt-2">
         {children}
       </CollapsibleContent>
     </Collapsible>

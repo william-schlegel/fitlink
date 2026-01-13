@@ -18,7 +18,7 @@ import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "../ui/shadcn";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 type TitleCreationProps = {
   clubId: string;

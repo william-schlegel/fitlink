@@ -5,8 +5,11 @@ import Image from "next/image";
 
 import { useQuery } from "convex/react";
 
-import { Id } from "../../../convex/_generated/dataModel";
+import { CheckCircle } from "lucide-react";
+
 import { LayoutPageLists } from "../../components/layoutPage";
+import { Id } from "../../../convex/_generated/dataModel";
+import { BadgeVariant } from "@/components/ui/shadcn";
 import { api } from "../../../convex/_generated/api";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -113,8 +116,13 @@ export function RoomList({
       name: <RoomItem clubId={room.clubId!} userId={userId} />,
       link: `/chat?roomId=${room._id}`,
       badgeText: room.unreadCount > 0 ? room.unreadCount.toString() : undefined,
-      badgeColor: room.unreadCount > 0 ? "badge-primary" : undefined,
-      badgeIcon: room._id === currentRoomId ? "bx bx-check-circle" : undefined,
+      badgeVariant: (room.unreadCount > 0
+        ? "default"
+        : undefined) as BadgeVariant,
+      badgeIcon:
+        room._id === currentRoomId ? (
+          <CheckCircle className="text-primary" />
+        ) : undefined,
     }));
 
   if (directConversations.length === 0 && roomList.length === 0) {
@@ -130,8 +138,13 @@ export function RoomList({
     ),
     link: `/chat?roomId=${conv.roomId}`,
     badgeText: conv.unreadCount > 0 ? conv.unreadCount.toString() : undefined,
-    badgeColor: conv.unreadCount > 0 ? "badge-primary" : undefined,
-    badgeIcon: conv.roomId === currentRoomId ? "bx bx-check-circle" : undefined,
+    badgeVariant: (conv.unreadCount > 0
+      ? "default"
+      : undefined) as BadgeVariant,
+    badgeIcon:
+      conv.roomId === currentRoomId ? (
+        <CheckCircle className="text-primary" />
+      ) : undefined,
   }));
 
   return (

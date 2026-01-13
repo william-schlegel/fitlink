@@ -22,7 +22,7 @@ import hslToHex from "@/lib/hslToHex";
 import { isCUID } from "@/lib/utils";
 import generateCircle from "./utils";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 import Title from "../title";
 import { env } from "@/env";
 

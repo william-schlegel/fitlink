@@ -31,7 +31,7 @@ import Spinner from "@/components/ui/spinner";
 import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 type PageContentProps = {
   pageId: string;

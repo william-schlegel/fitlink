@@ -39,8 +39,8 @@ import { trpc } from "@/lib/trpc/client";
 import { Textarea } from "../ui/shadcn";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
 import Modal from "../ui/modal";
+import { toast } from "sonner";
 
 type OfferFormValues = {
   name: string;

@@ -12,7 +12,7 @@ import { formatMoney } from "@/lib/formatNumber";
 import Spinner from "@/components/ui/spinner";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 type UserDetails = {
   name: string;

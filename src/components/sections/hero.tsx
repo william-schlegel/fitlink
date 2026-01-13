@@ -33,7 +33,7 @@ import { Input } from "../ui/shadcn/input";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 import "@/app/pageComponents.css";
 import "@/app/pageTheme.css";

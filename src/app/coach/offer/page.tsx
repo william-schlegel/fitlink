@@ -7,13 +7,14 @@ import {
   DeleteOffer,
   UpdateOffer,
 } from "@/components/modals/manageCoach";
-import { CoachOfferPage } from "@/components/sections/coachOffer";
-import { getOfferName } from "@/lib/offers/serverOffer";
 import {
   LayoutPage,
   LayoutPageMain,
   LayoutPageList,
 } from "@/components/layoutPage";
+import { CoachOfferPage } from "@/components/sections/coachOffer";
+import { getOfferName } from "@/lib/offers/serverOffer";
+import { BadgeVariant } from "@/components/ui/shadcn";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
@@ -50,7 +51,7 @@ export default async function CoachOffer({
       id: offer.id,
       name: offer.name,
       link: createLink({ offerId: offer.id }, href),
-      badgeColor: "primary",
+      badgeVariant: "default" as BadgeVariant,
       badgeText: await getOfferName(offer.target ?? "INDIVIDUAL"),
     })),
   );

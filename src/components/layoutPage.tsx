@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useRef } from "react";
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/shadcn/badge";
+import { Badge, BadgeVariant } from "@/components/ui/shadcn/badge";
 import { cn } from "@/lib/utils";
 import Title from "./title";
 
@@ -29,7 +29,7 @@ export function LayoutPage({
         {variant === "main" ? (
           <h1>
             {Boolean(preTitle) ? (
-              <span className="text-secondary mr-2">{preTitle}</span>
+              <span className="text-accent mr-2">{preTitle}</span>
             ) : null}
             {title}
           </h1>
@@ -69,9 +69,9 @@ type ListItem = {
   name: string | React.ReactNode;
   link?: string;
   onClick?: () => void;
-  badgeColor?: string;
+  badgeVariant?: BadgeVariant;
   badgeText?: string | React.ReactNode;
-  badgeIcon?: string;
+  badgeIcon?: React.ReactNode;
 };
 
 export function LayoutPageList<T extends ListItem>({
@@ -160,14 +160,14 @@ export function LayoutPageList<T extends ListItem>({
                 <div className="flex items-center gap-2">
                   {item.badgeText &&
                     (typeof item.badgeText === "string" ? (
-                      <Badge variant="outline" className={item.badgeColor}>
+                      <Badge variant={item.badgeVariant ?? "outline"}>
                         {item.badgeText}
                       </Badge>
                     ) : (
                       <>{item.badgeText}</>
                     ))}
 
-                  {item.badgeIcon && <i className={item.badgeIcon} />}
+                  {item.badgeIcon && <>{item.badgeIcon}</>}
                 </div>
               </Link>
             </li>
@@ -282,14 +282,11 @@ export function LayoutPageLists<T extends ListItem>({
                           )}
                           <div className="flex items-center gap-2">
                             {item.badgeText && (
-                              <Badge
-                                variant="outline"
-                                className={item.badgeColor}
-                              >
+                              <Badge variant={item.badgeVariant ?? "outline"}>
                                 {item.badgeText}
                               </Badge>
                             )}
-                            {item.badgeIcon && <i className={item.badgeIcon} />}
+                            {item.badgeIcon && <>{item.badgeIcon}</>}
                           </div>
                         </Link>
                       );

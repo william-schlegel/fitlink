@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogContent,
   DialogFooter,
+  DialogSize,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/shadcn/dialog";
@@ -40,6 +41,7 @@ type Props = {
   buttonClassName?: string;
   buttonSize?: ButtonSize;
   closeModal?: boolean;
+  size?: DialogSize;
 };
 
 export default function Modal({
@@ -58,6 +60,7 @@ export default function Modal({
   buttonSize = "default",
   closeModal,
   onCloseModal,
+  size = "lg",
 }: Props) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("common");
@@ -118,10 +121,11 @@ export default function Modal({
       <DialogContent
         className={cn("max-h-[90vh] overflow-y-auto", className)}
         aria-describedby={title}
+        size={size}
       >
         {children}
         {(cancelButtonText !== "" || typeof handleSubmit === "function") && (
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="space-x-2">
             {cancelButtonText !== "" && (
               <Button
                 variant="outline"

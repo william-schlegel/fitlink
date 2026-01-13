@@ -2,17 +2,20 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
-import { CreateSubscription } from "@/components/modals/manageSubscription";
-import { getSubscriptionsForClub } from "@/server/api/routers/subscription";
-import createLink, { createHref } from "@/lib/createLink";
+import { ChevronLeft } from "lucide-react";
+
 import {
   LayoutPage,
   LayoutPageMain,
   LayoutPageList,
 } from "@/components/layoutPage";
+import { CreateSubscription } from "@/components/modals/manageSubscription";
+import { getSubscriptionsForClub } from "@/server/api/routers/subscription";
+import createLink, { createHref } from "@/lib/createLink";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { SubscriptionContent } from "./pageContent";
 import { getActualUser } from "@/lib/auth/server";
+import { Button } from "@/components/ui/shadcn";
 import { getHref } from "@/lib/getHref";
 
 export default async function ManageSubscriptions({
@@ -59,14 +62,16 @@ export default async function ManageSubscriptions({
       titleComponents={
         <div className="flex items-center gap-4 justify-between">
           <CreateSubscription clubId={clubId} />
-          <Link
-            className="btn-outline btn btn-primary"
-            href={createHref(href, ["manager", userId, "clubs"], {
-              clubId: clubId,
-            })}
-          >
-            {t("subscription.back-to-clubs")}
-          </Link>
+          <Button asChild variant="outline" size="lg">
+            <Link
+              href={createHref(href, ["manager", userId, "clubs"], {
+                clubId: clubId,
+              })}
+            >
+              <ChevronLeft />
+              {t("subscription.back-to-clubs")}
+            </Link>
+          </Button>
         </div>
       }
     >

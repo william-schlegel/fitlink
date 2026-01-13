@@ -6,25 +6,27 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
+import { Plus, Edit, Trash2, MapPin, Pencil, Trash } from "lucide-react";
 import { startTransition, useEffect, useState } from "react";
 import MapComponent, { Marker } from "react-map-gl/mapbox";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Plus, Edit, Trash2, MapPin } from "lucide-react";
 import "mapbox-gl/dist/mapbox-gl.css";
 
+import { toast } from "sonner";
+
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import Modal from "../ui/modal";
 import { Button } from "@/components/ui/shadcn/button";
-import { Input } from "@/components/ui/shadcn/input";
 import { Label } from "@/components/ui/shadcn/label";
+import { Input } from "@/components/ui/shadcn/input";
 import AddressSearch from "../ui/addressSearch";
 import Confirmation from "../ui/confirmation";
 import { useUser } from "@/lib/auth/client";
 import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
+import Modal from "../ui/modal";
 import { env } from "@/env";
+
 import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type SiteFormValues = {
@@ -65,14 +67,15 @@ export const CreateSite = ({ clubId }: CreateSiteProps) => {
   return (
     <Modal
       title={t("site.create")}
-      buttonIcon={<Plus className="h-4 w-4" />}
-      className="w-11/12 max-w-5xl"
+      buttonIcon={<Plus />}
       cancelButtonText=""
       closeModal={closeModal}
       onCloseModal={() => setCloseModal(false)}
     >
       <h3>{t("site.create")}</h3>
-      <p className="py-4 text-base-content/70">{t("site.enter-info-new-site")}</p>
+      <p className="py-4 text-base-content/70">
+        {t("site.enter-info-new-site")}
+      </p>
       <SiteForm onSubmit={onSubmit} onCancel={() => setCloseModal(true)} />
     </Modal>
   );
@@ -123,10 +126,9 @@ export const UpdateSite = ({ siteId, clubId }: UpdateSiteProps) => {
   return (
     <Modal
       title={t("site.update", { siteName: querySite.data?.name ?? "" })}
-      buttonIcon={<Edit className="h-5 w-5" />}
+      buttonIcon={<Pencil />}
       variant="outline"
       buttonSize="icon"
-      className="w-2/3 max-w-5xl"
       cancelButtonText=""
       closeModal={closeModal}
       onCloseModal={() => setCloseModal(false)}
@@ -156,7 +158,7 @@ type PropsUpdateDelete = {
 export const DeleteSite = ({
   clubId,
   siteId,
-  variant = "outline",
+  variant = "destructive",
   buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
@@ -181,7 +183,7 @@ export const DeleteSite = ({
     <Confirmation
       message={t("site.deletion-message")}
       title={t("site.deletion")}
-      buttonIcon={<Trash2 className="h-5 w-5" />}
+      buttonIcon={<Trash />}
       onConfirm={() => {
         deleteSite.mutate(siteId);
       }}

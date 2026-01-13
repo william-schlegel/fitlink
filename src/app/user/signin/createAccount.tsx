@@ -7,7 +7,7 @@ import { UserPlus } from "lucide-react";
 import SimpleForm from "@/components/ui/simpleform";
 import Modal from "@/components/ui/modal";
 import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 
 type AccountFormValues = {
   name: string;
@@ -40,16 +40,16 @@ export default function CreateAccount() {
   };
 
   return (
-      <Modal
-        title={t("signin.create-account")}
-        handleSubmit={handleSubmit(onSubmit, onError)}
+    <Modal
+      title={t("signin.create-account")}
+      handleSubmit={handleSubmit(onSubmit, onError)}
+      errors={errors}
+      buttonIcon={<UserPlus className="h-4 w-4" />}
+      variant="outline"
+    >
+      <SimpleForm
         errors={errors}
-        buttonIcon={<UserPlus className="h-4 w-4" />}
-        variant="outline"
-      >
-        <SimpleForm
-          errors={errors}
-          register={register}
+        register={register}
         fields={[
           { name: "name", label: t("signin.name"), required: true },
           {

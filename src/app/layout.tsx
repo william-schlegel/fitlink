@@ -9,6 +9,8 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import "./globals.css";
 
+import { Toaster } from "@/components/ui/shadcn/sonner";
+
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -43,6 +45,7 @@ export default async function RootLayout({
                   <Navbar userId={user?.id} internalRole={user?.internalRole} />
                   <main>{children}</main>
                   <Footer />
+                  <Toaster />
                 </div>
               </TRPCProvider>
             </ConvexClientProvider>

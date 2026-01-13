@@ -43,7 +43,7 @@ import PlanDetails from "./planDetails";
 import { ROLE_LIST } from "@/lib/data";
 import hslToHex from "@/lib/hslToHex";
 import { isCUID } from "@/lib/utils";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
 import { env } from "@/env";
 
 type FormValues = {

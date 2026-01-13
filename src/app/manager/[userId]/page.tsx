@@ -5,8 +5,8 @@ import Link from "next/link";
 
 import {
   BuildingIcon,
-  DollarSignIcon,
   Dumbbell,
+  Euro,
   HomeIcon,
   MapPinIcon,
   TriangleAlert,
@@ -116,7 +116,7 @@ export default async function ManagerClubs({
               count: managerQuery?.subscriptions ?? 0,
             }),
             value: managerQuery?.subscriptions ?? 0,
-            icon: DollarSignIcon,
+            icon: Euro,
           },
           {
             title: t("dashboard.members", {

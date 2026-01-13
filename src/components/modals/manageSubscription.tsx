@@ -6,25 +6,44 @@ import {
   useForm,
   FormProvider,
   useFormContext,
+  Controller,
 } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { toast } from "sonner";
+
 import {
   SubscriptionModeEnum,
   SubscriptionRestrictionEnum,
 } from "@/db/schema/enums";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import Modal from "../ui/modal";
 import Confirmation from "../ui/confirmation";
 import { useUser } from "@/lib/auth/client";
 import createLink from "@/lib/createLink";
-import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import { toast } from "@/lib/toast";
+import Modal from "../ui/modal";
+
+import { Pencil, Trash } from "lucide-react";
+
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+} from "../ui/shadcn";
+
 import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 
 type SubscriptionFormValues = {
@@ -90,7 +109,7 @@ export const CreateSubscription = ({ clubId }: CreateSubscriptionProps) => {
       errors={form.formState.errors}
       buttonIcon={<i className="bx bx-plus bx-xs" />}
       onOpenModal={() => form.reset()}
-      className="w-11/12 max-w-3xl"
+      size="md"
     >
       <h3>{t("subscription.create-new")}</h3>
       <FormProvider {...form}>
@@ -167,10 +186,9 @@ export const UpdateSubscription = ({
       handleSubmit={form.handleSubmit(onSubmit, onError)}
       submitButtonText={t("subscription.update")}
       errors={form.formState.errors}
-      buttonIcon={<i className="bx bx-edit bx-sm" />}
+      buttonIcon={<Pencil />}
       variant="outline"
       buttonSize="icon"
-      className="w-11/12 max-w-3xl"
     >
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-4">
@@ -195,7 +213,7 @@ type PropsUpdateDelete = {
 export const DeleteSubscription = ({
   clubId,
   subscriptionId,
-  variant = "outline",
+  variant = "destructive",
   buttonSize = "icon",
 }: PropsUpdateDelete) => {
   const utils = trpc.useUtils();
@@ -220,7 +238,7 @@ export const DeleteSubscription = ({
     <Confirmation
       message={t("subscription.deletion-message")}
       title={t("subscription.deletion")}
-      buttonIcon={<i className="bx bx-trash bx-sm" />}
+      buttonIcon={<Trash />}
       onConfirm={() => {
         deleteSubscription.mutate(subscriptionId);
       }}
@@ -234,89 +252,156 @@ function SubscriptionForm() {
   const t = useTranslations("club");
   const form = useFormContext<SubscriptionFormValues>();
   return (
-    <SimpleForm
-      errors={form.formState.errors}
-      register={form.register}
-      fields={[
-        {
-          label: t("subscription.name"),
-          name: "name",
-          required: t("subscription.name-mandatory"),
-        },
-        {
-          label: t("subscription.description"),
-          name: "description",
-          required: true,
-          rows: 3,
-        },
-        {
-          label: t("subscription.highlight"),
-          name: "highlight",
-        },
-        {
-          label: t("subscription.start-date"),
-          name: "startDate",
-          type: "date",
-          required: t("subscription.start-date-mandatory"),
-        },
-        {
-          label: t("subscription.monthly"),
-          name: "monthly",
-          type: "number",
-          unit: t("subscription.per-month"),
-        },
-        {
-          label: t("subscription.yearly"),
-          name: "yearly",
-          type: "number",
-          unit: t("subscription.per-year"),
-        },
-        {
-          label: t("subscription.inscription-fee"),
-          name: "inscriptionFee",
-          type: "number",
-          unit: "€",
-        },
-        {
-          label: t("subscription.cancelation-fee"),
-          name: "cancelationFee",
-          type: "number",
-          unit: "€",
-        },
-        {
-          label: t("subscription.select-mode"),
-          name: "mode",
-          component: (
-            <select
-              defaultValue={form.getValues("mode")}
-              {...form.register("mode")}
-            >
-              {SUBSCRIPTION_MODES.map((mode) => (
-                <option key={mode.value} value={mode.value}>
-                  {t(mode.label)}
-                </option>
-              ))}
-            </select>
-          ),
-        },
-        {
-          label: t("subscription.select-restriction"),
-          name: "restriction",
-          component: (
-            <select
-              defaultValue={form.getValues("restriction")}
-              {...form.register("restriction")}
-            >
-              {SUBSCRIPTION_RESTRICTION.map((restriction) => (
-                <option key={restriction.value} value={restriction.value}>
-                  {t(restriction.label)}
-                </option>
-              ))}
-            </select>
-          ),
-        },
-      ]}
-    />
+    <FormProvider {...form}>
+      <form className="space-y-4">
+        <FieldSet>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="name">{t("subscription.name")}</FieldLabel>
+              <Input
+                id="name"
+                {...form.register("name", {
+                  required: t("subscription.name-mandatory"),
+                })}
+              />
+              {form.formState.errors.name && (
+                <FieldError>{form.formState.errors.name.message}</FieldError>
+              )}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="description">
+                {t("subscription.description")}
+              </FieldLabel>
+              <Textarea
+                id="description"
+                {...form.register("description", { required: true })}
+                rows={3}
+              />
+              {form.formState.errors.description && (
+                <FieldError>
+                  {form.formState.errors.description.message}
+                </FieldError>
+              )}
+            </Field>
+          </FieldGroup>
+        </FieldSet>
+        <FieldSet>
+          <FieldGroup className="grid grid-cols-2 gap-2">
+            <Field>
+              <FieldLabel htmlFor="highlight">
+                {t("subscription.highlight")}
+              </FieldLabel>
+              <Input id="highlight" {...form.register("highlight")} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="startDate">
+                {t("subscription.start-date")}
+              </FieldLabel>
+              <Input
+                id="startDate"
+                {...form.register("startDate", {
+                  required: t("subscription.start-date-mandatory"),
+                })}
+                type="date"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="monthly">
+                {t("subscription.monthly")}
+              </FieldLabel>
+              <Input
+                id="monthly"
+                {...form.register("monthly", { valueAsNumber: true })}
+                type="number"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="yearly">
+                {t("subscription.yearly")}
+              </FieldLabel>
+              <Input
+                id="yearly"
+                {...form.register("yearly", { valueAsNumber: true })}
+                type="number"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="inscriptionFee">
+                {t("subscription.inscription-fee")}
+              </FieldLabel>
+              <Input
+                id="inscriptionFee"
+                {...form.register("inscriptionFee", { valueAsNumber: true })}
+                type="number"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="cancelationFee">
+                {t("subscription.cancelation-fee")}
+              </FieldLabel>
+              <Input
+                id="cancelationFee"
+                {...form.register("cancelationFee", { valueAsNumber: true })}
+                type="number"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="mode">
+                {t("subscription.select-mode")}
+              </FieldLabel>
+              <Controller
+                control={form.control}
+                name="mode"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t("subscription.select-mode")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SUBSCRIPTION_MODES.map((mode) => (
+                        <SelectItem key={mode.value} value={mode.value}>
+                          {t(mode.label)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="restriction">
+                {t("subscription.select-restriction")}
+              </FieldLabel>
+              <Controller
+                control={form.control}
+                name="restriction"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t("subscription.select-restriction")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SUBSCRIPTION_RESTRICTION.map((restriction) => (
+                        <SelectItem
+                          key={restriction.value}
+                          value={restriction.value}
+                        >
+                          {t(restriction.label)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+          </FieldGroup>
+        </FieldSet>
+      </form>
+    </FormProvider>
   );
 }
 

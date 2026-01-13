@@ -3,18 +3,26 @@
 import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
+import { CalendarPlus, Plus } from "lucide-react";
+
+import { toast } from "sonner";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/shadcn/table";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
+import { Field, FieldLabel } from "../ui/shadcn/field";
+import { Checkbox } from "../ui/shadcn/checkbox";
 import { DayName, DAYS } from "@/lib/dates/data";
 import { fieldSet } from "@/lib/fieldGetSet";
-import {
-  Field,
-  FieldLabel,
-} from "../ui/shadcn/field";
 import { Input } from "../ui/shadcn/input";
-import { Checkbox } from "../ui/shadcn/checkbox";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
-import { toast } from "@/lib/toast";
 import Modal from "../ui/modal";
 
 type WorkingHoursSchema = {
@@ -89,47 +97,43 @@ function FormCalendar({ calendarValues, onCalendarChange }: FormCalendarProps) {
           className="text-center"
         />
       </Field>
-      <table className="w-full table-auto">
+      <Table className="w-full table-auto">
         {/* header */}
-        <thead>
-          <tr>
-            <th>{t("day")}</th>
-            <th>{t("whole-day")}</th>
-            <th>{t("closed")}</th>
-            <th>{t("times")}</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t("day")}</TableHead>
+            <TableHead>{t("whole-day")}</TableHead>
+            <TableHead>{t("closed")}</TableHead>
+            <TableHead>{t("times")}</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {DAYS.map((day, idx) => (
-            <tr key={day.value}>
-              <td>{t(day.label)}</td>
-              <td className="text-center">
-                <input
-                  type="checkbox"
-                  className="checkbox-primary checkbox"
+            <TableRow key={day.value}>
+              <TableCell>{t(day.label)}</TableCell>
+              <TableCell className="text-center">
+                <Checkbox
                   checked={calendarValues.openingTime[idx]?.wholeDay ?? true}
-                  onChange={(e) =>
-                    onChange(`openingTime.${idx}.wholeDay`, e.target.checked)
+                  onCheckedChange={(checked) =>
+                    onChange(`openingTime.${idx}.wholeDay`, !!checked)
                   }
                 />
-              </td>
+              </TableCell>
               {!calendarValues.openingTime[idx]?.wholeDay ? (
                 <>
-                  <td className="text-center">
-                    <input
-                      type="checkbox"
-                      className="checkbox-primary checkbox"
+                  <TableCell className="text-center">
+                    <Checkbox
                       checked={calendarValues.openingTime[idx]?.closed ?? false}
-                      onChange={(e) =>
-                        onChange(`openingTime.${idx}.closed`, e.target.checked)
+                      onCheckedChange={(checked) =>
+                        onChange(`openingTime.${idx}.closed`, !!checked)
                       }
                     />
-                  </td>
+                  </TableCell>
 
                   {!calendarValues.openingTime[idx]?.closed ? (
                     <>
-                      <td className="flex gap-2">
+                      <TableCell className="flex gap-2">
                         <Input
                           type="time"
                           value={
@@ -158,23 +162,34 @@ function FormCalendar({ calendarValues, onCalendarChange }: FormCalendarProps) {
                           }
                           className="w-fit text-center"
                         />
-                      </td>
-                      <td>
+                      </TableCell>
+                      <TableCell>
                         <ButtonIcon
                           title={t("more-times")}
-                          iconComponent={<i className="bx bx-plus bx-xs" />}
+                          iconComponent={<Plus />}
                           size="icon"
                           variant="outlines"
                         />
-                      </td>
+                      </TableCell>
                     </>
-                  ) : null}
+                  ) : (
+                    <>
+                      <TableCell />
+                      <TableCell />
+                    </>
+                  )}
                 </>
-              ) : null}
-            </tr>
+              ) : (
+                <>
+                  <TableCell />
+                  <TableCell />
+                  <TableCell />
+                </>
+              )}
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </>
   );
 }
@@ -202,10 +217,9 @@ export const CreateClubCalendar = ({ clubId }: ClubCalendarProps) => {
       title={t("create-club-calendar")}
       handleSubmit={onSubmit}
       submitButtonText={t("save-calendar")}
-      buttonIcon={<i className="bx bx-time bx-sm" />}
+      buttonIcon={<CalendarPlus />}
       variant="outline"
       buttonSize="icon"
-      className="w-2/3 max-w-xl"
     >
       <h3>{t("create-club-calendar")}</h3>
       <FormCalendar
@@ -240,23 +254,19 @@ export const CreateSiteCalendar = ({ siteId, clubId }: SiteCalendarProps) => {
       title={t("create-site-calendar")}
       handleSubmit={onSubmit}
       submitButtonText={t("save-calendar")}
-      buttonIcon={<i className="bx bx-time bx-sm" />}
+      buttonIcon={<CalendarPlus />}
       variant="outline"
       buttonSize="icon"
-      className="w-2/3 max-w-xl"
     >
       <h3>{t("create-site-calendar")}</h3>
-      <div className="form-control">
-        <label className="label cursor-pointer justify-start gap-4">
-          <input
-            type="checkbox"
-            className="checkbox-primary checkbox"
-            checked={!showCalendar}
-            onChange={(e) => setShowCalendar(!e.target.checked)}
-          />
-          <span className="label-text">{t("same-as-club")}</span>
-        </label>
-      </div>
+      <Field orientation="horizontal">
+        <Checkbox
+          id="same-as-club"
+          checked={!showCalendar}
+          onCheckedChange={(checked) => setShowCalendar(!checked)}
+        />
+        <FieldLabel htmlFor="same-as-club">{t("same-as-club")}</FieldLabel>
+      </Field>
       {showCalendar ? (
         <FormCalendar
           calendarValues={calendar}
@@ -325,35 +335,28 @@ export const CreateRoomCalendar = ({
       title={t("create-room-calendar")}
       handleSubmit={onSubmit}
       submitButtonText={t("save-calendar")}
-      buttonIcon={<i className="bx bx-time bx-sm" />}
+      buttonIcon={<CalendarPlus />}
       variant="outline"
       buttonSize="icon"
-      className="w-2/3 max-w-xl"
     >
       <h3>{t("create-room-calendar")}</h3>
-      <div className="form-control">
-        <label className="label cursor-pointer justify-start gap-4">
-          <input
-            type="checkbox"
-            className="checkbox-primary checkbox"
-            checked={sameAsClub}
-            onChange={(e) => setSameAsClub(e.target.checked)}
-          />
-          <span className="label-text">{t("same-as-club")}</span>
-        </label>
-      </div>
+      <Field orientation="horizontal">
+        <Checkbox
+          id="same-as-club"
+          checked={sameAsClub}
+          onCheckedChange={(checked) => setSameAsClub(!!checked)}
+        />
+        <FieldLabel htmlFor="same-as-club">{t("same-as-club")}</FieldLabel>
+      </Field>
       {sameAsClub ? null : (
-        <div className="form-control">
-          <label className="label cursor-pointer justify-start gap-4">
-            <input
-              type="checkbox"
-              className="checkbox-primary checkbox"
-              checked={sameAsSite}
-              onChange={(e) => setSameAsSite(e.target.checked)}
-            />
-            <span className="label-text">{t("same-as-site")}</span>
-          </label>
-        </div>
+        <Field orientation="horizontal">
+          <Checkbox
+            id="same-as-site"
+            checked={sameAsSite}
+            onCheckedChange={(checked) => setSameAsSite(!!checked)}
+          />
+          <FieldLabel htmlFor="same-as-site">{t("same-as-site")}</FieldLabel>
+        </Field>
       )}
       {!sameAsClub && !sameAsSite ? (
         <FormCalendar

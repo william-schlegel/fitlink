@@ -65,9 +65,9 @@ import { CSS } from "@dnd-kit/utilities";
 import { trpc } from "@/lib/trpc/client";
 import { ROLE_LIST } from "@/lib/data";
 import Spinner from "../ui/spinner";
-import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import Modal from "../ui/modal";
+import { toast } from "sonner";
 
 import type { ButtonVariant } from "@/components/ui/shadcn/button";
 

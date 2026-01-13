@@ -20,21 +20,19 @@ function LockedButton({ label, limited }: Props) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            className="cursor-default bg-neutral/20 text-base-content/30 hover:bg-neutral/20 hover:text-base-content/30 gap-2"
-            disabled
-          >
-            <Lock className="h-4 w-4" />
-            {label}
+          <Button asChild variant="destructive">
+            <span>
+              <Lock className="size-4" />
+              {label}
+            </span>
           </Button>
         </TooltipTrigger>
-        <TooltipContent className="bg-error text-error-content">
+        <TooltipContent>
           <p>
             {t(
               limited
                 ? "navigation.limited-plan"
-                : "navigation.insufficient-plan"
+                : "navigation.insufficient-plan",
             )}
           </p>
         </TooltipContent>

@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
+import { Star } from "lucide-react";
+
 import {
   CreatePricing,
   DeletePricing,
@@ -15,6 +17,7 @@ import {
 } from "@/components/layoutPage";
 import { getAllPricing, getPricingById } from "@/server/api/routers/pricing";
 import { PricingComponent } from "@/components/ui/pricing";
+import { BadgeVariant } from "@/components/ui/shadcn";
 import { getRoleName } from "@/server/lib/userTools";
 import { pricing } from "@/db/schema/subscription";
 import { getActualUser } from "@/lib/auth/server";
@@ -60,19 +63,19 @@ export default async function PricingManagement({
       id: pricing.id,
       name: pricing.title,
       link: createLink({ pricingId: pricing.id }, href),
-      badgeColor: pricing.free
-        ? "primary"
+      badgeVariant: pricing.free
+        ? "default"
         : pricing.deleted
-          ? "red"
-          : undefined,
+          ? "destructive"
+          : (undefined as BadgeVariant),
       badgeText: pricing.free
         ? "Free"
         : pricing.deleted
           ? "Deleted"
           : formatMoney(pricing.monthly),
-      badgeIcon: pricing.highlighted
-        ? "bx bxs-star bx-xs text-accent"
-        : undefined,
+      badgeIcon: pricing.highlighted ? (
+        <Star className="fill-yellow-500 size-4" />
+      ) : undefined,
     })),
   }));
 

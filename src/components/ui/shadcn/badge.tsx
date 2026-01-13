@@ -40,6 +40,9 @@ const badgeVariants = cva(
   },
 );
 
+export type BadgeVariant = VariantProps<typeof badgeVariants>["variant"];
+export type BadgeSize = VariantProps<typeof badgeVariants>["size"];
+
 function Badge({
   className,
   variant = "default",

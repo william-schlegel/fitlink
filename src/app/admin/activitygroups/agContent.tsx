@@ -59,7 +59,7 @@ export function AGContent({ agId }: AGContentProps) {
         <div className="flex items-center gap-2">
           <h2>{agQuery.data?.name}</h2>
           {agQuery.data?.default ? (
-            <Star className="fill-accent" />
+            <Star className="fill-yellow-500 size-4" />
           ) : (
             <p className="badge">({agQuery.data?.name})</p>
           )}
