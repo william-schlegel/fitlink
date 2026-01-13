@@ -9,6 +9,8 @@ import { InferSelectModel } from "drizzle-orm";
 
 import { Pencil, Trash } from "lucide-react";
 
+import { toast } from "sonner";
+
 import {
   Button,
   Card,
@@ -29,11 +31,13 @@ import {
 } from "../ui/shadcn/field";
 import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
 import ThemeSelector, { TThemes } from "../themeSelector";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
 import { List } from "@/app/member/[userId]/list";
 import { Textarea } from "../ui/shadcn/textarea";
 import { formatMoney } from "@/lib/formatNumber";
+import DeleteButton from "../ui/deleteButton";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { useUser } from "@/lib/auth/client";
@@ -41,8 +45,6 @@ import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import Spinner from "../ui/spinner";
-import { toast } from "sonner";
 
 type OfferCreationProps = {
   clubId: string;
@@ -405,11 +407,9 @@ function OfferForm({
               alt=""
               className="max-h-40 w-full object-contain"
             />
-            <ButtonIcon
-              iconComponent={<i className="bx bx-trash" />}
-              title={t("offer.delete-image")}
-              size="icon"
-              variant="outlines"
+            <DeleteButton
+              label={t("offer.delete-image")}
+              icon
               onClick={handleDeleteImage}
               className="absolute right-2 bottom-2"
             />

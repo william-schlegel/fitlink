@@ -7,6 +7,8 @@ import { useTranslations } from "next-intl";
 
 import { Trash } from "lucide-react";
 
+import { toast } from "sonner";
+
 import {
   Button,
   Select,
@@ -24,6 +26,7 @@ import {
 import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/shadcn/field";
 import { usePageSection } from "@/lib/sections/useGetSection";
 import ThemeSelector, { TThemes } from "../themeSelector";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { PageSectionModelEnum } from "@/db/schema/enums";
 import { Textarea } from "../ui/shadcn/textarea";
 import DeleteButton from "../ui/deleteButton";
@@ -32,8 +35,6 @@ import { UploadButton } from "../uploadthing";
 import { Input } from "../ui/shadcn/input";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import Spinner from "../ui/spinner";
-import { toast } from "sonner";
 
 import "@/app/pageComponents.css";
 import "@/app/pageTheme.css";

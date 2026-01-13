@@ -7,11 +7,11 @@ import { useState } from "react";
 
 import { Trash } from "lucide-react";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import Confirmation from "@/components/ui/confirmation";
 import { SelectDate } from "@/components/ui/selectDay";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { getButtonSize } from "@/components/ui/modal";
-import Spinner from "@/components/ui/spinner";
 import { AppRouter } from "@/server/api/root";
 import { trpc } from "@/lib/trpc/client";
 import DailyPlanning from "./planning";

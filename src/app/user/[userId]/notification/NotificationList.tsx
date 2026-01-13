@@ -6,6 +6,14 @@ import { twMerge } from "tailwind-merge";
 import { useQuery } from "convex/react";
 import Link from "next/link";
 
+import {
+  Check,
+  CircleQuestionMark,
+  Euro,
+  HeartHandshake,
+  X,
+} from "lucide-react";
+
 import { api } from "../../../../../convex/_generated/api";
 import { formatDateLocalized } from "@/lib/formatDate";
 import Pagination from "@/components/ui/pagination";
@@ -109,23 +117,38 @@ export function NotificationList({
                 notification.type === "CLUB_ACCEPT" ||
                 notification.type === "SUBSCRIPTION_VALIDATED" ||
                 notification.type === "REQUEST_VALIDATED" ? (
-                  <i className="bx bx-happy-heart-eyes bx-xs rounded-full bg-success p-2 text-success-content" />
+                  <HeartHandshake
+                    className="rounded-full bg-green-500/10 p-2 text-green-500"
+                    size={12}
+                  />
                 ) : null}
                 {notification.type === "COACH_REFUSE" ||
                 notification.type === "CLUB_REFUSE" ||
                 notification.type === "SUBSCRIPTION_REJECTED" ||
                 notification.type === "REQUEST_REJECTED" ? (
-                  <i className="bx bx-x bx-xs rounded-full bg-error p-2 text-error-content" />
+                  <X
+                    className="rounded-full bg-destructive/10 text-destructive p-2"
+                    size={12}
+                  />
                 ) : null}
                 {notification.type === "SEARCH_COACH" ||
                 notification.type === "SEARCH_CLUB" ? (
-                  <i className="bx bx-question-mark bx-xs rounded-full bg-secondary p-2 text-secondary-content" />
+                  <CircleQuestionMark
+                    className="rounded-full bg-accent/10 p-2 text-accent"
+                    size={12}
+                  />
                 ) : null}
                 {notification.type === "NEW_SUBSCRIPTION" ? (
-                  <i className="bx bx-dollar bx-xs rounded-full bg-secondary p-2 text-secondary-content" />
+                  <Euro
+                    className="rounded-full bg-accent/10 p-2 text-accent"
+                    size={12}
+                  />
                 ) : null}
                 {notification.answeredAt ? (
-                  <i className="bx bx-check bx-xs rounded-full bg-success p-2 text-success-content" />
+                  <Check
+                    className="rounded-full bg-green-500/10 p-2 text-green-500"
+                    size={12}
+                  />
                 ) : null}
               </div>
             </Link>

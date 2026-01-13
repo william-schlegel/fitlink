@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { useRouter } from "next/navigation";
 
-import { Pencil, Plus, Trash } from "lucide-react";
+import { CalendarX, Pencil, Plus, Trash } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -17,6 +17,7 @@ import {
   FieldLabel,
   FieldSet,
 } from "../ui/shadcn/field";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import Modal, { getButtonSize } from "../ui/modal";
 import { Checkbox } from "../ui/shadcn/checkbox";
 import Confirmation from "../ui/confirmation";
@@ -24,7 +25,6 @@ import { Input } from "../ui/shadcn/input";
 import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import Spinner from "../ui/spinner";
 
 import {
   Button,
@@ -36,8 +36,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "../ui/shadcn/input-group";
-import { Separator } from "../ui/separator";
-import { Item } from "../ui/shadcn/item";
+import { Separator } from "@/components/ui/shadcn/separator";
 
 type AddActivityProps = {
   userId: string;
@@ -135,7 +134,7 @@ const AddActivity = ({
                   <span className="flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-primary-content">
                     <span>{activity.name}</span>
                     {activity.noCalendar ? (
-                      <i className="bx bx-calendar-x bx-xs text-accent" />
+                      <CalendarX className="text-accent" size={12} />
                     ) : null}
                     {withUpdate && (
                       <>

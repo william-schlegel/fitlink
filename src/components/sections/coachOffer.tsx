@@ -4,13 +4,15 @@ import { useRouter } from "next/navigation";
 
 import Link from "next/link";
 
+import { Home, Map, MapPin, Rocket, Webcam } from "lucide-react";
+
 import { useCoachingLevel } from "@/lib/offers/useOffers";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { formatMoney } from "@/lib/formatNumber";
 import SendMessage from "../modals/sendMessage";
 import { useUser } from "@/lib/auth/client";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import Spinner from "../ui/spinner";
 import Rating from "../ui/rating";
 
 type CoachOfferPageProps = {
@@ -95,7 +97,7 @@ export function CoachOfferPage({
         <section>
           <h3>{t("offer.course-description")}</h3>
           <div className="pill w-fit px-4">
-            <i className="bx bx-rocket bx-sm" />
+            <Rocket />
             {t("offer.levels")}
             {" : "}
             {listFormatter.format(
@@ -221,7 +223,7 @@ export function OfferBadge({
   travelLimit,
 }: OfferBadgeProps) {
   const t = useTranslations("coach");
-  let icon = "";
+  let icon: React.ReactNode = null;
   let name = "";
   const restriction = travelLimit
     ? t("offer.in-limit", {
@@ -231,27 +233,27 @@ export function OfferBadge({
     : "";
 
   if (variant === "My-Place") {
-    icon = "bx-map-pin";
+    icon = <MapPin />;
     name = `${t("offer.home", {
       name: publicName ?? "",
     })} : ${searchAddress}`;
   }
   if (variant === "In-House") {
-    icon = "bx-home";
+    icon = <Home />;
     name = t("offer.your-place");
   }
   if (variant === "Public-Place") {
-    icon = "bx-map-alt";
+    icon = <Map />;
     name = t("offer.public-place");
   }
   if (variant === "Webcam") {
-    icon = "bx-webcam";
+    icon = <Webcam />;
     name = t("offer.webcam");
   }
 
   return (
     <div className="pill w-fit px-4">
-      {icon ? <i className={`bx ${icon} bx-sm`} /> : null}
+      {icon}
       <span>{name}</span>
       {restriction ? (
         <span className="text-sm text-secondary">{restriction}</span>
@@ -262,7 +264,7 @@ export function OfferBadge({
 
 type TarifProps = {
   value: number | undefined;
-  icon: string;
+  icon: React.ReactNode;
   unit: string;
   money?: boolean;
   className?: string;
@@ -280,9 +282,7 @@ function Tarif({
   if (!value) return null;
   return (
     <div className={`flex items-center gap-4 ${className}`}>
-      <label>
-        <i className={`bx ${icon} bx-sm mr-2`} />
-      </label>
+      {icon}
       {label ? <span>{label}</span> : null}
       <span>
         {money ? formatMoney(value) : value.toFixed(0)}

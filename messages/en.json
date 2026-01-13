@@ -141,7 +141,8 @@
       "user-updated-error": "An error occurred while updating your account information: {error}",
       "per-month": "/month",
       "per-year": "/year",
-      "free": "Free"
+      "free": "Free",
+      "delete-activity": "Delete activity"
     },
     "change-my-name": "Change my name",
     "welcome": "Welcome",
@@ -596,6 +597,7 @@
     }
   },
   "common": {
+    "today": "Today",
     "club": "Club",
     "cancel": "Cancel",
     "save": "Save",

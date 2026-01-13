@@ -17,7 +17,9 @@ import { format } from "date-fns";
 
 import { useRouter } from "next/navigation";
 
-import { Pencil, Trash } from "lucide-react";
+import { Eye, Map, MapPin, Pencil, Trash, X } from "lucide-react";
+
+import { toast } from "sonner";
 
 import {
   Field,
@@ -30,6 +32,7 @@ import {
 } from "../ui/shadcn/field";
 import AddressSearch, { AddressData } from "../ui/addressSearch";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { formatDateLocalized } from "@/lib/formatDate";
 import Modal, { getButtonSize } from "../ui/modal";
@@ -43,9 +46,7 @@ import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import Spinner from "../ui/spinner";
 import Ribbon from "../ui/ribbon";
-import { toast } from "sonner";
 import { env } from "@/env";
 
 import {
@@ -619,9 +620,7 @@ function DisplayEventCard() {
           <span>{fields.address}</span>
           {fields.searchAddress ? (
             <ButtonIcon
-              iconComponent={
-                <i className={`bx ${showMap ? "bx-x" : "bx-map"} bx-sm`} />
-              }
+              iconComponent={showMap ? <X /> : <Map />}
               title={t("event.view-map")}
               size="icon"
               variant="outlines"
@@ -649,7 +648,7 @@ function DisplayEventCard() {
               latitude={fields.latitude ?? LATITUDE}
               anchor="bottom"
             >
-              <i className="bx bx-map bx-sm text-secondary" />
+              <MapPin className="text-secondary" />
             </Marker>
           </MapComponent>
         </div>
@@ -694,7 +693,7 @@ export function ShowEventCard({ eventId }: { eventId: string }) {
       className="w-11/12 max-w-4xl"
       variant="default"
       buttonSize="icon"
-      buttonIcon={<i className="bx bx-show bx-xs" />}
+      buttonIcon={<Eye />}
     >
       {event.isLoading ? (
         <Spinner />

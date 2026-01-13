@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 
-import { Trash } from "lucide-react";
+import { Star, Trash } from "lucide-react";
 
 import { formatMoney } from "@/lib/formatNumber";
 import createLink from "@/lib/createLink";
@@ -32,7 +32,7 @@ export default function PricingCard({
       </span>
       <span className="space-x-2">
         {pricing.highlighted ? (
-          <i className="bx bxs-star bx-xs text-accent" />
+          <Star className="fill-yellow-500 size-4" />
         ) : null}
         {pricing.deleted ? (
           <Trash className="fill-destructive stroke-destructive" />

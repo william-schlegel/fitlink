@@ -6,8 +6,11 @@ import { useTranslations } from "next-intl";
 
 import { Trash } from "lucide-react";
 
+import { toast } from "sonner";
+
 import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/shadcn/field";
 import ThemeSelector, { TThemes } from "../themeSelector";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { Textarea } from "../ui/shadcn/textarea";
 import DeleteButton from "../ui/deleteButton";
 import Confirmation from "../ui/confirmation";
@@ -17,8 +20,6 @@ import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "../ui/shadcn";
-import Spinner from "../ui/spinner";
-import { toast } from "sonner";
 
 type TitleCreationProps = {
   clubId: string;

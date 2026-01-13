@@ -20,7 +20,7 @@ import { Checkbox } from "@/components/ui/shadcn/checkbox";
 import { Input } from "@/components/ui/shadcn/input";
 import { cn } from "@/lib/utils";
 
-import Spinner from "./spinner";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 
 import {
   InputGroup,

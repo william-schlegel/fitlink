@@ -8,11 +8,16 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import Image from "next/image";
 import Link from "next/link";
 
+import { Info, Mail, Phone } from "lucide-react";
+import { toast } from "sonner";
+
 import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/shadcn/field";
 import { CoachDataOfferType } from "@/server/api/routers/users";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import ThemeSelector, { TThemes } from "../themeSelector";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { Textarea } from "../ui/shadcn/textarea";
+import DeleteButton from "../ui/deleteButton";
 import { UploadButton } from "../uploadthing";
 import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
@@ -21,8 +26,6 @@ import { trpc } from "@/lib/trpc/client";
 import hslToHex from "@/lib/hslToHex";
 import { isCUID } from "@/lib/utils";
 import generateCircle from "./utils";
-import Spinner from "../ui/spinner";
-import { toast } from "sonner";
 import Title from "../title";
 import { env } from "@/env";
 
@@ -186,11 +189,9 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
               <div className="relative w-40 max-w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={fields.imageUrl} alt="" />
-                <ButtonIcon
-                  iconComponent={<i className="bx bx-trash" />}
-                  title={t("hero.delete-image")}
-                  size="icon"
-                  variant="default"
+                <DeleteButton
+                  label={t("hero.delete-image")}
+                  icon
                   onClick={handleDeleteImage}
                   className="absolute right-2 bottom-2 z-10"
                 />
@@ -203,7 +204,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
               {queryCoach.data?.coachData?.publicName ?? t("undefined")}
             </span>
             <span className="tooltip" data-tip={t("coach.your-public-name")}>
-              <i className="bx bx-info-circle bx-xs" />
+              <Info />
             </span>
           </div>
           <FieldSet>
@@ -242,7 +243,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
                 className="tooltip"
                 data-tip={t("coach.certifications-from-dashboard")}
               >
-                <i className="bx bx-info-circle bx-xs" />
+                <Info />
               </span>
             </div>
           </div>
@@ -258,7 +259,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
                 className="tooltip"
                 data-tip={t("coach.activities-in-profile")}
               >
-                <i className="bx bx-info-circle bx-xs" />
+                <Info />
               </span>
             </div>
           </div>
@@ -450,7 +451,7 @@ function PhotoSection({
             } gap-4`}
           >
             {t("coach.contact-me-email")}
-            <i className={`bx bx-envelope ${preview ? "bx-xs" : "bx-lg"}`} />
+            <Mail />
           </a>
         ) : null}
         {phone ? (
@@ -463,7 +464,7 @@ function PhotoSection({
             } gap-4`}
           >
             {t("coach.contact-me-phone")}
-            <i className={`bx bx-phone ${preview ? "bx-xs" : "bx-lg"}`} />
+            <Phone className={preview ? "size-4" : "size-6"} />
           </a>
         ) : null}
       </div>

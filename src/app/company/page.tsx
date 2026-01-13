@@ -5,12 +5,14 @@ import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { CalendarCheck, Gift, Hourglass, User, Webcam } from "lucide-react";
+
 import CollapsableGroup from "@/components/ui/collapsableGroup";
 import ActivitySearch from "@/components/ui/activitySearch";
 import AddressSearch from "@/components/ui/addressSearch";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { formatMoney } from "@/lib/formatNumber";
-import Spinner from "@/components/ui/spinner";
 import Rating from "@/components/ui/rating";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -230,22 +232,16 @@ function OfferCard({ id }: { id: string }) {
               key={`PRICE-${idx}`}
               className="items- flex gap-2 rounded bg-accent px-4 py-2 leading-none text-accent-content"
             >
-              <i
-                className={`bx ${
-                  price.type === "PHYSICAL" ? "bx-user" : "bx-webcam"
-                } bx-xs`}
-              />
+              {price.type === "PHYSICAL" ? <User /> : <Webcam />}
+
               {formatMoney(price.price)}
-              <i
-                className={`bx ${
-                  price.unit === "H" ? "bx-hourglass" : "bx-calendar-check"
-                } bx-xs`}
-              />
+
+              {price.unit === "H" ? <Hourglass /> : <CalendarCheck />}
             </span>
           ))}
           {offer.data?.freeHours ? (
             <span className="items- flex gap-2 rounded bg-accent px-4 py-2 leading-none text-accent-content">
-              <i className="bx bx-gift bx-xs" />
+              <Gift />
               <span>{t("coach.offer.free-hours")}</span>
             </span>
           ) : null}

@@ -10,6 +10,8 @@ import { ExternalLink } from "lucide-react";
 
 import Head from "next/head";
 
+import { toast } from "sonner";
+
 import {
   Badge,
   Button,
@@ -26,12 +28,11 @@ import { usePageSection } from "@/lib/sections/useGetSection";
 import { OfferCreation } from "@/components/sections/offers";
 import { TitleCreation } from "@/components/sections/title";
 import { HeroCreation } from "@/components/sections/hero";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { PageSectionModel } from "@/lib/sections/data";
-import Spinner from "@/components/ui/spinner";
 import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import { toast } from "sonner";
 
 type PageContentProps = {
   pageId: string;

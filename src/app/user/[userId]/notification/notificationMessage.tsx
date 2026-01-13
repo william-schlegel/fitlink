@@ -4,15 +4,16 @@ import { useTranslations } from "next-intl";
 import React, { Fragment } from "react";
 import { isDate } from "date-fns";
 
+import { toast } from "sonner";
+
 import { FromTo, NOTIFICATION_TYPES, NotificationType } from "./types";
 import { CreateNotificationInConvexArgs } from "@/lib/convex/types";
 import SendMessage from "@/components/modals/sendMessage";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { formatMoney } from "@/lib/formatNumber";
-import Spinner from "@/components/ui/spinner";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import { toast } from "sonner";
 
 type UserDetails = {
   name: string;

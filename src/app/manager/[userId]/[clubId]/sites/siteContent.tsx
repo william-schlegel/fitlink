@@ -14,10 +14,10 @@ import {
 } from "@/components/layoutPage";
 import { CreateSiteCalendar } from "@/components/modals/manageCalendar";
 import { DeleteSite, UpdateSite } from "@/components/modals/manageSite";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import LockedButton from "@/components/ui/lockedButton";
 import CalendarWeek from "@/components/calendarWeek";
 import { Button } from "@/components/ui/shadcn";
-import Spinner from "@/components/ui/spinner";
 import useUserInfo from "@/lib/useUserInfo";
 import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";

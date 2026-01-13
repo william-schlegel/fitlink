@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { isDate } from "date-fns";
 
+import { ArrowRight } from "lucide-react";
+
 import { formatDateLocalized } from "@/lib/formatDate";
 import { planning } from "@/db/schema/planning";
 
@@ -32,7 +34,7 @@ export function PlanningName({
           {formatDateLocalized(actualPlanning.startDate)}
           {isDate(actualPlanning.endDate) ? (
             <span className="space-x-2">
-              <i className="bx bx-right-arrow-alt bx-xs" />
+              <ArrowRight />
               <span>{formatDateLocalized(actualPlanning.endDate)}</span>
             </span>
           ) : null}

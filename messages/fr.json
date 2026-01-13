@@ -142,7 +142,8 @@
       "user-updated-error": "Une erreur est survenue lors de la mise à jour de vos informations de compte : {error}",
       "per-month": "/mois",
       "per-year": "/an",
-      "free": "Gratuit"
+      "free": "Gratuit",
+      "delete-activity": "Supprimer l'activité"
     },
     "change-my-name": "Changer mon nom",
     "welcome": "Bienvenue",
@@ -603,6 +604,7 @@
     }
   },
   "common": {
+    "today": "Aujourd'hui",
     "club": "Club",
     "cancel": "Annuler",
     "save": "Enregistrer",

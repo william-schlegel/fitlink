@@ -2,6 +2,8 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
+import { ExternalLink } from "lucide-react";
+
 import {
   CreateOffer,
   DeleteOffer,
@@ -99,7 +101,7 @@ async function OfferContent({ userId, offerId }: OfferContentProps) {
             rel="noreffer"
           >
             {t("offer.see-public-offer")}
-            <i className="bx bx-link-external bx-xs" />
+            <ExternalLink />
           </Link>
         </div>
         <div className="flex items-center gap-2">

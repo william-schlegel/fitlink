@@ -9,6 +9,8 @@ import { InferSelectModel } from "drizzle-orm";
 
 import { Pencil, Trash } from "lucide-react";
 
+import { toast } from "sonner";
+
 import {
   Field,
   FieldError,
@@ -18,17 +20,17 @@ import {
 } from "../ui/shadcn/field";
 import { Button, Card, CardContent, Separator } from "../ui/shadcn";
 import ThemeSelector, { TThemes } from "../themeSelector";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
 import { Textarea } from "../ui/shadcn/textarea";
+import DeleteButton from "../ui/deleteButton";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { Input } from "../ui/shadcn/input";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import Spinner from "../ui/spinner";
-import { toast } from "sonner";
 
 type ActivityGroupCreationProps = {
   clubId: string;
@@ -483,11 +485,9 @@ function ActivityGroupForm({
               alt=""
               className="max-h-40 w-full object-contain"
             />
-            <ButtonIcon
-              iconComponent={<i className="bx bx-trash" />}
-              title={t("activity.delete-image")}
-              size="icon"
-              variant="outlines"
+            <DeleteButton
+              label={t("activity.delete-image")}
+              icon
               onClick={handleDeleteImage}
               className="absolute right-2 bottom-2"
             />

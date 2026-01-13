@@ -3,8 +3,8 @@
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { useDayName } from "@/lib/dates/useDayName";
-import Spinner from "@/components/ui/spinner";
 import { DayName } from "@/lib/dates/data";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";

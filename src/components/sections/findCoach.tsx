@@ -9,7 +9,7 @@ import Link from "next/link";
 
 import { inferProcedureOutput } from "@trpc/server";
 
-import { ExternalLink, Search } from "lucide-react";
+import { ExternalLink, MapPin, Search } from "lucide-react";
 
 import {
   Table,
@@ -20,11 +20,6 @@ import {
   TableRow,
 } from "../ui/shadcn/table";
 import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "../ui/shadcn/input-group";
-import {
   Badge,
   Button,
   Checkbox,
@@ -32,6 +27,11 @@ import {
   FieldContent,
   FieldLabel,
 } from "../ui/shadcn";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "../ui/shadcn/input-group";
 import AddressSearch, { AddressData } from "../ui/addressSearch";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { type TThemes } from "../themeSelector";
@@ -295,10 +295,10 @@ function FindCoach({
                 longitude={res.longitude ?? LONGITUDE}
                 anchor="bottom"
               >
-                <i
-                  className={`bx bxs-map bx-md ${
-                    res.id === hoveredId ? "text-secondary" : "text-primary"
-                  }`}
+                <MapPin
+                  className={
+                    res.id === hoveredId ? "text-accent" : "text-primary"
+                  }
                 />
               </Marker>
             ))}

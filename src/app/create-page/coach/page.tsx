@@ -2,6 +2,8 @@ import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { ExternalLink } from "lucide-react";
+
 import { CoachCreation } from "@/components/sections/coach";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import PublishPageButton from "./publisPageButton";
@@ -51,7 +53,7 @@ export default async function CoachPage({
               className="btn btn-primary flex gap-2"
             >
               {t("page-preview")}
-              <i className="bx bx-link-external bx-xs" />
+              <ExternalLink />
             </Link>
           </div>
         ) : null}

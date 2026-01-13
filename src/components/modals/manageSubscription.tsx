@@ -27,7 +27,7 @@ import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 import Modal from "../ui/modal";
 
-import { Pencil, Trash } from "lucide-react";
+import { Pencil, Plus, Trash } from "lucide-react";
 
 import {
   Field,
@@ -107,7 +107,7 @@ export const CreateSubscription = ({ clubId }: CreateSubscriptionProps) => {
       title={t("subscription.create")}
       handleSubmit={form.handleSubmit(onSubmit, onError)}
       errors={form.formState.errors}
-      buttonIcon={<i className="bx bx-plus bx-xs" />}
+      buttonIcon={<Plus />}
       onOpenModal={() => form.reset()}
       size="md"
     >
