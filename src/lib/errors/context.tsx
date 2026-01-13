@@ -59,7 +59,7 @@ export function ErrorProvider({ children }: { children: ReactNode }) {
     (appError: AppError, customMessage?: string) => {
       const message = customMessage ?? appError.userMessage;
       const title = getErrorTitle(appError.severity);
-      toast.error(message, title);
+      toast.error(title, { description: message });
     },
     [],
   );
@@ -116,7 +116,7 @@ export function ErrorProvider({ children }: { children: ReactNode }) {
    * Show an error message without logging
    */
   const showError = useCallback((message: string, title?: string) => {
-    toast.error(message, title ?? "Error");
+    toast.error(title ?? "Error", { description: message });
   }, []);
 
   /**

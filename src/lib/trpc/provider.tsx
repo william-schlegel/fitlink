@@ -5,9 +5,10 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import React, { useState, useCallback } from "react";
 import superjson from "superjson";
 
+import { toast } from "sonner";
+
 import { AppError, ErrorCode, NetworkError, AuthError } from "@/lib/errors";
 import { logger } from "@/lib/errors/logger";
-import { toast } from "sonner";
 
 import { trpc } from "./client";
 
@@ -84,7 +85,7 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
 
     // Show toast notification for user-facing errors
     if (appError.isOperational) {
-      toast.error(appError.userMessage, "Error");
+      toast.error("Error", { description: appError.userMessage });
     }
   }, []);
 
