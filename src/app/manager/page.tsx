@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { Bell, Building, Presentation, Smartphone } from "lucide-react";
+
 import { PricingComponent, PricingContainer } from "@/components/ui/pricing";
 import { Feature, FeatureContainer } from "@/components/ui/features";
 import { getPricingForRole } from "@/server/api/routers/pricing";
@@ -35,25 +37,25 @@ export default async function ManagerPage() {
               title={t("features.management.title")}
               description={t("features.management.description")}
             >
-              <i className="bx bx-building bx-lg text-accent" />
+              <Building />
             </Feature>
             <Feature
               title={t("features.communication.title")}
               description={t("features.communication.description")}
             >
-              <i className="bx bx-bell bx-lg text-accent" />
+              <Bell />
             </Feature>
             <Feature
               title={t("features.page.title")}
               description={t("features.page.description")}
             >
-              <i className="bx bx-windows bx-lg text-accent" />
+              <Presentation />
             </Feature>
             <Feature
               title={t("features.mobile.title")}
               description={t("features.mobile.description")}
             >
-              <i className="bx bx-mobile-alt bx-lg text-accent" />
+              <Smartphone />
             </Feature>
           </FeatureContainer>
         </div>

@@ -9,6 +9,17 @@ import { InferSelectModel } from "drizzle-orm";
 
 import { Pencil, Trash } from "lucide-react";
 
+import { toast } from "sonner";
+
+import Image from "next/image";
+
+import {
+  PageCard,
+  PageCardAction,
+  PageCardContent,
+  PageCardDescription,
+  PageCardTitle,
+} from "../ui/page/card";
 import {
   Field,
   FieldError,
@@ -18,17 +29,19 @@ import {
 } from "../ui/shadcn/field";
 import { Button, Card, CardContent, Separator } from "../ui/shadcn";
 import ThemeSelector, { TThemes } from "../themeSelector";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { pageSectionElement } from "@/db/schema/page";
-import Modal, { getButtonSize } from "../ui/modal";
 import { Textarea } from "../ui/shadcn/textarea";
+import PageContainer from "../ui/page/container";
+import { PageButton } from "../ui/page/button";
+import DeleteButton from "../ui/deleteButton";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { Input } from "../ui/shadcn/input";
-import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
-import Spinner from "../ui/spinner";
-import { toast } from "sonner";
+import { cn, isCUID } from "@/lib/utils";
+import PageText from "../ui/page/text";
+import Modal from "../ui/modal";
 
 type ActivityGroupCreationProps = {
   clubId: string;
@@ -237,14 +250,14 @@ export const ActivityGroupCreation = ({
             onSave={(t) => updatePageStyle.mutate({ clubId, pageStyle: t })}
           />
         </h3>
-        <div data-theme={previewTheme}>
+        <PageContainer theme={previewTheme}>
           <ActivityGroupContentCard
             title={fields.title}
             subtitle={fields.subTitle}
             elements={querySection.data?.elements ?? []}
             preview
           />
-        </div>
+        </PageContainer>
       </div>
     </div>
   );
@@ -292,7 +305,7 @@ function AddActivityGroup({ pageId, sectionId }: ActivityProps) {
       onCloseModal={() => setClose(false)}
       closeModal={close}
       cancelButtonText=""
-      // className="w-11/12 max-w-4xl"
+      size="md"
     >
       <h3>
         <span>{t("activity-group.new-activity")}</span>
@@ -370,6 +383,7 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
       variant="outline"
       buttonIcon={<Pencil />}
       buttonSize="icon"
+      size="md"
     >
       <h3>
         <span>{t("activity-group.update-activity")}</span>
@@ -462,7 +476,7 @@ function ActivityGroupForm({
 
   return (
     <form onSubmit={handleSubmit(onSuccess)}>
-      <div className="grid grid-cols-[auto_1fr] place-content-start gap-y-1">
+      <div className="space-y-1">
         <UploadButton
           endpoint="imageAttachment"
           onClientUploadComplete={(result) =>
@@ -483,11 +497,9 @@ function ActivityGroupForm({
               alt=""
               className="max-h-40 w-full object-contain"
             />
-            <ButtonIcon
-              iconComponent={<i className="bx bx-trash" />}
-              title={t("activity.delete-image")}
-              size="icon"
-              variant="outlines"
+            <DeleteButton
+              label={t("activity.delete-image")}
+              icon
               onClick={handleDeleteImage}
               className="absolute right-2 bottom-2"
             />
@@ -590,21 +602,23 @@ function ActivityGroupContentCard({
   return (
     <section
       id="ACTIVITY_GROUPS"
-      className={`${
-        preview ? "aspect-4/3" : "min-h-screen"
-      } w-full bg-primary p-4`}
+      className={`${preview ? "aspect-4/3" : "min-h-screen"} w-full p-4`}
     >
       <div className={`container mx-auto p-4 ${preview ? "py-2" : "py-48"}`}>
-        <p
+        <PageText
+          level="h2"
+          color="primary"
           className={`${
             preview
               ? "text-3xl"
               : "text-[clamp(4rem,5vw,6rem)] leading-[clamp(6rem,7.5vw,9rem)]"
-          } font-bold text-primary-content`}
+          } font-bold`}
         >
           {title}
-        </p>
-        <p
+        </PageText>
+        <PageText
+          level="h3"
+          color="primary"
           className={`${
             preview
               ? "text-lg"
@@ -612,7 +626,7 @@ function ActivityGroupContentCard({
           } font-semibold text-primary-content`}
         >
           {subtitle}
-        </p>
+        </PageText>
         <div
           className={`mt-4 grid ${
             preview
@@ -621,41 +635,45 @@ function ActivityGroupContentCard({
           }`}
         >
           {elements?.map((activity) => (
-            <div key={activity.id} className="card bg-card shadow-xl">
+            <PageCard key={activity.id}>
               {activity.imageUrls?.[0] ? (
-                <figure className="white">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={activity.imageUrls[0]} alt="" />
-                </figure>
+                <Image
+                  src={activity.imageUrls[0]}
+                  alt=""
+                  width={400}
+                  height={400}
+                  className="w-full h-full object-cover"
+                />
               ) : null}
-              <div className={`card-body ${preview ? "p-4 text-sm" : ""}`}>
-                <div
-                  className={`card-title ${
-                    preview ? "text-base" : ""
-                  } text-primary`}
-                >
+              <PageCardContent
+                className={cn("space-y-2", preview && "space-y-1 p-4 text-sm")}
+              >
+                <PageCardTitle className={cn(preview && "text-base")}>
                   {activity.title}
-                </div>
+                </PageCardTitle>
                 {activity.subTitle ? (
-                  <p className="text-secondary">{activity.subTitle}</p>
+                  <PageCardDescription>{activity.subTitle}</PageCardDescription>
                 ) : null}
-                {/* <p>{activity.content}</p> */}
-                <div className="card-actions mt-auto justify-end">
-                  <Link
-                    className={`btn btn-primary ${
-                      preview ? "btn-xs max-w-full overflow-hidden text-xs" : ""
-                    }`}
-                    href={
-                      preview
-                        ? "#"
-                        : `${window.location.origin}${window.location.pathname}/activity-group/${activity.id}`
-                    }
+                <PageText level="p">{activity.content}</PageText>
+                <PageCardAction>
+                  <PageButton
+                    asChild
+                    variant="primary"
+                    size={preview ? "xs" : "default"}
                   >
-                    {t("activity-group.more-details")}
-                  </Link>
-                </div>
-              </div>
-            </div>
+                    <Link
+                      href={
+                        preview
+                          ? "#"
+                          : `${window.location.origin}${window.location.pathname}/activity-group/${activity.id}`
+                      }
+                    >
+                      {t("activity-group.more-details")}
+                    </Link>
+                  </PageButton>
+                </PageCardAction>
+              </PageCardContent>
+            </PageCard>
           ))}
         </div>
       </div>
@@ -679,21 +697,22 @@ export const ActivityGroupDisplayElement = ({
 
   return (
     <div className={`container mx-auto p-4 py-12`}>
-      <div className="hero-content flex-col lg:flex-row">
+      <PageCard>
         {queryElement.data.images?.[0] ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={queryElement.data.images[0]}
             alt={queryElement.data.title ?? ""}
-            className="max-w-xl rounded-lg shadow-2xl"
+            className="w-full h-full object-cover"
+            width={400}
+            height={400}
           />
         ) : null}
-        <div>
-          <h1 className="text-5xl font-bold">{queryElement.data.title}</h1>
-          <h2>{queryElement.data.subTitle}</h2>
-          <p className="py-6">{queryElement.data.content}</p>
-        </div>
-      </div>
+        <PageCardTitle>{queryElement.data.title}</PageCardTitle>
+        <PageCardDescription>{queryElement.data.subTitle}</PageCardDescription>
+        <PageCardContent className="mt-4">
+          <PageText level="p">{queryElement.data.content}</PageText>
+        </PageCardContent>
+      </PageCard>
     </div>
   );
 };

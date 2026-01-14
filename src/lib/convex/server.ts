@@ -211,3 +211,52 @@ export async function getNotificationByIdInConvex(
     return null;
   }
 }
+
+export async function getNotificationTotalCountInConvex(userId: string) {
+  if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
+    console.warn(
+      "CONVEX_URL not set, skipping Convex notification total count get",
+    );
+    return null;
+  }
+
+  try {
+    const totalCount = await convexHttpClient.query(
+      api.notifications.getTotalCount,
+      {
+        userId,
+      },
+    );
+    return totalCount;
+  } catch (error) {
+    console.error("Error getting Convex notification total count:", error);
+    return null;
+  }
+}
+
+export async function getNotificationsForUserInConvex(
+  userId: string,
+  mode: "received" | "sent",
+  limit: number,
+  skip: number,
+) {
+  if (!env.CONVEX_URL && !process.env.CONVEX_URL) {
+    console.warn("CONVEX_URL not set, skipping Convex notifications get");
+    return null;
+  }
+  try {
+    const notifications = await convexHttpClient.query(
+      api.notifications.getNotificationsForUser,
+      {
+        userId,
+        userFromId: mode === "sent" ? userId : undefined,
+        limit,
+        skip,
+      },
+    );
+    return notifications;
+  } catch (error) {
+    console.error("Error getting Convex notifications:", error);
+    return null;
+  }
+}

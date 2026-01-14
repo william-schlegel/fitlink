@@ -14,21 +14,22 @@ import { useRouter } from "next/navigation";
 
 import { Pencil, Trash } from "lucide-react";
 
+import { toast } from "sonner";
+
 import {
   PAGE_TARGET_LIST,
   PageTarget,
   TARGET_SECTIONS,
 } from "@/lib/sections/data";
 import { usePageSection } from "@/lib/sections/useGetSection";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import Confirmation from "../ui/confirmation";
 import { getButtonSize } from "../ui/modal";
 import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import Spinner from "../ui/spinner";
 import Modal from "../ui/modal";
-import { toast } from "sonner";
 
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/shadcn";
 

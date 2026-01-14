@@ -1,9 +1,9 @@
 import { inferRouterOutputs } from "@trpc/server";
 import { useTranslations } from "next-intl";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { AppRouter } from "@/server/api/root";
 import { DAYS } from "@/lib/dates/data";
-import Spinner from "./ui/spinner";
 
 type Calendar =
   inferRouterOutputs<AppRouter>["calendars"]["getCalendarForSite"];

@@ -5,6 +5,16 @@ import { useQuery, useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
 
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/shadcn";
+import {
   NotificationForMessage,
   NotificationMessage,
 } from "./notificationMessage";
@@ -91,52 +101,50 @@ export function NotificationContent({
             ? t("notification.from-user")
             : t("notification.to-user")}
         </span>
-        <div className="avatar">
-          <div className="w-16 avatar">
-            {userFrom && userTo && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={fromTo === "to" ? userFrom.imageUrl : userTo.imageUrl}
-                alt={fromTo === "to" ? userFrom.name : userTo.name}
-                width={64}
-                height={64}
-                className="rounded-full"
-                loading="lazy"
-              />
-            )}
-          </div>
-        </div>
+        <Avatar>
+          <AvatarImage
+            src={fromTo === "to" ? userFrom?.imageUrl : userTo?.imageUrl}
+            alt={fromTo === "to" ? userFrom?.name : userTo?.name}
+          />
+          <AvatarFallback>
+            {fromTo === "to" ? userFrom?.name : userTo?.name}
+          </AvatarFallback>
+        </Avatar>
+
         {userFrom && userTo && (
-          <span className="text-lg font-bold text-secondary">
+          <span className="text-lg font-bold text-accent">
             {(fromTo === "to" ? userFrom.name : userTo.name) ?? ""}
           </span>
         )}
       </div>
-      <div className="flex items-center gap-4">
-        <h2>
-          {formatDateLocalized(new Date(notification.createdAt), {
-            dateFormat: "long",
-            withDay: true,
-            withTime: true,
-          })}
-        </h2>
-        {notification.viewedAt ? (
-          <span>
-            {t("notification.viewed", {
-              date: formatDateLocalized(new Date(notification.viewedAt), {
-                dateFormat: "long",
-                withTime: true,
-              }),
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {formatDateLocalized(new Date(notification.createdAt), {
+              dateFormat: "long",
+              withDay: true,
+              withTime: true,
             })}
-          </span>
-        ) : null}
-      </div>
-      <div className="space-y-4 rounded border border-primary p-4">
-        <NotificationMessage
-          notification={notificationForMessage}
-          fromTo={fromTo}
-        />
-      </div>
+            {notification.viewedAt ? (
+              <CardDescription>
+                {t("notification.viewed", {
+                  date: formatDateLocalized(new Date(notification.viewedAt), {
+                    dateFormat: "long",
+                    withTime: true,
+                  }),
+                })}
+              </CardDescription>
+            ) : null}
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          <NotificationMessage
+            notification={notificationForMessage}
+            fromTo={fromTo}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

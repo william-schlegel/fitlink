@@ -4,8 +4,10 @@ import { ActivityGroupDisplayCard } from "@/components/sections/activities";
 import { PlanningDisplayCard } from "@/components/sections/planning";
 import PageNavigation from "@/components/sections/pageNavigation";
 import { OfferDisplayCard } from "@/components/sections/offers";
+import PageContainer from "@/components/ui/page/container";
 import { TitleDisplay } from "@/components/sections/title";
 import { HeroDisplay } from "@/components/sections/hero";
+import { TThemes } from "@/components/themeSelector";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import Title from "@/components/title";
 import { isCUID } from "@/lib/utils";
@@ -24,7 +26,7 @@ export default async function ClubPresentation({
   const queryClub = await caller.clubs.getClubPagesForNavByClubId(clubId);
 
   return (
-    <div data-theme={queryPage?.theme ?? "light"}>
+    <PageContainer theme={queryPage?.theme as TThemes}>
       <Title title={queryPage?.clubName ?? ""} />
       <PageNavigation
         clubId={clubId}
@@ -52,6 +54,6 @@ export default async function ClubPresentation({
           <OfferDisplayCard key={section.id} pageId={pageId} clubId={clubId} />
         ) : null,
       )}
-    </div>
+    </PageContainer>
   );
 }

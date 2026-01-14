@@ -6,6 +6,15 @@ import {
   DeleteCertification,
   UpdateCertification,
 } from "@/components/modals/manageCertification";
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Separator,
+} from "@/components/ui/shadcn";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
@@ -90,40 +99,45 @@ export default async function ManageCertifications({
       <div className="flex gap-4">
         <div className="flex flex-wrap gap-4">
           {(certificationQuery?.certifications ?? []).map((certification) => (
-            <div key={certification.id} className="card w-96 bg-card shadow-xl">
-              <div className="card-body">
-                <h2 className="card-title">{certification.name}</h2>
+            <Card key={certification.id}>
+              <CardHeader>
+                <CardTitle>
+                  <h2>{certification.name}</h2>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                 <h3>{t("coach.modules")}</h3>
                 <div className="flex flex-wrap gap-2">
                   {certification.modules.map((mod) => (
-                    <div key={mod.id} className="pill">
+                    <Badge key={mod.id} size="xl">
                       {mod.name}
-                    </div>
+                    </Badge>
                   ))}
                 </div>
                 <h3>{t("coach.activities")}</h3>
                 <div className="flex flex-wrap gap-2">
                   {certification.activityGroups.map((act) => (
-                    <div key={act.id} className="pill">
+                    <Badge key={act.id} size="xl">
                       {act.name}
-                    </div>
+                    </Badge>
                   ))}
                 </div>
-                <div className="mt-4 flex items-center gap-4 border-t border-border pt-4">
-                  <DocButton documentUrl={certification.documentUrl ?? ""} />
-                </div>
-                <div className="card-actions justify-end">
-                  <UpdateCertification
-                    userId={userId}
-                    certificationId={certification.id}
-                  />
-                  <DeleteCertification
-                    userId={userId}
-                    certificationId={certification.id}
-                  />
-                </div>
-              </div>
-            </div>
+              </CardContent>
+              <Separator />
+              <DocButton documentUrl={certification.documentUrl ?? ""} />
+              <CardFooter className="flex justify-end gap-2">
+                <UpdateCertification
+                  userId={userId}
+                  certificationId={certification.id}
+                  buttonSize="default"
+                />
+                <DeleteCertification
+                  userId={userId}
+                  certificationId={certification.id}
+                  buttonSize="default"
+                />
+              </CardFooter>
+            </Card>
           ))}
         </div>
       </div>

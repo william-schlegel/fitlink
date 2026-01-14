@@ -14,9 +14,9 @@ import { useMutation } from "convex/react";
 import { Trash } from "lucide-react";
 
 import { Id } from "../../../convex/_generated/dataModel";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import Confirmation from "@/components/ui/confirmation";
 import { api } from "../../../convex/_generated/api";
-import Spinner from "@/components/ui/spinner";
 import { trpc } from "@/lib/trpc/client";
 
 type MessageItemProps = {

@@ -50,7 +50,9 @@ import { Textarea } from "../ui/shadcn/textarea";
 import { Checkbox } from "../ui/shadcn/checkbox";
 import { Input } from "../ui/shadcn/input";
 
-import { Pencil, PlusCircle, Trash, Undo } from "lucide-react";
+import { Menu, Pencil, Plus, PlusCircle, Trash, Undo } from "lucide-react";
+
+import { toast } from "sonner";
 
 import {
   InputGroup,
@@ -59,15 +61,14 @@ import {
   InputGroupInput,
 } from "../ui/shadcn/input-group";
 import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import Confirmation from "../ui/confirmation";
 import ButtonIcon from "../ui/buttonIcon";
 import { CSS } from "@dnd-kit/utilities";
 import { trpc } from "@/lib/trpc/client";
 import { ROLE_LIST } from "@/lib/data";
-import Spinner from "../ui/spinner";
 import { cn } from "@/lib/utils";
 import Modal from "../ui/modal";
-import { toast } from "sonner";
 
 import type { ButtonVariant } from "@/components/ui/shadcn/button";
 
@@ -137,9 +138,8 @@ export const CreatePricing = ({ variant = "default" }: CreatePricingProps) => {
   return (
     <Modal
       title={t("pricing.new")}
-      buttonIcon={<i className="bx bx-plus bx-sm" />}
+      buttonIcon={<Plus />}
       variant={variant}
-      className="w-10/12 max-w-[90vw]"
       handleSubmit={form.handleSubmit(onSubmit, onError)}
     >
       <h3>{t("pricing.new")}</h3>
@@ -626,7 +626,7 @@ const Option = ({ option }: OptionProps) => {
       className="my-2 flex items-center justify-between gap-4 border border-border bg-card p-2"
     >
       <div className="flex items-center gap-2">
-        <i className="bx bx-menu bx-sm text-base-300" />
+        <Menu className="text-base-300" />
         <span>{option}</span>
       </div>
     </li>

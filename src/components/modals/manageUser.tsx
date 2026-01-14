@@ -13,6 +13,8 @@ import { useEffect, useState } from "react";
 
 import { Pencil, Trash } from "lucide-react";
 
+import { toast } from "sonner";
+
 import {
   Select,
   SelectContent,
@@ -24,14 +26,13 @@ import {
   PricingComponent as PricingCard,
   PricingContainer,
 } from "../ui/pricing";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import Confirmation from "../ui/confirmation";
 import { RoleEnum } from "@/db/schema/enums";
 import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
 import { ROLE_LIST } from "@/lib/data";
-import Spinner from "../ui/spinner";
 import Modal from "../ui/modal";
-import { toast } from "sonner";
 
 import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 

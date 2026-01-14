@@ -48,12 +48,12 @@ import {
 } from "@/components/modals/managePlanning";
 import { Field, FieldError, FieldLabel } from "@/components/ui/shadcn/field";
 import { getPlanningById } from "@/server/api/routers/planning";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { PlanningName } from "@/components/planningName";
 import Confirmation from "@/components/ui/confirmation";
 import { Input } from "@/components/ui/shadcn/input";
 import { useDayName } from "@/lib/dates/useDayName";
 import { DayName, DAYS } from "@/lib/dates/data";
-import Spinner from "@/components/ui/spinner";
 import { CSS } from "@dnd-kit/utilities";
 import { trpc } from "@/lib/trpc/client";
 import { room } from "@/db/schema/club";

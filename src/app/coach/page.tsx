@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { Bell, UserCheck, Video } from "lucide-react";
+
 import { Feature, FeatureContainer } from "@/components/ui/features";
 import { getPricingForRole } from "@/server/api/routers/pricing";
 import { PricingContainer } from "@/components/ui/pricing";
@@ -32,19 +34,19 @@ export default async function CoachPage() {
               title={t("features.coaching.title")}
               description={t("features.coaching.description")}
             >
-              <i className="bx bx-user-check bx-lg text-accent" />
+              <UserCheck />
             </Feature>
             <Feature
               title={t("features.coach-communication.title")}
               description={t("features.coach-communication.description")}
             >
-              <i className="bx bx-bell bx-lg text-accent" />
+              <Bell />
             </Feature>
             <Feature
               title={t("features.video.title")}
               description={t("features.video.description")}
             >
-              <i className="bx bx-video bx-lg text-accent" />
+              <Video />
             </Feature>
           </FeatureContainer>
         </div>

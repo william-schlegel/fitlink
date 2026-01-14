@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Link from "next/link";
 
-import { Search } from "lucide-react";
+import { ExternalLink, MapPin, Search } from "lucide-react";
 
 import {
   Table,
@@ -133,7 +133,7 @@ function FindClub({ address = "" }: FindClubProps) {
             >
               <ButtonIcon
                 title={t("page-club", { name: item.club.name })}
-                iconComponent={<i className="bx bx-link-external bx-xs" />}
+                iconComponent={<ExternalLink />}
                 size="icon"
                 variant="outlines"
               />
@@ -235,10 +235,10 @@ function FindClub({ address = "" }: FindClubProps) {
                 longitude={res.longitude ?? LONGITUDE}
                 anchor="bottom"
               >
-                <i
-                  className={`bx bxs-map bx-md ${
-                    res.id === hoveredId ? "text-secondary" : "text-primary"
-                  }`}
+                <MapPin
+                  className={
+                    res.id === hoveredId ? "text-accent" : "text-primary"
+                  }
                 />
               </Marker>
             ))}

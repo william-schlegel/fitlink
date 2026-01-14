@@ -13,6 +13,9 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 import { inferProcedureOutput } from "@trpc/server";
 
+import { AlertCircle, MapPin, Plus, X } from "lucide-react";
+import { toast } from "sonner";
+
 import {
   Field,
   FieldGroup,
@@ -28,10 +31,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/shadcn/select";
+import {
+  InputGroup,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/shadcn/input-group";
+import { Badge, Button, Card, CardContent } from "@/components/ui/shadcn";
 import { SubscriptionForm } from "@/components/modals/manageUser";
 import { Textarea } from "@/components/ui/shadcn/textarea";
 import AddressSearch from "@/components/ui/addressSearch";
 import generateCircle from "@/components/sections/utils";
+import DeleteButton from "@/components/ui/deleteButton";
 import Confirmation from "@/components/ui/confirmation";
 import { Input } from "@/components/ui/shadcn/input";
 import { TThemes } from "@/components/themeSelector";
@@ -43,7 +53,6 @@ import PlanDetails from "./planDetails";
 import { ROLE_LIST } from "@/lib/data";
 import hslToHex from "@/lib/hslToHex";
 import { isCUID } from "@/lib/utils";
-import { toast } from "sonner";
 import { env } from "@/env";
 
 type FormValues = {
@@ -238,8 +247,8 @@ export default function FormAccount({
                 <FieldLabel htmlFor="publicActivities">
                   {t("account.public-activities")}
                 </FieldLabel>
-                <div className="flex gap-2">
-                  <Input
+                <InputGroup>
+                  <InputGroupInput
                     id="publicActivities"
                     value={newActivity}
                     onChange={(e) => setNewActivity(e.target.value)}
@@ -250,26 +259,27 @@ export default function FormAccount({
                       }
                     }}
                   />
-                  <button
+                  <InputGroupButton
                     type="button"
-                    className="btn btn-primary btn-square"
                     onClick={handleAddActivity}
+                    size="icon-sm"
                   >
-                    <i className="bx bx-plus bx-sm" />
-                  </button>
-                </div>
+                    <Plus />
+                  </InputGroupButton>
+                </InputGroup>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {fields.coachingActivities?.map((activity, idx) => (
-                    <span
-                      key={`activity-${idx}`}
-                      className="pill w-fit space-x-2"
-                    >
-                      <span>{activity}</span>
-                      <i
-                        className="bx bx-trash bx-xs cursor-pointer text-error"
-                        onClick={() => handleDeleteActivity(idx)}
-                      />
-                    </span>
+                    <Card key={`activity-${idx}`} size="sm">
+                      <CardContent className="flex items-center gap-2">
+                        <span>{activity}</span>
+
+                        <DeleteButton
+                          label={t("account.delete-activity")}
+                          icon
+                          onClick={() => handleDeleteActivity(idx)}
+                        />
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               </Field>
@@ -364,7 +374,7 @@ export default function FormAccount({
                     longitude={fields.longitude ?? LONGITUDE}
                     latitude={fields.latitude ?? LATITUDE}
                   >
-                    <i className="bx bxs-map bx-sm text-secondary" />
+                    <MapPin className="text-accent size-4" />
                   </Marker>
                 </MapComponent>
               </div>
@@ -380,7 +390,7 @@ export default function FormAccount({
               <>
                 <label className="self-start">{t("account.actual-plan")}</label>
                 <div className="flex gap-2">
-                  <div className="rounded bg-primary px-4 py-2 text-primary-content">
+                  <div className="rounded bg-primary/10 px-4 py-2 text-primary">
                     <PlanDetails
                       // Actual pricing
                       monthlyPayment={userData.monthlyPayment ?? true}
@@ -391,7 +401,7 @@ export default function FormAccount({
                     />
                   </div>
                   {userData.trialUntil && !userData.pricing?.free ? (
-                    <div className="rounded bg-secondary px-4 py-2 text-secondary-content">
+                    <div className="rounded bg-accent/10 px-4 py-2 text-accent">
                       {t("account.trial-remaining", {
                         count: remainingDays(userData.trialUntil),
                       })}
@@ -402,10 +412,10 @@ export default function FormAccount({
             ) : (
               <div>{t("account.no-plan-yet")}</div>
             )}
-            {fields.pricingId ? ( // new pricing
+            {fields.pricingId !== userData?.pricingId ? ( // new pricing
               <div className="flex flex-1 flex-col border-2 border-warning p-2">
                 <h4>{t("account.new-plan")}</h4>
-                <div className="rounded bg-warning px-4 py-2 text-center text-warning-content">
+                <div className="rounded bg-accent/10 px-4 py-2 text-center text-accent">
                   {newPricing.data ? (
                     <PlanDetails
                       monthlyPayment={fields.monthlyPayment ?? true}
@@ -435,40 +445,44 @@ export default function FormAccount({
             ) : null}
           </div>
         </div>
-        <div className="mt-4 rounded border border-secondary p-4 text-center">
+        <div className="mt-4 rounded border border-destructive p-4 text-center">
           <Confirmation
             message={t("account.cancel-plan-message")}
             title={t("account.cancel-plan")}
-            variant="outline"
-            buttonIcon={<i className="bx bx-x bx-sm" />}
+            variant="destructive"
+            buttonIcon={<X />}
             textConfirmation={t("account.cancel-plan-confirm")}
             onConfirm={() => setValue("cancelationDate", startOfToday())}
           />
           {isDate(fields.cancelationDate) ? (
             <div className="alert alert-error mt-4">
               <div>
-                <i className="bx bx-error-circle bx-xs" />
+                <AlertCircle className="text-destructive size-4" />
                 <span>{t("account.cancelation-requested")}</span>
               </div>
               <div className="flex-none">
-                <button
-                  className="btn-warning btn-xs btn"
+                <Button
+                  variant="outline"
+                  className="bg-warning/10"
+                  size="icon"
                   type="button"
                   onClick={() => setValue("cancelationDate", null)}
                 >
-                  <i className="bx bx-x bx-xs" />
-                </button>
+                  <X />
+                </Button>
               </div>
             </div>
           ) : null}
         </div>
       </section>
-      <button
-        className="btn-primary btn col-span-2 w-fit"
-        // disabled={updateUser.isLoading}
+      <Button
+        type="submit"
+        size="xl"
+        className="col-span-2 w-fit"
+        disabled={updateUser.isPending}
       >
         {t("account.save-account")}
-      </button>
+      </Button>
     </form>
   );
 }

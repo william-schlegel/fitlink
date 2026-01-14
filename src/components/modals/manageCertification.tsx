@@ -13,7 +13,10 @@ import { Plus, Edit, Trash2, Trash, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { toast } from "sonner";
+
 import { LayoutPage, LayoutPageMain, LayoutPageList } from "../layoutPage";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { Button } from "@/components/ui/shadcn/button";
 import { Label } from "@/components/ui/shadcn/label";
@@ -26,9 +29,7 @@ import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
-import Spinner from "../ui/spinner";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 
 import { Field, FieldError, FieldLabel } from "../ui/shadcn";
 
@@ -345,9 +346,10 @@ export const UpdateCertification = ({
       title={t("update-certification")}
       handleSubmit={handleSubmit(onSubmit, onError)}
       errors={errors}
-      buttonIcon={<Edit className={getButtonSize(buttonSize)} />}
+      buttonIcon={<Pencil />}
       variant={variant}
       buttonSize={buttonSize}
+      size="sm"
     >
       <h3>
         {t("update-certification")} {queryCertification.data?.name}
@@ -371,7 +373,7 @@ export const UpdateCertification = ({
 export const DeleteCertification = ({
   userId,
   certificationId,
-  variant = "outline",
+  variant = "destructive",
   buttonSize = "icon",
 }: UpdateCertificationProps) => {
   const utils = trpc.useUtils();
@@ -394,7 +396,7 @@ export const DeleteCertification = ({
       onConfirm={() => {
         deleteCertification.mutate(certificationId);
       }}
-      buttonIcon={<Trash2 className={getButtonSize(buttonSize)} />}
+      buttonIcon={<Trash />}
       variant={variant}
       buttonSize={buttonSize}
       textConfirmation={t("certification-confirmation")}

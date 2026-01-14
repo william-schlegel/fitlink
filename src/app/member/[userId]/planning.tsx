@@ -5,9 +5,9 @@ import { inferRouterOutputs } from "@trpc/server";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { roomReservationEnum } from "@/db/schema/enums";
 import { useDayName } from "@/lib/dates/useDayName";
-import Spinner from "@/components/ui/spinner";
 import Modal from "@/components/ui/modal";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";

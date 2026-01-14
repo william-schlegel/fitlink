@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 
 import { useAction } from "convex/react";
 
+import { MessageCirclePlus, Search } from "lucide-react";
+
 import { api } from "../../../convex/_generated/api";
 import { Input } from "@/components/ui/shadcn/input";
 import ButtonIcon from "@/components/ui/buttonIcon";
@@ -80,7 +82,7 @@ export function UserSearch({ currentUserId, onClose }: UserSearchProps) {
             className="btn btn-primary"
             disabled={!searchQuery.trim()}
           >
-            <i className="bx bx-search" />
+            <Search />
           </button>
         </div>
 
@@ -124,7 +126,7 @@ export function UserSearch({ currentUserId, onClose }: UserSearchProps) {
                             </div>
                           )}
                         </div>
-                        <i className="bx bx-message-rounded-add text-xl" />
+                        <MessageCirclePlus />
                       </button>
                     </li>
                   ))}

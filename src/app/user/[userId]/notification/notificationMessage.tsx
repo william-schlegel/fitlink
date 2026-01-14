@@ -4,15 +4,17 @@ import { useTranslations } from "next-intl";
 import React, { Fragment } from "react";
 import { isDate } from "date-fns";
 
+import { toast } from "sonner";
+
 import { FromTo, NOTIFICATION_TYPES, NotificationType } from "./types";
 import { CreateNotificationInConvexArgs } from "@/lib/convex/types";
 import SendMessage from "@/components/modals/sendMessage";
+import { Spinner } from "@/components/ui/shadcn/spinner";
+import { Badge, Button } from "@/components/ui/shadcn";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { formatMoney } from "@/lib/formatNumber";
-import Spinner from "@/components/ui/spinner";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import { toast } from "sonner";
 
 type UserDetails = {
   name: string;
@@ -54,11 +56,11 @@ export function NotificationMessage({
   }
   const Elem: React.ReactNode[] = [];
   Elem.push(
-    <div className="badge-info badge">
+    <Badge>
       {t("notification.notification-type", {
         type: getName(notification.type as NotificationType),
       })}
-    </div>,
+    </Badge>,
   );
   Elem.push(<p>{notification.message}</p>);
   if (isDate(notification.answeredAt))
@@ -72,9 +74,7 @@ export function NotificationMessage({
             }),
           })}
         </span>
-        <span className="badge-primary badge">
-          {t(notification.answer ?? "")}
-        </span>
+        <Badge>{t(notification.answer ?? "")}</Badge>
       </div>,
     );
   if (
@@ -95,8 +95,8 @@ export function NotificationMessage({
     if (notification.type === "SEARCH_COACH")
       Elem.push(
         <div className="flex items-center gap-2">
-          <button
-            className="btn-success btn"
+          <Button
+            variant="success"
             type="button"
             onClick={() =>
               handleClick(
@@ -106,9 +106,9 @@ export function NotificationMessage({
             }
           >
             {t("notification.accept")}
-          </button>
-          <button
-            className="btn-error btn"
+          </Button>
+          <Button
+            variant="destructive"
             type="button"
             onClick={() =>
               handleClick(
@@ -118,7 +118,7 @@ export function NotificationMessage({
             }
           >
             {t("notification.refuse")}
-          </button>
+          </Button>
           <SendMessage
             toUserId={notification.userFromId}
             fromUserId={notification.userId}
@@ -128,8 +128,8 @@ export function NotificationMessage({
     if (notification.type === "NEW_SUBSCRIPTION")
       Elem.push(
         <div className="flex items-center gap-2">
-          <button
-            className="btn-success btn"
+          <Button
+            variant="success"
             type="button"
             onClick={() =>
               handleClick(
@@ -139,9 +139,9 @@ export function NotificationMessage({
             }
           >
             {t("notification.validate")}
-          </button>
-          <button
-            className="btn-error btn"
+          </Button>
+          <Button
+            variant="destructive"
             type="button"
             onClick={() =>
               handleClick(
@@ -151,7 +151,7 @@ export function NotificationMessage({
             }
           >
             {t("notification.cancel")}
-          </button>
+          </Button>
         </div>,
       );
   }

@@ -25,11 +25,11 @@ import {
   SubscriptionRestrictionEnum,
 } from "@/db/schema/enums";
 import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { Alert } from "@/components/ui/shadcn/alert";
 import CardGroup from "@/components/ui/cardGroup";
 import { formatMoney } from "@/lib/formatNumber";
-import Spinner from "@/components/ui/spinner";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 

@@ -3,8 +3,8 @@
 import { useTranslations } from "next-intl";
 import { Eye } from "lucide-react";
 
-import ButtonIcon from "@/components/ui/buttonIcon";
 import { Badge } from "@/components/ui/shadcn/badge";
+import ButtonIcon from "@/components/ui/buttonIcon";
 
 export default function DocButton({ documentUrl }: { documentUrl: string }) {
   const t = useTranslations("coach");
@@ -17,7 +17,9 @@ export default function DocButton({ documentUrl }: { documentUrl: string }) {
 
   return documentUrl ? (
     <>
-      <Badge variant="info">{t("document-ok")}</Badge>
+      <Badge variant="info" className="mx-auto my-4" size="xl">
+        {t("document-ok")}
+      </Badge>
 
       <ButtonIcon
         iconComponent={<Eye className="h-5 w-5" />}
@@ -29,7 +31,9 @@ export default function DocButton({ documentUrl }: { documentUrl: string }) {
     </>
   ) : (
     <>
-      <Badge variant="warning">{t("document-nok")}</Badge>
+      <Badge variant="warning" className="mx-auto my-4" size="xl">
+        {t("document-nok")}
+      </Badge>
     </>
   );
 }

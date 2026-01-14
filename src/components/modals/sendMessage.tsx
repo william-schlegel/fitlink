@@ -4,6 +4,8 @@ import { useTranslations } from "next-intl";
 import { useMutation } from "convex/react";
 import { useState } from "react";
 
+import { Mail } from "lucide-react";
+
 import { api } from "../../../convex/_generated/api";
 import Modal from "../ui/modal";
 
@@ -21,9 +23,8 @@ export default function SendMessage({
     <Modal
       title={t("notification.send-message")}
       submitButtonText={t("notification.send-message")}
-      buttonIcon={<i className="bx bx-envelope bx-sm" />}
+      buttonIcon={<Mail />}
       variant="outline"
-      className="w-2/3 max-w-xl"
       cancelButtonText=""
       onCloseModal={() => setCloseModal(true)}
       closeModal={closeModal}

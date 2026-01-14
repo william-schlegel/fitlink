@@ -10,13 +10,8 @@ import { ExternalLink } from "lucide-react";
 
 import Head from "next/head";
 
-import {
-  Badge,
-  Button,
-  Checkbox,
-  Field,
-  FieldLabel,
-} from "@/components/ui/shadcn";
+import { toast } from "sonner";
+
 import { ActivityGroupCreation } from "@/components/sections/activities";
 import { DeletePage, UpdatePage } from "@/components/modals/managePage";
 import { ButtonGroup } from "@/components/ui/shadcn/button-group";
@@ -26,12 +21,13 @@ import { usePageSection } from "@/lib/sections/useGetSection";
 import { OfferCreation } from "@/components/sections/offers";
 import { TitleCreation } from "@/components/sections/title";
 import { HeroCreation } from "@/components/sections/hero";
+import PublishPageButton from "../coach/publisPageButton";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { PageSectionModel } from "@/lib/sections/data";
-import Spinner from "@/components/ui/spinner";
+import { Button } from "@/components/ui/shadcn";
 import createLink from "@/lib/createLink";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
-import { toast } from "sonner";
 
 type PageContentProps = {
   pageId: string;
@@ -77,21 +73,14 @@ export default function PageContent({
       <div className="flex flex-wrap items-center gap-2">
         <h2> {queryPage.data?.name}</h2>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge size="xl">
-            <Field orientation="horizontal">
-              <FieldLabel>{t("publish-page")}</FieldLabel>
-              <Checkbox
-                checked={queryPage.data?.published ?? false}
-                onCheckedChange={(checked) =>
-                  publishPage.mutate({
-                    pageId,
-                    published: checked === true,
-                  })
-                }
-              />
-            </Field>
-          </Badge>
-          <Button asChild>
+          <PublishPageButton
+            id={clubId}
+            checked={queryPage.data?.published ?? false}
+            pageId={pageId}
+            target="club"
+          />
+
+          <Button asChild variant="secondary" size="lg">
             <Link
               href={`/presentation-page/club/${clubId}/${pageId}`}
               target="_blank"

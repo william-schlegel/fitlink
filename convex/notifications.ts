@@ -63,6 +63,20 @@ export const getUnreadCount = query({
   },
 });
 
+export const getTotalCount = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const notifications = await ctx.db
+      .query("notifications")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    return notifications.length;
+  },
+});
+
 export const getNotificationById = query({
   args: {
     notificationId: v.id("notifications"),

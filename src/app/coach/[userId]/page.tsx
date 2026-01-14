@@ -3,13 +3,24 @@ import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
+import {
+  Award,
+  Building,
+  Dumbbell,
+  Euro,
+  ExternalLink,
+  Star,
+} from "lucide-react";
+
 import { getCoachDataForUserId } from "@/server/api/routers/dashboard";
 import { getCoachDailyPlanning } from "@/server/api/routers/planning";
 import LockedButton from "@/components/ui/lockedButton";
+import { Badge, Button } from "@/components/ui/shadcn";
 import { getToday } from "@/lib/dates/serverDayName";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import ButtonIcon from "@/components/ui/buttonIcon";
 import SelectDay from "@/components/ui/selectDay";
+import CardGroup from "@/components/ui/cardGroup";
 import { getActualUser } from "@/lib/auth/server";
 import { DayName } from "@/lib/dates/data";
 import Title from "@/components/title";
@@ -57,79 +68,60 @@ export default async function CoachDashboard({
       <h1 className="flex items-center justify-between">
         <div className="flex flex-wrap items-center gap-4">
           <span>{t("dashboard.coach-dashboard")}</span>
-          <span
-            className={`rounded px-4 py-2 text-sm ${
-              published
-                ? "bg-success text-success-content"
-                : "bg-warning text-warning-content"
-            }`}
-          >
+          <Badge variant={published ? "success" : "warning"} size="lg">
             {published
               ? t("pages.page-published")
               : t("pages.page-unpublished")}
-          </span>
+          </Badge>
         </div>
         <div className="flex items-center gap-4">
           {features.includes("COACH_CERTIFICATION") ? (
-            <Link
-              className="btn btn-secondary"
-              href={`${userId}/certifications`}
-            >
-              {t("dashboard.manage-certifications")}
-            </Link>
+            <Button asChild>
+              <Link href={`${userId}/certifications`}>
+                {t("dashboard.manage-certifications")}
+              </Link>
+            </Button>
           ) : (
             <LockedButton label={t("dashboard.manage-certifications")} />
           )}
         </div>
       </h1>
-      <section className="stats w-full shadow">
-        <div className="stat">
-          <div className="stat-figure text-primary">
-            <i className="bx bx-building bx-lg" />
-          </div>
-          <div className="stat-title">
-            {t("dashboard.clubs", { count: clubCount })}
-          </div>
-          <div className="stat-value text-primary">{clubCount}</div>
-        </div>
-        <div className="stat">
-          <div className="stat-figure text-primary">
-            <i className="bx bx-award bx-lg" />
-          </div>
-          <div className="stat-title">
-            {t("dashboard.certifications", { count: certificationCount })}
-          </div>
-          <div className="stat-value text-primary">{certificationCount}</div>
-        </div>
-        <div className="stat">
-          <div className="stat-figure text-primary">
-            <i className="bx bx-cycling bx-lg" />
-          </div>
-          <div className="stat-title">
-            {t("dashboard.activities", { count: activityCount })}
-          </div>
-          <div className="stat-value text-primary">{activityCount}</div>
-        </div>
-        <div className="stat">
-          <div className="stat-figure text-primary">
-            <i className="bx bx-dollar bx-lg" />
-          </div>
-          <div className="stat-title">
-            {t("dashboard.offers", { count: offerCount })}
-          </div>
-          <div className="stat-value text-primary">{offerCount}</div>
-        </div>
-        <div className="stat">
-          <div className="stat-figure text-primary">
-            <i className="bx bx-star bx-lg" />
-          </div>
-          <div className="stat-title">{t("dashboard.rating")}</div>
-          <div className="stat-value text-primary">
-            {coachQuery?.coachData?.rating?.toFixed(1) ??
-              t("dashboard.unrated")}
-          </div>
-        </div>
-      </section>
+      <CardGroup
+        cards={[
+          {
+            title: t("dashboard.clubs", { count: clubCount }),
+            value: clubCount,
+            icon: Building,
+          },
+          {
+            title: t("dashboard.certifications", { count: certificationCount }),
+            value: certificationCount,
+            icon: Award,
+          },
+          {
+            title: t("dashboard.activities", { count: activityCount }),
+            value: activityCount,
+            icon: Dumbbell,
+          },
+          {
+            title: t("dashboard.offers", { count: offerCount }),
+            value: offerCount,
+            icon: Euro,
+          },
+          {
+            title: t("dashboard.rating", {
+              count:
+                coachQuery?.coachData?.rating?.toFixed(1) ??
+                t("dashboard.unrated"),
+            }),
+            value:
+              coachQuery?.coachData?.rating?.toFixed(1) ??
+              t("dashboard.unrated"),
+            icon: Star,
+          },
+        ]}
+      />
+
       {clubs.length > 0 && (
         <section className="rounded-md border border-primary p-2">
           <h2>{t("dashboard.clubs-working-with")}</h2>
@@ -151,7 +143,9 @@ export default async function CoachDashboard({
         <article className="rounded-md border border-primary p-2">
           <h2>{t("dashboard.schedule")}</h2>
           {features.includes("COACH_MEETING") ? (
-            <div></div>
+            <div className="text-center text-sm text-muted-foreground">
+              (A venir)
+            </div>
           ) : (
             <div className="alert alert-error">
               {t("common.navigation.insufficient-plan")}
@@ -160,6 +154,9 @@ export default async function CoachDashboard({
         </article>
         <article className="col-span-full rounded-md border border-primary p-2">
           <h2>{t("dashboard.chat-members")}</h2>
+          <div className="text-center text-sm text-muted-foreground">
+            (A venir)
+          </div>
         </article>
       </section>
     </div>
@@ -207,7 +204,7 @@ async function ClubCard({
               rel="noreferrer"
             >
               <ButtonIcon
-                iconComponent={<i className="bx bx-link-external" />}
+                iconComponent={<ExternalLink />}
                 title={t("view-club")}
               />
             </Link>

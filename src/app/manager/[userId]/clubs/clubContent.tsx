@@ -25,6 +25,8 @@ import Link from "next/link";
 
 import { CalendarX, Euro, User } from "lucide-react";
 
+import { toast } from "sonner";
+
 import {
   Badge,
   Button,
@@ -37,16 +39,15 @@ import { DeleteClub, UpdateClub } from "@/components/modals/manageClub";
 import { ButtonGroup } from "@/components/ui/shadcn/button-group";
 import CollapsableGroup from "@/components/ui/collapsableGroup";
 import AddActivity from "@/components/modals/manageActivity";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import LockedButton from "@/components/ui/lockedButton";
 import DeleteButton from "@/components/ui/deleteButton";
 import CalendarWeek from "@/components/calendarWeek";
 import ButtonIcon from "@/components/ui/buttonIcon";
 import { activityGroup } from "@/db/schema/club";
-import Spinner from "@/components/ui/spinner";
 import useUserInfo from "@/lib/useUserInfo";
 import { trpc } from "@/lib/trpc/client";
 import { cn, isCUID } from "@/lib/utils";
-import { toast } from "sonner";
 
 type ClubContentProps = {
   userId: string;

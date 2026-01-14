@@ -2,6 +2,13 @@ import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/shadcn";
+
 export default async function SelectCoachManager({
   hrefCoach,
   hrefManager,
@@ -11,32 +18,39 @@ export default async function SelectCoachManager({
 }) {
   const t = await getTranslations("dashboard");
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <Link href={hrefCoach} className="card bg-card w-96 shadow-sm">
-        <figure>
+    <div className="flex gap-4 mx-auto justify-center items-center w-full">
+      <Link href={hrefCoach} className="w-1/4">
+        <Card>
           <Image
             src="/images/coach-f.jpeg"
             alt="coach"
             width={400}
             height={300}
           />
-        </figure>
-        <div className="card-body items-center text-center">
-          <p className="card-title">{t("manager-coach.continue-as-coach")}</p>
-        </div>
+
+          <CardFooter className="justify-center">
+            <p className="font-bold text-xl text-primary ">
+              {t("manager-coach.continue-as-coach")}
+            </p>
+          </CardFooter>
+        </Card>
       </Link>
-      <Link href={hrefManager} className="card bg-card w-96 shadow-sm">
-        <figure>
+
+      <Link href={hrefManager} className="w-1/4">
+        <Card>
           <Image
             src="/images/manager-f.jpeg"
             alt="coach"
             width={400}
             height={300}
           />
-        </figure>
-        <div className="card-body items-center text-center">
-          <p className="card-title">{t("manager-coach.continue-as-manager")}</p>
-        </div>
+
+          <CardFooter className="justify-center">
+            <p className="font-bold text-xl text-primary ">
+              {t("manager-coach.continue-as-manager")}
+            </p>
+          </CardFooter>
+        </Card>
       </Link>
     </div>
   );

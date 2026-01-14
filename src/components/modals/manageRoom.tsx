@@ -15,13 +15,13 @@ import { useRouter } from "next/navigation";
 
 import { toast } from "sonner";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { roomReservationEnum } from "@/db/schema/enums";
 import Confirmation from "../ui/confirmation";
 import createLink from "@/lib/createLink";
 import SimpleForm from "../ui/simpleform";
 import { RESERVATIONS } from "@/lib/data";
 import { trpc } from "@/lib/trpc/client";
-import Spinner from "../ui/spinner";
 import Modal from "../ui/modal";
 
 import { Pencil, Plus, Trash } from "lucide-react";

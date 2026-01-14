@@ -2,7 +2,7 @@ import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-import { CalendarCheck, CalendarClock, ChevronLeft } from "lucide-react";
+import { CalendarCheck, CalendarClock, ChevronLeft, X } from "lucide-react";
 
 import {
   LayoutPage,
@@ -17,6 +17,7 @@ import {
 import { CreateRoomCalendar } from "@/components/modals/manageCalendar";
 import { getRoomById, getSiteById } from "@/server/api/routers/sites";
 import createLink, { createHref } from "@/lib/createLink";
+import { Alert } from "@/components/ui/shadcn/alert";
 import CalendarWeek from "@/components/calendarWeek";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { Button } from "@/components/ui/shadcn";
@@ -137,10 +138,10 @@ async function RoomContent({ clubId, siteId, roomId }: RoomContentProps) {
       <div className="flex items-center justify-between">
         <h2>{roomQuery?.name}</h2>
         {roomQuery?.unavailable ? (
-          <div className="alert alert-error w-fit">
-            <i className="bx bx-x bx-xs" />
+          <Alert variant="destructive" className="w-fit">
+            <X className="stroke-destructive" />
             <span>{t("room.closed")}</span>
-          </div>
+          </Alert>
         ) : null}
         <div className="flex items-center gap-2">
           <UpdateRoom siteId={siteId} roomId={roomId} />

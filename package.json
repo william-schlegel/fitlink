@@ -9,7 +9,6 @@
     "lint": "next lint",
     "lint:all": "eslint .",
     "format": "prettier --write .",
-    "dbml": "tsx --env-file=.env ./scripts/dbml.ts",
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
