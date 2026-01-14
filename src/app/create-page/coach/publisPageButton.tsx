@@ -4,8 +4,12 @@ import { useTranslations } from "next-intl";
 
 import { useRouter } from "next/navigation";
 
-import { trpc } from "@/lib/trpc/client";
 import { toast } from "sonner";
+
+import { Check, X } from "lucide-react";
+
+import { Badge, Checkbox, Field, FieldLabel } from "@/components/ui/shadcn";
+import { trpc } from "@/lib/trpc/client";
 
 export default function PublishPageButton({
   userId,
@@ -30,21 +34,30 @@ export default function PublishPageButton({
   });
 
   return (
-    <div className="form-control">
-      <label className="label cursor-pointer gap-4">
-        <span className="label-text">{t("publish-page")}</span>
-        <input
-          type="checkbox"
-          className="checkbox-primary checkbox"
-          checked={checked}
-          onChange={(e) =>
-            publishPage.mutate({
-              pageId,
-              published: e.target.checked,
-            })
-          }
-        />
-      </label>
+    <div>
+      <Field orientation="horizontal">
+        <Badge size="xl" variant="outline">
+          <FieldLabel htmlFor="publish-page">
+            {t("publish-page")}
+            {checked ? (
+              <Check className="size-4 text-success" />
+            ) : (
+              <X className="size-4 text-destructive" />
+            )}
+          </FieldLabel>
+          <Checkbox
+            className="hidden"
+            id="publish-page"
+            checked={checked}
+            onCheckedChange={(checked) =>
+              publishPage.mutate({
+                pageId,
+                published: checked === true,
+              })
+            }
+          />
+        </Badge>
+      </Field>
     </div>
   );
 }

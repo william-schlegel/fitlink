@@ -8,6 +8,7 @@ import { CoachCreation } from "@/components/sections/coach";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import PublishPageButton from "./publisPageButton";
 import { getActualUser } from "@/lib/auth/server";
+import { Button } from "@/components/ui/shadcn";
 import Title from "@/components/title";
 
 export default async function CoachPage({
@@ -33,28 +34,26 @@ export default async function CoachPage({
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">
       <Title title={t("coach.manage-page")} />
-      <h1 className="flex flex-wrap items-center justify-between">
+      <h1 className="flex flex-wrap items-center gap-2">
         <span>{t("coach.manage-page")}</span>
 
         {queryPage?.id ? (
           <div className="flex flex-wrap items-center gap-2">
-            <div className="pill">
-              <PublishPageButton
-                userId={userId}
-                checked={queryPage.published ?? false}
-                pageId={queryPage.id}
-              />
-            </div>
-
-            <Link
-              href={`/presentation-page/coach/${userId}/${queryPage.id}`}
-              target="_blank"
-              referrerPolicy="no-referrer"
-              className="btn btn-primary flex gap-2"
-            >
-              {t("page-preview")}
-              <ExternalLink />
-            </Link>
+            <PublishPageButton
+              userId={userId}
+              checked={queryPage.published ?? false}
+              pageId={queryPage.id}
+            />
+            <Button asChild variant="secondary" size="lg">
+              <Link
+                href={`/presentation-page/coach/${userId}/${queryPage.id}`}
+                target="_blank"
+                referrerPolicy="no-referrer"
+              >
+                {t("page-preview")}
+                <ExternalLink />
+              </Link>
+            </Button>
           </div>
         ) : null}
       </h1>

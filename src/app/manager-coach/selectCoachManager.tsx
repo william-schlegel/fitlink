@@ -21,16 +21,13 @@ export default async function SelectCoachManager({
     <div className="flex gap-4 mx-auto justify-center items-center w-full">
       <Link href={hrefCoach} className="w-1/4">
         <Card>
-          <CardHeader>
-            <figure>
-              <Image
-                src="/images/coach-f.jpeg"
-                alt="coach"
-                width={400}
-                height={300}
-              />
-            </figure>
-          </CardHeader>
+          <Image
+            src="/images/coach-f.jpeg"
+            alt="coach"
+            width={400}
+            height={300}
+          />
+
           <CardFooter className="justify-center">
             <p className="font-bold text-xl text-primary ">
               {t("manager-coach.continue-as-coach")}
@@ -41,16 +38,13 @@ export default async function SelectCoachManager({
 
       <Link href={hrefManager} className="w-1/4">
         <Card>
-          <CardHeader>
-            <figure>
-              <Image
-                src="/images/manager-f.jpeg"
-                alt="coach"
-                width={400}
-                height={300}
-              />
-            </figure>
-          </CardHeader>
+          <Image
+            src="/images/manager-f.jpeg"
+            alt="coach"
+            width={400}
+            height={300}
+          />
+
           <CardFooter className="justify-center">
             <p className="font-bold text-xl text-primary ">
               {t("manager-coach.continue-as-manager")}

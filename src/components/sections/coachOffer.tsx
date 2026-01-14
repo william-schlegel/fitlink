@@ -4,12 +4,25 @@ import { useRouter } from "next/navigation";
 
 import Link from "next/link";
 
-import { Home, Map, MapPin, Rocket, Webcam } from "lucide-react";
+import {
+  Car,
+  Gift,
+  Home,
+  Landmark,
+  MapPin,
+  Rocket,
+  User,
+  Webcam,
+} from "lucide-react";
 
+import Image from "next/image";
+
+import { Badge, Card, CardContent, CardHeader } from "../ui/shadcn";
 import { useCoachingLevel } from "@/lib/offers/useOffers";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { formatMoney } from "@/lib/formatNumber";
 import SendMessage from "../modals/sendMessage";
+import { PageBadge } from "../ui/page/badge";
 import { useUser } from "@/lib/auth/client";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -49,9 +62,9 @@ export function CoachOfferPage({
       <div className={condensed ? undefined : "space-y-8"}>
         <section className={`flex ${condensed ? "gap-2" : "gap-8 "}`}>
           {offerQuery.data.coach?.coachingActivities?.map((activity, idx) => (
-            <span className="pill px-4" key={idx}>
+            <Badge variant="info" size="xl" key={idx}>
               {activity}
-            </span>
+            </Badge>
           ))}
         </section>
 
@@ -96,7 +109,7 @@ export function CoachOfferPage({
         </section>
         <section>
           <h3>{t("offer.course-description")}</h3>
-          <div className="pill w-fit px-4">
+          <Badge variant="info" size="xl">
             <Rocket />
             {t("offer.levels")}
             {" : "}
@@ -105,7 +118,7 @@ export function CoachOfferPage({
                 getNameLevel(l.level),
               ) ?? [],
             )}
-          </div>
+          </Badge>
           <p className="my-4">{offerQuery.data.coach?.aboutMe}</p>
         </section>
         {offerQuery.data.packs?.length ? (
@@ -113,33 +126,32 @@ export function CoachOfferPage({
             <h3>{t("offer.packs")}</h3>
             <div className="flex flex-wrap gap-4">
               {offerQuery.data.packs.map((pack) => (
-                <div key={pack.id} className="pill px-4">
+                <Badge variant="info" size="xl" key={pack.id}>
                   <span className="font-semibold text-primary">
                     {pack.nbHours}h
                   </span>
                   <span>{formatMoney(pack.packPrice)}</span>
-                </div>
+                </Badge>
               ))}
             </div>
           </section>
         ) : null}
       </div>
-      <div className="card w-full place-self-start bg-card shadow-xl max-xl:card-side">
-        <figure
-          className="w-[40%] max-w-[16rem] shrink-0 xl:h-64 xl:w-full xl:max-w-full"
-          style={{
-            backgroundImage: `url(${offerQuery.data.imageUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <div className="mt-auto h-fit bg-black/20 px-4 py-2 text-accent xl:w-full">
-            <h3 className="text-center text-accent">
-              {offerQuery.data.coach?.publicName}
-            </h3>
-          </div>
-        </figure>
-        <div className="card-body justify-center">
+      <Card className="h-fit relative">
+        <Image
+          width={400}
+          height={400}
+          className="w-[40%] max-w-[16rem] shrink-0 xl:h-64 xl:w-full xl:max-w-full object-cover object-center"
+          src={offerQuery.data.imageUrl}
+          alt={offerQuery.data.coach?.publicName ?? ""}
+        />
+        <div className="absolute top-0 left-0 w-full h-fit bg-black/30 px-4 py-2 text-accent xl:w-full">
+          <h3 className="text-center text-accent">
+            {offerQuery.data.coach?.publicName}
+          </h3>
+        </div>
+
+        <CardContent>
           <Rating
             note={offerQuery.data.coach?.rating ?? 5}
             className="justify-center"
@@ -147,32 +159,32 @@ export function CoachOfferPage({
           <div className="space-y-2">
             <Tarif
               value={offerQuery.data.perHourPhysical ?? 0}
-              icon="bx-user"
+              icon={<User />}
               unit={t("offer.per-hour")}
             />
             <Tarif
               value={offerQuery.data.perDayPhysical ?? 0}
-              icon="bx-user"
+              icon={<User />}
               unit={t("offer.per-day")}
             />
             <Tarif
               value={offerQuery.data.perHourWebcam ?? 0}
-              icon="bx-webcam"
+              icon={<Webcam />}
               unit={t("offer.per-hour")}
             />
             <Tarif
               value={offerQuery.data.perDayWebcam ?? 0}
-              icon="bx-webcam"
+              icon={<Webcam />}
               unit={t("offer.per-day")}
             />
             <Tarif
               value={offerQuery.data.travelFee ?? 0}
-              icon="bx-car"
+              icon={<Car />}
               unit=""
             />
             <Tarif
               value={offerQuery.data.freeHours ?? 0}
-              icon="bx-gift"
+              icon={<Gift />}
               unit={"h"}
               money={false}
               className="rounded bg-primary/10 outline outline-primary"
@@ -203,8 +215,8 @@ export function CoachOfferPage({
               </button>
             )}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -214,6 +226,8 @@ type OfferBadgeProps = {
   publicName?: string | null;
   searchAddress?: string | null;
   travelLimit?: number | null;
+  page?: boolean;
+  preview?: boolean;
 };
 
 export function OfferBadge({
@@ -221,6 +235,8 @@ export function OfferBadge({
   publicName,
   searchAddress,
   travelLimit,
+  page = false,
+  preview = false,
 }: OfferBadgeProps) {
   const t = useTranslations("coach");
   let icon: React.ReactNode = null;
@@ -228,37 +244,53 @@ export function OfferBadge({
   const restriction = travelLimit
     ? t("offer.in-limit", {
         limit: travelLimit,
-        address: searchAddress ?? "",
+        address: searchAddress || "chez moi",
       })
     : "";
 
   if (variant === "My-Place") {
-    icon = <MapPin />;
+    icon = <MapPin className={preview ? "size-4" : "size-8"} />;
     name = `${t("offer.home", {
       name: publicName ?? "",
     })} : ${searchAddress}`;
   }
   if (variant === "In-House") {
-    icon = <Home />;
+    icon = <Home className={preview ? "size-4" : "size-8"} />;
     name = t("offer.your-place");
   }
   if (variant === "Public-Place") {
-    icon = <Map />;
+    icon = <Landmark className={preview ? "size-4" : "size-8"} />;
     name = t("offer.public-place");
   }
   if (variant === "Webcam") {
-    icon = <Webcam />;
+    icon = <Webcam className={preview ? "size-4" : "size-8"} />;
     name = t("offer.webcam");
   }
 
+  if (page) {
+    return (
+      <PageBadge variant="info" size={preview ? "sm" : "xl"}>
+        {icon}
+        <span className="flex items-center gap-[1ch] line-clamp-1 max-w-full">
+          <span>{name}</span>
+          {restriction ? (
+            <span className={preview ? "text-xs" : "text-sm"}>
+              {restriction}
+            </span>
+          ) : null}
+        </span>
+      </PageBadge>
+    );
+  }
+
   return (
-    <div className="pill w-fit px-4">
+    <Badge variant="info" size="xl">
       {icon}
       <span>{name}</span>
       {restriction ? (
-        <span className="text-sm text-secondary">{restriction}</span>
+        <span className="text-sm text-accent">{restriction}</span>
       ) : null}
-    </div>
+    </Badge>
   );
 }
 

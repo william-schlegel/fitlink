@@ -140,7 +140,9 @@ export const UpdateOffer = ({ userId, offerId }: PropsUpdateDelete) => {
 
   const queryOffer = trpc.coachs.getOfferById.useQuery(offerId, {
     enabled: isCUID(offerId),
+    refetchOnWindowFocus: false,
   });
+
   useEffect(() => {
     if (queryOffer.data) {
       const levels = COACHING_LEVEL.map(
@@ -322,10 +324,6 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
     control,
     name: "packs",
   });
-  const publicPlace = useWatch({
-    control,
-    name: "publicPlace",
-  });
 
   const { getName } = useCoachingLevel();
   const { getLabel } = useCoachingTarget();
@@ -460,7 +458,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
                     <Checkbox
                       id="offer-excluding-taxes"
                       checked={field.value}
-                      onCheckedChange={field.onChange}
+                      onCheckedChange={(checked) => field.onChange(!!checked)}
                     />
                     <FieldLabel
                       htmlFor="offer-excluding-taxes"
@@ -501,7 +499,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
                 <Checkbox
                   id={`offer-level-${idx}`}
                   checked={field.value[idx]}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => field.onChange(!!checked)}
                   defaultChecked={false}
                 />
                 <FieldLabel
@@ -527,7 +525,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
                   <Checkbox
                     id="offer-physical"
                     checked={field.value}
-                    onCheckedChange={field.onChange}
+                    onCheckedChange={(checked) => field.onChange(!!checked)}
                     defaultChecked={false}
                   />
                   <FieldLabel htmlFor="offer-physical" className="font-normal">
@@ -546,7 +544,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
                       <Checkbox
                         id="offer-in-house"
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
                       />
                       <FieldLabel
                         htmlFor="offer-in-house"
@@ -565,7 +563,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
                       <Checkbox
                         id="offer-my-place"
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
                       />
                       <FieldLabel
                         htmlFor="offer-my-place"
@@ -584,7 +582,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
                       <Checkbox
                         id="offer-public-place"
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
                       />
                       <FieldLabel
                         htmlFor="offer-public-place"
@@ -666,36 +664,36 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
         <FieldSet className="flex flex-col rounded border border-primary p-4">
           <FieldGroup>
             <Controller
-              name="publicPlace"
+              name="webcam"
               control={control}
               render={({ field }) => (
                 <Field orientation="horizontal">
                   <Checkbox
                     id="offer-public-place"
                     checked={field.value}
-                    onCheckedChange={field.onChange}
+                    onCheckedChange={(checked) => field.onChange(!!checked)}
                     defaultChecked={false}
                   />
                   <FieldLabel
                     htmlFor="offer-public-place"
                     className="font-normal"
                   >
-                    {t("offer.public-place")}
+                    {t("offer.webcam")}
                   </FieldLabel>
                 </Field>
               )}
             />
-            {publicPlace ? (
+            {webcam ? (
               <>
                 <h4>{t("offer.tarif")}</h4>
                 <Field>
-                  <FieldLabel htmlFor="per-hour-physical" className="sr-only">
+                  <FieldLabel htmlFor="per-hour-webcam" className="sr-only">
                     {t("offer.per-hour")}
                   </FieldLabel>
                   <InputGroup>
                     <InputGroupInput
-                      id="per-hour-physical"
-                      {...register("perHourPhysical", {
+                      id="per-hour-webcam"
+                      {...register("perHourWebcam", {
                         valueAsNumber: true,
                       })}
                       type="number"
@@ -706,13 +704,13 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
                   </InputGroup>
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="per-day-physical" className="sr-only">
+                  <FieldLabel htmlFor="per-day-webcam" className="sr-only">
                     {t("offer.per-day")}
                   </FieldLabel>
                   <InputGroup>
                     <InputGroupInput
-                      id="per-day-physical"
-                      {...register("perDayPhysical", {
+                      id="per-day-webcam"
+                      {...register("perDayWebcam", {
                         valueAsNumber: true,
                       })}
                       type="number"
@@ -720,93 +718,13 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
                     <InputGroupAddon align="inline-end">
                       €{t("offer.per-day")}
                     </InputGroupAddon>
-                  </InputGroup>
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="travel-fee">
-                    {t("offer.travel-fee")}
-                  </FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput
-                      id="travel-fee"
-                      {...register("travelFee", { valueAsNumber: true })}
-                      type="number"
-                    />
-                    <InputGroupAddon align="inline-end">€</InputGroupAddon>
-                  </InputGroup>
-                </Field>
-                <Field orientation="horizontal">
-                  <FieldLabel htmlFor="travel-limit">
-                    {t("offer.travel-limit")}
-                  </FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput
-                      id="travel-limit"
-                      {...register("travelLimit", { valueAsNumber: true })}
-                      type="number"
-                    />
-                    <InputGroupAddon align="inline-end">km</InputGroupAddon>
                   </InputGroup>
                 </Field>
               </>
             ) : null}
           </FieldGroup>
         </FieldSet>
-        {/*<FieldSet className="flex flex-col rounded border border-primary p-4">
-          <div>
-            <Field orientation="horizontal">
-              <Checkbox
-                id="offer-webcam"
-                {...register("webcam")}
-                defaultChecked={false}
-              />
-              <FieldLabel htmlFor="offer-webcam" className="font-normal">
-                {t("offer.webcam")}
-              </FieldLabel>
-            </Field>
-            {webcam ? (
-              <Field>
-                <FieldLabel>{t("offer.tarif")}</FieldLabel>
-                <Field>
-                  <FieldLabel htmlFor="per-hour-webcam" className="sr-only">
-                    {t("offer.per-hour")}
-                  </FieldLabel>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      id="per-hour-webcam"
-                      {...register("perHourWebcam", {
-                        valueAsNumber: true,
-                      })}
-                      type="number"
-                      className="w-auto flex-1"
-                    />
-                    <span className="text-sm text-base-content/70">
-                      €{t("offer.per-hour")}
-                    </span>
-                  </div>
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="per-day-webcam" className="sr-only">
-                    {t("offer.per-day")}
-                  </FieldLabel>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      id="per-day-webcam"
-                      {...register("perDayWebcam", {
-                        valueAsNumber: true,
-                      })}
-                      type="number"
-                      className="w-auto flex-1"
-                    />
-                    <span className="text-sm text-base-content/70">
-                      €{t("offer.per-day")}
-                    </span>
-                  </div>
-                </Field>
-              </Field>
-            ) : null}
-          </div>
-        </FieldSet>
+
         <FieldSet className="flex flex-col rounded border border-primary p-4">
           <label>{t("offer.packs")}</label>
           <Table>
@@ -889,7 +807,6 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
           {t2("cancel")}
         </Button>
         <Button type="submit">{t("offer.save")}</Button>
-        */}
       </div>
     </form>
   );

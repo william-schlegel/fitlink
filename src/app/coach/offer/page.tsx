@@ -15,8 +15,8 @@ import {
   LayoutPageList,
 } from "@/components/layoutPage";
 import { CoachOfferPage } from "@/components/sections/coachOffer";
+import { BadgeVariant, Button } from "@/components/ui/shadcn";
 import { getOfferName } from "@/lib/offers/serverOffer";
-import { BadgeVariant } from "@/components/ui/shadcn";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
@@ -94,15 +94,12 @@ async function OfferContent({ userId, offerId }: OfferContentProps) {
       <div className="flex items-center justify-between">
         <div className="flex flex-wrap items-center gap-4">
           <h2>{offerQuery?.name}</h2>
-          <Link
-            className="btn btn-primary flex items-center gap-4"
-            href={`/company/${offerId}`}
-            target="_blank"
-            rel="noreffer"
-          >
-            {t("offer.see-public-offer")}
-            <ExternalLink />
-          </Link>
+          <Button asChild variant="outline" size="lg">
+            <Link href={`/company/${offerId}`} target="_blank" rel="noreffer">
+              {t("offer.see-public-offer")}
+              <ExternalLink />
+            </Link>
+          </Button>
         </div>
         <div className="flex items-center gap-2">
           <UpdateOffer userId={userId} offerId={offerId} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import MapComponent, { Layer, Source } from "react-map-gl/mapbox";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -11,20 +11,42 @@ import Link from "next/link";
 import { Info, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
 
-import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/shadcn/field";
+import {
+  Button,
+  Checkbox,
+  Separator,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "../ui/shadcn";
+import {
+  PageCard,
+  PageCardAction,
+  PageCardHeader,
+  PageCardTitle,
+} from "../ui/page/card";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "../ui/shadcn/input-group";
 import { CoachDataOfferType } from "@/server/api/routers/users";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { Spinner } from "@/components/ui/shadcn/spinner";
+import { Field, FieldLabel } from "../ui/shadcn/field";
 import { Textarea } from "../ui/shadcn/textarea";
+import PageContainer from "../ui/page/container";
+import { PageButton } from "../ui/page/button";
 import DeleteButton from "../ui/deleteButton";
 import { UploadButton } from "../uploadthing";
+import { PageBadge } from "../ui/page/badge";
 import { Input } from "../ui/shadcn/input";
-import ButtonIcon from "../ui/buttonIcon";
 import { OfferBadge } from "./coachOffer";
 import { trpc } from "@/lib/trpc/client";
+import { cn, isCUID } from "@/lib/utils";
+import PageText from "../ui/page/text";
 import hslToHex from "@/lib/hslToHex";
-import { isCUID } from "@/lib/utils";
 import generateCircle from "./utils";
 import Title from "../title";
 import { env } from "@/env";
@@ -172,7 +194,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
       <div>
         <h3>{t("updating-page")}</h3>
         <form
-          className="grid grid-cols-[auto_1fr] gap-2 rounded border border-primary p-2"
+          className="rounded border border-primary p-2 space-y-2"
           onSubmit={form.handleSubmit(onSubmit)}
         >
           <div className="col-span-2 flex items-start gap-4">
@@ -198,76 +220,92 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
               </div>
             ) : null}
           </div>
-          <label>{t("coach.name")}</label>
-          <div className="flex items-center gap-2">
-            <span>
-              {queryCoach.data?.coachData?.publicName ?? t("undefined")}
-            </span>
-            <span className="tooltip" data-tip={t("coach.your-public-name")}>
-              <Info />
-            </span>
-          </div>
-          <FieldSet>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="coach-info">{t("coach.info")}</FieldLabel>
-                <Input
-                  id="coach-info"
-                  {...form.register("subtitle")}
-                  type="text"
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="coach-description">
-                  {t("coach.description")}
-                </FieldLabel>
-                <Textarea
-                  id="coach-description"
-                  {...form.register("description")}
-                  rows={4}
-                />
-              </Field>
-            </FieldGroup>
-          </FieldSet>
-          <div className="form-control col-span-2">
-            <div className="label cursor-pointer justify-start gap-4">
-              <input
-                type="checkbox"
-                className="checkbox-primary checkbox"
-                {...form.register("withCertifications")}
+          <Field orientation="horizontal">
+            <FieldLabel>{t("coach.name")}</FieldLabel>
+            <InputGroup>
+              <InputGroupInput
+                disabled
+                value={queryCoach.data?.coachData?.publicName ?? t("undefined")}
               />
-              <label className="label-text">
-                {t("coach.with-certifications")}
-              </label>
-              <span
-                className="tooltip"
-                data-tip={t("coach.certifications-from-dashboard")}
-              >
-                <Info />
-              </span>
-            </div>
-          </div>
-          <div className="form-control col-span-2">
-            <div className="label cursor-pointer justify-start gap-4">
-              <input
-                type="checkbox"
-                className="checkbox-primary checkbox"
-                {...form.register("withActivities")}
-              />
-              <label className="label-text">{t("coach.with-activities")}</label>
-              <span
-                className="tooltip"
-                data-tip={t("coach.activities-in-profile")}
-              >
-                <Info />
-              </span>
-            </div>
-          </div>
-          <div className="col-span-2 flex justify-between">
-            <button className="btn-primary btn" type="submit">
-              {t("save-section")}
-            </button>
-          </div>
+              <InputGroupAddon>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info />
+                  </TooltipTrigger>
+                  <TooltipContent>{t("coach.your-public-name")}</TooltipContent>
+                </Tooltip>
+              </InputGroupAddon>
+            </InputGroup>
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="coach-info">{t("coach.info")}</FieldLabel>
+            <Input id="coach-info" {...form.register("subtitle")} type="text" />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="coach-description">
+              {t("coach.description")}
+            </FieldLabel>
+            <Textarea
+              id="coach-description"
+              {...form.register("description")}
+              rows={4}
+            />
+          </Field>
+          <Field orientation="horizontal">
+            <Controller
+              name="withCertifications"
+              control={form.control}
+              render={({ field }) => (
+                <>
+                  <Checkbox
+                    id="coach-with-certifications"
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(!!checked)}
+                  />
+                  <FieldLabel htmlFor="coach-with-certifications">
+                    {t("coach.with-certifications")}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t("coach.certifications-from-dashboard")}
+                      </TooltipContent>
+                    </Tooltip>
+                  </FieldLabel>
+                </>
+              )}
+            />
+          </Field>
+          <Field orientation="horizontal">
+            <Controller
+              name="withActivities"
+              control={form.control}
+              render={({ field }) => (
+                <>
+                  <Checkbox
+                    id="coach-with-activities"
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(!!checked)}
+                  />
+                  <FieldLabel htmlFor="coach-with-certifications">
+                    {t("coach.with-activities")}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t("coach.activities-in-profile")}
+                      </TooltipContent>
+                    </Tooltip>
+                  </FieldLabel>
+                </>
+              )}
+            />
+          </Field>
+          <Separator />
+
+          <Button type="submit">{t("save-section")}</Button>
         </form>
       </div>
       <div>
@@ -279,7 +317,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
               onSave={(t) => updatePageStyle.mutate({ userId, pageStyle: t })}
             />
           </h3>
-          <div data-theme={previewTheme} className="pt-4">
+          <PageContainer theme={previewTheme} className="pt-4">
             <PhotoSection
               imageSrc={fields.imageUrl}
               userName={queryCoach.data?.coachData?.publicName}
@@ -319,7 +357,7 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
               preview
               theme={previewTheme}
             />
-          </div>
+          </PageContainer>
         </div>
       </div>
     </div>
@@ -342,8 +380,8 @@ export const CoachDisplay = ({ pageId }: CoachDisplayProps) => {
   const ca = { certifications, activities };
 
   return (
-    <div
-      data-theme={queryPage.data?.pageStyle ?? "light"}
+    <PageContainer
+      theme={queryPage.data?.pageStyle as TThemes}
       className="flex min-h-screen flex-col items-center justify-center"
     >
       <Title title={queryPage.data?.publicName ?? ""} />
@@ -379,7 +417,7 @@ export const CoachDisplay = ({ pageId }: CoachDisplayProps) => {
         theme={(queryPage.data?.pageStyle as TThemes) ?? "light"}
         range={queryPage.data?.range ?? 10}
       />
-    </div>
+    </PageContainer>
   );
 };
 
@@ -421,8 +459,9 @@ function PhotoSection({
           />
         ) : null}
       </div>
-      <div className="self-start">
-        <p
+      <div className="self-start space-y-2">
+        <PageText
+          level="p"
           className={`${
             preview
               ? "text-3xl"
@@ -430,8 +469,9 @@ function PhotoSection({
           } font-bold`}
         >
           {userName ?? ""}
-        </p>
-        <p
+        </PageText>
+        <PageText
+          level="p"
           className={`${
             preview
               ? "text-lg"
@@ -439,33 +479,23 @@ function PhotoSection({
           } font-semibold`}
         >
           {info}
-        </p>
-        <p className="text-neutral-content">{description}</p>
+        </PageText>
+        <PageText level="p">{description}</PageText>
         {email ? (
-          <a
-            href={`mailto:${email}`}
-            target="_blank"
-            rel="noreferrer"
-            className={`btn-primary btn-block btn ${
-              preview ? "btn-sm my-2 text-xs" : "btn-lg my-4 text-base"
-            } gap-4`}
-          >
-            {t("coach.contact-me-email")}
-            <Mail />
-          </a>
+          <PageButton asChild size={preview ? "sm" : "lg"} className="w-full">
+            <a href={`mailto:${email}`} target="_blank" rel="noreferrer">
+              {t("coach.contact-me-email")}
+              <Mail />
+            </a>
+          </PageButton>
         ) : null}
         {phone ? (
-          <a
-            href={`tel:${phone}`}
-            target="_blank"
-            rel="noreferrer"
-            className={`btn-outline btn-secondary btn-block btn ${
-              preview ? "btn-sm my-2 text-xs" : "btn-lg my-4 text-base"
-            } gap-4`}
-          >
-            {t("coach.contact-me-phone")}
-            <Phone className={preview ? "size-4" : "size-6"} />
-          </a>
+          <PageButton asChild size={preview ? "sm" : "lg"} className="w-full">
+            <a href={`tel:${phone}`} target="_blank" rel="noreferrer">
+              {t("coach.contact-me-phone")}
+              <Phone className={preview ? "size-4" : "size-6"} />
+            </a>
+          </PageButton>
         ) : null}
       </div>
     </section>
@@ -496,7 +526,8 @@ function CertificationsAndActivities({
     >
       {withCertifications && certifications.length ? (
         <div>
-          <h3
+          <PageText
+            level="h3"
             className={
               preview
                 ? ""
@@ -504,19 +535,18 @@ function CertificationsAndActivities({
             }
           >
             {t("coach.coach-certifications")}
-          </h3>
+          </PageText>
           <div className="flex flex-wrap gap-2">
             {certifications.map((certification) => (
-              <div key={certification.id} className="pill">
-                {certification.name}
-              </div>
+              <PageBadge key={certification.id}>{certification.name}</PageBadge>
             ))}
           </div>
         </div>
       ) : null}
       {withActivities && activities.length ? (
         <div>
-          <h3
+          <PageText
+            level="h3"
             className={
               preview
                 ? ""
@@ -524,12 +554,10 @@ function CertificationsAndActivities({
             }
           >
             {t("coach.coach-activities")}
-          </h3>
+          </PageText>
           <div className="flex flex-wrap gap-2">
             {activities.map((activity) => (
-              <div key={activity.id} className="pill">
-                {activity.name}
-              </div>
+              <PageBadge key={activity.id}>{activity.name}</PageBadge>
             ))}
           </div>
         </div>
@@ -619,68 +647,77 @@ function CoachOffers({ offers, preview, coachData }: CoachOffersProps) {
   const t = useTranslations("pages");
   if (!offers.length) return null;
   return (
-    <section className={`${preview ? "py-4" : "py-12"} w-full bg-muted`}>
+    <section
+      className={`${preview ? "py-4" : "py-12"} w-full bg-(--page-color-base-300)`}
+    >
       <div className={`container mx-auto ${preview ? "py-2 px-8" : "p-8"}`}>
-        <h3>{t("coach.coach-offers")}</h3>
+        <PageText level="h3">{t("coach.coach-offers")}</PageText>
         <div className="flex flex-wrap gap-2">
           {offers.map((offer) => (
-            <article
+            <PageCard
               key={offer.id}
-              className="card flex-1 bg-card p-4 shadow-xl"
+              className={cn(
+                "flex-1 bg-(--page-color-primary) text-(--page-color-primary-content)",
+                preview && "p-2",
+              )}
             >
-              <div className={`card-body ${preview ? "p-0" : ""}`}>
-                <h2 className={`card-title ${preview ? "text-base" : ""}`}>
+              <PageCardHeader>
+                <PageCardTitle className="text-(--page-color-base-content) text-center">
                   {offer.name}
-                </h2>
-                {offer?.physical && offer?.myPlace && !preview ? (
-                  <OfferBadge
-                    variant="My-Place"
-                    publicName={coachData.publicName}
-                    searchAddress={coachData.searchAddress}
-                  />
-                ) : null}
-                {offer?.physical && offer?.inHouse && !preview ? (
-                  <OfferBadge
-                    variant="In-House"
-                    travelLimit={offer.travelLimit}
-                    searchAddress={coachData.searchAddress}
-                  />
-                ) : null}
-                {offer?.physical && offer?.publicPlace && !preview ? (
-                  <OfferBadge
-                    variant="Public-Place"
-                    travelLimit={offer.travelLimit}
-                    searchAddress={coachData.searchAddress}
-                  />
-                ) : null}
-                {offer?.webcam && !preview ? (
-                  <OfferBadge variant="Webcam" />
-                ) : null}
-                <p
-                  className={
-                    preview
-                      ? "max-h-10 overflow-hidden text-ellipsis text-xs"
-                      : "text-base"
-                  }
-                >
-                  {offer.description}
-                </p>
-                <div className="card-actions mt-auto justify-end">
-                  {preview ? (
-                    <button className="btn-primary btn-sm btn">
-                      {t("coach.offer-details")}
-                    </button>
-                  ) : (
-                    <Link
-                      className="btn-primary btn"
-                      href={`/presentation-page/offer/${offer.id}`}
-                    >
+                </PageCardTitle>
+              </PageCardHeader>
+              {offer?.physical && offer?.myPlace ? (
+                <OfferBadge
+                  variant="My-Place"
+                  publicName={coachData.publicName}
+                  searchAddress={coachData.searchAddress}
+                  preview={preview}
+                  page
+                />
+              ) : null}
+              {offer?.physical && offer?.inHouse ? (
+                <OfferBadge
+                  variant="In-House"
+                  travelLimit={offer.travelLimit}
+                  searchAddress={coachData.searchAddress}
+                  preview={preview}
+                  page
+                />
+              ) : null}
+              {offer?.physical && offer?.publicPlace ? (
+                <OfferBadge
+                  variant="Public-Place"
+                  travelLimit={offer.travelLimit}
+                  searchAddress={coachData.searchAddress}
+                  preview={preview}
+                  page
+                />
+              ) : null}
+              {offer?.webcam ? <OfferBadge variant="Webcam" /> : null}
+              <PageText
+                level="p"
+                className={
+                  preview
+                    ? "max-h-10 overflow-hidden text-ellipsis text-xs"
+                    : "text-base"
+                }
+              >
+                {offer.description}
+              </PageText>
+              <PageCardAction className="w-full">
+                {preview ? (
+                  <PageButton size="sm" variant="secondary" className="w-full">
+                    {t("coach.offer-details")}
+                  </PageButton>
+                ) : (
+                  <PageButton asChild variant="secondary" className="w-full">
+                    <Link href={`/presentation-page/offer/${offer.id}`}>
                       {t("coach.offer-details")}
                     </Link>
-                  )}
-                </div>
-              </div>
-            </article>
+                  </PageButton>
+                )}
+              </PageCardAction>
+            </PageCard>
           ))}
         </div>
       </div>

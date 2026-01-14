@@ -172,7 +172,7 @@
     "find-club": "Find a club",
     "how-to-subscribe": "Find a club near you and subscribe through the subscription section of their page",
     "notification": {
-      "my-notification": "{count, plural, =0 {No notification} =1 {My notification} other {My notifications}}",
+      "my-notification": "{count, plural, =0 {No notification} =1 {My notification} other {My # notifications}}",
       "viewed": "(Viewed on {date})",
       "notification-type": "Notification type: {type}",
       "type": {
@@ -204,7 +204,8 @@
       "validate": "Validate",
       "cancel": "Cancel",
       "send-message": "Send a message",
-      "message-placeholder": "Response message"
+      "message-placeholder": "Response message",
+      "no-notification": "No notification"
     },
     "signin": {
       "name": "Name",
