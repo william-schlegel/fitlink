@@ -29,15 +29,15 @@ import ThemeSelector, { TThemes } from "../themeSelector";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { PageSectionModelEnum } from "@/db/schema/enums";
 import { Textarea } from "../ui/shadcn/textarea";
+import PageContainer from "../ui/page/container";
+import { PageButton } from "../ui/page/button";
 import DeleteButton from "../ui/deleteButton";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { Input } from "../ui/shadcn/input";
 import { trpc } from "@/lib/trpc/client";
+import PageText from "../ui/page/text";
 import { isCUID } from "@/lib/utils";
-
-import "@/app/pageComponents.css";
-import "@/app/pageTheme.css";
 
 type HeroCreationProps = {
   clubId: string;
@@ -445,7 +445,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
             onSave={(t) => updatePageStyle.mutate({ clubId, pageStyle: t })}
           />
         </h3>
-        <div data-theme={previewTheme}>
+        <PageContainer theme={previewTheme}>
           <HeroContent
             imageSrc={imagePreview}
             title={fields.title}
@@ -454,7 +454,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
             cta={fields.cta}
             preview={true}
           />
-        </div>
+        </PageContainer>
       </div>
     </div>
   );
@@ -527,7 +527,8 @@ function HeroContent({
         backgroundBlendMode: "darken",
       }}
     >
-      <p
+      <PageText
+        level="h2"
         className={`${
           preview
             ? "text-3xl"
@@ -535,8 +536,9 @@ function HeroContent({
         } font-bold text-white`}
       >
         {title}
-      </p>
-      <p
+      </PageText>
+      <PageText
+        level="h3"
         className={`${
           preview
             ? "text-lg"
@@ -544,19 +546,21 @@ function HeroContent({
         } font-semibold text-white`}
       >
         {subtitle}
-      </p>
-      <p className="text-gray-100">{description}</p>
+      </PageText>
+      <PageText level="p" className="text-white">
+        {description}
+      </PageText>
       {cta && (
-        <button
-          className={`btn btn-primary ${
-            preview ? "btn-sm" : "btn-xl"
-          } w-fit normal-case`}
+        <PageButton
+          size={preview ? "sm" : "lg"}
+          className="w-fit"
+          variant="primary"
           onClick={() => {
             if (ctaLink) router.push(ctaLink);
           }}
         >
           {cta}
-        </button>
+        </PageButton>
       )}
     </div>
   );

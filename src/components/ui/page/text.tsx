@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import "./text.css";
 
 export default function PageText({
   children,
@@ -22,7 +23,13 @@ export default function PageText({
 }) {
   const Comp = level;
   return (
-    <Comp className={cn(`text-(--page-color-${color}-content)`, className)}>
+    <Comp
+      style={{
+        ["--page-text-light" as never]: `var(--page-color-${color}-content)`,
+        ["--page-text-dark" as never]: `var(--page-color-${color})`,
+      }}
+      className={cn("page-text", className)}
+    >
       {children}
     </Comp>
   );

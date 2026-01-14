@@ -12,7 +12,7 @@ function PageCard({
       data-slot="card"
       data-size={size}
       className={cn(
-        "ring-(--page-color-base-200)/10 bg-(--page-color-base-200) text-(--page-color-base-content) gap-4 overflow-hidden rounded-(page-radius-box) py-4 text-sm ring-1 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col",
+        "ring-(--page-color-base-200)/10 bg-(--page-color-base-200) text-(--page-color-base-content) gap-4 overflow-hidden rounded-(--page-radius-box) py-4 text-sm ring-1 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-(--page-radius-box) *:[img:last-child]:rounded-b-(--page-radius-box) group/card flex flex-col",
         className,
       )}
       {...props}
@@ -53,7 +53,11 @@ function PageCardDescription({
   return (
     <div
       data-slot="card-description"
-      className={cn("text-(--page-color-neutral) text-sm", className)}
+      style={{
+        ["--page-text-light" as never]: `var(--page-color-neutral-content)`,
+        ["--page-text-dark" as never]: `var(--page-color-neutral)`,
+      }}
+      className={cn("page-text text-sm", className)}
       {...props}
     />
   );

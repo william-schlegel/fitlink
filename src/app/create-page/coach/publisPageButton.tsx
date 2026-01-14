@@ -12,20 +12,26 @@ import { Badge, Checkbox, Field, FieldLabel } from "@/components/ui/shadcn";
 import { trpc } from "@/lib/trpc/client";
 
 export default function PublishPageButton({
-  userId,
+  id,
   checked,
   pageId,
+  target,
 }: {
-  userId: string;
+  id: string;
   checked: boolean;
   pageId: string;
+  target: "coach" | "club";
 }) {
   const router = useRouter();
   const utils = trpc.useUtils();
   const t = useTranslations("pages");
   const publishPage = trpc.pages.updatePagePublication.useMutation({
     onSuccess(data) {
-      utils.pages.getPageForCoach.invalidate({ userId });
+      if (target === "coach") {
+        utils.pages.getPageForCoach.invalidate({ userId: id });
+      } else {
+        utils.pages.getPagesForClub.invalidate(id);
+      }
       router.refresh();
       toast.success(
         t(data[0].published ? "page-published" : "page-unpublished"),

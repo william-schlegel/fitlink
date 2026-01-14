@@ -40,9 +40,10 @@ export default async function CoachPage({
         {queryPage?.id ? (
           <div className="flex flex-wrap items-center gap-2">
             <PublishPageButton
-              userId={userId}
+              id={userId}
               checked={queryPage.published ?? false}
               pageId={queryPage.id}
+              target="coach"
             />
             <Button asChild variant="secondary" size="lg">
               <Link
