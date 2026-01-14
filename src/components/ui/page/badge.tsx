@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { cva, type VariantProps } from "class-variance-authority";
-import { Slot } from "radix-ui";
+import { Slot } from "@radix-ui/react-slot";
 
 import { cn } from "@/lib/utils";
 
@@ -33,10 +33,10 @@ const pageBadgeVariants = cva(
         md: "h-10 [&>svg]:size-3",
         sm: "h-8 [&>svg]:size-3",
       },
-      defaultVariants: {
-        variant: "default",
-        size: "md",
-      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "md",
     },
   },
 );
@@ -49,7 +49,7 @@ function PageBadge({
   ...props
 }: React.ComponentProps<"span"> &
   VariantProps<typeof pageBadgeVariants> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot.Root : "span";
+  const Comp = asChild ? Slot : "span";
 
   return (
     <Comp
