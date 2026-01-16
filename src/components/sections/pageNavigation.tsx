@@ -1,9 +1,14 @@
-/* eslint-disable @next/next/no-img-element */
+"use client";
 import Link from "next/link";
 
 import { PageSectionModel, PageTarget } from "@/lib/sections/data";
 
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
+import Image from "next/image";
+
+import { Button, Collapsible, CollapsibleContent } from "../ui/shadcn";
+import { PageButton } from "../ui/page/button";
 
 type PageProps = {
   id: string;
@@ -24,47 +29,52 @@ type Props = {
 
 const PageNavigation = ({ clubId, logoUrl, pages }: Props) => {
   const homePageId = pages.find((p) => p.target === "HOME")?.id ?? "";
+  const [openNav, setOpenNav] = useState(false);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) setOpenNav(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   return (
-    <nav className="navbar fixed bg-card/50">
-      <div className="navbar-start">
-        <div className="dropdown">
-          <label tabIndex={0} className="btn btn-ghost lg:hidden">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h8m-8 6h16"
-              />
-            </svg>
-          </label>
-          <ul
-            tabIndex={0}
-            className="dropdown-content menu rounded-box menu-compact mt-3 w-52 bg-card p-2 shadow"
-          >
-            <PageMenu menus={pages} clubId={clubId} />
-          </ul>
-        </div>
+    <nav className="bg-(--page-color-base-100)/50 sticky top-0 z-10 mx-auto w-full max-w-7xl rounded-lg border px-4 py-2 shadow-sm">
+      <div className="flex items-center">
         <Link
           className="max-h-full"
           href={`/presentation-page/club/${clubId}/${homePageId}`}
         >
-          <img className="h-12" src={logoUrl} alt="" />
+          {logoUrl ? (
+            <Image
+              className="h-12"
+              src={logoUrl}
+              alt=""
+              width={48}
+              height={48}
+            />
+          ) : (
+            <span className="h-12">Logo</span>
+          )}
         </Link>
-      </div>
-      <div className="navbar-center hidden lg:flex">
-        <ul className="menu menu-horizontal space-x-4">
+
+        <div className="hidden lg:mr-2 lg:ml-auto lg:block">
           <PageMenu menus={pages} clubId={clubId} />
-        </ul>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setOpenNav(!openNav)}
+          className="ml-auto lg:hidden"
+        >
+          {openNav ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        </Button>
       </div>
-      <div className="navbar-end"></div>
+      <Collapsible open={openNav}>
+        <CollapsibleContent>
+          <PageMenu menus={pages} clubId={clubId} />
+        </CollapsibleContent>
+      </Collapsible>
     </nav>
   );
 };
@@ -73,7 +83,7 @@ export default PageNavigation;
 
 function PageMenu({ menus, clubId }: { menus: PageProps[]; clubId: string }) {
   return (
-    <>
+    <ul className="m-2 flex flex-col gap-x-3 gap-y-1 lg:m-0 lg:flex-row lg:items-center">
       {menus.map((menu) => {
         if (menu.target === "HOME") {
           return (
@@ -81,25 +91,29 @@ function PageMenu({ menus, clubId }: { menus: PageProps[]; clubId: string }) {
               {menu.sections
                 .filter((s) => s.title)
                 .map((s) => (
-                  <li key={s.id}>
-                    <Link
-                      href={`/presentation-page/club/${clubId}/${menu.id}#${s.model}`}
-                    >
-                      {s.title}
-                    </Link>
-                  </li>
+                  <PageButton asChild key={s.id}>
+                    <li key={s.id}>
+                      <Link
+                        href={`/presentation-page/club/${clubId}/${menu.id}#${s.model}`}
+                      >
+                        {s.title}
+                      </Link>
+                    </li>
+                  </PageButton>
                 ))}
             </Fragment>
           );
         }
         return (
-          <li key={menu.id}>
-            <Link href={`/presentation-page/club/${clubId}/${menu.id}`}>
-              {menu.name}
-            </Link>
-          </li>
+          <PageButton asChild key={menu.id}>
+            <li key={menu.id}>
+              <Link href={`/presentation-page/club/${clubId}/${menu.id}`}>
+                {menu.name}
+              </Link>
+            </li>
+          </PageButton>
         );
       })}
-    </>
+    </ul>
   );
 }

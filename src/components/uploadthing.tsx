@@ -5,8 +5,6 @@ import {
 
 import { ComponentProps } from "react";
 
-import { twMerge } from "tailwind-merge";
-
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
 
 const MyUploadButton = generateUploadButton<OurFileRouter>();
@@ -21,28 +19,22 @@ export const UploadButton = (
         props.onClientUploadComplete?.(result);
       }}
       {...props}
-      className={twMerge(
-        "ut-button:btn-primary ut-button:btn",
-        props.className,
-      )}
+      className={props.className}
       content={{
         button() {
           return props.buttonText ?? "Téléchargement...";
         },
       }}
-      // appearance={{
-      //   button() {
-      //     return {
-      //       width: "fit-content",
-      //       backgroundColor: "var(--join-bg, var(--color-primary))",
-      //       color: "var(--join-text, var(--color-primary-content))",
-      //       borderStartStartRadius: "var(--join-ss, var(--radius-field))",
-      //       borderStartEndRadius: "var(--join-se, var(--radius-field))",
-      //       borderEndEndRadius: "var(--join-ee, var(--radius-field))",
-      //       borderEndStartRadius: "var(--join-es, var(--radius-field))",
-      //     };
-      //   },
-      // }}
+      appearance={{
+        button() {
+          return {
+            width: "max-content",
+            backgroundColor: "var(--primary)",
+            color: "var(--primary-foreground)",
+            padding: "0.5em 1em",
+          };
+        },
+      }}
     />
   );
 };

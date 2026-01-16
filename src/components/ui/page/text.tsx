@@ -9,7 +9,7 @@ export default function PageText({
 }: {
   children: React.ReactNode;
   className?: string;
-  level?: "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  level?: "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "label" | "span";
   color?:
     | "base"
     | "primary"
@@ -28,7 +28,7 @@ export default function PageText({
         ["--page-text-light" as never]: `var(--page-color-${color}-content)`,
         ["--page-text-dark" as never]: `var(--page-color-${color})`,
       }}
-      className={cn("page-text", className)}
+      className={cn("page-text", level === "label" && "font-bold", className)}
     >
       {children}
     </Comp>

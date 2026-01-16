@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ActivityGroupDisplayElement } from "@/components/sections/activities";
 import { ActivityDisplayCard } from "@/components/sections/activity";
 import PageNavigation from "@/components/sections/pageNavigation";
+import PageContainer from "@/components/ui/page/container";
+import { TThemes } from "@/components/themeSelector";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import Title from "@/components/title";
 import { isCUID } from "@/lib/utils";
@@ -20,7 +22,7 @@ export default async function ActivityGroup({
   const queryPage = await caller.pages.getClubPage(pageId);
 
   return (
-    <div data-theme={queryPage?.theme ?? "light"}>
+    <PageContainer theme={queryPage?.theme as TThemes}>
       <Title title={queryPage?.clubName ?? ""} />
       <PageNavigation
         clubId={clubId}
@@ -31,6 +33,6 @@ export default async function ActivityGroup({
         <ActivityGroupDisplayElement elementId={agId} />
         <ActivityDisplayCard pageId={pageId} groupId={agId} />
       </section>
-    </div>
+    </PageContainer>
   );
 }

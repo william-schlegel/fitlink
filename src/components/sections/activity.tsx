@@ -10,6 +10,8 @@ import { Pencil, Trash } from "lucide-react";
 
 import { toast } from "sonner";
 
+import Image from "next/image";
+
 import {
   Field,
   FieldError,
@@ -18,19 +20,26 @@ import {
   FieldLegend,
   FieldSet,
 } from "../ui/shadcn/field";
+import {
+  PageCard,
+  PageCardContent,
+  PageCardDescription,
+  PageCardTitle,
+} from "../ui/page/card";
 import { Button, Card, CardContent, Checkbox } from "../ui/shadcn";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
 import { Textarea } from "../ui/shadcn/textarea";
+import PageContainer from "../ui/page/container";
 import DeleteButton from "../ui/deleteButton";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { Input } from "../ui/shadcn/input";
-import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
+import { cn, isCUID } from "@/lib/utils";
+import PageText from "../ui/page/text";
 
 type ActivityCreationProps = {
   clubId: string;
@@ -106,21 +115,28 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
             onSave={(t) => updatePageStyle.mutate({ clubId, pageStyle: t })}
           />
         </h3>
-        <div data-theme={previewTheme}>
+        <PageContainer theme={previewTheme as TThemes}>
           {groups.data?.map((group) => (
             <Fragment key={group.id}>
-              <h2 className="text-center">{group.title}</h2>
+              <PageText level="h2" color="primary" className="text-center">
+                {group.title}
+              </PageText>
               <section id="ACTIVITIES" className={`w-full bg-muted p-4`}>
-                <div className={`container mx-auto p-4`}>
-                  <p className={`text-3xl font-bold text-primary-content`}>
-                    {querySection.data?.title}
-                  </p>
-                  {querySection.data?.subTitle ? (
-                    <p className={`text-lg font-semibold text-primary-content`}>
-                      {querySection.data.subTitle}
-                    </p>
+                <div className={`@container mx-auto p-4`}>
+                  {group.subTitle ? (
+                    <PageText
+                      level="h4"
+                      color="primary"
+                      className="text-center"
+                    >
+                      {group.subTitle}
+                    </PageText>
                   ) : null}
-                  <div className={`mt-4 grid grid-cols-3 gap-2`}>
+                  <div
+                    className={
+                      "mt-4 grid grid-cols-3 gap-2 @max-xl:grid-cols-2 @max-md:grid-cols-1"
+                    }
+                  >
                     {querySection.data?.elements
                       .filter((e) =>
                         JSON.parse(e.optionValue ?? "[]").includes(group.id),
@@ -133,7 +149,7 @@ export const ActivityCreation = ({ clubId, pageId }: ActivityCreationProps) => {
               </section>
             </Fragment>
           ))}
-        </div>
+        </PageContainer>
       </div>
     </div>
   );
@@ -531,24 +547,29 @@ function ActivityContentCard({
   activity,
 }: ActivitiesContentCardProps) {
   return (
-    <div key={activity.id} className="card bg-card shadow-xl">
+    <PageCard key={activity.id}>
       {activity.imageUrls?.[0] ? (
-        <figure className="white">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={activity.imageUrls[0]} alt="" />
-        </figure>
+        <Image
+          src={activity.imageUrls[0]}
+          alt=""
+          width={400}
+          height={400}
+          className="w-full h-full object-cover"
+        />
       ) : null}
-      <div className={`card-body ${preview ? "p-4 text-sm" : ""}`}>
-        <div
+      <PageCardContent
+        className={cn("space-y-2", preview && "space-y-1 p-4 text-sm")}
+      >
+        <PageCardTitle
           className={`card-title ${preview ? "text-base" : ""} text-primary`}
         >
           {activity.title}
-        </div>
+        </PageCardTitle>
         {activity.subTitle ? (
-          <p className="text-secondary">{activity.subTitle}</p>
+          <PageCardDescription>{activity.subTitle}</PageCardDescription>
         ) : null}
-        <p>{activity.content}</p>
-      </div>
-    </div>
+        <PageText level="p">{activity.content}</PageText>
+      </PageCardContent>
+    </PageCard>
   );
 }

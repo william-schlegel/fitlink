@@ -1,6 +1,5 @@
 import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import Image from "next/image";
 import Link from "next/link";
 
 import {
@@ -12,13 +11,20 @@ import {
   Star,
 } from "lucide-react";
 
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+} from "@/components/ui/shadcn";
 import { getCoachDataForUserId } from "@/server/api/routers/dashboard";
 import { getCoachDailyPlanning } from "@/server/api/routers/planning";
 import LockedButton from "@/components/ui/lockedButton";
-import { Badge, Button } from "@/components/ui/shadcn";
 import { getToday } from "@/lib/dates/serverDayName";
 import { createTrpcCaller } from "@/lib/trpc/caller";
-import ButtonIcon from "@/components/ui/buttonIcon";
 import SelectDay from "@/components/ui/selectDay";
 import CardGroup from "@/components/ui/cardGroup";
 import { getActualUser } from "@/lib/auth/server";
@@ -175,21 +181,14 @@ async function ClubCard({
   const homePage = clubPages?.pages?.find((p) => p.target === "HOME");
 
   return (
-    <div className="card card-border bg-card">
-      <div className="card-body">
+    <Card>
+      <CardContent>
         <div className="flex items-center gap-3">
           {club.logoUrl && (
-            <div className="avatar">
-              <div className="w-12 h-12 rounded-full">
-                <Image
-                  src={club.logoUrl}
-                  alt={club.name}
-                  width={48}
-                  height={48}
-                  className="rounded-full object-cover"
-                />
-              </div>
-            </div>
+            <Avatar className="size-10">
+              <AvatarImage src={club.logoUrl} alt={club.name} />
+              <AvatarFallback>{club.name.charAt(0)}</AvatarFallback>
+            </Avatar>
           )}
           <div className="flex-1 min-w-0">
             <h3 className="text-base truncate p-0">{club.name}</h3>
@@ -198,20 +197,20 @@ async function ClubCard({
             </p>
           </div>
           {homePage && (
-            <Link
-              href={`/presentation-page/club/${club.id}/${homePage.id}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <ButtonIcon
-                iconComponent={<ExternalLink />}
+            <Button asChild variant="outline">
+              <Link
+                href={`/presentation-page/club/${club.id}/${homePage.id}`}
+                target="_blank"
+                rel="noreferrer"
                 title={t("view-club")}
-              />
-            </Link>
+              >
+                <ExternalLink />
+              </Link>
+            </Button>
           )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 

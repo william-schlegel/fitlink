@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
+import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
-import Title from "@/components/title";
 import { isCUID } from "@/lib/utils";
 import OfferForm from "./offerForm";
 import OfferCard from "./offerCard";
@@ -23,7 +23,6 @@ export default async function Subscribe({
 
   const caller = await createTrpcCaller();
   if (!caller) return null;
-  const userQuery = await caller.users.getUserById({ id: userId });
 
   const offerQuery = await caller.subscriptions.getSubscriptionById(myOfferId);
   const clubQuery = await caller.clubs.getClubById({
@@ -36,12 +35,9 @@ export default async function Subscribe({
   const t = await getTranslations("club");
 
   return (
-    <div className="container mx-auto my-2 space-y-2 p-2">
-      <Title title={t("subscription.new-subscription")} />
-
-      <h1>{t("subscription.new-subscription")}</h1>
+    <LayoutPage title={t("subscription.new-subscription")}>
       <OfferCard offer={offerQuery} clubName={clubQuery.name} />
       <OfferForm offer={offerQuery} userId={userId} />
-    </div>
+    </LayoutPage>
   );
 }

@@ -1,27 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { Send, ImagePlus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMutation } from "convex/react";
-import { Send, ImagePlus, X } from "lucide-react";
+import { useState } from "react";
+import Image from "next/image";
 
-import { Id } from "../../../convex/_generated/dataModel";
-import { UploadButton } from "@/components/uploadthing";
-import { api } from "../../../convex/_generated/api";
-import { Button } from "@/components/ui/shadcn/button";
-import { Input } from "@/components/ui/shadcn/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/shadcn/input-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/shadcn/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/shadcn/dropdown-menu";
+import { Id } from "../../../convex/_generated/dataModel";
+import { Popover } from "@/components/ui/shadcn/popover";
+import { UploadButton } from "@/components/uploadthing";
+import { Button } from "@/components/ui/shadcn/button";
+import { api } from "../../../convex/_generated/api";
 
 type MessageInputProps = {
   roomId: Id<"chatRooms">;
@@ -79,62 +85,64 @@ export function MessageInput({
           )}
         </div>
       )}
-      <div className="flex gap-2 items-center">
-        <Input
+      <InputGroup>
+        <InputGroupInput
           type="text"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={t("message-placeholder")}
           className="flex-1"
         />
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button type="submit" variant="outline" size="icon">
-                <Send className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{t("send")}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <DropdownMenu>
+        <InputGroupAddon align="inline-end">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <DropdownMenuTrigger asChild>
-                  <Button type="button" variant="outline" size="icon">
-                    <ImagePlus className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
+                <InputGroupButton type="submit">
+                  <Send />
+                </InputGroupButton>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{t("image-upload")}</p>
+                <p>{t("send")}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <DropdownMenuContent align="end" className="w-52 p-2">
-            <UploadButton
-              buttonText={t("image-upload")}
-              endpoint="messageAttachment"
-              onClientUploadComplete={(res) => {
-                if (res) {
-                  setImageUrls((prev) => [
-                    ...prev,
-                    ...res.map((file) => file.url),
-                  ]);
-                }
-              }}
-              onUploadError={(error) => {
-                console.error("Upload error:", error);
-                alert("Failed to upload image");
-              }}
-            />
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+
+          <DropdownMenu>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <InputGroupButton type="button">
+                      <ImagePlus />
+                    </InputGroupButton>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t("image-upload")}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <DropdownMenuContent align="end" className="w-max p-2">
+              <UploadButton
+                buttonText={t("image-upload")}
+                endpoint="messageAttachment"
+                onClientUploadComplete={(res) => {
+                  if (res) {
+                    setImageUrls((prev) => [
+                      ...prev,
+                      ...res.map((file) => file.url),
+                    ]);
+                  }
+                }}
+                onUploadError={(error) => {
+                  console.error("Upload error:", error);
+                  alert("Failed to upload image");
+                }}
+              />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </InputGroupAddon>
+      </InputGroup>
       {imageUrls.length > 0 && (
         <div className="flex gap-2 flex-wrap">
           {imageUrls.map((url, idx) => (

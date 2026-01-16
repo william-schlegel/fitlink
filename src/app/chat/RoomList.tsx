@@ -1,15 +1,26 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 
 import { useQuery } from "convex/react";
 
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Circle, Home, UserIcon } from "lucide-react";
 
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/shadcn/item";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  BadgeVariant,
+} from "@/components/ui/shadcn";
 import { LayoutPageLists } from "../../components/layoutPage";
 import { Id } from "../../../convex/_generated/dataModel";
-import { BadgeVariant } from "@/components/ui/shadcn";
 import { api } from "../../../convex/_generated/api";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
@@ -41,29 +52,30 @@ function DirectConversationItem({ conv }: DirectConversationItemProps) {
   });
 
   return (
-    <div className="flex items-center gap-2 flex-1 min-w-0 max-w-full">
-      <div className="avatar">
-        <div className="w-8 h-8 rounded-full">
-          <Image
-            src={otherUser?.profileImageUrl ?? "/images/dummy.jpg"}
-            alt={otherUser?.name ?? ""}
-            width={32}
-            height={32}
-            className="rounded-full"
+    <Item>
+      <ItemMedia>
+        <Avatar>
+          <AvatarImage
+            src={otherUser?.profileImageUrl}
+            width={50}
+            height={50}
           />
-        </div>
-      </div>
-      <div className="flex flex-col min-w-0 flex-1">
-        <span className="font-semibold truncate">
+          <AvatarFallback>
+            <UserIcon className="size-4" />
+          </AvatarFallback>
+        </Avatar>
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle className="line-clamp-1">
           {otherUser?.name ?? "..."}
-        </span>
+        </ItemTitle>
         {conv.lastMessage && (
-          <span className="text-xs text-[hsl(var(--foreground)/0.6)] truncate">
+          <ItemDescription className="line-clamp-1">
             {conv.lastMessage.content}
-          </span>
+          </ItemDescription>
         )}
-      </div>
-    </div>
+      </ItemContent>
+    </Item>
   );
 }
 function RoomItem({ clubId, userId }: { clubId: string; userId: string }) {
@@ -76,20 +88,19 @@ function RoomItem({ clubId, userId }: { clubId: string; userId: string }) {
   );
 
   return (
-    <div className="flex items-center gap-2 flex-1 min-w-0 max-w-full">
-      <div className="avatar">
-        <div className="w-8 h-8 rounded-full">
-          <Image
-            src={club?.logoUrl ?? "/images/dummy.jpg"}
-            alt={club?.name ?? ""}
-            width={32}
-            height={32}
-            className="rounded-full"
-          />
-        </div>
-      </div>
-      <span className="font-semibold truncate">{club?.name ?? "..."}</span>
-    </div>
+    <Item>
+      <ItemMedia>
+        <Avatar>
+          <AvatarImage src={club?.logoUrl ?? ""} />
+          <AvatarFallback>
+            <Home className="size-4" />
+          </AvatarFallback>
+        </Avatar>
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle className="truncate">{club?.name ?? "..."}</ItemTitle>
+      </ItemContent>
+    </Item>
   );
 }
 export function RoomList({
@@ -121,8 +132,10 @@ export function RoomList({
         : undefined) as BadgeVariant,
       badgeIcon:
         room._id === currentRoomId ? (
-          <CheckCircle className="text-primary" />
-        ) : undefined,
+          <CheckCircle className="text-green-500" />
+        ) : (
+          <Circle className="text-muted-foreground" />
+        ),
     }));
 
   if (directConversations.length === 0 && roomList.length === 0) {
@@ -131,11 +144,7 @@ export function RoomList({
 
   const directList = directConversations.map((conv) => ({
     id: conv.roomId,
-    name: (
-      <>
-        <DirectConversationItem conv={conv} />
-      </>
-    ),
+    name: <DirectConversationItem conv={conv} />,
     link: `/chat?roomId=${conv.roomId}`,
     badgeText: conv.unreadCount > 0 ? conv.unreadCount.toString() : undefined,
     badgeVariant: (conv.unreadCount > 0
@@ -143,12 +152,15 @@ export function RoomList({
       : undefined) as BadgeVariant,
     badgeIcon:
       conv.roomId === currentRoomId ? (
-        <CheckCircle className="text-primary" />
-      ) : undefined,
+        <CheckCircle className="text-green-500" />
+      ) : (
+        <Circle className="text-muted-foreground" />
+      ),
   }));
 
   return (
     <LayoutPageLists
+      itemId={currentRoomId}
       lists={[
         { name: t("direct-messages"), items: directList },
         { name: t("group-rooms"), items: roomList },

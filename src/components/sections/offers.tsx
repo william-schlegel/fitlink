@@ -11,6 +11,8 @@ import { Pencil, Trash } from "lucide-react";
 
 import { toast } from "sonner";
 
+import Image from "next/image";
+
 import {
   Button,
   Card,
@@ -29,6 +31,7 @@ import {
   FieldLabel,
   FieldSet,
 } from "../ui/shadcn/field";
+import { PageCard, PageCardAction, PageCardContent } from "../ui/page/card";
 import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { Spinner } from "@/components/ui/shadcn/spinner";
@@ -36,15 +39,17 @@ import { pageSectionElement } from "@/db/schema/page";
 import Modal, { getButtonSize } from "../ui/modal";
 import { List } from "@/app/member/[userId]/list";
 import { Textarea } from "../ui/shadcn/textarea";
+import PageContainer from "../ui/page/container";
 import { formatMoney } from "@/lib/formatNumber";
+import { PageButton } from "../ui/page/button";
 import DeleteButton from "../ui/deleteButton";
 import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
 import { useUser } from "@/lib/auth/client";
 import { Input } from "../ui/shadcn/input";
-import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
+import { cn, isCUID } from "@/lib/utils";
+import PageText from "../ui/page/text";
 
 type OfferCreationProps = {
   clubId: string;
@@ -125,8 +130,8 @@ export const OfferCreation = ({ clubId, pageId }: OfferCreationProps) => {
             onSave={(t) => updatePageStyle.mutate({ clubId, pageStyle: t })}
           />
         </h3>
-        <div data-theme={previewTheme}>
-          <div className="grid grid-cols-2 gap-4 bg-muted p-4">
+        <PageContainer theme={previewTheme as TThemes}>
+          <div className="grid grid-cols-2 gap-4 p-4">
             {querySection.data?.elements.map((card) => (
               <OfferContentCard
                 key={card.id}
@@ -136,7 +141,7 @@ export const OfferCreation = ({ clubId, pageId }: OfferCreationProps) => {
               />
             ))}
           </div>
-        </div>
+        </PageContainer>
       </div>
     </div>
   );
@@ -554,80 +559,77 @@ function OfferContentCard({
   const t = useTranslations();
 
   return (
-    <div
-      className={`card ${
-        preview ? "card-compact w-full" : "w-96"
-      } bg-card shadow-xl`}
-    >
-      <figure>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={offer.imageUrls?.[0] ?? ""} alt={offer.title ?? ""} />
-      </figure>
-      <div className="card-body">
-        <h2 className="card-title">{offer.title}</h2>
-        {offer.subTitle ? (
-          <p className="font-semibold">{offer.subTitle}</p>
-        ) : null}
-        {offer.content ? <p>{offer.content}</p> : null}
-        {shortInfo ? <p>{shortInfo}</p> : ""}
-        <div className="flex gap-2">
-          <List label="sites" items={sites} />
-          <List label="rooms" items={rooms} />
-          <List label="activity-groups" items={activityGroups} />
-          <List label="activities" items={activities} />
-        </div>
+    <PageCard className={cn(preview ? "w-full" : "w-96")}>
+      <Image
+        src={offer.imageUrls?.[0] ?? ""}
+        alt={offer.title ?? ""}
+        width={400}
+        height={400}
+        className="w-full h-full object-cover"
+      />
+      <PageCardContent>
         <div className="grid grid-cols-[auto,1fr] items-center gap-2">
           {offerQuery.data?.monthly ? (
             <>
-              <label>{t("club.subscription.monthly")}</label>
-              <span>{formatMoney(offerQuery.data?.monthly)}</span>
+              <PageText level="label">
+                {t("club.subscription.monthly")}
+              </PageText>
+              <PageText level="span">
+                {formatMoney(offerQuery.data?.monthly)}
+              </PageText>
             </>
           ) : null}
           {offerQuery.data?.yearly ? (
             <>
-              <label>{t("club.subscription.yearly")}</label>
-              <span>{formatMoney(offerQuery.data?.yearly)}</span>
+              <PageText level="label">{t("club.subscription.yearly")}</PageText>
+              <PageText level="span">
+                {formatMoney(offerQuery.data?.yearly)}
+              </PageText>
             </>
           ) : null}
           {offerQuery.data?.inscriptionFee ? (
             <>
-              <label>{t("club.subscription.inscription-fee")}</label>
-              <span>{formatMoney(offerQuery.data?.inscriptionFee)}</span>
+              <PageText level="label">
+                {t("club.subscription.inscription-fee")}
+              </PageText>
+              <PageText level="span">
+                {formatMoney(offerQuery.data?.inscriptionFee)}
+              </PageText>
             </>
           ) : null}
           {offerQuery.data?.cancelationFee ? (
             <>
-              <label>{t("club.subscription.cancelation-fee")}</label>
-              <span>{formatMoney(offerQuery.data?.cancelationFee)}</span>
+              <PageText level="label">
+                {t("club.subscription.cancelation-fee")}
+              </PageText>
+              <PageText level="span">
+                {formatMoney(offerQuery.data?.cancelationFee)}
+              </PageText>
             </>
           ) : null}
         </div>
-        {preview ? (
-          <div className="card-actions justify-end">
-            <button className="btn btn-primary">
+        <PageCardAction className="mt-2">
+          {preview ? (
+            <PageButton className="w-full">
               {t("pages.offer.select")}
-            </button>
-          </div>
-        ) : user?.data?.id ? (
-          <div>
-            <Link
-              href={`/user/${user.data.id}/subscribe?clubId=${clubId}&offerId=${offer.optionValue}`}
-            >
-              <button className="btn btn-primary">
+            </PageButton>
+          ) : user?.data?.id ? (
+            <PageButton variant="primary" asChild>
+              <Link
+                href={`/user/${user.data.id}/subscribe?clubId=${clubId}&offerId=${offer.optionValue}`}
+              >
                 {t("pages.offer.select")}
-              </button>
-            </Link>
-          </div>
-        ) : (
-          <div>
-            <Link href="/user/signin">
-              <button className="btn btn-primary">
+              </Link>
+            </PageButton>
+          ) : (
+            <PageButton variant="primary" asChild>
+              <Link href="/user/signin" className="w-full">
                 {t("pages.offer.connect-to-subscribe")}
-              </button>
-            </Link>
-          </div>
-        )}
-      </div>
-    </div>
+              </Link>
+            </PageButton>
+          )}
+        </PageCardAction>
+      </PageCardContent>
+    </PageCard>
   );
 }

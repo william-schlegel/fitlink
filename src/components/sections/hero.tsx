@@ -266,8 +266,8 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
   return (
     <div className="grid w-full auto-rows-auto gap-2 lg:grid-cols-2">
       <div>
-        <h3 className="flex items-center gap-2 justify-between">
-          <span>{t(updating ? "updating-section" : "creation-section")}</span>
+        <div className="flex items-center gap-2 justify-between">
+          <h3>{t(updating ? "updating-section" : "creation-section")}</h3>
           {updating ? (
             <Confirmation
               title={t("section-deletion")}
@@ -279,7 +279,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
               onConfirm={() => handleDeleteSection()}
             />
           ) : null}
-        </h3>
+        </div>
 
         <form
           className="space-y-2 rounded border border-primary p-2"

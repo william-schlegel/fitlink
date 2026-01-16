@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { toast } from "sonner";
+
+import { ButtonGroup } from "@/components/ui/shadcn/button-group";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { formatMoney } from "@/lib/formatNumber";
+import { Button } from "@/components/ui/shadcn";
 import { AppRouter } from "@/server/api/root";
 import { trpc } from "@/lib/trpc/client";
-import { toast } from "sonner";
 
 export default function OfferForm({
   offer,
@@ -61,63 +64,49 @@ export default function OfferForm({
             <span>{formatMoney(offer.inscriptionFee)}</span>
           </label>
         ) : null}
-        <div className="space-x-4">
+        <ButtonGroup>
           {offer.monthly ? (
-            <button
-              type="button"
-              className={`btn btn-secondary ${monthly ? "" : "btn-outline"}`}
+            <Button
+              variant={monthly ? "default" : "outline"}
               onClick={() => setMonthly(true)}
             >
               {t("subscription.select-monthly", {
                 price: formatMoney(offer.monthly),
               })}
-            </button>
+            </Button>
           ) : null}
           {offer.yearly ? (
-            <button
-              type="button"
-              className={`btn btn-secondary ${monthly ? "btn-outline" : ""}`}
+            <Button
+              variant={monthly ? "outline" : "default"}
               onClick={() => setMonthly(false)}
             >
               {t("subscription.select-yearly", {
                 price: formatMoney(offer.yearly),
                 date: formatDateLocalized(null, { dateFormat: "month-year" }),
               })}
-            </button>
+            </Button>
           ) : null}
-        </div>
-        <div className="space-x-4">
-          <button
-            type="button"
-            className={`btn btn-secondary ${online ? "" : "btn-outline"}`}
+        </ButtonGroup>
+        <ButtonGroup>
+          <Button
+            variant={online ? "default" : "outline"}
             onClick={() => setOnline(true)}
           >
             {t("subscription.payment-online")}
-          </button>
-          <button
-            type="button"
-            className={`btn btn-secondary ${online ? "btn-outline" : ""}`}
+          </Button>
+          <Button
+            variant={online ? "outline" : "default"}
             onClick={() => setOnline(false)}
           >
             {t("subscription.payment-club")}
-          </button>
-        </div>
+          </Button>
+        </ButtonGroup>
       </div>
-      <div className="flex gap-4">
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={handleSubscribe}
-        >
-          {t("subscription.subscribe")}
-        </button>
-        <button
-          type="button"
-          className="btn-outline btn btn-secondary"
-          onClick={cancel}
-        >
+      <div className="flex gap-2">
+        <Button onClick={handleSubscribe}>{t("subscription.subscribe")}</Button>
+        <Button variant="outline" onClick={cancel}>
           {t("subscription.cancel")}
-        </button>
+        </Button>
       </div>
     </>
   );
