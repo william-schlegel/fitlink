@@ -23,10 +23,10 @@ export default async function FitlinkPage() {
           />
 
           <div>
-            <h1 className="text-[clamp(2rem,5vw,8rem)] font-bold leading-[clamp(1.5rem,4vw,6rem)]">
+            <h1 className="text-[clamp(2rem,5vw,8rem)] font-bold leading-[clamp(1.5rem,4vw,6rem)] text-background">
               {t("title")}
             </h1>
-            <p className="py-6">{t("hero-text")}</p>
+            <p className="py-6 text-background">{t("hero-text")}</p>
             <div className="flex flex-wrap gap-2">
               <ButtonLink size="xl" href="#find-club">
                 {t("btn-visitor")}

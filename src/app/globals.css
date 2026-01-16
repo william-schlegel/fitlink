@@ -170,15 +170,6 @@
 }
 
 @layer utilities {
-  .pill {
-    @apply flex flex-wrap items-center gap-2 border border-accent bg-accent p-2 text-foreground;
-    border-radius: var(--rounded-btn, 0.5rem);
-  }
-
-  .pill-xs {
-    @apply px-1 py-0.5 text-xs;
-  }
-
   .hero {
     background-position: 50%;
     background-size: cover;
@@ -202,20 +193,20 @@
     object-fit: fill;
     background:
       linear-gradient(
-          oklab(from var(--color-accent) l a b / 30%),
-          oklab(from var(--color-accent) l a b / 30%)
+          oklch(from var(--color-primary) l c h),
+          oklch(from var(--color-accent) l c h / 30%)
         )
         0px 0px / 100% 100% no-repeat no-repeat,
       radial-gradient(
           circle at 50% 50%,
-          var(--color-secondary) 0%,
+          var(--color-accent) 0%,
           rgba(0, 0, 0, 0) 65%,
           rgba(0, 0, 0, 0) 100%
         ) -35% -65% /
         100% 150% no-repeat no-repeat,
       radial-gradient(
           ellipse at 50% 50%,
-          var(--color-accent) 0%,
+          var(--color-primary) 0%,
           rgba(0, 0, 0, 0) 65%,
           rgba(0, 0, 0, 0) 100%
         )
@@ -227,14 +218,12 @@
           rgba(0, 0, 0, 0) 70%
         )
         0px 0px / 100% 100% no-repeat no-repeat,
-      linear-gradient(-6deg, var(--color-info) 0%, 40%, var(--color-info) 100%)
+      linear-gradient(
+          -6deg,
+          var(--color-success) 0%,
+          40%,
+          var(--color-info) 100%
+        )
         0px 0px / 100% 100% no-repeat no-repeat;
-  }
-
-  .image-home-hero {
-    mask-image: url(/images/image-home-mask.svg);
-    mask-repeat: no-repeat;
-    -webkit-mask-image: url(/images/image-home-mask.svg);
-    -webkit-mask-repeat: no-repeat;
   }
 }
