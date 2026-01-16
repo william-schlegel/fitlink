@@ -5,6 +5,19 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "./shadcn";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "./shadcn/input-group";
+import { Popover, PopoverContent } from "./shadcn/popover";
 import { Button } from "@/components/ui/shadcn/button";
 import { Label } from "@/components/ui/shadcn/label";
 import { Input } from "@/components/ui/shadcn/input";
@@ -58,32 +71,28 @@ const ActivitySearch = ({
   }, [initialActivity]);
 
   return (
-    <div className={cn("relative", className)}>
+    <Field className={cn("relative", className)}>
       {label && (
-        <Label
-          className={cn(
-            "mb-2",
-            required && "after:content-['*'] after:text-error after:ml-0.5",
-          )}
-        >
-          {label}
-        </Label>
+        <FieldLabel className={cn(required && "required")}>{label}</FieldLabel>
       )}
-      <div className="flex gap-2">
-        {iconActivity && (
-          <Button variant="outline" size="icon" className="shrink-0" disabled>
-            <Search className="h-4 w-4 text-primary" />
-          </Button>
-        )}
-        <Input
-          value={activity}
-          onChange={(e) => setActivity(e.currentTarget.value)}
-          placeholder={t("enter-activity") ?? ""}
-        />
-      </div>
-      {error && <p className="text-sm text-error mt-1">{error}</p>}
+      <FieldContent className="bg-background">
+        <InputGroup>
+          {iconActivity && (
+            <InputGroupAddon>
+              <Search className="text-primary" />
+            </InputGroupAddon>
+          )}
+          <InputGroupInput
+            value={activity}
+            onChange={(e) => setActivity(e.currentTarget.value)}
+            placeholder={t("enter-activity") ?? ""}
+          />
+        </InputGroup>
+      </FieldContent>
+
+      {error && <FieldError>{error}</FieldError>}
       {showList && activities.data?.length ? (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-background shadow-lg">
           <ul className="max-h-60 overflow-auto py-1">
             {activities.data?.map((act) => (
               <li key={act.id}>
@@ -106,7 +115,7 @@ const ActivitySearch = ({
           </ul>
         </div>
       ) : null}
-    </div>
+    </Field>
   );
 };
 

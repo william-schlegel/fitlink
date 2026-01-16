@@ -1,12 +1,31 @@
 "use client";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useLocale, useTranslations } from "next-intl";
-import { useForm, useWatch } from "react-hook-form";
 import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { CalendarCheck, Gift, Hourglass, User, Webcam } from "lucide-react";
+import {
+  CalendarCheck,
+  Gift,
+  Hourglass,
+  Search,
+  User,
+  Webcam,
+} from "lucide-react";
 
+import {
+  Badge,
+  Button,
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+  Separator,
+} from "@/components/ui/shadcn";
 import CollapsableGroup from "@/components/ui/collapsableGroup";
 import ActivitySearch from "@/components/ui/activitySearch";
 import AddressSearch from "@/components/ui/addressSearch";
@@ -78,69 +97,104 @@ export default function CoachPage() {
     <div>
       <section className="bg-background">
         <div className="container mx-auto">
-          <h1 className="text-5xl font-bold">{t("home.company-title")}</h1>
+          <h1>{t("home.company-title")}</h1>
           <p className="py-6 text-lg">{t("home.company-text")}</p>
-          <form
-            className="mx-auto w-fit rounded border border-border bg-card p-4 shadow-xl"
-            onSubmit={handleSubmit(onValid)}
-          >
-            <div className="mb-2 flex justify-around">
-              <CollapsableGroup
-                groupName={`${t("home.price-range")} (${formatMoney(
-                  fields.priceMax,
-                )})`}
-                className="w-fit"
-              >
-                <input
-                  type="range"
-                  min="0"
-                  max="5000"
-                  {...register("priceMax", { valueAsNumber: true })}
-                  className="range range-primary flex-1"
+          <Card className="mx-auto w-fit p-4">
+            <form onSubmit={handleSubmit(onValid)}>
+              <div className="mb-2 flex justify-around">
+                <CollapsableGroup
+                  groupName={`${t("home.price-range")} (${formatMoney(
+                    fields.priceMax,
+                  )})`}
+                  className="w-fit"
+                >
+                  <Input
+                    type="range"
+                    min="0"
+                    max="5000"
+                    {...register("priceMax", { valueAsNumber: true })}
+                    className="range range-primary flex-1"
+                  />
+                </CollapsableGroup>
+                <CollapsableGroup
+                  groupName={`${t(
+                    "home.distance-range",
+                  )} (${fields.range?.toFixed(0)}km)`}
+                  className="w-fit"
+                >
+                  <Input
+                    type="range"
+                    min="0"
+                    max="100"
+                    {...register("range", { valueAsNumber: true })}
+                    className="range range-primary flex-1"
+                  />
+                </CollapsableGroup>
+              </div>
+              <div className="flex flex-wrap items-center gap-4">
+                <Controller
+                  control={control}
+                  name="activity"
+                  render={({ field }) => (
+                    <ActivitySearch
+                      initialActivity={field.value}
+                      onSearch={(activity) => {
+                        field.onChange(activity.name);
+                        offerQuery.refetch();
+                      }}
+                      onActivityChange={(value) => field.onChange(value)}
+                      className="w-[clamp(24rem,25vw,100%)]"
+                      required
+                      error={errors.activity ? t("common.enter-activity") : ""}
+                    />
+                  )}
                 />
-              </CollapsableGroup>
-              <CollapsableGroup
-                groupName={`${t(
-                  "home.distance-range",
-                )} (${fields.range?.toFixed(0)}km)`}
-                className="w-fit"
-              >
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  {...register("range", { valueAsNumber: true })}
-                  className="range range-primary flex-1"
+                <Controller
+                  control={control}
+                  name="location"
+                  render={({ field }) => (
+                    <AddressSearch
+                      onSearch={(adr) => {
+                        field.onChange(adr.address);
+                        offerQuery.refetch();
+                      }}
+                      className="w-[clamp(24rem,25vw,100%)]"
+                      required
+                      error={errors.location ? t("common.enter-location") : ""}
+                    />
+                  )}
                 />
-              </CollapsableGroup>
-            </div>
-            <div className="flex flex-wrap items-center gap-4">
-              <ActivitySearch
-                onSearch={(activity) => {
-                  setValue("activity", activity.name);
-                  offerQuery.refetch();
-                }}
-                onActivityChange={(value) => setValue("activity", value)}
-                className="w-[clamp(24rem,25vw,100%)]"
-                required
-                error={errors.location ? t("common.enter-activity") : ""}
-              />
-              <AddressSearch
-                onSearch={(adr) => {
-                  setValue("location", adr.address);
-                  setValue("longitude", adr.lng);
-                  setValue("latitude", adr.lat);
-                  offerQuery.refetch();
-                }}
-                className="w-[clamp(24rem,25vw,100%)]"
-                required
-                error={errors.location ? t("common.enter-location") : ""}
-              />
-              <button className="btn btn-primary">
-                {t("home.search-coach")}
-              </button>
-            </div>
-          </form>
+                {/* <ActivitySearch
+                  onSearch={(activity) => {
+                    setValue("activity", activity.name);
+                    offerQuery.refetch();
+                  }}
+                  onActivityChange={(value) => setValue("activity", value)}
+                  className="w-[clamp(24rem,25vw,100%)]"
+                  required
+                  error={errors.location ? t("common.enter-activity") : ""}
+                />
+                <AddressSearch
+                  onSearch={(adr) => {
+                    setValue("location", adr.address);
+                    setValue("longitude", adr.lng);
+                    setValue("latitude", adr.lat);
+                    offerQuery.refetch();
+                  }}
+                  className="w-[clamp(24rem,25vw,100%)]"
+                  required
+                  error={errors.location ? t("common.enter-location") : ""}
+                /> */}
+              </div>
+              <Separator className="my-4" />
+              <CardAction className="text-center">
+                <Button type="submit">
+                  {t("home.search-coach")}
+                  <Search />
+                </Button>
+              </CardAction>
+            </form>
+          </Card>
           <div className="flex flex-wrap gap-8 py-12">
             {data?.map((offer) => (
               <OfferCard
@@ -205,53 +259,48 @@ function OfferCard({ id }: { id: string }) {
   if (offer.data?.inHouse) options.push(t("coach.offer.in-house"));
 
   return (
-    <div className="card w-96 bg-card shadow-xl">
-      <figure className="relative">
-        <Image
-          src={offer.data?.imageUrl ?? "/images/dummy.jpg"}
-          alt={offer.data?.coach?.user.name ?? ""}
-          width={400}
-          height={200}
-          className="object-cover object-center"
-        />
-        <div className="absolute bottom-0 left-0 w-full bg-black/20 px-4 py-2 text-accent">
-          <h3>{offer.data?.coach?.publicName}</h3>
-          <p className="space-x-2">
-            {offer.data?.coach?.searchAddress},
-            {listFormatter.format(options).toLocaleLowerCase()}
-          </p>
-        </div>
-      </figure>
-      <div className="card-body">
+    <Card className="relative w-96">
+      <Image
+        src={offer.data?.imageUrl ?? "/images/dummy.jpg"}
+        alt={offer.data?.coach?.user.name ?? ""}
+        width={400}
+        height={200}
+        className="object-cover object-center"
+      />
+      <CardHeader>
+        <CardTitle>{offer.data?.coach?.publicName}</CardTitle>
+        <CardDescription className="space-x-2">
+          {offer.data?.coach?.searchAddress},
+          {listFormatter.format(options).toLocaleLowerCase()}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
         <Rating note={offer.data?.coach?.rating ?? 5} />
         <h2 className="card-title">{offer.data?.name}</h2>
         <p>{offer.data?.description}</p>
         <div className="flex flex-wrap gap-2">
           {prices.map((price, idx) => (
-            <span
-              key={`PRICE-${idx}`}
-              className="items- flex gap-2 rounded bg-accent px-4 py-2 leading-none text-accent-content"
-            >
+            <Badge key={`PRICE-${idx}`} variant="info" size="lg">
               {price.type === "PHYSICAL" ? <User /> : <Webcam />}
 
               {formatMoney(price.price)}
 
               {price.unit === "H" ? <Hourglass /> : <CalendarCheck />}
-            </span>
+            </Badge>
           ))}
           {offer.data?.freeHours ? (
-            <span className="items- flex gap-2 rounded bg-accent px-4 py-2 leading-none text-accent-content">
+            <Badge variant="info" size="lg">
               <Gift />
               <span>{t("coach.offer.free-hours")}</span>
-            </span>
+            </Badge>
           ) : null}
         </div>
-        <div className="card-actions justify-end">
-          <Link className="btn btn-primary" href={`/company/${id}`}>
-            {t("home.offer-details")}
-          </Link>
-        </div>
-      </div>
-    </div>
+        <CardAction>
+          <Button variant="default" asChild className="w-full">
+            <Link href={`/company/${id}`}>{t("home.offer-details")}</Link>
+          </Button>
+        </CardAction>
+      </CardContent>
+    </Card>
   );
 }

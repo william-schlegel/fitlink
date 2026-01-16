@@ -11,6 +11,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "./shadcn/input-group";
+import { Field, FieldContent, FieldLabel } from "./shadcn";
 import { Label } from "@/components/ui/shadcn/label";
 import { cn } from "@/lib/utils";
 import { env } from "@/env";
@@ -91,32 +92,30 @@ const AddressSearch = ({
 
   return (
     <div className={cn("relative", className)}>
-      <div className="space-y-2">
+      <Field>
         {label && (
-          <Label
-            className={cn(
-              required && "after:content-['*'] after:text-error after:ml-0.5",
-            )}
-          >
+          <FieldLabel className={cn(required && "required")}>
             {label}
-          </Label>
+          </FieldLabel>
         )}
-        <InputGroup>
-          <InputGroupInput
-            value={address}
-            onChange={(e) => handleSelect(e.currentTarget.value)}
-            placeholder={t("location") ?? ""}
-            required={required}
-          />
-          {iconSearch && (
-            <InputGroupAddon>
-              <InputGroupButton onClick={handleClickIcon}>
-                <MapPin />
-              </InputGroupButton>
-            </InputGroupAddon>
-          )}
-        </InputGroup>
-      </div>
+        <FieldContent className="bg-background">
+          <InputGroup>
+            <InputGroupInput
+              value={address}
+              onChange={(e) => handleSelect(e.currentTarget.value)}
+              placeholder={t("location") ?? ""}
+              required={required}
+            />
+            {iconSearch && (
+              <InputGroupAddon>
+                <InputGroupButton onClick={handleClickIcon}>
+                  <MapPin />
+                </InputGroupButton>
+              </InputGroupAddon>
+            )}
+          </InputGroup>
+        </FieldContent>
+      </Field>
       {error && <p className="text-sm text-error mt-1">{error}</p>}
       {isOpen && addresses.length > 0 && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-card shadow-lg">

@@ -12,7 +12,7 @@ import {
 type FeatureProps = {
   title: string;
   description: string;
-  children: ReactNode;
+  icon: ReactNode;
 };
 
 type FeatureContainerProps = {
@@ -27,12 +27,12 @@ export function FeatureContainer({ children }: FeatureContainerProps) {
   );
 }
 
-export function Feature({ title, description, children }: FeatureProps) {
+export function Feature({ title, description, icon }: FeatureProps) {
   return (
     <div className="w-full p-4 lg:w-1/2 xl:w-1/4">
       <Card className="h-full bg-muted">
-        <CardHeader className="items-center">
-          <div className="px-10 pt-4">{children}</div>
+        <CardHeader className="place-content-center text-primary/60">
+          {icon}
         </CardHeader>
         <CardContent className="items-center text-center">
           <CardTitle className="text-3xl font-bold mb-4">{title}</CardTitle>

@@ -7,7 +7,9 @@ import { Feature, FeatureContainer } from "@/components/ui/features";
 import { getPricingForRole } from "@/server/api/routers/pricing";
 import { PricingContainer } from "@/components/ui/pricing";
 import { PricingComponent } from "@/components/ui/pricing";
+import { Alert } from "@/components/ui/shadcn/alert";
 import { getActualUser } from "@/lib/auth/server";
+import { SigninOrAccount } from "../manager/page";
 import Title from "@/components/title";
 
 export default async function CoachPage() {
@@ -18,7 +20,7 @@ export default async function CoachPage() {
   return (
     <div>
       <Title title={t("coach-title")} />
-      <section className="hero bg-card">
+      <section className="hero bg-primary/10">
         <div className="hero-content py-48 text-center">
           <div className="max-w-md">
             <h1 className="text-5xl font-bold">{t("coach-title")}</h1>
@@ -33,49 +35,32 @@ export default async function CoachPage() {
             <Feature
               title={t("features.coaching.title")}
               description={t("features.coaching.description")}
-            >
-              <UserCheck />
-            </Feature>
+              icon={<UserCheck size={60} />}
+            />
+
             <Feature
               title={t("features.coach-communication.title")}
               description={t("features.coach-communication.description")}
-            >
-              <Bell />
-            </Feature>
+              icon={<Bell size={60} />}
+            />
             <Feature
               title={t("features.video.title")}
               description={t("features.video.description")}
-            >
-              <Video />
-            </Feature>
+              icon={<Video size={60} />}
+            />
           </FeatureContainer>
         </div>
       </section>
       <section className="bg-muted">
         <div className="container mx-auto">
           <h2 className="pt-12">{t("pricing.usage")}</h2>
-          <p className="alert alert-info">{t("pricing.try-offer")}</p>
+          <Alert variant="info">{t("pricing.try-offer")}</Alert>
           <PricingContainer>
             {pricingQuery?.map((pricing) => (
               <PricingComponent key={pricing.id} data={pricing} />
             ))}
           </PricingContainer>
-          {user?.id ? (
-            <div className="text-center">
-              {t("pricing.go-to-account")}{" "}
-              <Link href={`/user/${user?.id}/account`}>
-                <button className="btn btn-accent my-4">
-                  {t("pricing.my-account")}
-                </button>
-              </Link>
-            </div>
-          ) : (
-            <Link href="/user/signin">
-              <button className="btn btn-accent btn-block my-4">
-                {t("pricing.create-your-account")}
-              </button>
-            </Link>
-          )}
+          <SigninOrAccount userId={user?.id} />
         </div>
       </section>
     </div>

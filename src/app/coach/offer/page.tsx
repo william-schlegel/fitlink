@@ -106,7 +106,6 @@ async function OfferContent({ userId, offerId }: OfferContentProps) {
           <DeleteOffer userId={userId} offerId={offerId} />
         </div>
       </div>
-      {/* <CoachOfferDisplay offerId={offerId} /> */}
       <CoachOfferPage offerId={offerId} condensed />
     </div>
   );

@@ -137,11 +137,11 @@ export function CoachOfferPage({
           </section>
         ) : null}
       </div>
-      <Card className="h-fit relative">
+      <Card className="h-fit w-fit relative">
         <Image
           width={400}
           height={400}
-          className="w-[40%] max-w-[16rem] shrink-0 xl:h-64 xl:w-full xl:max-w-full object-cover object-center"
+          className="w-max-64 w-full object-cover object-center"
           src={offerQuery.data.imageUrl}
           alt={offerQuery.data.coach?.publicName ?? ""}
         />
