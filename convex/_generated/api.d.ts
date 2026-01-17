@@ -9,6 +9,7 @@
  */
 
 import type * as actions from "../actions.js";
+import type * as assistant from "../assistant.js";
 import type * as messages from "../messages.js";
 import type * as moderation from "../moderation.js";
 import type * as notifications from "../notifications.js";
@@ -21,6 +22,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   actions: typeof actions;
+  assistant: typeof assistant;
   messages: typeof messages;
   moderation: typeof moderation;
   notifications: typeof notifications;

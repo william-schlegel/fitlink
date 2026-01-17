@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 
+import { FloatingChatWidget } from "@/components/assistant";
 import FindCoach from "@/components/sections/findCoach";
 import FindClub from "@/components/sections/findClub";
 import ButtonLink from "@/components/ui/buttonLink";
@@ -53,6 +54,9 @@ export default async function FitlinkPage() {
           <FindCoach />
         </div>
       </section>
+
+      {/* AI Assistant Floating Widget */}
+      <FloatingChatWidget />
     </>
   );
 }

@@ -11,7 +11,7 @@ import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { LATITUDE, LONGITUDE, DEFAULT_RANGE } from "@/lib/defaultValues";
 import { calculateBBox } from "@/lib/distance";
 import { userCoach } from "@/db/schema/user";
-import { club } from "@/db/schema/club";
+import { club, site } from "@/db/schema/club";
 import { user } from "@/db/schema/auth";
 import { db } from "@/db";
 
@@ -392,3 +392,113 @@ export async function getUserWithPricingForOffer(userId: string) {
   });
 }
 
+
+// ==================== ASSISTANT SEARCH FUNCTIONS ====================
+
+const DEFAULT_ASSISTANT_RADIUS = 20;
+const DEFAULT_ASSISTANT_LIMIT = 20;
+
+export type AssistantSearchInput = {
+  activity?: string;
+  lat: number;
+  lng: number;
+  radiusKm?: number;
+  limit?: number;
+};
+
+export async function searchCoachesByActivityAndLocation({
+  activity,
+  lat,
+  lng,
+  radiusKm = DEFAULT_ASSISTANT_RADIUS,
+  limit = DEFAULT_ASSISTANT_LIMIT,
+}: AssistantSearchInput) {
+  const bbox = calculateBBox(lng, lat, radiusKm);
+
+  const coaches = await db.query.userCoach.findMany({
+    where: and(
+      gte(userCoach.longitude, bbox?.[0]?.[0] ?? LONGITUDE),
+      lte(userCoach.longitude, bbox?.[1]?.[0] ?? LONGITUDE),
+      gte(userCoach.latitude, bbox?.[1]?.[1] ?? LATITUDE),
+      lte(userCoach.latitude, bbox?.[0]?.[1] ?? LATITUDE),
+    ),
+    with: {
+      page: true,
+      certifications: true,
+      user: {
+        columns: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+    },
+    limit: limit * 2, // Fetch more to allow filtering
+  });
+
+  // Filter by activity if provided (case-insensitive partial match)
+  let filtered = coaches;
+  if (activity) {
+    const activityLower = activity.toLowerCase();
+    filtered = coaches.filter((coach) =>
+      coach.coachingActivities?.some((a) =>
+        a.toLowerCase().includes(activityLower),
+      ),
+    );
+  }
+
+  return filtered.slice(0, limit);
+}
+
+export async function searchClubsByActivityAndLocation({
+  activity,
+  lat,
+  lng,
+  radiusKm = DEFAULT_ASSISTANT_RADIUS,
+  limit = DEFAULT_ASSISTANT_LIMIT,
+}: AssistantSearchInput) {
+  const bbox = calculateBBox(lng, lat, radiusKm);
+
+  const sites = await db.query.site.findMany({
+    where: and(
+      gte(site.longitude, bbox?.[0]?.[0] ?? LONGITUDE),
+      lte(site.longitude, bbox?.[1]?.[0] ?? LONGITUDE),
+      gte(site.latitude, bbox?.[1]?.[1] ?? LATITUDE),
+      lte(site.latitude, bbox?.[0]?.[1] ?? LATITUDE),
+    ),
+    with: {
+      club: {
+        with: {
+          activities: {
+            with: {
+              group: true,
+            },
+          },
+          pages: {
+            columns: {
+              id: true,
+              published: true,
+              target: true,
+            },
+          },
+        },
+      },
+    },
+    limit: limit * 2, // Fetch more to allow filtering
+  });
+
+  // Filter by activity if provided (case-insensitive partial match on activity or group name)
+  let filtered = sites;
+  if (activity) {
+    const activityLower = activity.toLowerCase();
+    filtered = sites.filter((s) =>
+      s.club.activities.some(
+        (a) =>
+          a.name.toLowerCase().includes(activityLower) ||
+          a.group.name.toLowerCase().includes(activityLower),
+      ),
+    );
+  }
+
+  return filtered.slice(0, limit);
+}
