@@ -3,7 +3,13 @@ import Link from "next/link";
 
 import { ExternalLink } from "lucide-react";
 
-import { Badge, Card, CardContent, CardHeader } from "@/components/ui/shadcn";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+} from "@/components/ui/shadcn";
 import { DeleteUser, UpdateUser } from "@/components/modals/manageUser";
 import { getUserFullById } from "@/server/api/routers/users";
 import CardGroup from "@/components/ui/cardGroup";
@@ -147,15 +153,16 @@ export default async function UserContent({ userId }: UserContentProps) {
               userQuery?.internalRole === "MANAGER_COACH") &&
             userQuery?.coachData?.page &&
             userQuery.coachData.page.published ? (
-              <Link
-                href={`/presentation-page/coach/${userId}/${userQuery.coachData.page.id}`}
-                target="_blank"
-                referrerPolicy="no-referrer"
-                className="btn btn-primary flex gap-2"
-              >
-                {t("pages.page-preview")}
-                <ExternalLink size={16} />
-              </Link>
+              <Button asChild>
+                <Link
+                  href={`/presentation-page/coach/${userId}/${userQuery.coachData.page.id}`}
+                  target="_blank"
+                  referrerPolicy="no-referrer"
+                >
+                  {t("pages.page-preview")}
+                  <ExternalLink size={16} />
+                </Link>
+              </Button>
             ) : null}
           </CardContent>
         </Card>

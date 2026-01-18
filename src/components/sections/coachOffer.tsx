@@ -17,7 +17,7 @@ import {
 
 import Image from "next/image";
 
-import { Badge, Card, CardContent, CardHeader } from "../ui/shadcn";
+import { Badge, Button, Card, CardContent, CardHeader } from "../ui/shadcn";
 import { useCoachingLevel } from "@/lib/offers/useOffers";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { formatMoney } from "@/lib/formatNumber";
@@ -198,21 +198,20 @@ export function CoachOfferPage({
                     fromUserId={userId}
                   />
                 ) : offerQuery.data.coach?.user.email ? (
-                  <Link
-                    href={`mailto:${offerQuery.data.coach.user.email}`}
-                    className="btn-primary btn-block btn col-span-2 mt-8"
-                  >
-                    {t("offer.contact-me")}
-                  </Link>
+                  <Button className="block col-span-2 mt-8" asChild>
+                    <Link href={`mailto:${offerQuery.data.coach.user.email}`}>
+                      {t("offer.contact-me")}
+                    </Link>
+                  </Button>
                 ) : null}
               </>
             ) : (
-              <button
-                className="btn-primary btn-block btn col-span-2 mt-8"
+              <Button
+                className="block col-span-2 mt-8"
                 onClick={() => router.back()}
               >
                 {t("offer.back-to-my-page")}
-              </button>
+              </Button>
             )}
           </div>
         </CardContent>

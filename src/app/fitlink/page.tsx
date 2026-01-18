@@ -42,14 +42,21 @@ export default async function FitlinkPage() {
           </div>
         </div>
       </section>
+      <section className="bg-card py-16">
+        <div className="container mx-auto p-4 space-y-4 text-card-foreground text-[clamp(2rem,3vw,4rem)] font-bold">
+          <p className="text-center ">{t("hero-intro-1")}</p>
+          <p className="text-center ">{t("hero-intro-2")}</p>
+        </div>
+      </section>
       <section id="find-club" className="bg-muted">
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-4 space-y-4">
           <h2>{t("find-club")}</h2>
+          <p className="text-sm text-muted-foreground">{t("find-club-text")}</p>
           <FindClub />
         </div>
       </section>
       <section id="find-coach" className="bg-card">
-        <div className="container mx-auto p-4 @container">
+        <div className="container mx-auto p-4 @container space-y-4">
           <h2>{t("find-coach")}</h2>
           <FindCoach />
         </div>

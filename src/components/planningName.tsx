@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 
 import { formatDateLocalized } from "@/lib/formatDate";
 import { planning } from "@/db/schema/planning";
+import { Badge } from "./ui/shadcn";
 
 /**
  * compose a planning name from name and dates
@@ -25,11 +26,7 @@ export function PlanningName({
     <div className="flex w-full items-center justify-between gap-2">
       {actualPlanning.name ? <span>{actualPlanning.name}</span> : null}
       {variant === "default" ? (
-        <span
-          className={`${
-            planning.name ? "badge-secondary badge" : ""
-          } flex items-center gap-2`}
-        >
+        <Badge variant={planning.name ? "secondary" : "default"}>
           {!planning.name && <span>{t("from")}</span>}
           {formatDateLocalized(actualPlanning.startDate)}
           {isDate(actualPlanning.endDate) ? (
@@ -38,7 +35,7 @@ export function PlanningName({
               <span>{formatDateLocalized(actualPlanning.endDate)}</span>
             </span>
           ) : null}
-        </span>
+        </Badge>
       ) : null}
     </div>
   );

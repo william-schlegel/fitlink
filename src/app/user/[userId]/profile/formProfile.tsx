@@ -15,6 +15,8 @@ import { useRouter } from "next/navigation";
 
 import { Trash } from "lucide-react";
 
+import { toast } from "sonner";
+
 import {
   Field,
   FieldGroup,
@@ -26,9 +28,9 @@ import { Textarea } from "@/components/ui/shadcn/textarea";
 import { UploadButton } from "@/components/uploadthing";
 import { Input } from "@/components/ui/shadcn/input";
 import ButtonIcon from "@/components/ui/buttonIcon";
+import { Button } from "@/components/ui/shadcn";
 import { AppRouter } from "@/server/api/root";
 import { trpc } from "@/lib/trpc/client";
-import { toast } from "sonner";
 
 type FormValues = {
   name: string;
@@ -135,12 +137,9 @@ export default function FormProfile({
           </FieldGroup>
         </FieldSet>
         <ProfileImage />
-        <button
-          className="btn-primary btn col-span-2 w-fit"
-          disabled={updateUser.isPending}
-        >
+        <Button disabled={updateUser.isPending}>
           {t("profile.save-profile")}
-        </button>
+        </Button>
       </form>
     </FormProvider>
   );

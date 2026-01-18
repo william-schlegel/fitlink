@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Mail } from "lucide-react";
 
 import { api } from "../../../convex/_generated/api";
+import { Button } from "../ui/shadcn";
 import Modal from "../ui/modal";
 
 export default function SendMessage({
@@ -48,9 +49,9 @@ export default function SendMessage({
           className="textarea textarea-bordered w-full"
           placeholder={t("notification.message-placeholder")}
         />
-        <button type="submit" className="btn btn-primary mt-4 ">
+        <Button type="submit" className="mt-4 ">
           {t("notification.send-message")}
-        </button>
+        </Button>
       </form>
     </Modal>
   );

@@ -13,6 +13,7 @@ import { MessageCirclePlus, Search } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { Input } from "@/components/ui/shadcn/input";
 import ButtonIcon from "@/components/ui/buttonIcon";
+import { Button } from "@/components/ui/shadcn";
 import { trpc } from "@/lib/trpc/client";
 
 type UserSearchProps = {
@@ -76,14 +77,14 @@ export function UserSearch({ currentUserId, onClose }: UserSearchProps) {
               }
             }}
           />
-          <button
+          <Button
             type="button"
             onClick={handleSearch}
-            className="btn btn-primary"
+            size="icon"
             disabled={!searchQuery.trim()}
           >
             <Search />
-          </button>
+          </Button>
         </div>
 
         {isSearching && isLoading && (

@@ -82,7 +82,7 @@ export function SelectDate({ day, onNewDay }: SelectDateProps) {
       >
         <ChevronLeft className="h-5 w-5" />
       </Button>
-      <span className="inline-flex items-center justify-center w-32 bg-primary text-primary-content text-sm font-medium">
+      <span className="inline-flex items-center justify-center w-32 bg-primary text-primary-foreground text-sm font-medium">
         {formatDateLocalized(day, { dateFormat: "short", withDay: "short" })}
       </span>
       <Button

@@ -672,7 +672,8 @@
       "subscription-accepted": "L'abonnement a été ajouté",
       "subscription-rejected": "L'abonnement a été refusé",
       "new-message": "Nouveau message"
-    }
+    },
+    "footer-title": "Fitlink, la plateforme qui relie tous les acteurs du sport."
   },
   "dashboard": {
     "clubs": "{count, plural, =1 {Club} other {Clubs}}",
@@ -737,16 +738,16 @@
   },
   "home": {
     "title": "Rejoignez la communauté des clubs de sport",
-    "hero-text": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus culpa incidunt perferendis possimus recusandae deleniti ab neque soluta! At, nam excepturi possimus odit ipsam accusamus esse obcaecati vero id reiciendis.",
+    "hero-text": "Fitlink connecte les clubs, les coachs et les sportifs au même endroit.\nTrouvez un club près de chez vous, gérez vos adhérents simplement ou développez votre activité de coaching grâce à une plateforme pensée pour le sport d’aujourd’hui.",
     "btn-visitor": "Je cherche un club de sport",
     "btn-manager": "J'ai un club à gérer",
     "btn-coach": "Je suis coach",
-    "find-club": "Trouver un club autour de chez moi",
+    "find-club": "Trouvez et rejoignez le club qui vous correspond",
     "find-coach": "Trouver un coach autour de chez moi",
-    "manager-title": "Vous devez gérer un club de sport",
-    "manager-text": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus culpa incidunt perferendis possimus recusandae deleniti ab neque soluta! At, nam excepturi possimus odit ipsam accusamus esse obcaecati vero id reiciendis.",
-    "coach-title": "Vous êtes coach sportif",
-    "coach-text": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus culpa incidunt perferendis possimus recusandae deleniti ab neque soluta! At, nam excepturi possimus odit ipsam accusamus esse obcaecati vero id reiciendis.",
+    "manager-title": "Gérez votre club simplement, au quotidien",
+    "manager-text": "Fitlink aide les clubs de sport à centraliser leur gestion et à mieux communiquer avec leurs membres. Moins d’administratif, plus de temps pour l’animation et le développement de votre club.",
+    "coach-title": "Développez votre activité de coaching",
+    "coach-text": "Que vous soyez coach indépendant ou intervenant dans plusieurs clubs, Fitlink vous permet de gérer vos clients, vos séances et votre visibilité depuis une seule plateforme.",
     "company-title": "Vous êtes une société et cherchez un coach pour vos salariés",
     "company-text": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus culpa incidunt perferendis possimus recusandae deleniti ab neque soluta! At, nam excepturi possimus odit ipsam accusamus esse obcaecati vero id reiciendis.",
     "my-address": "Mon adresse",
@@ -815,7 +816,10 @@
         "title": "Coaching vidéo",
         "description": "Faites connaître vos vidéos de coaching|Gérez les abonnements à vos programmes"
       }
-    }
+    },
+    "find-club-text": "Recherchez facilement des clubs de sport autour de vous, découvrez leurs activités, horaires et actualités, puis gérez votre pratique depuis une seule application.",
+    "hero-intro-1": "Que vous soyez sportif, responsable de club ou coach indépendant, Fitlink vous accompagne au quotidien.",
+    "hero-intro-2": "Notre plateforme centralise les outils essentiels pour gagner du temps, mieux communiquer et se concentrer sur l’essentiel : le sport."
   },
   "pages": {
     "club": {

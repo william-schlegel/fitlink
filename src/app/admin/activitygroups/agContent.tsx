@@ -61,7 +61,7 @@ export function AGContent({ agId }: AGContentProps) {
           {agQuery.data?.default ? (
             <Star className="fill-yellow-500 size-4" />
           ) : (
-            <p className="badge">({agQuery.data?.name})</p>
+            <Badge>({agQuery.data?.name})</Badge>
           )}
         </div>
         <div className="flex items-center gap-2">

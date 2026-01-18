@@ -2,9 +2,12 @@ import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { Plus } from "lucide-react";
+
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import PlanningAndReservations from "./reservations";
 import { getActualUser } from "@/lib/auth/server";
+import { Button } from "@/components/ui/shadcn";
 import Subscription from "./subscription";
 import Title from "@/components/title";
 
@@ -40,14 +43,14 @@ export default async function MemberDashboard({
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">
       <Title title={t("member.dashboard")} />
-      <h1 className="flex justify-between">
+      <h1 className="flex gap-4">
         {t("member.dashboard")}
-        <Link
-          className="btn btn-secondary"
-          href={`/member/${user.id}/subscribe`}
-        >
-          {t("member.new-subscription")}
-        </Link>
+        <Button asChild>
+          <Link href={`/member/${user.id}/subscribe`}>
+            <Plus />
+            {t("member.new-subscription")}
+          </Link>
+        </Button>
       </h1>
       <h2>
         {t("member.my-subscription", {

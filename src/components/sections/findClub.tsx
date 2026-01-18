@@ -109,7 +109,7 @@ function FindClub({ address = "" }: FindClubProps) {
         <TableCell>
           <div className="flex flex-wrap items-center gap-2">
             <span>{item.club.name}</span>
-            <span className="badge-primary badge">{item.name}</span>
+            <Badge variant="default">{item.name}</Badge>
           </div>
         </TableCell>
         <TableCell>{item.distance.toFixed(0)}&nbsp;km</TableCell>

@@ -20,6 +20,7 @@ export default function Footer() {
   const t = useTranslations("common");
   return (
     <footer className="bg-card text-card-foreground mt-auto">
+      <h3 className="text-center">{t("footer-title")}</h3>
       <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         <Item>
           <ItemMedia>

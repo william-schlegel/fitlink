@@ -17,6 +17,7 @@ import {
 import { api } from "../../../../../convex/_generated/api";
 import { formatDateLocalized } from "@/lib/formatDate";
 import Pagination from "@/components/ui/pagination";
+import { Button } from "@/components/ui/shadcn";
 import createLink from "@/lib/createLink";
 import { FromTo } from "./types";
 
@@ -55,36 +56,36 @@ export function NotificationList({
   return (
     <div className="w-1/4 space-y-2">
       <div className="grid grid-cols-2 gap-2">
-        <Link
-          className={`btn-primary btn ${fromTo === "to" ? "" : "btn-outline"}`}
-          href={createLink(
-            {
-              notificationId: "",
-              page: "0",
-              fromTo: "to",
-            },
-            null,
-            pathname,
-          )}
-        >
-          {t("notification.to")}
-        </Link>
-        <Link
-          className={`btn-primary btn ${
-            fromTo === "from" ? "" : "btn-outline"
-          }`}
-          href={createLink(
-            {
-              notificationId: "",
-              page: "0",
-              fromTo: "from",
-            },
-            null,
-            pathname,
-          )}
-        >
-          {t("notification.from")}
-        </Link>
+        <Button variant={fromTo === "to" ? "default" : "outline"} asChild>
+          <Link
+            href={createLink(
+              {
+                notificationId: "",
+                page: "0",
+                fromTo: "to",
+              },
+              null,
+              pathname,
+            )}
+          >
+            {t("notification.to")}
+          </Link>
+        </Button>
+        <Button variant={fromTo === "from" ? "default" : "outline"} asChild>
+          <Link
+            href={createLink(
+              {
+                notificationId: "",
+                page: "0",
+                fromTo: "from",
+              },
+              null,
+              pathname,
+            )}
+          >
+            {t("notification.from")}
+          </Link>
+        </Button>
       </div>
       <ul className="menu w-full overflow-hidden rounded bg-card">
         {notifications.map((notification) => (

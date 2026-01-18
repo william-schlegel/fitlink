@@ -12,6 +12,8 @@ import Modal from "@/components/ui/modal";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 
+import { Badge, Button } from "@/components/ui/shadcn";
+
 import type { AppRouter } from "@/server/api/root";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
@@ -146,13 +148,7 @@ function MakeReservation({
       ? room.capacity - reservations.length
       : 0;
   if (room.reservation === "NONE")
-    return (
-      <div className="text-center">
-        <p className="btn-outline btn-disabled btn btn-xs">
-          {t("member.free-access")}
-        </p>
-      </div>
-    );
+    return <Badge variant="info">{t("member.free-access")}</Badge>;
 
   return (
     <div className="flex items-center justify-between gap-2">
@@ -164,10 +160,9 @@ function MakeReservation({
       {reservations.find(
         (r) => r.id === planningActivityId && isEqual(day, r.date),
       ) ? (
-        <span className="btn btn-accent btn-xs">{t("member.reserved")}</span>
+        <Badge variant="secondary">{t("member.reserved")}</Badge>
       ) : (
-        <button
-          className="btn btn-primary btn-xs"
+        <Button
           onClick={() =>
             createReservation.mutate({
               planningActivityId,
@@ -177,7 +172,7 @@ function MakeReservation({
           }
         >
           {t("member.reserve")}
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -321,13 +316,7 @@ function ReserveDuration({
     (room as WncRoom)?.reservation === "NONE" ||
     !(room as WncRoom)?.reservation
   )
-    return (
-      <div className="text-center">
-        <p className="btn-outline btn-disabled btn btn-xs">
-          {t("member.free-access")}
-        </p>
-      </div>
-    );
+    return <Badge variant="info">{t("member.free-access")}</Badge>;
   const free =
     room.capacity > reservations.length
       ? room.capacity - reservations.length
@@ -343,7 +332,7 @@ function ReserveDuration({
       {reservations.find(
         (r) => r.id === activity.id && isEqual(day, r.date),
       ) ? (
-        <span className="btn btn-accent btn-xs">{t("member.reserved")}</span>
+        <Badge variant="secondary">{t("member.reserved")}</Badge>
       ) : (
         <Modal
           title={t("member.reserve")}
@@ -352,6 +341,7 @@ function ReserveDuration({
           cancelButtonText=""
           closeModal={closeModal}
           onCloseModal={() => setCloseModal(false)}
+          size="sm"
         >
           <h3>{t("member.reserve")}</h3>
           <label>{t("club.activity.slot")}</label>
@@ -443,15 +433,13 @@ function AvailableSlots({
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2">
       {slots.map((slot, idx) => (
-        <span
+        <Button
           key={idx}
-          className={`btn btn-sm ${
-            slot.available ? "btn-primary" : "btn-disabled"
-          }`}
+          variant={slot.available ? "default" : "ghost"}
           onClick={() => onSelect(slot)}
         >
           {slot.slot}
-        </span>
+        </Button>
       ))}
     </div>
   );

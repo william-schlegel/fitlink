@@ -1,3 +1,10 @@
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/shadcn";
 import { MemberSubscriptionType } from "@/server/api/routers/users";
 import { getDataNames } from "@/server/api/routers/subscription";
 import { getDescription } from "@/lib/subscriptions";
@@ -27,12 +34,14 @@ export default async function Subscription({
   );
 
   return (
-    <div className="card w-full bg-card shadow-xl">
-      <div className="card-body">
-        <div className="flex items-center justify-between">
-          <h3 className="card-title text-primary">{subscription.name}</h3>
-          <span className="badge-primary badge">{subscription.club.name}</span>
-        </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <h3>{subscription.name}</h3>
+          <Badge>{subscription.club.name}</Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
         {shortInfo ? <p>{shortInfo}</p> : ""}
         <div className="flex gap-2">
           <List label="sites" items={sites.map((site) => site.name)} />
@@ -43,7 +52,7 @@ export default async function Subscription({
           />
           <List label="activities" items={activities.map((a) => a.name)} />
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
