@@ -1109,6 +1109,18 @@
     "input-placeholder": "Demandez-moi des clubs ou des coachs...",
     "share-location": "Partager ma position",
     "location-shared": "J'ai partagé ma position actuelle",
+    "voice": {
+      "start": "Entrée vocale",
+      "stop": "Arrêter l'enregistrement",
+      "listening": "Écoute en cours...",
+      "speak-now": "Parlez maintenant...",
+      "recording": "Enregistrement",
+      "transcribing": "Transcription en cours...",
+      "error-microphone": "Impossible d'accéder au microphone. Vérifiez les permissions.",
+      "error-recording": "L'enregistrement a échoué. Veuillez réessayer.",
+      "error-transcription": "La transcription a échoué. Veuillez réessayer.",
+      "error-recognition": "La reconnaissance vocale a échoué. Veuillez réessayer."
+    },
     "error-message": "Désolé, j'ai rencontré une erreur. Veuillez réessayer.",
     "view-profile": "Voir le profil",
     "view-offer": "Voir les détails de l'offre",

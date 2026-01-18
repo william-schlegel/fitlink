@@ -6,9 +6,20 @@ import {
   useImperativeHandle,
   forwardRef,
   KeyboardEvent,
+  useCallback,
 } from "react";
-import { Send, MapPin, Loader2, ArrowUpIcon } from "lucide-react";
+import {
+  MapPin,
+  Loader2,
+  ArrowUpIcon,
+  Mic,
+  MicOff,
+  Square,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { useVoiceInput } from "@/hooks/use-voice-input";
+import { cn } from "@/lib/utils";
 
 import {
   InputGroup,
@@ -21,7 +32,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
-import { Textarea } from "@/components/ui/shadcn/textarea";
 import { Button } from "@/components/ui/shadcn/button";
 
 type ChatInputProps = {
@@ -45,6 +55,25 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
     const [isGettingLocation, setIsGettingLocation] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+    // Handle transcript from voice input
+    const handleTranscript = useCallback((text: string) => {
+      setMessage((prev) => {
+        const newMessage = prev + (prev ? " " : "") + text;
+        return newMessage;
+      });
+    }, []);
+
+    // Voice input hook
+    const voice = useVoiceInput({
+      onTranscript: handleTranscript,
+      errorMessages: {
+        microphone: t("voice.error-microphone"),
+        recording: t("voice.error-recording"),
+        transcription: t("voice.error-transcription"),
+        recognition: t("voice.error-recognition"),
+      },
+    });
+
     // Expose focus method to parent
     useImperativeHandle(ref, () => ({
       focus: () => {
@@ -56,7 +85,6 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
       if (message.trim() && !disabled) {
         onSend(message.trim());
         setMessage("");
-        // Reset textarea height
         if (textareaRef.current) {
           textareaRef.current.style.height = "auto";
         }
@@ -79,7 +107,6 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
           const { latitude, longitude } = position.coords;
           onLocationShare(latitude, longitude);
           setIsGettingLocation(false);
-          // Send a message with the actual coordinates
           onSend(
             `${t("location-shared")} (Coordonnées GPS: latitude ${latitude.toFixed(6)}, longitude ${longitude.toFixed(6)})`,
           );
@@ -96,7 +123,6 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
       );
     };
 
-    // Auto-resize textarea
     const handleTextareaChange = (
       e: React.ChangeEvent<HTMLTextAreaElement>,
     ) => {
@@ -106,20 +132,155 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
       textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
     };
 
+    // Determine the status text and color for the recording indicator
+    const getRecordingStatus = () => {
+      if (voice.isTranscribing) {
+        return {
+          text: t("voice.transcribing"),
+          bgClass: "bg-blue-50 dark:bg-blue-950/30",
+          textClass: "text-blue-600 dark:text-blue-400",
+          dotClass: "bg-blue-500",
+          pingClass: "bg-blue-400",
+        };
+      }
+      if (voice.isListening) {
+        return {
+          text:
+            voice.voiceMode === "fallback"
+              ? `${t("voice.recording")} ${voice.formatDuration(voice.recordingDuration)}`
+              : t("voice.listening"),
+          bgClass: "bg-red-50 dark:bg-red-950/30",
+          textClass: "text-red-600 dark:text-red-400",
+          dotClass: "bg-red-500",
+          pingClass: "bg-red-400",
+        };
+      }
+      return null;
+    };
+
+    const recordingStatus = getRecordingStatus();
+
     return (
       <div className="border-t bg-background p-4">
+        {/* Voice error message */}
+        {voice.error && (
+          <div className="mb-3 rounded-lg bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+            {voice.error}
+          </div>
+        )}
+
+        {/* Voice recording/transcribing indicator */}
+        {recordingStatus && (
+          <div
+            className={cn(
+              "mb-3 flex items-center justify-center gap-2 rounded-lg px-3 py-2",
+              recordingStatus.bgClass,
+            )}
+          >
+            <span className="relative flex h-3 w-3">
+              {voice.isTranscribing ? (
+                <Loader2
+                  className={cn(
+                    "h-3 w-3 animate-spin",
+                    recordingStatus.textClass,
+                  )}
+                />
+              ) : (
+                <>
+                  <span
+                    className={cn(
+                      "absolute inline-flex h-full w-full animate-ping rounded-full opacity-75",
+                      recordingStatus.pingClass,
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "relative inline-flex h-3 w-3 rounded-full",
+                      recordingStatus.dotClass,
+                    )}
+                  />
+                </>
+              )}
+            </span>
+            <span
+              className={cn("text-sm font-medium", recordingStatus.textClass)}
+            >
+              {recordingStatus.text}
+            </span>
+            {voice.interimTranscript && (
+              <span className="ml-2 max-w-[200px] truncate text-sm italic text-muted-foreground">
+                {voice.interimTranscript}
+              </span>
+            )}
+          </div>
+        )}
+
         <InputGroup>
           <InputGroupTextarea
             ref={textareaRef}
             value={message}
             onChange={handleTextareaChange}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder || t("input-placeholder")}
-            disabled={disabled}
+            placeholder={
+              voice.isListening
+                ? t("voice.speak-now")
+                : voice.isTranscribing
+                  ? t("voice.transcribing")
+                  : placeholder || t("input-placeholder")
+            }
+            disabled={disabled || voice.isTranscribing}
             rows={2}
+            className={cn(
+              voice.isListening &&
+                "border-red-300 ring-2 ring-red-200 dark:border-red-700 dark:ring-red-900",
+              voice.isTranscribing &&
+                "border-blue-300 ring-2 ring-blue-200 dark:border-blue-700 dark:ring-blue-900",
+            )}
           />
 
           <InputGroupAddon align="block-end">
+            {/* Voice input button */}
+            {voice.voiceMode !== "none" && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant={voice.isListening ? "destructive" : "ghost"}
+                    size="icon"
+                    onClick={voice.toggle}
+                    disabled={disabled || voice.isTranscribing}
+                    className={cn(
+                      "shrink-0 transition-all duration-200",
+                      voice.isListening && "animate-pulse",
+                    )}
+                    aria-label={
+                      voice.isListening ? t("voice.stop") : t("voice.start")
+                    }
+                  >
+                    {voice.isTranscribing ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : voice.isListening ? (
+                      voice.voiceMode === "fallback" ? (
+                        <Square className="h-4 w-4 fill-current" />
+                      ) : (
+                        <MicOff className="h-5 w-5" />
+                      )
+                    ) : (
+                      <Mic className="h-5 w-5" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {voice.isTranscribing
+                    ? t("voice.transcribing")
+                    : voice.isListening
+                      ? t("voice.stop")
+                      : t("voice.start")}
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {/* Location share button */}
             {onLocationShare && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -141,43 +302,20 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                 <TooltipContent>{t("share-location")}</TooltipContent>
               </Tooltip>
             )}
+
+            {/* Send button */}
             <InputGroupButton
               variant="default"
               className="ml-auto rounded-full"
               size="icon-xs"
               onClick={handleSend}
-              disabled={disabled || !message.trim()}
+              disabled={disabled || voice.isTranscribing || !message.trim()}
             >
               <ArrowUpIcon />
               <span className="sr-only">Send</span>
             </InputGroupButton>
           </InputGroupAddon>
         </InputGroup>
-
-        {/* <div className="flex items-end gap-2">
-         
-
-          <div className="relative flex-1">
-            <Textarea
-              ref={textareaRef}
-              value={message}
-              onChange={handleTextareaChange}
-              onKeyDown={handleKeyDown}
-              placeholder={placeholder || t("input-placeholder")}
-              disabled={disabled}
-              rows={1}
-              className="min-h-[44px] max-h-[120px] resize-none pr-12 py-3"
-            />
-            <Button
-              type="button"
-              size="icon"
-             
-              className="absolute right-2 bottom-2 h-8 w-8"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-        </div> */}
       </div>
     );
   },

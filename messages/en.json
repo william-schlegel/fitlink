@@ -1099,6 +1099,18 @@
     "input-placeholder": "Ask me about clubs or coaches...",
     "share-location": "Share my location",
     "location-shared": "I've shared my current location",
+    "voice": {
+      "start": "Start voice input",
+      "stop": "Stop recording",
+      "listening": "Listening...",
+      "speak-now": "Speak now...",
+      "recording": "Recording",
+      "transcribing": "Transcribing...",
+      "error-microphone": "Could not access microphone. Please check permissions.",
+      "error-recording": "Recording failed. Please try again.",
+      "error-transcription": "Transcription failed. Please try again.",
+      "error-recognition": "Voice recognition failed. Please try again."
+    },
     "error-message": "Sorry, I encountered an error. Please try again.",
     "view-profile": "View profile",
     "view-offer": "View offer details",
