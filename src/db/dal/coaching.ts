@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, lte, or } from "drizzle-orm";
+import { and, eq, gte, inArray, lte, or, sql } from "drizzle-orm";
 
 import {
   coachingLevel,
@@ -7,11 +7,11 @@ import {
   selectedModuleForCoach,
 } from "@/db/schema/coach";
 import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
-import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { LATITUDE, LONGITUDE, DEFAULT_RANGE } from "@/lib/defaultValues";
+import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { calculateBBox } from "@/lib/distance";
-import { userCoach } from "@/db/schema/user";
 import { club, site } from "@/db/schema/club";
+import { userCoach } from "@/db/schema/user";
 import { user } from "@/db/schema/auth";
 import { db } from "@/db";
 
@@ -392,7 +392,6 @@ export async function getUserWithPricingForOffer(userId: string) {
   });
 }
 
-
 // ==================== ASSISTANT SEARCH FUNCTIONS ====================
 
 const DEFAULT_ASSISTANT_RADIUS = 20;
@@ -421,6 +420,9 @@ export async function searchCoachesByActivityAndLocation({
       lte(userCoach.longitude, bbox?.[1]?.[0] ?? LONGITUDE),
       gte(userCoach.latitude, bbox?.[1]?.[1] ?? LATITUDE),
       lte(userCoach.latitude, bbox?.[0]?.[1] ?? LATITUDE),
+      activity
+        ? sql`array_to_string(${userCoach.coachingActivities}, ',') ILIKE ${"%" + activity + "%"}`
+        : undefined,
     ),
     with: {
       page: true,
@@ -433,21 +435,10 @@ export async function searchCoachesByActivityAndLocation({
         },
       },
     },
-    limit: limit * 2, // Fetch more to allow filtering
+    limit,
   });
 
-  // Filter by activity if provided (case-insensitive partial match)
-  let filtered = coaches;
-  if (activity) {
-    const activityLower = activity.toLowerCase();
-    filtered = coaches.filter((coach) =>
-      coach.coachingActivities?.some((a) =>
-        a.toLowerCase().includes(activityLower),
-      ),
-    );
-  }
-
-  return filtered.slice(0, limit);
+  return coaches;
 }
 
 export async function searchClubsByActivityAndLocation({
