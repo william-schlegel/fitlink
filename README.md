@@ -1,18 +1,30 @@
 # Fitlink - Coaching Platform
 
-A modern Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRPC for type-safe APIs, and next-intl for internationalization.
+A modern Next.js 16 application for coaching and sports management with TypeScript, Tailwind CSS v4, shadcn/ui, Drizzle ORM, tRPC, better-auth, Convex, and next-intl.
 
 ## Technology Stack
 
-- **Framework**: Next.js 15 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Language**: TypeScript + React 19
+- **Styling**: Tailwind CSS v4, shadcn/ui (Radix UI), class-variance-authority
 - **Database**: PostgreSQL with Drizzle ORM
-- **API**: tRPC for type-safe APIs
-- **State Management**: React Query (TanStack Query)
+- **API**: tRPC + Next.js route handlers
+- **Auth**: better-auth (email/password, magic link, social)
+- **Realtime**: Convex (chat + notifications)
+- **File uploads**: UploadThing
+- **Maps**: Mapbox GL + MapQuest geocoding
+- **State Management**: TanStack Query
 - **Validation**: Zod
 - **Internationalization**: next-intl
 - **Package Manager**: Bun
+
+## Highlights
+
+- **Data Access Layer (DAL)** in `src/db/dal` with shared Zod schemas in `src/schemas`
+- **shadcn/ui** components under `src/components/ui/shadcn` (see `components.json`)
+- **better-auth** integration in `src/lib/auth` with a Drizzle adapter
+- **Convex** realtime chat and notifications in `convex/` and `src/lib/convex`
+- **AI assistant endpoint** at `/api/assistant` (Gemini or HuggingFace via `src/lib/llm`)
 
 ## Getting Started
 
@@ -20,6 +32,7 @@ A modern Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRPC
 
 - Node.js 18+ or Bun
 - PostgreSQL database
+- Optional: Mapbox/MapQuest keys, UploadThing, Convex, and LLM provider keys
 
 ### Installation
 
@@ -30,7 +43,7 @@ A modern Next.js 15 application with TypeScript, Tailwind CSS, Drizzle ORM, tRPC
    bun install
    ```
 
-3. Set up your environment variables in `.env`
+3. Copy `.env.example` to `.env` and fill required values (see `src/env.ts` for the full list)
 4. Run the development server:
 
    ```bash
@@ -53,6 +66,7 @@ This project uses next-intl for internationalization with the following setup:
 - **`src/i18n.ts`**: Main i18n configuration
 - **`messages/fr.json`**: French translations
 - **`messages/en.json`**: English translations
+- **`src/app/layout.tsx`**: Loads messages into `NextIntlClientProvider`
 
 ### Usage in Components
 
@@ -73,23 +87,22 @@ export function MyComponent() {
 
 ### Language Switcher
 
-The app includes a `LanguageSwitcher` component that allows users to switch between languages:
+The app includes a `LanguageSwitcher` component:
 
 ```typescript
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
-// Use in any component
 <LanguageSwitcher />;
 ```
 
 ## tRPC Setup
 
-This project uses tRPC for type-safe APIs. The setup includes:
+This project uses tRPC for type-safe APIs:
 
 ### Server-side Configuration
 
-- **`src/lib/trpc/server.ts`**: Main tRPC server configuration
-- **`src/server/api/root.ts`**: Root router combining all sub-routers
+- **`src/lib/trpc/server.ts`**: tRPC context and helpers
+- **`src/server/api/root.ts`**: Root router combining sub-routers
 - **`src/server/api/routers/`**: Individual route handlers
 - **`src/app/api/trpc/[trpc]/route.ts`**: Next.js API route handler
 
@@ -97,24 +110,11 @@ This project uses tRPC for type-safe APIs. The setup includes:
 
 - **`src/lib/trpc/client.ts`**: tRPC client configuration
 - **`src/lib/trpc/provider.tsx`**: React Query provider wrapper
-- **`src/app/[locale]/layout.tsx`**: Root layout with tRPC and i18n providers
-
-### Available Routes
-
-#### Health Check
-
-- `GET /api/trpc/health.check` - Basic health check endpoint
-
-#### Users
-
-- `GET /api/trpc/user.list` - List users with pagination
-- `GET /api/trpc/user.getById` - Get user by ID
-- `POST /api/trpc/user.create` - Create new user
+- **`src/app/layout.tsx`**: Root layout with tRPC and i18n providers
 
 ### Usage Example
 
 ```typescript
-// In a React component
 import { trpc } from "@/lib/trpc/client";
 
 export function MyComponent() {
@@ -133,63 +133,65 @@ export function MyComponent() {
 }
 ```
 
+## Data Access Layer (DAL) & Schemas
+
+The DAL provides typed database operations and is paired with shared Zod schemas:
+
+- **DAL**: `src/db/dal`
+- **Schemas**: `src/schemas`
+- **Guide**: `docs/dal-guide.md`
+
 ## Project Structure
 
 ```text
+convex/                  # Convex functions and schema
+docs/                    # Internal guides
+drizzle/                 # Drizzle migrations
+messages/                # i18n translations
 src/
-├── app/                    # Next.js App Router pages
-│   ├── api/               # API routes
-│   │   └── trpc/          # tRPC API handler
-│   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Home page
-├── db/                    # Database configuration
-│   ├── schema.ts          # Drizzle schema
-│   └── index.ts           # Database connection
-├── lib/                   # Shared utilities
-│   └── trpc/              # tRPC configuration
-│       ├── client.ts      # Client setup
-│       ├── server.ts      # Server setup
-│       └── provider.tsx   # React provider
-├── server/                # Server-side code
-│   └── api/               # tRPC routers
-│       ├── root.ts        # Root router
-│       └── routers/       # Individual routers
-└── i18n.ts               # Internationalization config
-
-messages/
-├── fr.json               # French translations
-└── en.json              # English translations
+├── app/                 # Next.js App Router pages
+├── actions/             # Server actions
+├── components/          # UI and feature components
+│   └── ui/shadcn/        # shadcn/ui components
+├── db/
+│   ├── dal/             # Data Access Layer
+│   ├── schema/          # Drizzle schema definitions
+│   └── index.ts         # Database connection
+├── lib/
+│   ├── auth/            # better-auth client/server helpers
+│   ├── convex/          # Convex client/server helpers
+│   ├── llm/             # Assistant integrations
+│   └── trpc/            # tRPC configuration
+├── schemas/             # Shared Zod schemas
+└── i18n.ts              # Internationalization config
 ```
 
 ## Development
 
+- **Dev**: `bun run dev`
 - **Build**: `bun run build`
 - **Lint**: `bun run lint`
-- **Dev**: `bun run dev`
+- **Lint (all)**: `bun run lint:all`
+- **Typecheck**: `bun run tsc`
+- **Format**: `bun run format`
 
 ## Database
 
-The project uses Drizzle ORM with PostgreSQL. The schema is defined in `src/db/schema.ts` and includes:
+The project uses Drizzle ORM with PostgreSQL:
 
-- User management with roles
-- Coaching and subscription models
-- File upload and document management
-- Notification system
+- **Schema**: `src/db/schema`
+- **Migrations**: `drizzle/`
+- **DAL**: `src/db/dal`
+
+## Docs
+
+- `docs/dal-guide.md`
+- `docs/error-handling-guide.md`
 
 ## Contributing
 
 1. Follow the TypeScript and tRPC patterns established in the codebase
-2. Use proper Zod validation for all inputs
-3. Follow the existing database schema patterns
+2. Use the shared Zod schemas in `src/schemas` for inputs
+3. Route all database access through the DAL in `src/db/dal`
 4. Add translations for all new text content
 5. Test thoroughly before submitting changes
-
-## Translation Guidelines
-
-When adding new features:
-
-1. Add translation keys to both `messages/fr.json` and `messages/en.json`
-2. Use the `useTranslations` hook in components
-3. Follow the existing translation structure
-4. Use descriptive key names (e.g., `users.createButton` instead of `create`)
-5. Test both languages to ensure consistency
