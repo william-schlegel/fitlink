@@ -3,6 +3,8 @@
 @import "shadcn/tailwind.css";
 @import "uploadthing/tw/v4";
 
+@plugin "@tailwindcss/typography";
+
 @source "../../node_modules/@uploadthing/react/dist"; /** <-- depends on your project structure */
 
 @custom-variant dark (&:is(.dark *));
@@ -225,5 +227,71 @@
           var(--color-info) 100%
         )
         0px 0px / 100% 100% no-repeat no-repeat;
+  }
+}
+
+@layer components {
+  /* Chat markdown styles - more compact than default prose */
+  .chat-markdown {
+    @apply text-sm leading-relaxed;
+  }
+
+  .chat-markdown p {
+    @apply m-0 mb-2;
+  }
+
+  .chat-markdown p:last-child {
+    @apply mb-0;
+  }
+
+  .chat-markdown ul,
+  .chat-markdown ol {
+    @apply m-0 mb-2 pl-5;
+  }
+
+  .chat-markdown li {
+    @apply mb-1;
+  }
+
+  .chat-markdown li:last-child {
+    @apply mb-0;
+  }
+
+  .chat-markdown strong {
+    @apply font-semibold;
+  }
+
+  .chat-markdown a {
+    @apply text-primary underline underline-offset-2 hover:text-primary/80 transition-colors;
+  }
+
+  .chat-markdown h1,
+  .chat-markdown h2,
+  .chat-markdown h3 {
+    @apply font-semibold m-0 mb-2;
+  }
+
+  .chat-markdown h1 {
+    @apply text-base;
+  }
+
+  .chat-markdown h2 {
+    @apply text-sm;
+  }
+
+  .chat-markdown h3 {
+    @apply text-sm;
+  }
+
+  .chat-markdown code {
+    @apply bg-background/50 px-1.5 py-0.5 rounded text-xs font-mono;
+  }
+
+  .chat-markdown pre {
+    @apply bg-background/50 p-2 rounded text-xs overflow-x-auto m-0 mb-2;
+  }
+
+  .chat-markdown blockquote {
+    @apply border-l-2 border-primary/50 pl-3 italic m-0 mb-2;
   }
 }

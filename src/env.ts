@@ -28,6 +28,13 @@ export const env = createEnv({
     // Convex Configuration
     CONVEX_URL: z.url().optional(),
     CONVEX_DEPLOY_KEY: z.string().optional(),
+    // LLM Configuration
+    GOOGLE_GEMINI_API_KEY: z.string().optional(),
+    HUGGINGFACE_API_KEY: z.string().optional(),
+    LLM_PROVIDER: z
+      .enum(["gemini", "huggingface"])
+      .default("gemini")
+      .optional(),
   },
 
   /**
@@ -61,6 +68,9 @@ export const env = createEnv({
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     CONVEX_URL: process.env.CONVEX_URL,
     CONVEX_DEPLOY_KEY: process.env.CONVEX_DEPLOY_KEY,
+    GOOGLE_GEMINI_API_KEY: process.env.GOOGLE_GEMINI_API_KEY,
+    HUGGINGFACE_API_KEY: process.env.HUGGINGFACE_API_KEY,
+    LLM_PROVIDER: process.env.LLM_PROVIDER,
 
     NEXT_PUBLIC_HOSTNAME: process.env.NEXT_PUBLIC_HOSTNAME,
     NEXT_PUBLIC_BETA: process.env.NEXT_PUBLIC_BETA,

@@ -164,27 +164,6 @@ export default function CoachPage() {
                     />
                   )}
                 />
-                {/* <ActivitySearch
-                  onSearch={(activity) => {
-                    setValue("activity", activity.name);
-                    offerQuery.refetch();
-                  }}
-                  onActivityChange={(value) => setValue("activity", value)}
-                  className="w-[clamp(24rem,25vw,100%)]"
-                  required
-                  error={errors.location ? t("common.enter-activity") : ""}
-                />
-                <AddressSearch
-                  onSearch={(adr) => {
-                    setValue("location", adr.address);
-                    setValue("longitude", adr.lng);
-                    setValue("latitude", adr.lat);
-                    offerQuery.refetch();
-                  }}
-                  className="w-[clamp(24rem,25vw,100%)]"
-                  required
-                  error={errors.location ? t("common.enter-location") : ""}
-                /> */}
               </div>
               <Separator className="my-4" />
               <CardAction className="text-center">

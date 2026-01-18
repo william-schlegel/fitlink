@@ -77,5 +77,26 @@ export default defineSchema({
     .index("by_userId", ["userId"])
     .index("by_userId_createdAt", ["userId", "createdAt"])
     .index("by_userFromId", ["userFromId"]),
+
+  // LLM Assistant tables
+  assistantSessions: defineTable({
+    userId: v.optional(v.string()), // null for anonymous users
+    createdAt: v.number(),
+  }).index("by_userId", ["userId"]),
+
+  assistantMessages: defineTable({
+    sessionId: v.id("assistantSessions"),
+    role: v.union(
+      v.literal("user"),
+      v.literal("assistant"),
+      v.literal("system"),
+    ),
+    content: v.string(),
+    toolCalls: v.optional(v.any()), // store tool invocations
+    results: v.optional(v.any()), // store search results
+    createdAt: v.number(),
+  })
+    .index("by_sessionId", ["sessionId"])
+    .index("by_sessionId_createdAt", ["sessionId", "createdAt"]),
 });
 
