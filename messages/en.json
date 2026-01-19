@@ -261,7 +261,9 @@
     "no-calendar": "No opening hours defined",
     "calendar-created": "Opening hours created",
     "calendar-updated": "Opening hours updated",
-    "calendar-deleted": "Opening hours deleted"
+    "calendar-deleted": "Opening hours deleted",
+    "activity-updated": "Activity recorded",
+    "activity-deleted": "Activity deleted"
   },
   "club": {
     "manager-only": "This page is reserved for club managers",

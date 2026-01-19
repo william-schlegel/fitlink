@@ -263,7 +263,9 @@
     "no-calendar": "Pas d'horaires d'ouverture définis",
     "calendar-created": "Horaires d'ouverture créés",
     "calendar-updated": "Horaires d'ouverture mis à jour",
-    "calendar-deleted": "Horaires d'ouverture supprimés"
+    "calendar-deleted": "Horaires d'ouverture supprimés",
+    "activity-updated": "Activité enregistrée",
+    "activity-deleted": "Activité supprimée"
   },
   "club": {
     "manager-only": "Cette page est réservée aux managers de clubs",

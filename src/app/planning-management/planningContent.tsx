@@ -16,6 +16,8 @@ import { useTranslations } from "next-intl";
 
 import { Trash, X } from "lucide-react";
 
+import { toast } from "sonner";
+
 import {
   Button,
   Dialog,
@@ -403,6 +405,8 @@ function PopupActivityDetails({
   clubId,
   onClose,
 }: PopupActivityDetailsProps) {
+  const t = useTranslations("calendar");
+
   const queryPlanning = trpc.plannings.getPlanningActivityById.useQuery(
     activityId,
     { enabled: activityId !== "" && activityId !== null },
@@ -411,11 +415,13 @@ function PopupActivityDetails({
   const updatePlanning = trpc.plannings.updatePlanningActivity.useMutation({
     onSuccess(data) {
       utils.plannings.getPlanningById.invalidate(data[0].planningId);
+      toast.success(t("activity-updated"));
     },
   });
   const deletePlanning = trpc.plannings.deletePlanningActivity.useMutation({
     onSuccess(data) {
       utils.plannings.getPlanningById.invalidate(data[0].planningId);
+      toast.success(t("activity-deleted"));
     },
   });
   const { getName } = useDayName();

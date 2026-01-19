@@ -2,18 +2,6 @@ import { and, eq, inArray, or } from "drizzle-orm";
 import z from "zod";
 
 import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/lib/trpc/server";
-import { dayNameEnum, roomReservationEnum } from "@/db/schema/enums";
-import { planningActivity } from "@/db/schema/planning";
-import { getDayName } from "@/lib/dates/days";
-import { userCoach } from "@/db/schema/user";
-import { activity } from "@/db/schema/club";
-import { DayName } from "@/lib/dates/data";
-import { isCUID } from "@/lib/utils";
-import {
   getPlanningsForClub,
   getPlanningById,
   getClubDailyPlanning,
@@ -36,6 +24,18 @@ import {
   createActivityReservation,
   deleteReservation,
 } from "@/db/dal";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/lib/trpc/server";
+import { dayNameEnum, roomReservationEnum } from "@/db/schema/enums";
+import { planningActivity } from "@/db/schema/planning";
+import { getDayName } from "@/lib/dates/days";
+import { userCoach } from "@/db/schema/user";
+import { activity } from "@/db/schema/club";
+import { DayName } from "@/lib/dates/data";
+import { isCUID } from "@/lib/utils";
 
 const planningObject = z.object({
   id: z.cuid2(),
@@ -56,7 +56,7 @@ const planningActivityObject = z.object({
   day: z.enum(dayNameEnum.enumValues),
   startTime: z.string(),
   duration: z.number(),
-  coachId: z.cuid2().optional(),
+  coachId: z.string().optional(),
 });
 
 export { getClubDailyPlanning, getPlanningsForClub, getPlanningById };
@@ -126,7 +126,7 @@ export const planningRouter = createTRPCRouter({
   getCoachDailyPlanning: protectedProcedure
     .input(
       z.object({
-        coachId: z.cuid2(),
+        coachId: z.string(),
         day: z.enum(dayNameEnum.enumValues),
       }),
     )
@@ -135,13 +135,11 @@ export const planningRouter = createTRPCRouter({
   getCoachPlanningForClub: protectedProcedure
     .input(
       z.object({
-        coachId: z.cuid2(),
+        coachId: z.string(),
         clubId: z.cuid2(),
       }),
     )
-    .query(({ input }) =>
-      getCoachPlanningForClub(input.coachId, input.clubId),
-    ),
+    .query(({ input }) => getCoachPlanningForClub(input.coachId, input.clubId)),
 
   getMemberDailyPlanning: protectedProcedure
     .input(
@@ -181,9 +179,11 @@ export const planningRouter = createTRPCRouter({
             site: NonNullable<
               Awaited<ReturnType<typeof getPlanningActivitiesWithFilters>>
             >[number]["site"];
-            room: NonNullable<
-              Awaited<ReturnType<typeof getPlanningActivityById>>
-            >["room"] | null;
+            room:
+              | NonNullable<
+                  Awaited<ReturnType<typeof getPlanningActivityById>>
+                >["room"]
+              | null;
             coach: typeof userCoach.$inferSelect | null;
             reservations: Array<{ id: string; date: Date }>;
           }>;
@@ -285,9 +285,7 @@ export const planningRouter = createTRPCRouter({
             : undefined;
 
         const additionalActivityConditions =
-          activityConditions.length > 0
-            ? or(...activityConditions)
-            : undefined;
+          activityConditions.length > 0 ? or(...activityConditions) : undefined;
 
         const pa = await getPlanningActivitiesWithFilters(
           planningClub.id,

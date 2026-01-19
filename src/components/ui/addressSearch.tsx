@@ -11,9 +11,8 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "./shadcn/input-group";
-import { Field, FieldContent, FieldLabel } from "./shadcn";
-import { Label } from "@/components/ui/shadcn/label";
-import { cn } from "@/lib/utils";
+import { Button, Field, FieldContent, FieldError, FieldLabel } from "./shadcn";
+import { Popover, PopoverContent, PopoverTrigger } from "./shadcn/popover";
 import { env } from "@/env";
 
 type Props = {
@@ -45,6 +44,7 @@ const AddressSearch = ({
   const [debouncedAddress] = useDebounceValue<string>(address, 500);
   const [addresses, setAddresses] = useState<AddressData[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const t = useTranslations("common");
 
   useEffect(() => {
@@ -60,7 +60,7 @@ const AddressSearch = ({
       searchAddresses(debouncedAddress).then((found) => {
         startTransition(() => {
           setAddresses(found);
-          setIsOpen(found.length > 0);
+          setIsOpen(isFocused && found.length > 0);
         });
       });
     } else {
@@ -69,7 +69,7 @@ const AddressSearch = ({
         setIsOpen(false);
       });
     }
-  }, [debouncedAddress]);
+  }, [debouncedAddress, isFocused]);
 
   function handleSelect(value: string) {
     setAddress(value);
@@ -91,51 +91,61 @@ const AddressSearch = ({
   }
 
   return (
-    <div className={cn("relative", className)}>
-      <Field>
-        {label && <FieldLabel>{label}</FieldLabel>}
-        <FieldContent className="bg-background">
-          <InputGroup>
-            <InputGroupInput
-              value={address}
-              onChange={(e) => handleSelect(e.currentTarget.value)}
-              placeholder={t("location") ?? ""}
-              required={required}
-            />
-            {iconSearch && (
-              <InputGroupAddon>
-                <InputGroupButton onClick={handleClickIcon}>
-                  <MapPin />
-                </InputGroupButton>
-              </InputGroupAddon>
-            )}
-          </InputGroup>
-        </FieldContent>
-      </Field>
-      {error && <p className="text-sm text-error mt-1">{error}</p>}
-      {isOpen && addresses.length > 0 && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
-          <ul className="max-h-60 overflow-auto py-1">
-            {addresses.map((adr, idx) => (
-              <li key={`ADR-${idx}`}>
-                <button
-                  type="button"
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors"
-                  onClick={() => {
-                    setAddress(adr.address);
-                    onSearch(adr);
-                    setAddresses([]);
-                    setIsOpen(false);
-                  }}
-                >
-                  {adr.address}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
+    <Popover
+      open={isOpen && isFocused && addresses.length > 0}
+      onOpenChange={setIsOpen}
+    >
+      <PopoverTrigger className={className} asChild>
+        <Field>
+          {label && <FieldLabel>{label}</FieldLabel>}
+          <FieldContent className="bg-background text-foreground">
+            <InputGroup>
+              <InputGroupInput
+                value={address}
+                onChange={(e) => handleSelect(e.currentTarget.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                placeholder={t("location") ?? ""}
+                required={required}
+              />
+              {iconSearch && (
+                <InputGroupAddon>
+                  <InputGroupButton onClick={handleClickIcon}>
+                    <MapPin />
+                  </InputGroupButton>
+                </InputGroupAddon>
+              )}
+            </InputGroup>
+          </FieldContent>
+          {error && <FieldError>{error}</FieldError>}
+        </Field>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-(--radix-popover-trigger-width)"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <ul>
+          {addresses.map((adr, idx) => (
+            <Button
+              asChild
+              key={`ADR-${idx}`}
+              onClick={() => {
+                setAddress(adr.address);
+                onSearch(adr);
+                setAddresses([]);
+                setIsOpen(false);
+              }}
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start"
+              type="button"
+            >
+              <li>{adr.address}</li>
+            </Button>
+          ))}
+        </ul>
+      </PopoverContent>
+    </Popover>
   );
 };
 

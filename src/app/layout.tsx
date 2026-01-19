@@ -39,7 +39,7 @@ export default async function RootLayout({
                   <Navbar userId={user?.id} internalRole={user?.internalRole} />
                   <main>{children}</main>
                   <Footer />
-                  <Toaster />
+                  <Toaster position="top-center" richColors />
                 </div>
               </TRPCProvider>
             </ConvexClientProvider>
