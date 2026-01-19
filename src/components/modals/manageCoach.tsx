@@ -369,9 +369,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
         <FieldSet>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="offer-name" className="required">
-                {t("offer.name")}
-              </FieldLabel>
+              <FieldLabel htmlFor="offer-name">{t("offer.name")}</FieldLabel>
               <Input
                 id="offer-name"
                 {...register("name", {
@@ -381,7 +379,7 @@ function OfferForm({ onSubmit, onCancel, initialData }: OfferFormProps) {
               {errors.name && <FieldError>{errors.name.message}</FieldError>}
             </Field>
             <Field>
-              <FieldLabel htmlFor="offer-start-date" className="required">
+              <FieldLabel htmlFor="offer-start-date">
                 {t("offer.start-date")}
               </FieldLabel>
               <Input

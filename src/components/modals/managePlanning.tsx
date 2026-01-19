@@ -135,7 +135,7 @@ export const CreatePlanning = ({
               <Input id="planning-name" {...register("name")} />
             </Field>
             <Field>
-              <FieldLabel htmlFor="planning-start-date" className="required">
+              <FieldLabel htmlFor="planning-start-date">
                 {t("start-date")}
               </FieldLabel>
               <Input
@@ -390,10 +390,7 @@ export function UpdatePlanning({
               <Input id="update-planning-name" {...register("name")} />
             </Field>
             <Field>
-              <FieldLabel
-                htmlFor="update-planning-start-date"
-                className="required"
-              >
+              <FieldLabel htmlFor="update-planning-start-date">
                 {t("start-date")}
               </FieldLabel>
               <Input

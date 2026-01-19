@@ -93,11 +93,7 @@ const AddressSearch = ({
   return (
     <div className={cn("relative", className)}>
       <Field>
-        {label && (
-          <FieldLabel className={cn(required && "required")}>
-            {label}
-          </FieldLabel>
-        )}
+        {label && <FieldLabel>{label}</FieldLabel>}
         <FieldContent className="bg-background">
           <InputGroup>
             <InputGroupInput

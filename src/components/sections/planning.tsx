@@ -396,7 +396,7 @@ function PlanningForm({
         <FieldSet>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="planning-title" className="required">
+              <FieldLabel htmlFor="planning-title">
                 {t("pages.planning.title")}
               </FieldLabel>
               <Input

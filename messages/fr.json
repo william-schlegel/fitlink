@@ -231,7 +231,10 @@
       "continue-with-link": "Continuer avec le lien magique",
       "check-your-mail": "Vérifiez votre boite mail à l'adresse {email} et cliquez sur le lien fourni pour accéder à l'application",
       "close-page": "Vous pouvez fermer cette page",
-      "wrong-credentials": "Erreur dans l'email ou le mot de passe"
+      "wrong-credentials": "Erreur dans l'email ou le mot de passe",
+      "password-min-length": "Le mot de passe doit faire au moins {min} caractères",
+      "password-uppercase": "Le mot de passe doit contenir un caractère en majuscule",
+      "password-lowercase": "Le mot de passe doit contenir au moins un caractère en minuscule"
     },
     "all-roles": "Tous les rôles"
   },
@@ -334,7 +337,8 @@
       "minutes": "minutes",
       "slot": "Créneau",
       "no-slot": "Aucun créneau de défini",
-      "name": "Nom de l'activité"
+      "name": "Nom de l'activité",
+      "activity-removed": "Activité supprimée"
     },
     "room": {
       "room": "{count, plural, =0 {Aucune salle} =1 {Salle} other {Salles}}",
@@ -1097,7 +1101,6 @@
     "only-message-author-or-admin-can-delete": "Seul l'auteur du message peut le supprimer"
   },
   "no-events": "Aucun événement programmé",
-  "activity-removed": "Activité supprimée",
   "assistant": {
     "title": "Assistant Fitlink",
     "subtitle": "Trouvez des clubs et coachs près de chez vous",

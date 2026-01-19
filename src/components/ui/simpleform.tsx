@@ -113,29 +113,14 @@ export default function SimpleForm<T extends FieldValues>({
                         {...register(fn as Path<T>)}
                         defaultChecked={false}
                       />
-                      <FieldLabel
-                        htmlFor={fn}
-                        className={cn(
-                          "cursor-pointer font-normal",
-                          field.required &&
-                            "after:content-['*'] after:text-error after:ml-0.5",
-                        )}
-                      >
+                      <FieldLabel htmlFor={fn} className="font-normal">
                         {field.label}
                       </FieldLabel>
                     </>
                   ) : (
                     <>
                       {field.label !== undefined ? (
-                        <FieldLabel
-                          htmlFor={fn}
-                          className={cn(
-                            field.required &&
-                              "after:content-['*'] after:text-destructive after:ml-0.5",
-                          )}
-                        >
-                          {field.label}
-                        </FieldLabel>
+                        <FieldLabel htmlFor={fn}>{field.label}</FieldLabel>
                       ) : null}
                       {field.unit !== undefined ? (
                         <InputGroup>

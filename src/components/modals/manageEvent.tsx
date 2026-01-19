@@ -23,7 +23,6 @@ import { toast } from "sonner";
 
 import {
   Field,
-  FieldContent,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -382,9 +381,7 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
           <FieldSet className="col-span-full">
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="event-name" className="required">
-                  {t("event.name")}
-                </FieldLabel>
+                <FieldLabel htmlFor="event-name">{t("event.name")}</FieldLabel>
                 <Input
                   id="event-name"
                   {...form.register("name", {
@@ -396,7 +393,7 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
                 )}
               </Field>
               <Field>
-                <FieldLabel htmlFor="event-brief" className="required">
+                <FieldLabel htmlFor="event-brief">
                   {t("event.brief")}
                 </FieldLabel>
                 <Textarea
@@ -426,7 +423,7 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
         <FieldSet>
           <FieldGroup>
             <Field orientation="horizontal" className="grid grid-cols-2">
-              <FieldLabel htmlFor="event-start-date" className="required">
+              <FieldLabel htmlFor="event-start-date">
                 {t("event.start-date")}
               </FieldLabel>
 
@@ -444,7 +441,7 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
               )}
             </Field>
             <Field orientation="horizontal" className="grid grid-cols-2">
-              <FieldLabel htmlFor="event-end-date" className="required">
+              <FieldLabel htmlFor="event-end-date">
                 {t("event.end-date")}
               </FieldLabel>
               <Input
@@ -461,7 +458,7 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
               )}
             </Field>
             <Field orientation="horizontal" className="grid grid-cols-2">
-              <FieldLabel htmlFor="event-start-display" className="required">
+              <FieldLabel htmlFor="event-start-display">
                 {t("event.start-display")}
               </FieldLabel>
               <Input
@@ -478,7 +475,7 @@ function EventForm({ onSubmit, initialValues, onCancel }: EventFormProps) {
               )}
             </Field>
             <Field orientation="horizontal" className="grid grid-cols-2">
-              <FieldLabel htmlFor="event-end-display" className="required">
+              <FieldLabel htmlFor="event-end-display">
                 {t("event.end-display")}
               </FieldLabel>
               <Input
@@ -592,7 +589,7 @@ function DisplayEventCard() {
         backgroundBlendMode: "darken",
       }}
     >
-      <h3 className="">{fields.name}</h3>
+      <h3 className="text-white">{fields.name}</h3>
       <p className="text-lg">{fields.brief}</p>
       <p>{fields.description}</p>
       <p className="text-xl font-bold text-accent">
@@ -619,13 +616,16 @@ function DisplayEventCard() {
         <p className="space-x-4 text-right text-xl font-bold">
           <span>{fields.address}</span>
           {fields.searchAddress ? (
-            <ButtonIcon
-              iconComponent={showMap ? <X /> : <Map />}
+            <Button
+              asChild
+              variant="outline"
+              className="text-foreground"
               title={t("event.view-map")}
               size="icon"
-              variant="outlines"
               onClick={() => setShowMap((prev) => !prev)}
-            />
+            >
+              {showMap ? <X /> : <Map />}
+            </Button>
           ) : null}
         </p>
         <div
@@ -648,7 +648,7 @@ function DisplayEventCard() {
               latitude={fields.latitude ?? LATITUDE}
               anchor="bottom"
             >
-              <MapPin className="text-secondary" />
+              <MapPin className="text-primary" />
             </Marker>
           </MapComponent>
         </div>

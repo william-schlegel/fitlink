@@ -208,7 +208,7 @@ function ActivityForm({
       <FieldSet>
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor="activity-name" className="required">
+            <FieldLabel htmlFor="activity-name">
               {t("club.activity.name")}
             </FieldLabel>
             <Input

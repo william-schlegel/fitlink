@@ -15,7 +15,6 @@ export default function Providers({
     <div className="space-y-2">
       {providers.map((provider) => (
         <Button
-          variant="outline"
           className="w-full"
           key={provider.name}
           onClick={() =>

@@ -19,10 +19,7 @@ import { Trash, X } from "lucide-react";
 import {
   Button,
   Dialog,
-  DialogOverlay,
-  DialogPortal,
   DialogTitle,
-  DialogClose,
   DialogContent,
   Select,
   SelectTrigger,
@@ -476,6 +473,7 @@ function DraggableActivity({ id, name }: { id: string; name: string }) {
       style={style}
       {...listeners}
       {...attributes}
+      size="lg"
       className="bg-card text-card-foreground w-full z-50 cursor-grab"
     >
       {name}
@@ -556,7 +554,7 @@ function FormActivity({
         <span className="text-primary">{activityName}</span>
       </div>
       <Field orientation="horizontal">
-        <FieldLabel className="required">{t("start-hour")}</FieldLabel>
+        <FieldLabel>{t("start-hour")}</FieldLabel>
         <Input
           type="time"
           {...register("startTime", {
@@ -565,7 +563,7 @@ function FormActivity({
         />
       </Field>
       <Field orientation="horizontal">
-        <FieldLabel className="required">{t("duration")}</FieldLabel>
+        <FieldLabel>{t("duration")}</FieldLabel>
         <InputGroup>
           <InputGroupInput
             type="number"

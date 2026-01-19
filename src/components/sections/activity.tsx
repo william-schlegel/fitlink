@@ -437,7 +437,7 @@ function ActivityForm({
         <FieldSet>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="activity-title" className="required">
+              <FieldLabel htmlFor="activity-title">
                 {t("activity.title")}
               </FieldLabel>
               <Input

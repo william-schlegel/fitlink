@@ -4,10 +4,11 @@ import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { UserPlus } from "lucide-react";
 
+import { toast } from "sonner";
+
 import SimpleForm from "@/components/ui/simpleform";
 import Modal from "@/components/ui/modal";
 import { trpc } from "@/lib/trpc/client";
-import { toast } from "sonner";
 
 type AccountFormValues = {
   name: string;
@@ -45,7 +46,6 @@ export default function CreateAccount() {
       handleSubmit={handleSubmit(onSubmit, onError)}
       errors={errors}
       buttonIcon={<UserPlus className="h-4 w-4" />}
-      variant="outline"
     >
       <SimpleForm
         errors={errors}

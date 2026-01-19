@@ -7,8 +7,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
+import {
+  PasswordInput,
+  PasswordInputStrengthChecker,
+} from "@/components/ui/shadcn/password-input";
 import { signInAction, signInMagicLinkAction } from "@/actions/auth";
 import { Separator } from "@/components/ui/shadcn/separator";
+import { Field, FieldLabel } from "@/components/ui/shadcn";
 import { Button } from "@/components/ui/shadcn/button";
 import { Label } from "@/components/ui/shadcn/label";
 import { Input } from "@/components/ui/shadcn/input";
@@ -28,48 +33,10 @@ export default async function FormEmail({
           {error}
         </div>
       )}
-      <form action={signInMagicLinkAction} className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label
-              htmlFor="email"
-              className="after:content-['*'] after:text-error after:ml-0.5"
-            >
-              {t("signin.my-email")}
-            </Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-[hsl(var(--foreground)/0.5)]" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t("signin.magic-link")}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <Input id="email" type="email" required name="email" />
-        </div>
-        <Button type="submit" variant="outline" className="w-full">
-          {t("signin.connect-with-magic-link")}
-        </Button>
-      </form>
-      <div className="flex items-center gap-4">
-        <Separator className="flex-1" />
-        <span className="text-sm text-primary font-medium">
-          {t("signin.or")}
-        </span>
-        <Separator className="flex-1" />
-      </div>
       <form action={signInAction} className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label
-              htmlFor="email2"
-              className="after:content-['*'] after:text-error after:ml-0.5"
-            >
-              {t("signin.my-email")}
-            </Label>
+        <Field>
+          <FieldLabel htmlFor="email2">
+            {t("signin.my-email")}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -80,20 +47,74 @@ export default async function FormEmail({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-          <Input id="email2" type="email" required name="email" />
-        </div>
-        <div className="space-y-2">
-          <Label
-            htmlFor="password"
-            className="after:content-['*'] after:text-error after:ml-0.5"
+          </FieldLabel>
+
+          <Input
+            id="email2"
+            type="email"
+            required
+            name="email"
+            className="bg-background text-foreground"
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="password">{t("signin.password")}</FieldLabel>
+          <PasswordInput
+            id="password"
+            required
+            name="password"
+            className="bg-background text-foreground"
           >
-            {t("signin.password")}
-          </Label>
-          <Input id="password" type="password" required name="password" />
-        </div>
-        <Button type="submit" variant="outline" className="w-full">
+            <PasswordInputStrengthChecker
+              rules={{
+                minLength: {
+                  value: 8,
+                  label: t("signin.password-min-length", { min: 8 }),
+                },
+
+                // uppercase: {
+                //   value: true,
+                //   label: t("signin.password-uppercase"),
+                // },
+                lowercase: {
+                  value: true,
+                  label: t("signin.password-lowercase"),
+                },
+              }}
+            />
+          </PasswordInput>
+        </Field>
+        <Button type="submit" className="w-full">
           {t("signin.connect-with-account")} {t("signin.local")}
+        </Button>
+      </form>
+      <Separator>{t("signin.or")}</Separator>
+      <form action={signInMagicLinkAction} className="space-y-4">
+        <Field>
+          <FieldLabel htmlFor="email">
+            {t("signin.my-email")}
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-[hsl(var(--foreground)/0.5)]" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t("signin.magic-link")}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </FieldLabel>
+          <Input
+            id="email"
+            type="email"
+            required
+            name="email"
+            className="bg-background text-foreground"
+          />
+        </Field>
+        <Button type="submit" className="w-full">
+          {t("signin.connect-with-magic-link")}
         </Button>
       </form>
     </>

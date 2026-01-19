@@ -229,7 +229,10 @@
       "continue-with-link": "Continue with magic link",
       "check-your-mail": "Check your mailbox at {email} and click on the provided link to access the application",
       "close-page": "You can close this page",
-      "wrong-credentials": "Error in email or password"
+      "wrong-credentials": "Error in email or password",
+      "password-min-length": "The password must be at least {min} characters long",
+      "password-uppercase": "Password must contain an uppercase character",
+      "password-lowercase": "Password must contain at least one lowercase character"
     },
     "all-roles": "All the roles"
   },
@@ -331,6 +334,7 @@
       "minutes": "minutes",
       "slot": "Slot",
       "no-slot": "No slot defined",
+      "activity-removed": "Activity deleted",
       "name": "Activity name"
     },
     "room": {
@@ -1087,7 +1091,6 @@
     "only-message-author-or-admin-can-delete": "Only the author of the message can delete it"
   },
   "no-events": "No event scheduled",
-  "activity-removed": "Activity deleted",
   "assistant": {
     "title": "Fitlink Assistant",
     "subtitle": "Find clubs and coaches near you",

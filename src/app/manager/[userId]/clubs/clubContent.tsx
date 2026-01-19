@@ -23,7 +23,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
-import { CalendarX, Euro, User } from "lucide-react";
+import { CalendarX, ChevronRight, Euro, User } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -33,17 +33,18 @@ import {
   Card,
   CardContent,
   CardTitle,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
 } from "@/components/ui/shadcn";
 import { CreateClubCalendar } from "@/components/modals/manageCalendar";
 import { DeleteClub, UpdateClub } from "@/components/modals/manageClub";
-import { ButtonGroup } from "@/components/ui/shadcn/button-group";
 import CollapsableGroup from "@/components/ui/collapsableGroup";
 import AddActivity from "@/components/modals/manageActivity";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import LockedButton from "@/components/ui/lockedButton";
 import DeleteButton from "@/components/ui/deleteButton";
 import CalendarWeek from "@/components/calendarWeek";
-import ButtonIcon from "@/components/ui/buttonIcon";
 import { activityGroup } from "@/db/schema/club";
 import useUserInfo from "@/lib/useUserInfo";
 import { trpc } from "@/lib/trpc/client";
@@ -55,6 +56,8 @@ type ClubContentProps = {
 };
 
 export function ClubContent({ userId, clubId }: ClubContentProps) {
+  const t = useTranslations("club");
+
   const clubQuery = trpc.clubs.getClubById.useQuery(
     { clubId, userId },
     {
@@ -86,11 +89,10 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
   const removeActivity = trpc.activities.removeFromRoom.useMutation({
     onSuccess() {
       utils.clubs.getClubById.invalidate({ clubId, userId });
-      toast.success(t("activity-removed"));
+      toast.success(t("activity.activity-removed"));
     },
   });
   const utils = trpc.useUtils();
-  const t = useTranslations("club");
   const { features } = useUserInfo(userId);
 
   const sensors = useSensors(
@@ -191,43 +193,54 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
           isLoading={calendarQuery.isLoading}
         />
       ) : null}
+      {/* Site Section */}
+      <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+        <div className="flex flex-row items-center justify-between gap-4">
+          <h3>
+            {t("site.site", { count: clubQuery?.data?.sites?.length ?? 0 })}
+          </h3>
+          <Button asChild>
+            <Link href={`/manager/${userId}/${clubId}/sites`}>
+              {t("site.manage")}
+            </Link>
+          </Button>
+        </div>
+        {clubQuery?.data?.sites?.map((site) => (
+          <div key={site.id} className="my-2 flex items-center gap-4">
+            <span>
+              {site.name} ({site.address})
+            </span>
+            <Badge variant="info">
+              {site.rooms.length > 0 && <span>{site.rooms.length}</span>}
+              {t("room.room", { count: site.rooms.length })}
+            </Badge>
+          </div>
+        ))}
+      </div>
+
+      {/* Activity Assignment Section */}
       <DndContext
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onDragCancel={() => setActiveActivityId(null)}
         sensors={sensors}
       >
-        <div className="flex flex-wrap gap-4">
-          <div className="flex-1 rounded border border-primary p-4 ">
-            <div className="flex flex-row items-center justify-between gap-4">
-              <h3>
-                {t("site.site", { count: clubQuery?.data?.sites?.length ?? 0 })}
-              </h3>
-              <Button asChild>
-                <Link href={`/manager/${userId}/${clubId}/sites`}>
-                  {t("site.manage")}
-                </Link>
-              </Button>
-            </div>
-            {clubQuery?.data?.sites?.map((site) => (
-              <div key={site.id} className="my-2 flex items-center gap-4">
-                <span>
-                  {site.name} ({site.address})
-                </span>
-                <Badge variant="info">
-                  {site.rooms.length > 0 && <span>{site.rooms.length}</span>}
-                  {t("room.room", { count: site.rooms.length })}
-                </Badge>
-              </div>
-            ))}
-          </div>
-          <div className="flex-1 rounded border border-primary p-4 ">
-            <div className="mb-4 flex flex-row items-center justify-between gap-4">
-              <h3>
+        <div className="flex items-center gap-4 pt-2">
+          <h3>{t("activity.manage-club-activities")}</h3>
+          <p className="text-sm text-muted-foreground">
+            {t("activity.manage-club-activities-help")}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_1fr]">
+          {/* Left Panel - Activities */}
+          <div className="rounded-lg border border-border bg-card shadow-sm">
+            <div className="border-b border-border p-4">
+              <h4 className="font-semibold">
                 {t("activity.activity", {
                   count: clubQuery?.data?.activities?.length ?? 0,
                 })}
-              </h3>
+              </h4>
               <AddActivity
                 clubId={clubId}
                 userId={userId}
@@ -238,10 +251,18 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
                 withUpdate
               />
             </div>
-            <ButtonGroup>
+            <div className="max-h-[500px] overflow-y-auto p-2">
               {groups.map((gp) => (
-                <Button key={gp.id} asChild>
-                  <CollapsableGroup groupName={gp.name}>
+                <ActivityGroupCollapsible
+                  key={gp.id}
+                  groupName={gp.name}
+                  activitiesCount={
+                    clubQuery.data?.activities?.filter(
+                      (a) => a.groupId === gp.id,
+                    )?.length ?? 0
+                  }
+                >
+                  <div className="flex flex-col gap-1 py-1 pl-4">
                     {clubQuery.data?.activities
                       ?.filter((a) => a.groupId === gp.id)
                       ?.map((a) => (
@@ -258,56 +279,55 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
                           </span>
                         </DraggableElement>
                       ))}
-                  </CollapsableGroup>
-                </Button>
+                  </div>
+                </ActivityGroupCollapsible>
               ))}
-            </ButtonGroup>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col gap-2 rounded border border-primary p-4">
-          <div className="flex items-center gap-4">
-            <h3>{t("activity.manage-club-activities")}</h3>
-            <p className="text-sm text-muted-foreground">
-              {t("activity.manage-club-activities-help")}
-            </p>
-          </div>
-          <div className="flex flex-col gap-2">
-            {clubQuery.data?.sites?.map((site) => (
-              <CollapsableGroup
-                key={site.id}
-                groupName={site.name}
-                defaultOpen={site.rooms.length > 0}
-              >
-                {site.rooms?.map((room) => (
-                  <DroppableArea
-                    key={room.id}
-                    areaId={room.id}
-                    title={room.name}
-                  >
-                    {room.activities?.map((a) => (
-                      <DraggableElement
-                        key={a.id}
-                        elementId={`${a.activity.id} ${room.id}`}
-                        data={{ activityId: a.activity.id, roomId: room.id }}
-                      >
-                        {a.activity.name}
-                        {a.activity.noCalendar ? (
-                          <CalendarX size={12} className="opacity-50" />
-                        ) : null}
 
-                        <DeleteButton
-                          label={t("activity.remove")}
-                          icon
-                          onClick={() =>
-                            handledeleteActivity(room.id, a.activity.id)
-                          }
-                        />
-                      </DraggableElement>
-                    ))}
-                  </DroppableArea>
-                ))}
-              </CollapsableGroup>
-            ))}
+          {/* Right Panel - Rooms/Sites */}
+          <div className="rounded-lg border border-border bg-card shadow-sm">
+            <div className="border-b border-border p-4">
+              <h4 className="font-semibold">{t("room.room", { count: 2 })}</h4>
+            </div>
+            <div className="max-h-[500px] overflow-y-auto p-2">
+              {clubQuery.data?.sites?.map((site) => (
+                <CollapsableGroup
+                  key={site.id}
+                  groupName={site.name}
+                  defaultOpen={site.rooms.length > 0}
+                >
+                  {site.rooms?.map((room) => (
+                    <DroppableArea
+                      key={room.id}
+                      areaId={room.id}
+                      title={room.name}
+                    >
+                      {room.activities?.map((a) => (
+                        <DraggableElement
+                          key={a.id}
+                          elementId={`${a.activity.id} ${room.id}`}
+                          data={{ activityId: a.activity.id, roomId: room.id }}
+                        >
+                          {a.activity.name}
+                          {a.activity.noCalendar ? (
+                            <CalendarX size={12} className="opacity-50" />
+                          ) : null}
+
+                          <DeleteButton
+                            label={t("activity.remove")}
+                            icon
+                            onClick={() =>
+                              handledeleteActivity(room.id, a.activity.id)
+                            }
+                          />
+                        </DraggableElement>
+                      ))}
+                    </DroppableArea>
+                  ))}
+                </CollapsableGroup>
+              ))}
+            </div>
           </div>
         </div>
         <DragOverlay>
@@ -373,7 +393,7 @@ function DraggableElement({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex items-center gap-2 rounded-full border border-neutral bg-card px-4 py-1",
+        "flex items-center gap-2 border border-neutral bg-card px-4 py-1",
         transform ? "cursor-grabbing" : "cursor-grab",
       )}
       style={style}
@@ -382,5 +402,39 @@ function DraggableElement({
     >
       {children}
     </div>
+  );
+}
+
+type ActivityGroupCollapsibleProps = {
+  groupName: string;
+  activitiesCount: number;
+  children: ReactNode;
+};
+
+function ActivityGroupCollapsible({
+  groupName,
+  activitiesCount,
+  children,
+}: ActivityGroupCollapsibleProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="group">
+      <CollapsibleTrigger className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-muted/50">
+        <ChevronRight
+          className={cn(
+            "size-4 shrink-0 text-muted-foreground transition-transform duration-200",
+            isOpen && "rotate-90",
+          )}
+        />
+        <span className="flex-1 font-medium">{groupName}</span>
+        <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+          {activitiesCount}
+        </span>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapse-up data-[state=open]:animate-collapse-down">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

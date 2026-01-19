@@ -373,7 +373,7 @@ function PricingForm() {
         <FieldSet>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="pricing-title" className="required">
+              <FieldLabel htmlFor="pricing-title">
                 {t("pricing.name")}
               </FieldLabel>
               <Input
@@ -386,7 +386,7 @@ function PricingForm() {
               {errors.title && <FieldError>{errors.title.message}</FieldError>}
             </Field>
             <Field>
-              <FieldLabel htmlFor="pricing-description" className="required">
+              <FieldLabel htmlFor="pricing-description">
                 {t("pricing.description")}
               </FieldLabel>
               <Textarea

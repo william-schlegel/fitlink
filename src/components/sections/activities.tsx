@@ -509,7 +509,7 @@ function ActivityGroupForm({
         <FieldSet>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="activity-group-title" className="required">
+              <FieldLabel htmlFor="activity-group-title">
                 {t("activity-group.title")}
               </FieldLabel>
               <Input

@@ -59,25 +59,12 @@ export default async function SignIn({
           <CardTitle className="text-2xl">{t("signin.connect")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <FormEmail />
+          <Separator>{t("signin.or")}</Separator>
           <Providers
             providers={providers.map((p) => ({ id: p.id, name: p.name }))}
           />
-          <div className="flex items-center gap-4">
-            <Separator className="flex-1" />
-            <span className="text-sm text-primary font-medium">
-              {t("signin.or")}
-            </span>
-            <Separator className="flex-1" />
-          </div>
-          <FormEmail />
-
-          <div className="flex items-center gap-4">
-            <Separator className="flex-1" />
-            <span className="text-sm text-primary font-medium">
-              {t("signin.or")}
-            </span>
-            <Separator className="flex-1" />
-          </div>
+          <Separator>{t("signin.or")}</Separator>
           <div className="flex justify-center">
             <CreateAccount />
           </div>

@@ -424,9 +424,7 @@ function OfferForm({
         <FieldSet>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="offer-title" className="required">
-                {t("offer.title")}
-              </FieldLabel>
+              <FieldLabel htmlFor="offer-title">{t("offer.title")}</FieldLabel>
               <Input
                 id="offer-title"
                 {...register("title", {

@@ -72,9 +72,7 @@ const ActivitySearch = ({
 
   return (
     <Field className={cn("relative", className)}>
-      {label && (
-        <FieldLabel className={cn(required && "required")}>{label}</FieldLabel>
-      )}
+      {label && <FieldLabel>{label}</FieldLabel>}
       <FieldContent className="bg-background">
         <InputGroup>
           {iconActivity && (

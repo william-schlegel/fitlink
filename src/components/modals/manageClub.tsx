@@ -253,9 +253,7 @@ function ClubForm({ onSubmit, onCancel, update, initialData }: ClubFormProps) {
     >
       <div className="space-y-4">
         <Field>
-          <FieldLabel htmlFor="name" className="required">
-            {t("club.name")}
-          </FieldLabel>
+          <FieldLabel htmlFor="name">{t("club.name")}</FieldLabel>
           <Input
             id="name"
             {...register("name", {
@@ -277,9 +275,7 @@ function ClubForm({ onSubmit, onCancel, update, initialData }: ClubFormProps) {
         )}
 
         <Field>
-          <FieldLabel htmlFor="address" className="required">
-            {t("club.address")}
-          </FieldLabel>
+          <FieldLabel htmlFor="address">{t("club.address")}</FieldLabel>
           <Input
             id="address"
             {...register("address", {

@@ -26,14 +26,14 @@ export function PlanningName({
     <div className="flex w-full items-center justify-between gap-2">
       {actualPlanning.name ? <span>{actualPlanning.name}</span> : null}
       {variant === "default" ? (
-        <Badge variant={planning.name ? "secondary" : "default"}>
+        <Badge variant={planning.name ? "secondary" : "default"} size="lg">
           {!planning.name && <span>{t("from")}</span>}
           {formatDateLocalized(actualPlanning.startDate)}
           {isDate(actualPlanning.endDate) ? (
-            <span className="space-x-2">
-              <ArrowRight />
+            <>
+              <ArrowRight size={16} />
               <span>{formatDateLocalized(actualPlanning.endDate)}</span>
-            </span>
+            </>
           ) : null}
         </Badge>
       ) : null}

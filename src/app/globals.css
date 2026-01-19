@@ -162,13 +162,6 @@
   h4 {
     @apply space-x-2 py-2 text-xl font-semibold text-foreground;
   }
-
-  label.required::after {
-    content: "*";
-    color: var(--color-destructive);
-    font-size: 0.8em;
-    align-self: start;
-  }
 }
 
 @layer utilities {

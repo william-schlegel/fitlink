@@ -20,8 +20,7 @@ export default function Footer() {
   const t = useTranslations("common");
   return (
     <footer className="bg-card text-card-foreground mt-auto">
-      <h3 className="text-center">{t("footer-title")}</h3>
-      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="container mx-auto grid md:grid-cols-3 gap-4">
         <Item>
           <ItemMedia>
             <Stars size={60} />
@@ -32,12 +31,13 @@ export default function Footer() {
             <ItemFooter>&copy; {format(new Date(), "yyyy")}</ItemFooter>
           </ItemContent>
         </Item>
-        <Item className="w-fit justify-center">
-          <ItemHeader>
+        <h3 className="text-center">{t("footer-title")}</h3>
+        <Item>
+          <ItemHeader className="justify-end">
             <ItemTitle>{t("social")}</ItemTitle>
           </ItemHeader>
 
-          <ItemContent className="flex flex-row items-center gap-2">
+          <ItemContent className="flex flex-row items-center justify-end gap-2">
             <Button asChild variant="ghost">
               <a
                 className="size-5 fill-card-foreground"
