@@ -275,23 +275,14 @@ export async function processAssistantMessage(
 
   try {
     const provider = getConfiguredProvider();
-    console.log(`[LLM] Using provider: ${provider}`);
-
     // Convert messages to LLM format
     const llmMessages: LLMMessage[] = messages.map((m) => ({
       role: m.role,
       content: m.content,
     }));
 
-    console.log(`[LLM] Starting chat with ${llmMessages.length} messages`);
-
     // Process with the configured LLM
     const response = await processWithLLM(llmMessages, promptTranslations);
-
-    console.log(
-      `[LLM] Function calls found: ${response.functionCalls.length}`,
-      response.functionCalls,
-    );
 
     if (response.functionCalls.length > 0) {
       // Execute tool calls

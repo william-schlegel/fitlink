@@ -228,20 +228,20 @@ export async function POST(request: NextRequest) {
     const promptTranslations = getPromptTranslations(locale);
     const responseTranslations = getResponseTranslations(locale);
 
-    // Check if Convex is configured
-    const convexConfigured = !!convexHttpClient;
+    // Only record conversations for logged-in users (when userId is provided)
+    const shouldRecordConversation = !!convexHttpClient && !!userId;
 
     let actualSessionId: Id<"assistantSessions"> | null = null;
     let messages: AssistantMessage[] = [];
 
-    if (convexConfigured && convexHttpClient) {
-      // Get or create session
+    if (shouldRecordConversation && convexHttpClient) {
+      // Get or create session for the logged-in user
       if (sessionId) {
         actualSessionId = sessionId as Id<"assistantSessions">;
       } else {
         actualSessionId = await convexHttpClient.mutation(
           api.assistant.createSession,
-          { userId: userId ?? undefined },
+          { userId },
         );
       }
 
@@ -275,12 +275,6 @@ export async function POST(request: NextRequest) {
       content: message,
     });
 
-    // Debug: Log conversation history
-    console.log(
-      `[Assistant] Processing with ${messages.length} messages in history:`,
-      messages.map((m) => `[${m.role}]: ${m.content.substring(0, 50)}...`),
-    );
-
     // Process with LLM
     const assistantResponse = await processAssistantMessage(
       messages,
@@ -289,7 +283,7 @@ export async function POST(request: NextRequest) {
       responseTranslations,
     );
 
-    if (convexConfigured && convexHttpClient && actualSessionId) {
+    if (shouldRecordConversation && convexHttpClient && actualSessionId) {
       // Save assistant response
       await convexHttpClient.mutation(api.assistant.addMessage, {
         sessionId: actualSessionId,

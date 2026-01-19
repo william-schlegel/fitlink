@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 
+import { AnimatedGradient } from "@/components/ui/shadcn/stripe-animated-gradient";
 import { FloatingChatWidget } from "@/components/assistant";
 import FindCoach from "@/components/sections/findCoach";
 import FindClub from "@/components/sections/findClub";
@@ -13,8 +14,15 @@ export default async function FitlinkPage() {
   return (
     <>
       <Title title={t("title")} />
-      <section className="bg-gradient-home-hero hero min-h-screen">
-        <div className="hero-content flex-col lg:flex-row-reverse">
+      {/* <section className="bg-gradient-home-hero hero min-h-screen"> */}
+      <section className="relative min-h-screen">
+        <AnimatedGradient
+          color1="#4f46e5"
+          color2="#ff8600"
+          color3="#016630"
+          color4="#e7000b"
+        />
+        <div className="absolute inset-0 isolate justify-center items-center gap-4 max-w-7xl p-4 flex flex-col lg:flex-row-reverse mx-auto">
           <Image
             src="/images/photo.jpg"
             alt=""
@@ -24,10 +32,10 @@ export default async function FitlinkPage() {
           />
 
           <div>
-            <h1 className="text-[clamp(2rem,5vw,8rem)] font-bold leading-[clamp(1.5rem,4vw,6rem)] text-background">
+            <h1 className="text-[clamp(2rem,5vw,8rem)] font-bold leading-[clamp(1.5rem,4vw,6rem)] text-gray-100">
               {t("title")}
             </h1>
-            <p className="py-6 text-background">{t("hero-text")}</p>
+            <p className="py-6 text-gray-100">{t("hero-text")}</p>
             <div className="flex flex-wrap gap-2">
               <ButtonLink size="xl" href="#find-club">
                 {t("btn-visitor")}

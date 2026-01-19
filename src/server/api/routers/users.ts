@@ -20,16 +20,17 @@ import {
   updateCoachData,
 } from "@/db/dal";
 import {
+  addMemberToClubRoomInConvex,
+  createCoachRoomInConvex,
+  createNotificationInConvex,
+  getClubRoomId,
+} from "@/lib/convex/server";
+import {
   getOrCreateMember,
   addSubscriptionToMember,
   deleteMemberSubscription,
   getSubscriptionWithClub,
 } from "@/db/dal";
-import {
-  addMemberToClubRoomInConvex,
-  createCoachRoomInConvex,
-  createNotificationInConvex,
-} from "@/lib/convex/server";
 import {
   hasRole,
   isAdmin,
@@ -324,7 +325,6 @@ export const userRouter = createTRPCRouter({
           userFromId: input.userId,
           type: "NEW_SUBSCRIPTION",
           message: "",
-          createdAt: Date.now(),
           data: {
             subscriptionId: input.subscriptionId,
             monthly: input.monthly,
@@ -334,7 +334,11 @@ export const userRouter = createTRPCRouter({
       }
       const clubId = sub?.club.id;
       if (clubId) {
-        await addMemberToClubRoomInConvex(clubId, input.userId);
+        // Get the Convex room ID for this club, then add the member
+        const roomId = await getClubRoomId(clubId);
+        if (roomId) {
+          await addMemberToClubRoomInConvex(roomId, input.userId);
+        }
       }
       return true;
     }),

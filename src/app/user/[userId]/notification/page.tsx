@@ -48,8 +48,6 @@ export default async function ManageNotifications({
     page * PER_PAGE,
   );
 
-  console.log("notificationsData", notificationsData);
-
   const notificationList =
     notificationsData?.notifications.map((notification) => ({
       id: notification._id,

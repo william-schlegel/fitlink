@@ -80,8 +80,6 @@ export async function processWithLLM(
 ): Promise<LLMResponse> {
   const provider = getConfiguredProvider();
 
-  console.log(`[LLM] Using provider: ${provider}`);
-
   if (provider === "huggingface") {
     return processWithHuggingFace(messages, promptTranslations);
   }

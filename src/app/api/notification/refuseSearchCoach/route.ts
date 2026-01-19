@@ -62,7 +62,6 @@ export async function GET(request: Request) {
       type: "COACH_REFUSE",
       message: notification.message,
       linkedNotification: notification._id.toString(),
-      createdAt: Date.now(),
     });
     // update notification answered
     await updateNotificationInConvex(
