@@ -36,7 +36,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/shadcn/input-group";
-import { Badge, Button, Card, CardContent } from "@/components/ui/shadcn";
+import { Button, Card, CardContent } from "@/components/ui/shadcn";
 import { SubscriptionForm } from "@/components/modals/manageUser";
 import { Textarea } from "@/components/ui/shadcn/textarea";
 import AddressSearch from "@/components/ui/addressSearch";
@@ -45,13 +45,13 @@ import DeleteButton from "@/components/ui/deleteButton";
 import Confirmation from "@/components/ui/confirmation";
 import { Input } from "@/components/ui/shadcn/input";
 import { TThemes } from "@/components/themeSelector";
+import { cssVarToHex } from "@/lib/colorConversion";
 import { remainingDays } from "@/lib/formatDate";
 import { AppRouter } from "@/server/api/root";
 import { RoleEnum } from "@/db/schema/enums";
 import { trpc } from "@/lib/trpc/client";
 import PlanDetails from "./planDetails";
 import { ROLE_LIST } from "@/lib/data";
-import hslToHex from "@/lib/hslToHex";
 import { isCUID } from "@/lib/utils";
 import { env } from "@/env";
 
@@ -356,14 +356,14 @@ export default function FormAccount({
                     <Layer
                       type="fill"
                       paint={{
-                        "fill-color": hslToHex(theme, "--p"),
+                        "fill-color": cssVarToHex("var(--primary)"),
                         "fill-opacity": 0.2,
                       }}
                     />
                     <Layer
                       type="line"
                       paint={{
-                        "line-color": hslToHex(theme, "--p"),
+                        "line-color": cssVarToHex("var(--primary)"),
                         "line-opacity": 1,
                         "line-width": 2,
                       }}

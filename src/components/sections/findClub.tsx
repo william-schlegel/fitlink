@@ -25,10 +25,10 @@ import {
 import { Badge, Button, Field, FieldContent, FieldLabel } from "../ui/shadcn";
 import AddressSearch, { AddressData } from "../ui/addressSearch";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { cssVarToHex } from "@/lib/colorConversion";
 import { type TThemes } from "../themeSelector";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
-import hslToHex from "@/lib/hslToHex";
 import generateCircle from "./utils";
 import { env } from "@/env";
 
@@ -215,14 +215,14 @@ function FindClub({ address = "" }: FindClubProps) {
               <Layer
                 type="fill"
                 paint={{
-                  "fill-color": hslToHex(theme, "--color-primary"),
+                  "fill-color": cssVarToHex("var(--primary)"),
                   "fill-opacity": 0.2,
                 }}
               />
               <Layer
                 type="line"
                 paint={{
-                  "line-color": hslToHex(theme, "--color-primary"),
+                  "line-color": cssVarToHex("var(--primary)"),
                   "line-opacity": 1,
                   "line-width": 2,
                 }}

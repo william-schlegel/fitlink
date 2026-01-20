@@ -22,8 +22,13 @@ type UserDetails = {
 } | null;
 
 export type NotificationForMessage = CreateNotificationInConvexArgs & {
+  _id: string;
   userFrom: UserDetails;
   userTo: UserDetails;
+  createdAt: number;
+  viewedAt?: number;
+  answeredAt?: number;
+  answer?: string;
 };
 
 type NotificationMessageProps = {

@@ -35,6 +35,7 @@ import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import ThemeSelector, { TThemes } from "../themeSelector";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { Field, FieldLabel } from "../ui/shadcn/field";
+import { cssVarToHex } from "@/lib/colorConversion";
 import { Textarea } from "../ui/shadcn/textarea";
 import PageContainer from "../ui/page/container";
 import { PageButton } from "../ui/page/button";
@@ -46,7 +47,6 @@ import { OfferBadge } from "./coachOffer";
 import { trpc } from "@/lib/trpc/client";
 import { cn, isCUID } from "@/lib/utils";
 import PageText from "../ui/page/text";
-import hslToHex from "@/lib/hslToHex";
 import generateCircle from "./utils";
 import Title from "../title";
 import { env } from "@/env";
@@ -617,14 +617,14 @@ function MapSection({
               <Layer
                 type="fill"
                 paint={{
-                  "fill-color": hslToHex(theme, "--p"),
+                  "fill-color": cssVarToHex("var(--primary)"),
                   "fill-opacity": 0.2,
                 }}
               />
               <Layer
                 type="line"
                 paint={{
-                  "line-color": hslToHex(theme, "--p"),
+                  "line-color": cssVarToHex("var(--primary)"),
                   "line-opacity": 1,
                   "line-width": 2,
                 }}

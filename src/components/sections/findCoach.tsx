@@ -34,11 +34,11 @@ import {
 } from "../ui/shadcn/input-group";
 import AddressSearch, { AddressData } from "../ui/addressSearch";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { cssVarToHex } from "@/lib/colorConversion";
 import { type TThemes } from "../themeSelector";
 import { AppRouter } from "@/server/api/root";
 import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
-import hslToHex from "@/lib/hslToHex";
 import generateCircle from "./utils";
 import Rating from "../ui/rating";
 import { cn } from "@/lib/utils";
@@ -275,14 +275,14 @@ function FindCoach({
               <Layer
                 type="fill"
                 paint={{
-                  "fill-color": hslToHex(theme, "--p"),
+                  "fill-color": cssVarToHex("var(--primary)"),
                   "fill-opacity": 0.2,
                 }}
               />
               <Layer
                 type="line"
                 paint={{
-                  "line-color": hslToHex(theme, "--p"),
+                  "line-color": cssVarToHex("var(--primary)"),
                   "line-opacity": 1,
                   "line-width": 2,
                 }}
