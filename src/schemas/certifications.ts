@@ -104,12 +104,20 @@ export const createModuleDbSchema = z.object({
 // ==================== INFERRED TYPES ====================
 
 export type Certification = z.infer<typeof certificationSchema>;
-export type CreateCertificationInput = z.infer<typeof createCertificationSchema>;
-export type UpdateCertificationInput = z.infer<typeof updateCertificationSchema>;
+export type CreateCertificationInput = z.infer<
+  typeof createCertificationSchema
+>;
+export type UpdateCertificationInput = z.infer<
+  typeof updateCertificationSchema
+>;
 
 export type CertificationDb = z.infer<typeof certificationDbSchema>;
-export type CreateCertificationDbInput = z.infer<typeof createCertificationDbSchema>;
-export type UpdateCertificationDbInput = z.infer<typeof updateCertificationDbSchema>;
+export type CreateCertificationDbInput = z.infer<
+  typeof createCertificationDbSchema
+>;
+export type UpdateCertificationDbInput = z.infer<
+  typeof updateCertificationDbSchema
+>;
 
 export type Organism = z.infer<typeof organismSchema>;
 export type CreateOrganismInput = z.infer<typeof createOrganismSchema>;
@@ -119,4 +127,3 @@ export type Module = z.infer<typeof moduleSchema>;
 export type CreateModuleInput = z.infer<typeof createModuleSchema>;
 export type UpdateModuleInput = z.infer<typeof updateModuleSchema>;
 export type CreateModuleDbInput = z.infer<typeof createModuleDbSchema>;
-

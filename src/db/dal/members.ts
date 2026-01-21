@@ -13,10 +13,7 @@ export async function getMemberByUserId(userId: string) {
 }
 
 export async function createMember(userId: string) {
-  return db
-    .insert(userMember)
-    .values({ userId })
-    .returning();
+  return db.insert(userMember).values({ userId }).returning();
 }
 
 export async function getOrCreateMember(userId: string) {
@@ -62,4 +59,3 @@ export async function getSubscriptionWithClub(subscriptionId: string) {
     with: { club: true },
   });
 }
-

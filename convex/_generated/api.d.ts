@@ -8,11 +8,11 @@
  * @module
  */
 
-import type * as actions from "../actions.js";
+import type * as notifications from "../notifications.js";
+import type * as moderation from "../moderation.js";
 import type * as assistant from "../assistant.js";
 import type * as messages from "../messages.js";
-import type * as moderation from "../moderation.js";
-import type * as notifications from "../notifications.js";
+import type * as actions from "../actions.js";
 
 import type {
   ApiFromModules,

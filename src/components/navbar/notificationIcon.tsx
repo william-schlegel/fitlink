@@ -76,7 +76,6 @@ export default function NotificationIcon({ userId }: NotificationIconProps) {
           <Bell className="size-6 text-primary" />
           {unread > 0 && (
             <Badge
-              variant="secondary"
               className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
             >
               {unread}
@@ -97,8 +96,8 @@ export default function NotificationIcon({ userId }: NotificationIconProps) {
               <Link href={href}>
                 <span
                   className={cn(
-                    "line-clamp-2",
-                    !notification.viewedAt && "font-bold text-secondary",
+                    "line-clamp-2 w-full",
+                    !notification.viewedAt && "font-bold text-primary",
                   )}
                 >
                   {formatMessage(t, notification)}

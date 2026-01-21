@@ -1,6 +1,9 @@
 import { asc, eq, inArray } from "drizzle-orm";
 
-import { subscriptionModeEnum, subscriptionRestrictionEnum } from "@/db/schema/enums";
+import {
+  subscriptionModeEnum,
+  subscriptionRestrictionEnum,
+} from "@/db/schema/enums";
 import { activityGroup, club, room, site, activity } from "@/db/schema/club";
 import { subscription } from "@/db/schema/subscription";
 import { isCUID } from "@/lib/utils";
@@ -81,10 +84,7 @@ export async function deleteSubscription(id: string) {
       .where(eq(subscription.id, id))
       .returning();
   } else {
-    return db
-      .delete(subscription)
-      .where(eq(subscription.id, id))
-      .returning();
+    return db.delete(subscription).where(eq(subscription.id, id)).returning();
   }
 }
 
@@ -203,4 +203,3 @@ export async function getRoomsWithActivitiesBasic(roomIds: string[]) {
     },
   });
 }
-

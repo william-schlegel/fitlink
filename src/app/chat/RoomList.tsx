@@ -1,10 +1,8 @@
 "use client";
 
+import { Home, UserIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-
 import { useQuery } from "convex/react";
-
-import { CheckCircle, Circle, Home, UserIcon } from "lucide-react";
 
 import {
   Item,
@@ -130,12 +128,6 @@ export function RoomList({
       badgeVariant: (room.unreadCount > 0
         ? "default"
         : undefined) as BadgeVariant,
-      badgeIcon:
-        room._id === currentRoomId ? (
-          <CheckCircle className="text-green-500" />
-        ) : (
-          <Circle className="text-muted-foreground" />
-        ),
     }));
 
   if (directConversations.length === 0 && roomList.length === 0) {
@@ -150,12 +142,6 @@ export function RoomList({
     badgeVariant: (conv.unreadCount > 0
       ? "default"
       : undefined) as BadgeVariant,
-    badgeIcon:
-      conv.roomId === currentRoomId ? (
-        <CheckCircle className="text-green-500" />
-      ) : (
-        <Circle className="text-muted-foreground" />
-      ),
   }));
 
   return (

@@ -74,5 +74,6 @@ export type CreateClubInput = z.infer<typeof createClubSchema>;
 export type CreateClubDbInput = z.infer<typeof createClubDbSchema>;
 export type UpdateClubInput = z.infer<typeof updateClubSchema>;
 export type UpdateClubDbInput = z.infer<typeof updateClubDbSchema>;
-export type UpdateClubActivitiesInput = z.infer<typeof updateClubActivitiesSchema>;
-
+export type UpdateClubActivitiesInput = z.infer<
+  typeof updateClubActivitiesSchema
+>;

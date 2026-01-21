@@ -92,4 +92,3 @@ export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 export type UpdateUserDbInput = z.infer<typeof updateUserDbSchema>;
 export type GetUserByIdOptions = z.infer<typeof getUserByIdOptionsSchema>;
 export type UserPaginationInput = z.infer<typeof userPaginationSchema>;
-

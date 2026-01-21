@@ -166,7 +166,10 @@ export async function updatePage(data: {
     .where(eq(page.id, data.id));
 }
 
-export async function updatePagePublication(pageId: string, published: boolean) {
+export async function updatePagePublication(
+  pageId: string,
+  published: boolean,
+) {
   return db
     .update(page)
     .set({ published })
@@ -316,18 +319,21 @@ export async function deletePageSectionElement(id: string) {
 
 // ==================== PAGE STYLE ====================
 
-export async function updatePageStyleForCoach(userId: string, pageStyle: string) {
+export async function updatePageStyleForCoach(
+  userId: string,
+  pageStyle: string,
+) {
   return db
     .update(userCoach)
     .set({ pageStyle })
     .where(eq(userCoach.userId, userId));
 }
 
-export async function updatePageStyleForClub(clubId: string, pageStyle: string) {
-  return db
-    .update(club)
-    .set({ pageStyle })
-    .where(eq(club.id, clubId));
+export async function updatePageStyleForClub(
+  clubId: string,
+  pageStyle: string,
+) {
+  return db.update(club).set({ pageStyle }).where(eq(club.id, clubId));
 }
 
 // ==================== PAGE CREATION WITH INITIAL SECTIONS ====================
@@ -367,4 +373,3 @@ export async function createPageWithInitialSection(
     return newPage[0];
   });
 }
-

@@ -52,10 +52,7 @@ export async function createPricing(data: {
   features: (typeof featureEnum.enumValues)[number][];
 }) {
   return db.transaction(async (tx) => {
-    const [newPricing] = await tx
-      .insert(pricing)
-      .values(data.base)
-      .returning();
+    const [newPricing] = await tx.insert(pricing).values(data.base).returning();
 
     if (data.options.length > 0) {
       await tx.insert(pricingOption).values(
@@ -150,4 +147,3 @@ export async function undeletePricing(id: string) {
 export async function deletePricingOption(name: string) {
   return db.delete(pricingOption).where(eq(pricingOption.name, name));
 }
-

@@ -87,4 +87,3 @@ export async function getCoachDataForUserId(userId: string) {
     },
   });
 }
-

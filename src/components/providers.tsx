@@ -22,4 +22,3 @@ export function ErrorProviders({ children }: ProvidersProps) {
 }
 
 export default ErrorProviders;
-

@@ -1,4 +1,5 @@
 import { ConvexReactClient } from "convex/react";
+
 import { env } from "@/env";
 
 const convexUrl =
@@ -11,4 +12,3 @@ if (!convexUrl) {
 }
 
 export const convex = new ConvexReactClient(convexUrl);
-

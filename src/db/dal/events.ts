@@ -69,4 +69,3 @@ export async function updateEvent(data: {
 export async function deleteEvent(id: string) {
   return db.delete(event).where(eq(event.id, id));
 }
-

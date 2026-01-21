@@ -9,11 +9,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
 import { Button } from "@/components/ui/shadcn/button";
+import { cn } from "@/lib/utils";
+
 import type {
   ButtonSize as ShadcnButtonSize,
   ButtonVariant as ShadcnButtonVariant,
 } from "@/components/ui/shadcn/button";
-import { cn } from "@/lib/utils";
 
 type ButtonIconVariant = "default" | "outlines";
 type ButtonIconSize = "default" | "sm" | "lg" | "xl" | "icon";
@@ -43,7 +44,7 @@ function ButtonIcon({
     ? size && size !== "icon"
       ? size
       : "default"
-    : size ?? "icon";
+    : (size ?? "icon");
 
   if (fullButton) {
     return (

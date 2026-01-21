@@ -2,17 +2,6 @@ import { InferSelectModel } from "drizzle-orm";
 import z from "zod";
 
 import {
-  pageSectionElementTypeEnum,
-  pageSectionModelEnum,
-  pageTargetEnum,
-} from "@/db/schema/enums";
-import { pageSectionElement } from "@/db/schema/page";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/lib/trpc/server";
-import {
   getPageById,
   getPagesForClub,
   getPagesForManager,
@@ -41,6 +30,17 @@ import {
   updatePageStyleForClub,
   createPageWithInitialSection,
 } from "@/db/dal";
+import {
+  pageSectionElementTypeEnum,
+  pageSectionModelEnum,
+  pageTargetEnum,
+} from "@/db/schema/enums";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/lib/trpc/server";
+import { pageSectionElement } from "@/db/schema/page";
 
 const PageObject = z.object({
   id: z.cuid2(),

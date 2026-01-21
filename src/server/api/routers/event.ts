@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 import {
   getEventById,
   getEventsForClub,
@@ -8,6 +7,7 @@ import {
   updateEvent,
   deleteEvent,
 } from "@/db/dal";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 
 const eventObject = z.object({
   id: z.cuid2(),
@@ -31,12 +31,10 @@ const eventObject = z.object({
 });
 
 export const eventRouter = createTRPCRouter({
-  getEventById: protectedProcedure
-    .input(z.cuid2())
-    .query(async ({ input }) => {
-      const eventData = await getEventById(input);
-      return eventData ?? null;
-    }),
+  getEventById: protectedProcedure.input(z.cuid2()).query(async ({ input }) => {
+    const eventData = await getEventById(input);
+    return eventData ?? null;
+  }),
 
   getEventsForClub: protectedProcedure
     .input(z.cuid2())

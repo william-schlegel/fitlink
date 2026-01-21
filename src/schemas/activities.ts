@@ -67,8 +67,11 @@ export type CreateActivityInput = z.infer<typeof createActivitySchema>;
 export type UpdateActivityInput = z.infer<typeof updateActivitySchema>;
 
 export type ActivityGroup = z.infer<typeof activityGroupSchema>;
-export type CreateActivityGroupInput = z.infer<typeof createActivityGroupSchema>;
-export type UpdateActivityGroupInput = z.infer<typeof updateActivityGroupSchema>;
+export type CreateActivityGroupInput = z.infer<
+  typeof createActivityGroupSchema
+>;
+export type UpdateActivityGroupInput = z.infer<
+  typeof updateActivityGroupSchema
+>;
 
 export type RoomActivityInput = z.infer<typeof roomActivitySchema>;
-

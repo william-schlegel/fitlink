@@ -59,8 +59,7 @@ export default defineSchema({
     bannedBy: v.string(),
     reason: v.optional(v.string()),
     bannedAt: v.number(),
-  })
-    .index("by_userId", ["userId"]),
+  }).index("by_userId", ["userId"]),
 
   notifications: defineTable({
     userId: v.string(), // recipient user ID
@@ -99,4 +98,3 @@ export default defineSchema({
     .index("by_sessionId", ["sessionId"])
     .index("by_sessionId_createdAt", ["sessionId", "createdAt"]),
 });
-

@@ -46,7 +46,6 @@ export async function GET(request: Request) {
       { status: 500 },
     );
   }
-
   if (!session) {
     return NextResponse.json<ResponseData>(
       { error: t("api.error-with", { error: "unauthorized" }) },

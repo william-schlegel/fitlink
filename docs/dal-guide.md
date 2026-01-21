@@ -507,16 +507,16 @@ import {
   roomActivitySchema,
 } from "@/schemas/activities";
 import {
+  requireAdmin,
+  requireAdminOrSelf,
+  requireAdminOrOwner,
+} from "@/server/lib/userTools";
+import {
   getActivityById,
   createActivity,
   updateActivity,
   deleteActivity,
 } from "@/db/dal";
-import {
-  requireAdmin,
-  requireAdminOrSelf,
-  requireAdminOrOwner,
-} from "@/server/lib/userTools";
 import {
   createTRPCRouter,
   protectedProcedure,

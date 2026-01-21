@@ -19,7 +19,7 @@ const isUndefined = (val: unknown): val is undefined => val === undefined;
 export const fieldGet = <T>(
   obj: T,
   path: string,
-  defaultValue?: unknown
+  defaultValue?: unknown,
 ): unknown => {
   if (!path || !isObject(obj)) {
     return defaultValue;
@@ -28,7 +28,7 @@ export const fieldGet = <T>(
   const result = compact(path.split(/[,[\].]+?/)).reduce(
     (result, key) =>
       isNullOrUndefined(result) ? result : result[key as keyof object],
-    obj
+    obj,
   );
 
   return isUndefined(result) || result === obj
@@ -54,8 +54,8 @@ export function fieldSet(object: FieldValues, path: string, value?: unknown) {
         isObject(objValue) || Array.isArray(objValue)
           ? objValue
           : !isNaN(Number(tempPath[index + 1]))
-          ? []
-          : {};
+            ? []
+            : {};
     }
     object[key] = newValue;
     object = object[key];

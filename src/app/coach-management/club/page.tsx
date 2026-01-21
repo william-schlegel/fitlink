@@ -6,12 +6,12 @@ import {
   AddCoachToClub,
   CoachDataPresentation,
 } from "@/components/modals/manageClub";
-import SelectClub from "../../../components/selectClub";
 import {
   LayoutPage,
   LayoutPageMain,
   LayoutPageList,
 } from "@/components/layoutPage";
+import SelectClub from "../../../components/selectClub";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { AppRouter } from "@/server/api/root";

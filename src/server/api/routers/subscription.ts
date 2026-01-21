@@ -2,16 +2,6 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/lib/trpc/server";
-import {
-  subscriptionModeEnum,
-  subscriptionRestrictionEnum,
-} from "@/db/schema/enums";
-import { activityGroup } from "@/db/schema/club";
-import {
   getSubscriptionById as dalGetSubscriptionById,
   getSubscriptionsForClub as dalGetSubscriptionsForClub,
   createSubscription as dalCreateSubscription,
@@ -25,6 +15,16 @@ import {
   getSitesWithRoomActivitiesBasic,
   getRoomsWithActivitiesBasic,
 } from "@/db/dal";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/lib/trpc/server";
+import {
+  subscriptionModeEnum,
+  subscriptionRestrictionEnum,
+} from "@/db/schema/enums";
+import { activityGroup } from "@/db/schema/club";
 
 const subscriptionObject = z.object({
   id: z.cuid2(),

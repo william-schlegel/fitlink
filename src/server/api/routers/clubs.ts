@@ -1,16 +1,6 @@
 import z from "zod";
 
 import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/lib/trpc/server";
-import { createClubRoomInConvex } from "@/lib/convex/server";
-import {
-  requireAdminOrSelf,
-  requireAdminOrOwner,
-} from "@/server/lib/userTools";
-import {
   getClubById as dalGetClubById,
   getClubPagesForNav,
   getClubsForManager,
@@ -27,6 +17,16 @@ import {
   addCoachToClub,
   getUserWithPricingFeatures,
 } from "@/db/dal";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/lib/trpc/server";
+import {
+  requireAdminOrSelf,
+  requireAdminOrOwner,
+} from "@/server/lib/userTools";
+import { createClubRoomInConvex } from "@/lib/convex/server";
 
 export const clubRouter = createTRPCRouter({
   getClubById: protectedProcedure
@@ -197,9 +197,8 @@ export const clubRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const initialClub = await getClubForUpdate(input.clubId);
-      const managerId = input.managerId ?? initialClub?.managerId;
-      requireAdminOrOwner(ctx.user, managerId);
+      const coachId = input.coachUserId;
+      requireAdminOrOwner(ctx.user, coachId);
 
       const existing = await getClubCoachRelation(
         input.clubId,

@@ -3,8 +3,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
 
-import { AppError, isAppError } from "@/lib/errors";
-import { logger } from "@/lib/errors/logger";
 import {
   Card,
   CardContent,
@@ -13,6 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/shadcn/card";
 import { Button } from "@/components/ui/shadcn/button";
+import { AppError, isAppError } from "@/lib/errors";
+import { logger } from "@/lib/errors/logger";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -114,10 +114,7 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
         </CardContent>
         <CardFooter className="justify-center gap-2">
           <Button onClick={onReset}>Try Again</Button>
-          <Button
-            variant="ghost"
-            onClick={() => (window.location.href = "/")}
-          >
+          <Button variant="ghost" onClick={() => (window.location.href = "/")}>
             Go Home
           </Button>
         </CardFooter>

@@ -2,13 +2,13 @@ import { getTranslations } from "next-intl/server";
 
 import { redirect, RedirectType } from "next/navigation";
 
-import CreateClub from "@/components/modals/manageClub";
-import LockedButton from "@/components/ui/lockedButton";
 import {
   LayoutPage,
   LayoutPageMain,
   LayoutPageList,
 } from "@/components/layoutPage";
+import CreateClub from "@/components/modals/manageClub";
+import LockedButton from "@/components/ui/lockedButton";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import { ClubContent } from "./clubContent";

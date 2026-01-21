@@ -175,7 +175,7 @@ export function PlanningContent({
   return (
     <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
+        <DialogContent size="sm">
           <DialogTitle>{t("add-activity")}</DialogTitle>
           <FormActivity
             clubId={clubId}
@@ -241,9 +241,8 @@ export function PlanningContent({
                     <div
                       className="grid gap-px"
                       style={{
-                        gridTemplateColumns: `repeat(${
-                          queryClub.data?.sites?.length ?? 1
-                        }, minmax(0, 1fr)`,
+                        gridTemplateColumns: `repeat(${queryClub.data?.sites?.length ?? 1
+                          }, minmax(0, 1fr)`,
                       }}
                     >
                       {queryClub.data?.sites?.map((site) => (

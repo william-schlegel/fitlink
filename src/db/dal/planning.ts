@@ -401,4 +401,3 @@ export async function createActivityReservation(data: {
 export async function deleteReservation(id: string) {
   return db.delete(reservation).where(eq(reservation.id, id));
 }
-

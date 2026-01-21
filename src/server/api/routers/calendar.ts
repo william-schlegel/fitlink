@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
-import { dayNameEnum } from "@/db/schema/enums";
 import {
   getCalendarById,
   getCalendarForClub,
@@ -9,6 +7,8 @@ import {
   getCalendarForRoom,
   createCalendar,
 } from "@/db/dal";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
+import { dayNameEnum } from "@/db/schema/enums";
 
 const CalendarData = {
   startDate: z.date().default(new Date()),

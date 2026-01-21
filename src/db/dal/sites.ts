@@ -4,13 +4,14 @@ import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { calculateBBox } from "@/lib/distance";
 import { room, site } from "@/db/schema/club";
 import { user } from "@/db/schema/auth";
+import { db } from "@/db";
+
 import type {
   CreateSiteInput,
   UpdateSiteInput,
   CreateRoomInput,
   UpdateRoomInput,
 } from "@/schemas/sites";
-import { db } from "@/db";
 
 // ==================== SITE QUERIES ====================
 
@@ -125,4 +126,3 @@ export async function getUserWithPricingForSites(userId: string) {
     },
   });
 }
-

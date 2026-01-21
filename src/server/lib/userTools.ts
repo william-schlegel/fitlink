@@ -77,6 +77,7 @@ export function requireAdminOrOwner(
   user: UserContext,
   ownerId: string | undefined | null,
 ) {
+  console.log("user", user);
   if (user.internalRole !== "ADMIN" && user.id !== ownerId) {
     throw new TRPCError({
       code: "UNAUTHORIZED",

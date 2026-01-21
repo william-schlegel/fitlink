@@ -8,6 +8,8 @@ import { useState } from "react";
 
 import { ChevronDown, Search } from "lucide-react";
 
+import { Select } from "@radix-ui/react-select";
+
 import {
   Badge,
   Button,
@@ -20,7 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/shadcn";
 import SimpleForm from "@/components/ui/simpleform";
-import { Select } from "@radix-ui/react-select";
 import { RoleEnum } from "@/db/schema/enums";
 import { ROLE_LIST } from "@/lib/data";
 import { cn } from "@/lib/utils";

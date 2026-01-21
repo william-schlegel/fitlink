@@ -100,7 +100,10 @@ export type CoachOffer = z.infer<typeof coachOfferSchema>;
 export type CreateCoachOfferInput = z.infer<typeof createCoachOfferSchema>;
 export type UpdateCoachOfferInput = z.infer<typeof updateCoachOfferSchema>;
 
-export type CoachDistanceSearchInput = z.infer<typeof coachDistanceSearchSchema>;
-export type CompanyOffersSearchInput = z.infer<typeof companyOffersSearchSchema>;
+export type CoachDistanceSearchInput = z.infer<
+  typeof coachDistanceSearchSchema
+>;
+export type CompanyOffersSearchInput = z.infer<
+  typeof companyOffersSearchSchema
+>;
 export type UpdateCoachDataInput = z.infer<typeof updateCoachDataSchema>;
-

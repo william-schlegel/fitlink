@@ -35,10 +35,7 @@ function Ribbon({ text, offset, bgColor, textColor }: Props) {
   };
 
   return (
-    <div
-      className={cn("absolute text-sm font-medium", bgClass)}
-      style={style}
-    >
+    <div className={cn("absolute text-sm font-medium", bgClass)} style={style}>
       {Array.isArray(text) ? text.map((p, i) => <p key={i}>{p}</p>) : text}
     </div>
   );

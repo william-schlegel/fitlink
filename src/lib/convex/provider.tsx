@@ -1,6 +1,7 @@
 "use client";
 
 import { ConvexProvider } from "convex/react";
+
 import { convex } from "./client";
 
 export function ConvexClientProvider({
@@ -10,4 +11,3 @@ export function ConvexClientProvider({
 }) {
   return <ConvexProvider client={convex}>{children}</ConvexProvider>;
 }
-

@@ -133,10 +133,7 @@ export async function updateClubConvexRoomId(
   clubId: string,
   convexRoomId: string,
 ) {
-  return db
-    .update(club)
-    .set({ convexRoomId })
-    .where(eq(club.id, clubId));
+  return db.update(club).set({ convexRoomId }).where(eq(club.id, clubId));
 }
 
 export async function updateClubCalendar(clubId: string, calendarId: string) {
@@ -169,7 +166,10 @@ export async function updateClubActivities(
 
 // ==================== CLUB COACHES ====================
 
-export async function getClubCoachRelation(clubId: string, coachUserId: string) {
+export async function getClubCoachRelation(
+  clubId: string,
+  coachUserId: string,
+) {
   return db.query.clubCoachs.findFirst({
     where: and(
       eq(clubCoachs.clubId, clubId),
@@ -202,4 +202,3 @@ export async function getUserWithPricingFeatures(userId: string) {
     },
   });
 }
-
