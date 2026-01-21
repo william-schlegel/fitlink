@@ -1,8 +1,22 @@
 const config = {
-  // For prettier 3
-  // sortingMethod: "lineLength",
-  // importTypeOrder: ["NPMPackages", "localImportsValue", "localImportsType"],
-  // newlineBetweenTypes: true,
+  arrowParens: "always",
+  bracketSpacing: true,
+  endOfLine: "lf",
+  htmlWhitespaceSensitivity: "css",
+  singleAttributePerLine: false,
+  bracketSameLine: false,
+  jsxBracketSameLine: false,
+  jsxSingleQuote: false,
+  printWidth: 80,
+  proseWrap: "preserve",
+  quoteProps: "as-needed",
+  semi: true,
+  singleQuote: false,
+  tabWidth: 2,
+  trailingComma: "all",
+  useTabs: false,
+  embeddedLanguageFormatting: "auto",
+  experimentalTernaries: false,
   plugins: ["prettier-plugin-organize-imports"],
 };
 

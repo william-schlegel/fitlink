@@ -28,7 +28,6 @@ import {
   CardHeader,
   CardTitle,
   Input,
-  Separator,
 } from "@/components/ui/shadcn";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
@@ -97,83 +96,91 @@ export default function CoachPage() {
     <div>
       <section className="bg-background">
         <div className="container mx-auto">
-          <h1>{t("home.company-title")}</h1>
-          <p className="py-6 text-lg">{t("home.company-text")}</p>
-          <Card className="mx-auto w-fit p-4">
-            <form onSubmit={handleSubmit(onValid)}>
-              <div className="mb-2 flex justify-around">
-                <CollapsableGroup
-                  groupName={`${t("home.price-range")} (${formatMoney(
-                    fields.priceMax,
-                  )})`}
-                  className="w-fit"
-                >
-                  <Input
-                    type="range"
-                    min="0"
-                    max="5000"
-                    {...register("priceMax", { valueAsNumber: true })}
-                    className="range range-primary flex-1"
-                  />
-                </CollapsableGroup>
-                <CollapsableGroup
-                  groupName={`${t(
-                    "home.distance-range",
-                  )} (${fields.range?.toFixed(0)}km)`}
-                  className="w-fit"
-                >
-                  <Input
-                    type="range"
-                    min="0"
-                    max="100"
-                    {...register("range", { valueAsNumber: true })}
-                    className="range range-primary flex-1"
-                  />
-                </CollapsableGroup>
-              </div>
-              <div className="flex flex-wrap items-center gap-4">
-                <Controller
-                  control={control}
-                  name="activity"
-                  render={({ field }) => (
-                    <ActivitySearch
-                      initialActivity={field.value}
-                      onSearch={(activity) => {
-                        field.onChange(activity.name);
-                        offerQuery.refetch();
-                      }}
-                      onActivityChange={(value) => field.onChange(value)}
-                      className="w-[clamp(24rem,25vw,100%)]"
-                      required
-                      error={errors.activity ? t("common.enter-activity") : ""}
+          <h1 className="text-center">{t("home.company-title")}</h1>
+          <p className="py-6 text-lg text-center">{t("home.company-text")}</p>
+          <form onSubmit={handleSubmit(onValid)}>
+            <Card className="mx-auto w-fit p-4">
+              <CardHeader>
+                <CardTitle>{t("home.company-search")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-2 flex justify-around">
+                  <CollapsableGroup
+                    groupName={`${t("home.price-range")} (${formatMoney(
+                      fields.priceMax,
+                    )})`}
+                    className="w-fit"
+                  >
+                    <Input
+                      type="range"
+                      min="0"
+                      max="5000"
+                      {...register("priceMax", { valueAsNumber: true })}
+                      className="range range-primary flex-1"
                     />
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="location"
-                  render={({ field }) => (
-                    <AddressSearch
-                      onSearch={(adr) => {
-                        field.onChange(adr.address);
-                        offerQuery.refetch();
-                      }}
-                      className="w-[clamp(24rem,25vw,100%)]"
-                      required
-                      error={errors.location ? t("common.enter-location") : ""}
+                  </CollapsableGroup>
+                  <CollapsableGroup
+                    groupName={`${t(
+                      "home.distance-range",
+                    )} (${fields.range?.toFixed(0)}km)`}
+                    className="w-fit"
+                  >
+                    <Input
+                      type="range"
+                      min="0"
+                      max="100"
+                      {...register("range", { valueAsNumber: true })}
+                      className="range range-primary flex-1"
                     />
-                  )}
-                />
-              </div>
-              <Separator className="my-4" />
-              <CardAction className="text-center">
+                  </CollapsableGroup>
+                </div>
+                <div className="flex flex-wrap items-center gap-4">
+                  <Controller
+                    control={control}
+                    name="activity"
+                    render={({ field }) => (
+                      <ActivitySearch
+                        initialActivity={field.value}
+                        onSearch={(activity) => {
+                          field.onChange(activity.name);
+                          offerQuery.refetch();
+                        }}
+                        onActivityChange={(value) => field.onChange(value)}
+                        className="w-[clamp(24rem,25vw,100%)]"
+                        required
+                        error={
+                          errors.activity ? t("common.enter-activity") : ""
+                        }
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="location"
+                    render={({ field }) => (
+                      <AddressSearch
+                        onSearch={(adr) => {
+                          field.onChange(adr.address);
+                          offerQuery.refetch();
+                        }}
+                        className="w-[clamp(24rem,25vw,100%)]"
+                        required
+                        error={
+                          errors.location ? t("common.enter-location") : ""
+                        }
+                      />
+                    )}
+                  />
+                </div>
+              </CardContent>
+              <CardAction className="flex justify-center w-full pt-4 border-t border-border">
                 <Button type="submit">
                   {t("home.search-coach")}
                   <Search />
                 </Button>
               </CardAction>
-            </form>
-          </Card>
+            </Card>
+          </form>
           <div className="flex flex-wrap gap-8 py-12">
             {data?.map((offer) => (
               <OfferCard
@@ -242,9 +249,9 @@ function OfferCard({ id }: { id: string }) {
       <Image
         src={offer.data?.imageUrl ?? "/images/dummy.jpg"}
         alt={offer.data?.coach?.user.name ?? ""}
-        width={400}
-        height={200}
-        className="object-cover object-center"
+        width={300}
+        height={300}
+        className="object-cover object-top aspect-square w-full"
       />
       <CardHeader>
         <CardTitle>{offer.data?.coach?.publicName}</CardTitle>

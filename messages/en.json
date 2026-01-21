@@ -615,7 +615,7 @@
     "enter-location": "Enter an address or city, or click on the pin to determine your location",
     "tag-line": "Sport club management",
     "social": "Social",
-    "language": "Language",
+    "language": "Change language",
     "roles": {
       "MEMBER": "Member",
       "COACH": "Coach",
@@ -671,7 +671,9 @@
       "subscription-rejected": "The subscription has been refused",
       "new-message": "New message"
     },
-    "footer-title": "Fitlink, the platform that connects all players in sport."
+    "footer-title": "Fitlink, the platform that connects all players in sport.",
+    "language-french": "Passer au Français",
+    "language-english": "Passer à l'Anglais"
   },
   "dashboard": {
     "clubs": "{count, plural, =1 {Club} other {Clubs}}",
@@ -746,8 +748,8 @@
     "manager-text": "Fitlink helps sports clubs to centralize their management and communicate better with their members. Less administration, more time for the animation and development of your club.",
     "coach-title": "Develop your coaching business",
     "coach-text": "Whether you are an independent coach or working in several clubs, Fitlink allows you to manage your clients, your sessions and your visibility from a single platform.",
-    "company-title": "You are a company and are looking for a coach for your employees",
-    "company-text": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus culpa incidunt perferendis possimus recusandae deleniti ab neque soluta! At, nam excepturi possimus odit ipsam accusamus esse obcaecati vero id reiciendis.",
+    "company-title": "Are you a company and would you like to offer sports or well-being activities to your employees?",
+    "company-text": "Fitlink helps you quickly find qualified coaches offering offers adapted to the professional world.",
     "my-address": "My address",
     "search-radius": "Search radius",
     "search-club": "Search clubs",
@@ -817,7 +819,8 @@
     },
     "find-club-text": "Easily search for sports clubs around you, discover their activities, schedules and news, then manage your practice from a single application.",
     "hero-intro-1": "Whether you are an athlete, club manager or independent coach, Fitlink supports you on a daily basis.",
-    "hero-intro-2": "Our platform centralizes the essential tools to save time, communicate better and concentrate on what matters: sport."
+    "hero-intro-2": "Our platform centralizes the essential tools to save time, communicate better and concentrate on what matters: sport.",
+    "company-search": "Indicate a location and a search radius, then discover the offers offered by professional coaches around your business."
   },
   "pages": {
     "club": {

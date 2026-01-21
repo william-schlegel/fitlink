@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/shadcn";
 import { Alert } from "@/components/ui/shadcn/alert";
 import { getActualUser } from "@/lib/auth/server";
 import { getPricingForRole } from "@/server/api/routers/pricing";
+import Image from "next/image";
 
 /**
  *
@@ -23,11 +24,14 @@ export default async function ManagerPage() {
 
   return (
     <div>
-      <section className="hero bg-primary/10">
-        <div className="hero-content py-48 text-center">
-          <div className="max-w-md">
-            <h1 className="text-5xl font-bold">{t("manager-title")}</h1>
-            <p className="py-6 text-lg">{t("manager-text")}</p>
+      <section >
+        <div className="py-36 grid place-content-center">
+          <div className="space-y-8">
+            <h1 className="text-5xl font-bold text-center">{t("manager-title")}</h1>
+            <div className="flex flex-col md:flex-row items-center gap-8 w-4/5 mx-auto max-w-3xl">
+              <Image src="/images/manager-f.jpeg" alt="Manager" width={300} height={300} className="rounded-lg shadow-2xl" />
+              <p className="py-6 text-2xl">{t("manager-text")}</p>
+            </div>
           </div>
         </div>
       </section>

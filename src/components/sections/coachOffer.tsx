@@ -9,6 +9,7 @@ import {
   Gift,
   Home,
   Landmark,
+  Mail,
   MapPin,
   Rocket,
   User,
@@ -141,7 +142,7 @@ export function CoachOfferPage({
         <Image
           width={400}
           height={400}
-          className="w-max-64 w-full object-cover object-center"
+          className="w-max-64 w-full object-cover object-top aspect-square"
           src={offerQuery.data.imageUrl}
           alt={offerQuery.data.coach?.publicName ?? ""}
         />
@@ -198,9 +199,13 @@ export function CoachOfferPage({
                     fromUserId={userId}
                   />
                 ) : offerQuery.data.coach?.user.email ? (
-                  <Button className="block col-span-2 mt-8" asChild>
-                    <Link href={`mailto:${offerQuery.data.coach.user.email}`}>
-                      {t("offer.contact-me")}
+                  <Button asChild>
+                    <Link
+                      className="block col-span-2 w-full"
+                      href={`mailto:${offerQuery.data.coach.user.email}`}
+                    >
+                      <Mail />
+                      <span>{t("offer.contact-me")}</span>
                     </Link>
                   </Button>
                 ) : null}

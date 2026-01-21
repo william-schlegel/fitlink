@@ -14,7 +14,6 @@ export default async function FitlinkPage() {
   return (
     <>
       <Title title={t("title")} />
-      {/* <section className="bg-gradient-home-hero hero min-h-screen"> */}
       <section className="relative min-h-screen">
         <AnimatedGradient
           color1="#4f46e5"

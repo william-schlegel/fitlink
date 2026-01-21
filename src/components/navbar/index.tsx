@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/shadcn/button";
 import { RoleEnum } from "@/db/schema/enums";
 import { env } from "@/env";
 import { createTrpcCaller } from "@/lib/trpc/caller";
+import LanguageButton from "./languageButton";
 import Menu from "./menu";
 import NotificationIcon from "./notificationIcon";
 import ThemeButton from "./themeButton";
@@ -44,6 +45,7 @@ export default async function Navbar({
 
       <div className="flex items-center gap-2">
         <ThemeButton />
+        <LanguageButton />
         {userId ? (
           <>
             <NotificationIcon userId={userId} />
@@ -51,7 +53,7 @@ export default async function Navbar({
             <UserButton />
           </>
         ) : (
-          <Button asChild variant="ghost">
+          <Button asChild size="lg" className="cursor-pointer">
             <Link href="/user/signin">{t("auth.signin.connect")}</Link>
           </Button>
         )}

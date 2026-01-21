@@ -9,6 +9,7 @@ import { Alert } from "@/components/ui/shadcn/alert";
 import { getActualUser } from "@/lib/auth/server";
 import { getPricingForRole } from "@/server/api/routers/pricing";
 import { SigninOrAccount } from "../manager/page";
+import Image from "next/image";
 
 export default async function CoachPage() {
   const pricingQuery = await getPricingForRole("COACH");
@@ -18,14 +19,19 @@ export default async function CoachPage() {
   return (
     <div>
       <Title title={t("coach-title")} />
-      <section className="hero bg-primary/10">
-        <div className="hero-content py-48 text-center">
-          <div className="max-w-md">
-            <h1 className="text-5xl font-bold">{t("coach-title")}</h1>
-            <p className="py-6 text-lg">{t("coach-text")}</p>
+      <section >
+        <div className="py-36 grid place-content-center">
+          <div className="space-y-8">
+            <h1 className="text-5xl font-bold text-center">{t("coach-title")}</h1>
+            <div className="flex flex-col md:flex-row items-center gap-8 w-4/5 mx-auto max-w-3xl">
+              <Image src="/images/coach.jpeg" alt="Coach" width={300} height={300} className="rounded-lg shadow-2xl" />
+              <p className="py-6 text-2xl">{t("coach-text")}</p>
+            </div>
           </div>
         </div>
       </section>
+
+
       <section className="bg-card">
         <div className="container mx-auto">
           <h2 className="pt-12">{t("features.coach")}</h2>
