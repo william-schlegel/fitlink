@@ -3,8 +3,8 @@
 import { useLocale, useTranslations } from "next-intl";
 import { startTransition } from "react";
 
-import { setUserLocale } from "@/lib/locale";
 import { Locale, locales } from "@/i18n";
+import { setUserLocale } from "@/lib/locale";
 
 export default function LanguageSwitcher() {
   const t = useTranslations("common");

@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 import {
+  createEvent,
+  deleteEvent,
   getEventById,
   getEventsForClub,
-  createEvent,
   updateEvent,
-  deleteEvent,
 } from "@/db/dal";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 

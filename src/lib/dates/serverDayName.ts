@@ -1,5 +1,5 @@
-import { getTranslations } from "next-intl/server";
 import { getDay, startOfToday } from "date-fns";
+import { getTranslations } from "next-intl/server";
 
 import { DayName, DAYS } from "./data";
 

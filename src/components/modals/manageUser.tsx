@@ -1,20 +1,30 @@
 "use client";
 
-import {
-  SubmitHandler,
-  useForm,
-  SubmitErrorHandler,
-  FormProvider,
-  useFormContext,
-  Controller,
-} from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import {
+  Controller,
+  FormProvider,
+  SubmitErrorHandler,
+  SubmitHandler,
+  useForm,
+  useFormContext,
+} from "react-hook-form";
 
 import { Pencil, Trash } from "lucide-react";
 
 import { toast } from "sonner";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
+import { RoleEnum } from "@/db/schema/enums";
+import { ROLE_LIST } from "@/lib/data";
+import { trpc } from "@/lib/trpc/client";
+import Confirmation from "../ui/confirmation";
+import Modal from "../ui/modal";
+import {
+  PricingComponent as PricingCard,
+  PricingContainer,
+} from "../ui/pricing";
 import {
   Select,
   SelectContent,
@@ -22,17 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/shadcn";
-import {
-  PricingComponent as PricingCard,
-  PricingContainer,
-} from "../ui/pricing";
-import { Spinner } from "@/components/ui/shadcn/spinner";
-import Confirmation from "../ui/confirmation";
-import { RoleEnum } from "@/db/schema/enums";
 import SimpleForm from "../ui/simpleform";
-import { trpc } from "@/lib/trpc/client";
-import { ROLE_LIST } from "@/lib/data";
-import Modal from "../ui/modal";
 
 import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
 

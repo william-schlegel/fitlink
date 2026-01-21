@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 
+import { pageTargetEnum } from "@/db/schema/enums";
 import {
   getDefaultSection,
   PAGE_SECTION_LIST,
@@ -9,7 +10,6 @@ import {
   PageTarget,
   TARGET_SECTIONS,
 } from "./data";
-import { pageTargetEnum } from "@/db/schema/enums";
 
 export function usePageSection() {
   const t = useTranslations("pages");

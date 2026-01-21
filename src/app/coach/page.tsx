@@ -1,16 +1,14 @@
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
 import { Bell, UserCheck, Video } from "lucide-react";
 
+import Title from "@/components/title";
 import { Feature, FeatureContainer } from "@/components/ui/features";
-import { getPricingForRole } from "@/server/api/routers/pricing";
-import { PricingContainer } from "@/components/ui/pricing";
-import { PricingComponent } from "@/components/ui/pricing";
+import { PricingComponent, PricingContainer } from "@/components/ui/pricing";
 import { Alert } from "@/components/ui/shadcn/alert";
 import { getActualUser } from "@/lib/auth/server";
+import { getPricingForRole } from "@/server/api/routers/pricing";
 import { SigninOrAccount } from "../manager/page";
-import Title from "@/components/title";
 
 export default async function CoachPage() {
   const pricingQuery = await getPricingForRole("COACH");

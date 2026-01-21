@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 
 import Link from "next/link";
 
-import type { ComponentType, SVGProps } from "react";
 import type { LucideIcon } from "lucide-react";
+import type { ComponentType, SVGProps } from "react";
 
 type CardProps = {
   title: string;

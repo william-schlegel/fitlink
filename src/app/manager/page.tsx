@@ -3,12 +3,12 @@ import Link from "next/link";
 
 import { Bell, Building, Presentation, Smartphone } from "lucide-react";
 
-import { PricingComponent, PricingContainer } from "@/components/ui/pricing";
 import { Feature, FeatureContainer } from "@/components/ui/features";
-import { getPricingForRole } from "@/server/api/routers/pricing";
+import { PricingComponent, PricingContainer } from "@/components/ui/pricing";
+import { Button } from "@/components/ui/shadcn";
 import { Alert } from "@/components/ui/shadcn/alert";
 import { getActualUser } from "@/lib/auth/server";
-import { Button } from "@/components/ui/shadcn";
+import { getPricingForRole } from "@/server/api/routers/pricing";
 
 /**
  *

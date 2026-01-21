@@ -2,9 +2,9 @@ import { asc, eq, gte } from "drizzle-orm";
 
 import { startOfToday } from "date-fns";
 
-import { club, event } from "@/db/schema/club";
-import { user } from "@/db/schema/auth";
 import { db } from "@/db";
+import { user } from "@/db/schema/auth";
+import { club, event } from "@/db/schema/club";
 
 // ==================== ADMIN DASHBOARD ====================
 

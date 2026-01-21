@@ -2,12 +2,7 @@ import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/shadcn";
+import { Card, CardFooter } from "@/components/ui/shadcn";
 
 export default async function SelectCoachManager({
   hrefCoach,

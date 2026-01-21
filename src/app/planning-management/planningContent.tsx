@@ -10,27 +10,35 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
+import { ReactNode, useEffect, useMemo, useState } from "react";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 
-import { Trash, X } from "lucide-react";
+import { Trash } from "lucide-react";
 
 import { toast } from "sonner";
 
 import {
+  DeletePlanning,
+  UpdatePlanning,
+} from "@/components/modals/managePlanning";
+import { PlanningName } from "@/components/planningName";
+import Confirmation from "@/components/ui/confirmation";
+import {
+  Badge,
   Button,
   Dialog,
-  DialogTitle,
   DialogContent,
+  DialogTitle,
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
   Separator,
-  Badge,
 } from "@/components/ui/shadcn";
+import { Field, FieldError, FieldLabel } from "@/components/ui/shadcn/field";
+import { Input } from "@/components/ui/shadcn/input";
 import {
   InputGroup,
   InputGroupAddon,
@@ -41,22 +49,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/shadcn/popover";
-import {
-  DeletePlanning,
-  UpdatePlanning,
-} from "@/components/modals/managePlanning";
-import { Field, FieldError, FieldLabel } from "@/components/ui/shadcn/field";
-import { getPlanningById } from "@/server/api/routers/planning";
 import { Spinner } from "@/components/ui/shadcn/spinner";
-import { PlanningName } from "@/components/planningName";
-import Confirmation from "@/components/ui/confirmation";
-import { Input } from "@/components/ui/shadcn/input";
-import { useDayName } from "@/lib/dates/useDayName";
-import { DayName, DAYS } from "@/lib/dates/data";
-import { CSS } from "@dnd-kit/utilities";
-import { trpc } from "@/lib/trpc/client";
 import { room } from "@/db/schema/club";
+import { DayName, DAYS } from "@/lib/dates/data";
+import { useDayName } from "@/lib/dates/useDayName";
+import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
+import { getPlanningById } from "@/server/api/routers/planning";
+import { CSS } from "@dnd-kit/utilities";
 
 const HHOUR = "h-12"; // 3rem 48px
 const HHOUR_PX = 48;
@@ -241,8 +241,9 @@ export function PlanningContent({
                     <div
                       className="grid gap-px"
                       style={{
-                        gridTemplateColumns: `repeat(${queryClub.data?.sites?.length ?? 1
-                          }, minmax(0, 1fr)`,
+                        gridTemplateColumns: `repeat(${
+                          queryClub.data?.sites?.length ?? 1
+                        }, minmax(0, 1fr)`,
                       }}
                     >
                       {queryClub.data?.sites?.map((site) => (

@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
+import Title from "@/components/title";
 import {
   Card,
   CardContent,
@@ -8,12 +9,10 @@ import {
   CardTitle,
 } from "@/components/ui/shadcn/card";
 import { Separator } from "@/components/ui/shadcn/separator";
-import { getSession } from "@/lib/auth/server";
+import { auth, getSession } from "@/lib/auth/server";
 import CreateAccount from "./createAccount";
-import { auth } from "@/lib/auth/server";
-import Title from "@/components/title";
-import Providers from "./providers";
 import FormEmail from "./formEmail";
+import Providers from "./providers";
 
 export default async function SignIn({
   searchParams,

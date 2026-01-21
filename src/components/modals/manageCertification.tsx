@@ -1,5 +1,8 @@
 "use client";
 
+import { Edit, Pencil, Plus, Trash } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import {
   Dispatch,
   SetStateAction,
@@ -9,27 +12,23 @@ import {
   useState,
 } from "react";
 import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
-import { Plus, Edit, Trash2, Trash, Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 
 import { toast } from "sonner";
 
-import { LayoutPage, LayoutPageMain, LayoutPageList } from "../layoutPage";
-import { Spinner } from "@/components/ui/shadcn/spinner";
-import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import { Button } from "@/components/ui/shadcn/button";
-import { Label } from "@/components/ui/shadcn/label";
-import { Input } from "@/components/ui/shadcn/input";
 import { Badge } from "@/components/ui/shadcn/badge";
-import Modal, { getButtonSize } from "../ui/modal";
-import Confirmation from "../ui/confirmation";
-import { UploadButton } from "../uploadthing";
+import { Button } from "@/components/ui/shadcn/button";
+import { Input } from "@/components/ui/shadcn/input";
+import { Label } from "@/components/ui/shadcn/label";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import createLink from "@/lib/createLink";
-import SimpleForm from "../ui/simpleform";
-import ButtonIcon from "../ui/buttonIcon";
+import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
+import { LayoutPage, LayoutPageList, LayoutPageMain } from "../layoutPage";
+import Confirmation from "../ui/confirmation";
+import Modal from "../ui/modal";
+import SimpleForm from "../ui/simpleform";
+import { UploadButton } from "../uploadthing";
 
 import { Field, FieldError, FieldLabel } from "../ui/shadcn";
 

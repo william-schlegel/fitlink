@@ -4,16 +4,16 @@ import { redirect, RedirectType } from "next/navigation";
 
 import {
   LayoutPage,
-  LayoutPageMain,
   LayoutPageList,
+  LayoutPageMain,
 } from "@/components/layoutPage";
 import CreateClub from "@/components/modals/manageClub";
 import LockedButton from "@/components/ui/lockedButton";
-import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
-import { ClubContent } from "./clubContent";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { ClubContent } from "./clubContent";
 
 export default async function ManageClubs({
   params,

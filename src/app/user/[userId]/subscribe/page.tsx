@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 import { LayoutPage } from "@/components/layoutPage";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { isCUID } from "@/lib/utils";
-import OfferForm from "./offerForm";
 import OfferCard from "./offerCard";
+import OfferForm from "./offerForm";
 
 export default async function Subscribe({
   params,

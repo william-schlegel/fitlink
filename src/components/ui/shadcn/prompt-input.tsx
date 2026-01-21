@@ -8,14 +8,14 @@ import React, {
   useState,
 } from "react";
 
+import { cn } from "@/lib/utils";
+import { Textarea } from "./textarea";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "./tooltip";
-import { Textarea } from "./textarea";
-import { cn } from "@/lib/utils";
 
 type PromptInputContextType = {
   isLoading: boolean;
@@ -228,7 +228,7 @@ function PromptInputAction({
 
 export {
   PromptInput,
-  PromptInputTextarea,
-  PromptInputActions,
   PromptInputAction,
+  PromptInputActions,
+  PromptInputTextarea,
 };

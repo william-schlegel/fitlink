@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
-import { getActualUser } from "@/lib/auth/server";
 import { RoleEnum } from "@/db/schema/enums";
+import { getActualUser } from "@/lib/auth/server";
 import { ROLE_LIST } from "@/lib/data";
 
 // ==================== ASYNC AUTH HELPERS (fetch user from session) ====================

@@ -1,8 +1,8 @@
-import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { redirect, RedirectType } from "next/navigation";
 
-import SelectCoachManager from "../manager-coach/selectCoachManager";
 import { getActualUser } from "@/lib/auth/server";
+import SelectCoachManager from "../manager-coach/selectCoachManager";
 
 export default async function PageCreation() {
   const user = await getActualUser();

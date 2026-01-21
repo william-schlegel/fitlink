@@ -4,8 +4,8 @@ import { useMemo } from "react";
 
 import { cva, type VariantProps } from "class-variance-authority";
 
-import { Separator } from "@/components/ui/shadcn/separator";
 import { Label } from "@/components/ui/shadcn/label";
+import { Separator } from "@/components/ui/shadcn/separator";
 import { cn } from "@/lib/utils";
 
 function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
@@ -228,13 +228,13 @@ function FieldError({
 
 export {
   Field,
-  FieldLabel,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,
+  FieldLabel,
   FieldLegend,
   FieldSeparator,
   FieldSet,
-  FieldContent,
   FieldTitle,
 };

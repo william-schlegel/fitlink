@@ -1,11 +1,11 @@
 import { and, asc, count, eq, gte, ilike, SQL } from "drizzle-orm";
 
-import { userCoach, userManager, userMember } from "@/db/schema/user";
-import { pricing } from "@/db/schema/subscription";
-import { reservation } from "@/db/schema/planning";
-import { roleEnum } from "@/db/schema/enums";
-import { user } from "@/db/schema/auth";
 import { db, TxClient } from "@/db";
+import { user } from "@/db/schema/auth";
+import { roleEnum } from "@/db/schema/enums";
+import { reservation } from "@/db/schema/planning";
+import { pricing } from "@/db/schema/subscription";
+import { userCoach, userManager, userMember } from "@/db/schema/user";
 
 // ==================== USER QUERIES ====================
 

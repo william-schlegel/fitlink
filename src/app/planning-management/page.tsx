@@ -1,21 +1,21 @@
-import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { redirect, RedirectType } from "next/navigation";
 
 import {
   LayoutPage,
-  LayoutPageMain,
-  LayoutPageList,
   LayoutPageContent,
+  LayoutPageList,
+  LayoutPageMain,
 } from "@/components/layoutPage";
 import { CreatePlanning } from "@/components/modals/managePlanning";
-import { getPlanningsForClub } from "@/server/api/routers/planning";
 import { PlanningName } from "@/components/planningName";
-import { createTrpcCaller } from "@/lib/trpc/caller";
-import { PlanningContent } from "./planningContent";
-import { getActualUser } from "@/lib/auth/server";
 import SelectClub from "@/components/selectClub";
+import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { getPlanningsForClub } from "@/server/api/routers/planning";
+import { PlanningContent } from "./planningContent";
 
 export default async function ClubPlanning({
   searchParams,

@@ -2,8 +2,8 @@ import { z } from "zod";
 
 import {
   getAdminData as dalGetAdminData,
-  getManagerDataForUserId as dalGetManagerData,
   getCoachDataForUserId as dalGetCoachData,
+  getManagerDataForUserId as dalGetManagerData,
 } from "@/db/dal";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 import { hasRole, isAdmin } from "@/server/lib/userTools";

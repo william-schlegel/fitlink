@@ -1,38 +1,38 @@
 "use client";
 
 import {
-  useState,
-  useRef,
-  useImperativeHandle,
-  forwardRef,
-  KeyboardEvent,
-  useCallback,
-} from "react";
-import {
-  MapPin,
-  Loader2,
   ArrowUpIcon,
+  Loader2,
+  MapPin,
   Mic,
   MicOff,
   Square,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import {
+  forwardRef,
+  KeyboardEvent,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { useVoiceInput } from "@/hooks/use-voice-input";
 import { cn } from "@/lib/utils";
 
+import { Button } from "@/components/ui/shadcn/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/shadcn/tooltip";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupTextarea,
 } from "../ui/shadcn/input-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/shadcn/tooltip";
-import { Button } from "@/components/ui/shadcn/button";
 
 type ChatInputProps = {
   onSend: (message: string) => void;

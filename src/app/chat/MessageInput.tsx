@@ -1,11 +1,17 @@
 "use client";
 
-import { Send, ImagePlus, X } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useMutation } from "convex/react";
-import { useState } from "react";
+import { ImagePlus, Send, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { useState } from "react";
 
+import { Button } from "@/components/ui/shadcn/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/shadcn/dropdown-menu";
 import {
   InputGroup,
   InputGroupAddon,
@@ -13,21 +19,14 @@ import {
   InputGroupInput,
 } from "@/components/ui/shadcn/input-group";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/shadcn/dropdown-menu";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
-import { Id } from "../../../convex/_generated/dataModel";
-import { Popover } from "@/components/ui/shadcn/popover";
 import { UploadButton } from "@/components/uploadthing";
-import { Button } from "@/components/ui/shadcn/button";
 import { api } from "../../../convex/_generated/api";
+import { Id } from "../../../convex/_generated/dataModel";
 
 type MessageInputProps = {
   roomId: Id<"chatRooms">;

@@ -1,14 +1,23 @@
 "use client";
 import { InferSelectModel } from "drizzle-orm";
 
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
-import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { startTransition, useEffect, useState } from "react";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 
 import { Pencil, Trash } from "lucide-react";
 
 import { toast } from "sonner";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
+import { pageSectionElement } from "@/db/schema/page";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import ThemeSelector, { TThemes } from "../themeSelector";
+import Confirmation from "../ui/confirmation";
+import DeleteButton from "../ui/deleteButton";
+import Modal from "../ui/modal";
+import { Button, Card, CardContent, Checkbox, Separator } from "../ui/shadcn";
 import {
   Field,
   FieldError,
@@ -16,19 +25,9 @@ import {
   FieldLabel,
   FieldSet,
 } from "../ui/shadcn/field";
-import { Button, Card, CardContent, Checkbox, Separator } from "../ui/shadcn";
-import ThemeSelector, { TThemes } from "../themeSelector";
-import { Spinner } from "@/components/ui/shadcn/spinner";
-import { pageSectionElement } from "@/db/schema/page";
-import { Textarea } from "../ui/shadcn/textarea";
-import DeleteButton from "../ui/deleteButton";
-import Confirmation from "../ui/confirmation";
-import { UploadButton } from "../uploadthing";
 import { Input } from "../ui/shadcn/input";
-import ButtonIcon from "../ui/buttonIcon";
-import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
-import Modal from "../ui/modal";
+import { Textarea } from "../ui/shadcn/textarea";
+import { UploadButton } from "../uploadthing";
 
 type PlanningCreationProps = {
   clubId: string;

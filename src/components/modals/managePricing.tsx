@@ -1,14 +1,14 @@
 "use client";
 
 import {
-  DndContext,
   closestCenter,
+  DndContext,
   KeyboardSensor,
   PointerSensor,
+  useDroppable,
   useSensor,
   useSensors,
   type DragEndEvent,
-  useDroppable,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -17,19 +17,20 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, type PropsWithoutRef } from "react";
 import {
+  Controller,
+  FormProvider,
   SubmitErrorHandler,
   SubmitHandler,
   useForm,
-  FormProvider,
-  useWatch,
   useFormContext,
+  useWatch,
 } from "react-hook-form";
-import { useEffect, useRef, type PropsWithoutRef } from "react";
-import { Controller } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 
+import { Checkbox } from "../ui/shadcn/checkbox";
 import {
   Field,
   FieldContent,
@@ -39,6 +40,7 @@ import {
   FieldLegend,
   FieldSet,
 } from "../ui/shadcn/field";
+import { Input } from "../ui/shadcn/input";
 import {
   Select,
   SelectContent,
@@ -47,28 +49,25 @@ import {
   SelectValue,
 } from "../ui/shadcn/select";
 import { Textarea } from "../ui/shadcn/textarea";
-import { Checkbox } from "../ui/shadcn/checkbox";
-import { Input } from "../ui/shadcn/input";
 
 import { Menu, Pencil, Plus, PlusCircle, Trash, Undo } from "lucide-react";
 
 import { toast } from "sonner";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
+import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
+import { ROLE_LIST } from "@/lib/data";
+import { trpc } from "@/lib/trpc/client";
+import { cn } from "@/lib/utils";
+import { CSS } from "@dnd-kit/utilities";
+import Confirmation from "../ui/confirmation";
+import Modal from "../ui/modal";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
 } from "../ui/shadcn/input-group";
-import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
-import { Spinner } from "@/components/ui/shadcn/spinner";
-import Confirmation from "../ui/confirmation";
-import ButtonIcon from "../ui/buttonIcon";
-import { CSS } from "@dnd-kit/utilities";
-import { trpc } from "@/lib/trpc/client";
-import { ROLE_LIST } from "@/lib/data";
-import { cn } from "@/lib/utils";
-import Modal from "../ui/modal";
 
 import type { ButtonVariant } from "@/components/ui/shadcn/button";
 

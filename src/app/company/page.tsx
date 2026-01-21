@@ -1,9 +1,9 @@
 "use client";
-import { Controller, useForm, useWatch } from "react-hook-form";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 import {
   CalendarCheck,
@@ -14,6 +14,10 @@ import {
   Webcam,
 } from "lucide-react";
 
+import ActivitySearch from "@/components/ui/activitySearch";
+import AddressSearch from "@/components/ui/addressSearch";
+import CollapsableGroup from "@/components/ui/collapsableGroup";
+import Rating from "@/components/ui/rating";
 import {
   Badge,
   Button,
@@ -26,13 +30,9 @@ import {
   Input,
   Separator,
 } from "@/components/ui/shadcn";
-import CollapsableGroup from "@/components/ui/collapsableGroup";
-import ActivitySearch from "@/components/ui/activitySearch";
-import AddressSearch from "@/components/ui/addressSearch";
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { Spinner } from "@/components/ui/shadcn/spinner";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { formatMoney } from "@/lib/formatNumber";
-import Rating from "@/components/ui/rating";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 

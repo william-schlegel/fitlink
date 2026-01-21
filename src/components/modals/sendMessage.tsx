@@ -1,14 +1,14 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useMutation } from "convex/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Mail } from "lucide-react";
 
 import { api } from "../../../convex/_generated/api";
-import { Button } from "../ui/shadcn";
 import Modal from "../ui/modal";
+import { Button } from "../ui/shadcn";
 
 export default function SendMessage({
   toUserId,

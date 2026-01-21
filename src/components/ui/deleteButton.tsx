@@ -1,7 +1,7 @@
 import { Trash } from "lucide-react";
 
-import { Button } from "./shadcn";
 import { cn } from "@/lib/utils";
+import { Button } from "./shadcn";
 
 type DeleteButtonProps = {
   size?: "sm" | "lg" | "xl";

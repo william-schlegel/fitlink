@@ -6,6 +6,9 @@ import * as React from "react";
 
 import { PanelLeftIcon } from "lucide-react";
 
+import { Button } from "@/components/ui/shadcn/button";
+import { Input } from "@/components/ui/shadcn/input";
+import { Separator } from "@/components/ui/shadcn/separator";
 import {
   Sheet,
   SheetContent,
@@ -13,15 +16,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/shadcn/sheet";
+import { Skeleton } from "@/components/ui/shadcn/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
-import { Separator } from "@/components/ui/shadcn/separator";
-import { Skeleton } from "@/components/ui/shadcn/skeleton";
-import { Button } from "@/components/ui/shadcn/button";
-import { Input } from "@/components/ui/shadcn/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 

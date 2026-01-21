@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useQuery } from "convex/react";
+import { useTranslations } from "next-intl";
 
 import { api } from "../../convex/_generated/api";
 

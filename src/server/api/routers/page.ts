@@ -2,45 +2,45 @@ import { InferSelectModel } from "drizzle-orm";
 import z from "zod";
 
 import {
+  createPage,
+  createPageSection,
+  createPageSectionElement,
+  createPageWithInitialSection,
+  getClubPage as dalGetClubPage,
+  getCoachPage as dalGetCoachPage,
+  getPageSection as dalGetPageSection,
+  deletePage,
+  deletePageSection,
+  deletePageSectionElement,
+  getClubBasicInfo,
+  getCoachDataForPage,
+  getCoachUserForPage,
   getPageById,
+  getPageForCoach,
+  getPageSectionElementById,
+  getPageSectionElements,
   getPagesForClub,
   getPagesForManager,
-  getPageForCoach,
-  getUserForPageCreation,
-  getClubPage as dalGetClubPage,
   getPublishedPagesForClub,
-  getClubBasicInfo,
-  getCoachPage as dalGetCoachPage,
-  getCoachUserForPage,
-  getCoachDataForPage,
-  createPage,
+  getUserForPageCreation,
   updatePage,
   updatePagePublication,
-  deletePage,
-  getPageSection as dalGetPageSection,
-  getPageSectionElements,
-  createPageSection,
   updatePageSection,
-  deletePageSection,
-  getPageSectionElementById,
-  createPageSectionElement,
   updatePageSectionElement,
-  deletePageSectionElement,
-  updatePageStyleForCoach,
   updatePageStyleForClub,
-  createPageWithInitialSection,
+  updatePageStyleForCoach,
 } from "@/db/dal";
 import {
   pageSectionElementTypeEnum,
   pageSectionModelEnum,
   pageTargetEnum,
 } from "@/db/schema/enums";
+import { pageSectionElement } from "@/db/schema/page";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { pageSectionElement } from "@/db/schema/page";
 
 const PageObject = z.object({
   id: z.cuid2(),

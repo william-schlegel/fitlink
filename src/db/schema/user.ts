@@ -1,25 +1,25 @@
+import { createId } from "@paralleldrive/cuid2";
+import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
   pgTable,
+  real,
   text,
   timestamp,
-  real,
 } from "drizzle-orm/pg-core";
-import { createId } from "@paralleldrive/cuid2";
-import { relations } from "drizzle-orm";
 
+import { user } from "./auth";
+import { activityGroup, club, clubCoachs, clubMembers } from "./club";
 import {
   coachCertification,
   coachingPrice,
   coachMarketPlace,
   coachOrganisms,
 } from "./coach";
-import { activityGroup, club, clubCoachs, clubMembers } from "./club";
+import { page } from "./page";
 import { planning, planningActivity } from "./planning";
 import { subscription } from "./subscription";
-import { page } from "./page";
-import { user } from "./auth";
 
 export const userCoach = pgTable(
   "UserCoach",

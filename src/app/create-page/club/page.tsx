@@ -1,24 +1,21 @@
-import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { redirect, RedirectType } from "next/navigation";
 
 import { Check, X } from "lucide-react";
 
-import Head from "next/head";
-
 import {
   LayoutPage,
-  LayoutPageMain,
   LayoutPageList,
+  LayoutPageMain,
 } from "@/components/layoutPage";
 import { CreatePage } from "@/components/modals/managePage";
-import { getPagesForClub } from "@/server/api/routers/page";
-import createLink, { createHref } from "@/lib/createLink";
-import { getDefaultSection } from "@/lib/sections/data";
-import { PageSectionModel } from "@/lib/sections/data";
-import { createTrpcCaller } from "@/lib/trpc/caller";
-import { getActualUser } from "@/lib/auth/server";
 import SelectClub from "@/components/selectClub";
+import { getActualUser } from "@/lib/auth/server";
+import createLink, { createHref } from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
+import { getDefaultSection, PageSectionModel } from "@/lib/sections/data";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { getPagesForClub } from "@/server/api/routers/page";
 import PageContent from "./pageContent";
 import TargetName from "./targetName";
 export default async function ClubPage({

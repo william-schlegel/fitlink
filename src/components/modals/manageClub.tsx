@@ -1,57 +1,54 @@
 "use client";
 
 import {
-  Plus,
-  Edit,
-  Trash2,
-  MapPin,
   ExternalLink,
-  Search,
   Mail,
+  MapPin,
   Pencil,
+  Plus,
+  Search,
   Trash,
 } from "lucide-react";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { startTransition, useEffect, useState } from "react";
 import {
   SubmitErrorHandler,
   SubmitHandler,
   useForm,
   useWatch,
 } from "react-hook-form";
-import { startTransition, useEffect, useState } from "react";
 import MapComponent, { Marker } from "react-map-gl/mapbox";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import "mapbox-gl/dist/mapbox-gl.css";
-import Image from "next/image";
-import Link from "next/link";
 
 import { useMutation } from "convex/react";
 
 import { toast } from "sonner";
 
-import { Field, FieldError, FieldLabel } from "../ui/shadcn";
-import { Textarea } from "@/components/ui/shadcn/textarea";
-import { Checkbox } from "@/components/ui/shadcn/checkbox";
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import { Spinner } from "@/components/ui/shadcn/spinner";
-import { Button } from "@/components/ui/shadcn/button";
-import CollapsableGroup from "../ui/collapsableGroup";
-import { api } from "../../../convex/_generated/api";
-import { Label } from "@/components/ui/shadcn/label";
-import { Input } from "@/components/ui/shadcn/input";
 import { Badge } from "@/components/ui/shadcn/badge";
-import AddressSearch from "../ui/addressSearch";
-import FindCoach from "../sections/findCoach";
-import DeleteButton from "../ui/deleteButton";
-import Confirmation from "../ui/confirmation";
-import { UploadButton } from "../uploadthing";
-import { useUser } from "@/lib/auth/client";
-import ButtonIcon from "../ui/buttonIcon";
-import { trpc } from "@/lib/trpc/client";
-import { isCUID, cn } from "@/lib/utils";
-import Rating from "../ui/rating";
-import Modal from "../ui/modal";
+import { Button } from "@/components/ui/shadcn/button";
+import { Checkbox } from "@/components/ui/shadcn/checkbox";
+import { Input } from "@/components/ui/shadcn/input";
+import { Label } from "@/components/ui/shadcn/label";
+import { Spinner } from "@/components/ui/shadcn/spinner";
+import { Textarea } from "@/components/ui/shadcn/textarea";
 import { env } from "@/env";
+import { useUser } from "@/lib/auth/client";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { trpc } from "@/lib/trpc/client";
+import { cn, isCUID } from "@/lib/utils";
+import { api } from "../../../convex/_generated/api";
+import FindCoach from "../sections/findCoach";
+import AddressSearch from "../ui/addressSearch";
+import CollapsableGroup from "../ui/collapsableGroup";
+import Confirmation from "../ui/confirmation";
+import DeleteButton from "../ui/deleteButton";
+import Modal from "../ui/modal";
+import Rating from "../ui/rating";
+import { Field, FieldError, FieldLabel } from "../ui/shadcn";
+import { UploadButton } from "../uploadthing";
 
 export const CreateClub = () => {
   const { data: user } = useUser();

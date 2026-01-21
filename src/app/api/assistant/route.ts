@@ -1,21 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
 import { ConvexHttpClient } from "convex/browser";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import {
+  getOffersForCompanies,
   searchClubsByActivityAndLocation,
   searchCoachesByActivityAndLocation,
-  getOffersForCompanies,
 } from "@/db/dal/coaching";
+import { env } from "@/env";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { calculateDistance } from "@/lib/distance";
 import {
   processAssistantMessage,
   type AssistantMessage,
 } from "@/lib/llm/assistant";
-import { Id } from "../../../../convex/_generated/dataModel";
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { api } from "../../../../convex/_generated/api";
-import { calculateDistance } from "@/lib/distance";
-import { env } from "@/env";
+import { Id } from "../../../../convex/_generated/dataModel";
 
 import type {
   PromptTranslations,
@@ -23,8 +23,8 @@ import type {
 } from "@/lib/llm/gemini";
 
 // Import translations directly
-import frMessages from "../../../../messages/fr.json";
 import enMessages from "../../../../messages/en.json";
+import frMessages from "../../../../messages/fr.json";
 
 // Get prompt translations based on locale
 function getPromptTranslations(locale: string): PromptTranslations {

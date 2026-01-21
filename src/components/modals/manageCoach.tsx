@@ -1,27 +1,47 @@
 "use client";
+import { useTranslations } from "next-intl";
+import { startTransition, useEffect, useState } from "react";
 import {
   SubmitErrorHandler,
   SubmitHandler,
   useForm,
   useWatch,
 } from "react-hook-form";
-import { startTransition, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
 
 import { Controller } from "react-hook-form";
 
-import { Lock, Pencil, Plus, Trash } from "lucide-react";
+import { Pencil, Plus, Trash } from "lucide-react";
 
 import { toast } from "sonner";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
+import { CoachingTargetEnum } from "@/db/schema/enums";
+import { useUser } from "@/lib/auth/client";
+import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
+import { formatMoney } from "@/lib/formatNumber";
+import { COACHING_LEVEL, COACHING_TARGET } from "@/lib/offers/data";
+import { useCoachingLevel, useCoachingTarget } from "@/lib/offers/useOffers";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import Confirmation from "../ui/confirmation";
+import DeleteButton from "../ui/deleteButton";
+import LockedButton from "../ui/lockedButton";
+import Modal from "../ui/modal";
+import { Button, Separator, Textarea } from "../ui/shadcn";
+import { Checkbox } from "../ui/shadcn/checkbox";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/shadcn/table";
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/shadcn/field";
+import { Input } from "../ui/shadcn/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "../ui/shadcn/input-group";
 import {
   Select,
   SelectContent,
@@ -30,33 +50,13 @@ import {
   SelectValue,
 } from "../ui/shadcn/select";
 import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldSet,
-} from "../ui/shadcn/field";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "../ui/shadcn/input-group";
-import { useCoachingLevel, useCoachingTarget } from "@/lib/offers/useOffers";
-import { COACHING_LEVEL, COACHING_TARGET } from "@/lib/offers/data";
-import { Button, Separator, Textarea } from "../ui/shadcn";
-import { Spinner } from "@/components/ui/shadcn/spinner";
-import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import { CoachingTargetEnum } from "@/db/schema/enums";
-import { Checkbox } from "../ui/shadcn/checkbox";
-import { formatMoney } from "@/lib/formatNumber";
-import LockedButton from "../ui/lockedButton";
-import DeleteButton from "../ui/deleteButton";
-import Confirmation from "../ui/confirmation";
-import { useUser } from "@/lib/auth/client";
-import { Input } from "../ui/shadcn/input";
-import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
-import Modal from "../ui/modal";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/shadcn/table";
 
 type OfferFormValues = {
   name: string;

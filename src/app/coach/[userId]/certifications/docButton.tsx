@@ -1,10 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { Eye } from "lucide-react";
+import { useTranslations } from "next-intl";
 
-import { Badge } from "@/components/ui/shadcn/badge";
 import ButtonIcon from "@/components/ui/buttonIcon";
+import { Badge } from "@/components/ui/shadcn/badge";
 
 export default function DocButton({ documentUrl }: { documentUrl: string }) {
   const t = useTranslations("coach");

@@ -1,17 +1,17 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import ReactMarkdown from "react-markdown";
-import { useEffect, useRef } from "react";
 import { Bot, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
 
+import { cn } from "@/lib/utils";
 import {
   ClubResultCard,
   CoachResultCard,
   CompanyOfferResultCard,
 } from "./ResultCard";
-import { cn } from "@/lib/utils";
 
 import type {
   ClubResult,

@@ -1,22 +1,21 @@
-import { getTranslations } from "next-intl/server";
 import { Info } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
+import { signInAction, signInMagicLinkAction } from "@/actions/auth";
+import { Field, FieldLabel } from "@/components/ui/shadcn";
+import { Button } from "@/components/ui/shadcn/button";
+import { Input } from "@/components/ui/shadcn/input";
+import {
+  PasswordInput,
+  PasswordInputStrengthChecker,
+} from "@/components/ui/shadcn/password-input";
+import { Separator } from "@/components/ui/shadcn/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
-import {
-  PasswordInput,
-  PasswordInputStrengthChecker,
-} from "@/components/ui/shadcn/password-input";
-import { signInAction, signInMagicLinkAction } from "@/actions/auth";
-import { Separator } from "@/components/ui/shadcn/separator";
-import { Field, FieldLabel } from "@/components/ui/shadcn";
-import { Button } from "@/components/ui/shadcn/button";
-import { Label } from "@/components/ui/shadcn/label";
-import { Input } from "@/components/ui/shadcn/input";
 
 export default async function FormEmail({
   searchParams,

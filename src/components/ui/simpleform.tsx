@@ -2,22 +2,20 @@
 
 import {
   type FormEventHandler,
-  Fragment,
-  type ReactNode,
   type HTMLInputTypeAttribute,
+  type ReactNode,
 } from "react";
-import { useTranslations } from "next-intl";
 
+import { Checkbox } from "@/components/ui/shadcn/checkbox";
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
-  FieldError,
   FieldSet,
 } from "@/components/ui/shadcn/field";
-import { Textarea } from "@/components/ui/shadcn/textarea";
-import { Checkbox } from "@/components/ui/shadcn/checkbox";
 import { Input } from "@/components/ui/shadcn/input";
+import { Textarea } from "@/components/ui/shadcn/textarea";
 import { cn } from "@/lib/utils";
 
 import { Spinner } from "@/components/ui/shadcn/spinner";
@@ -29,11 +27,11 @@ import {
 } from "./shadcn/input-group";
 
 import type {
-  UseFormRegister,
   FieldErrors,
-  Path,
   FieldValues,
+  Path,
   RegisterOptions,
+  UseFormRegister,
 } from "react-hook-form";
 
 type SimpleFormField<T> = {

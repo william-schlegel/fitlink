@@ -1,13 +1,13 @@
-import { boolean, index, pgTable, text } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
+import { boolean, index, pgTable, text } from "drizzle-orm/pg-core";
 
+import { club, event } from "./club";
 import {
   pageSectionElementTypeEnum,
   pageSectionModelEnum,
   pageTargetEnum,
 } from "./enums";
-import { club, event } from "./club";
 import { userCoach } from "./user";
 
 export const pageSectionElement = pgTable(

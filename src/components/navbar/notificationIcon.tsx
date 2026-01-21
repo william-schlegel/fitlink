@@ -1,10 +1,12 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useQuery } from "convex/react";
 import { Bell } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
+import { Badge } from "@/components/ui/shadcn/badge";
+import { Button } from "@/components/ui/shadcn/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,10 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
-import { Button } from "@/components/ui/shadcn/button";
-import { api } from "../../../convex/_generated/api";
-import { Badge } from "@/components/ui/shadcn/badge";
 import { cn } from "@/lib/utils";
+import { api } from "../../../convex/_generated/api";
 
 type NotificationIconProps = {
   userId: string;
@@ -75,9 +75,7 @@ export default function NotificationIcon({ userId }: NotificationIconProps) {
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="size-6 text-primary" />
           {unread > 0 && (
-            <Badge
-              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-            >
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
               {unread}
             </Badge>
           )}

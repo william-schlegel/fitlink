@@ -1,17 +1,17 @@
-import { subscriptionRouter } from "./routers/subscription";
-import { activityRouter } from "./routers/activities";
-import { dashboardRouter } from "./routers/dashboard";
-import { assistantRouter } from "./routers/assistant";
 import { createTRPCRouter } from "@/lib/trpc/server";
-import { planningRouter } from "./routers/planning";
+import { activityRouter } from "./routers/activities";
+import { assistantRouter } from "./routers/assistant";
 import { calendarRouter } from "./routers/calendar";
-import { pricingRouter } from "./routers/pricing";
-import { coachRouter } from "./routers/coachs";
-import { eventRouter } from "./routers/event";
-import { userRouter } from "./routers/users";
-import { siteRouter } from "./routers/sites";
 import { clubRouter } from "./routers/clubs";
+import { coachRouter } from "./routers/coachs";
+import { dashboardRouter } from "./routers/dashboard";
+import { eventRouter } from "./routers/event";
 import { pageRouter } from "./routers/page";
+import { planningRouter } from "./routers/planning";
+import { pricingRouter } from "./routers/pricing";
+import { siteRouter } from "./routers/sites";
+import { subscriptionRouter } from "./routers/subscription";
+import { userRouter } from "./routers/users";
 
 /**
  * This is the primary router for your server.

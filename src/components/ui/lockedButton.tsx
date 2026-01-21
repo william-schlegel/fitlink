@@ -1,15 +1,15 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { Lock } from "lucide-react";
+import { useTranslations } from "next-intl";
 
+import { Button } from "@/components/ui/shadcn/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
-import { Button } from "@/components/ui/shadcn/button";
 
 type Props = { label: string; limited?: boolean };
 

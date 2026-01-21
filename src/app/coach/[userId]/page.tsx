@@ -1,6 +1,6 @@
-import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { redirect, RedirectType } from "next/navigation";
 
 import {
   Award,
@@ -11,6 +11,10 @@ import {
   Star,
 } from "lucide-react";
 
+import Title from "@/components/title";
+import CardGroup from "@/components/ui/cardGroup";
+import LockedButton from "@/components/ui/lockedButton";
+import SelectDay from "@/components/ui/selectDay";
 import {
   Avatar,
   AvatarFallback,
@@ -20,16 +24,12 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/shadcn";
-import { getCoachDataForUserId } from "@/server/api/routers/dashboard";
-import { getCoachDailyPlanning } from "@/server/api/routers/planning";
-import LockedButton from "@/components/ui/lockedButton";
-import { getToday } from "@/lib/dates/serverDayName";
-import { createTrpcCaller } from "@/lib/trpc/caller";
-import SelectDay from "@/components/ui/selectDay";
-import CardGroup from "@/components/ui/cardGroup";
 import { getActualUser } from "@/lib/auth/server";
 import { DayName } from "@/lib/dates/data";
-import Title from "@/components/title";
+import { getToday } from "@/lib/dates/serverDayName";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { getCoachDataForUserId } from "@/server/api/routers/dashboard";
+import { getCoachDailyPlanning } from "@/server/api/routers/planning";
 
 export default async function CoachDashboard({
   params,

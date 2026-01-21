@@ -1,11 +1,16 @@
 "use client";
 
-import { User, Settings, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { LogOut, Settings, User } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/shadcn/avatar";
+import { Button } from "@/components/ui/shadcn/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,13 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from "@/components/ui/shadcn/avatar";
 import { authClient, useUser } from "@/lib/auth/client";
-import { Button } from "@/components/ui/shadcn/button";
 
 export default function UserButton() {
   const t = useTranslations("common");

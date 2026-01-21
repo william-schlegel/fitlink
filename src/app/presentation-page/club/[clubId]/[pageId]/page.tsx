@@ -1,15 +1,15 @@
 import { notFound } from "next/navigation";
 
 import { ActivityGroupDisplayCard } from "@/components/sections/activities";
-import { PlanningDisplayCard } from "@/components/sections/planning";
-import PageNavigation from "@/components/sections/pageNavigation";
-import { OfferDisplayCard } from "@/components/sections/offers";
-import PageContainer from "@/components/ui/page/container";
-import { TitleDisplay } from "@/components/sections/title";
 import { HeroDisplay } from "@/components/sections/hero";
+import { OfferDisplayCard } from "@/components/sections/offers";
+import PageNavigation from "@/components/sections/pageNavigation";
+import { PlanningDisplayCard } from "@/components/sections/planning";
+import { TitleDisplay } from "@/components/sections/title";
 import { TThemes } from "@/components/themeSelector";
-import { createTrpcCaller } from "@/lib/trpc/caller";
 import Title from "@/components/title";
+import PageContainer from "@/components/ui/page/container";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { isCUID } from "@/lib/utils";
 
 export default async function ClubPresentation({

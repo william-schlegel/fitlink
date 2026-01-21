@@ -1,10 +1,11 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useQuery } from "convex/react";
 import { Lock } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
+import { Badge } from "@/components/ui/shadcn/badge";
 import {
   Tooltip,
   TooltipContent,
@@ -12,10 +13,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
 import { FeatureEnum, RoleEnum } from "@/db/schema/enums";
-import { api } from "../../../convex/_generated/api";
-import { Badge } from "@/components/ui/shadcn/badge";
 import { useUser } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
+import { api } from "../../../convex/_generated/api";
 
 type MenuDefinitionType = {
   label: string;

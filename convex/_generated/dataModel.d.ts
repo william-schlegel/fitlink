@@ -13,8 +13,8 @@ import schema from "../schema.js";
 import type {
   DataModelFromSchemaDefinition,
   DocumentByName,
-  TableNamesInDataModel,
   SystemTableNames,
+  TableNamesInDataModel,
 } from "convex/server";
 import type { GenericId } from "convex/values";
 

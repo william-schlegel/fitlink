@@ -1,23 +1,23 @@
+import { createId } from "@paralleldrive/cuid2";
+import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
+  integer,
   pgTable,
   primaryKey,
+  real,
   text,
   timestamp,
-  real,
-  integer,
 } from "drizzle-orm/pg-core";
-import { createId } from "@paralleldrive/cuid2";
-import { relations } from "drizzle-orm";
 
+import { activityGroup, club, site } from "./club";
 import {
   coachingLevelListEnum,
   coachingTargetEnum,
   coachMarketPlaceTypeEnum,
   packModeEnum,
 } from "./enums";
-import { activityGroup, club, site } from "./club";
 import { userCoach } from "./user";
 
 /* Coaching prices */

@@ -1,8 +1,8 @@
 "use client";
 
 import { MoonIcon, SunIcon } from "lucide-react";
-import { useLocalStorage } from "usehooks-ts";
 import { useEffect } from "react";
+import { useLocalStorage } from "usehooks-ts";
 
 import { Toggle } from "../ui/shadcn/toggle";
 

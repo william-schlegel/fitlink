@@ -1,27 +1,23 @@
 "use client";
 
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import {
-  useState,
   createContext,
   useContext,
+  useDeferredValue,
+  useState,
+  type ChangeEvent,
   type ComponentProps,
   type ReactNode,
-  type ChangeEvent,
-  useEffect,
-  useDeferredValue,
-  useMemo,
 } from "react";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
 
+import { Input } from "./input";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
 } from "./input-group";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
-import { cn } from "@/lib/utils";
-import { Input } from "./input";
 
 const PasswordInputContext = createContext<{ password: string } | null>(null);
 

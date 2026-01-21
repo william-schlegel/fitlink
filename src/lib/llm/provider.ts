@@ -1,20 +1,19 @@
 import { env } from "@/env";
 
 import {
-  isHuggingFaceConfigured,
+  getAssistantModel,
+  isGeminiConfigured,
+  toGeminiContent,
+  type Part,
+  type PromptTranslations,
+} from "./gemini";
+import {
   callHuggingFace,
-  toHFMessages,
   sendFunctionResults as hfSendFunctionResults,
+  isHuggingFaceConfigured,
+  toHFMessages,
   type HFFunctionCall,
 } from "./huggingface";
-import {
-  isGeminiConfigured,
-  getAssistantModel,
-  toGeminiContent,
-  type PromptTranslations,
-  type FunctionCallResult,
-  type Part,
-} from "./gemini";
 
 export type LLMProvider = "gemini" | "huggingface";
 

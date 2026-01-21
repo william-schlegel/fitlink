@@ -1,18 +1,18 @@
+import { createId } from "@paralleldrive/cuid2";
+import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
+  integer,
   pgTable,
   text,
   timestamp,
-  integer,
 } from "drizzle-orm/pg-core";
-import { createId } from "@paralleldrive/cuid2";
-import { relations } from "drizzle-orm";
 
+import { user } from "./auth";
 import { activity, club, room, site } from "./club";
 import { dayNameEnum } from "./enums";
 import { userCoach } from "./user";
-import { user } from "./auth";
 
 export const openingCalendar = pgTable("OpeningCalendar", {
   id: text("id").primaryKey().$defaultFn(createId),

@@ -2,15 +2,15 @@ import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/shadcn/button";
 import { Badge } from "@/components/ui/shadcn/badge";
-import { createTrpcCaller } from "@/lib/trpc/caller";
-import NotificationIcon from "./notificationIcon";
+import { Button } from "@/components/ui/shadcn/button";
 import { RoleEnum } from "@/db/schema/enums";
+import { env } from "@/env";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import Menu from "./menu";
+import NotificationIcon from "./notificationIcon";
 import ThemeButton from "./themeButton";
 import UserButton from "./userButton";
-import { env } from "@/env";
-import Menu from "./menu";
 
 const BETA = env.NEXT_PUBLIC_BETA === "true";
 

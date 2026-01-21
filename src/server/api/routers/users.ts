@@ -1,24 +1,31 @@
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { TUserFilter } from "@/app/admin/users/userFilter";
+import { db } from "@/db";
 import {
-  getUserById as dalGetUserById,
-  getUserByEmail,
-  getUserFullById as dalGetUserFullById,
-  getUserAvatar,
-  getAllUsers as dalGetAllUsers,
-  searchUsers,
-  updateUser as dalUpdateUser,
+  addSubscriptionToMember,
   deleteUser as dalDeleteUser,
+  getAllUsers as dalGetAllUsers,
+  getUserById as dalGetUserById,
+  getUserFullById as dalGetUserFullById,
   updatePaymentPeriod as dalUpdatePaymentPeriod,
-  getUserSubscriptionsById,
-  getReservationsByUserId,
-  getPricingData,
+  updateUser as dalUpdateUser,
+  deleteMemberSubscription,
   getMemberData,
   getOrCreateCoachData,
+  getOrCreateMember,
+  getPricingData,
+  getReservationsByUserId,
+  getSubscriptionWithClub,
+  getUserAvatar,
+  getUserByEmail,
+  getUserSubscriptionsById,
+  searchUsers,
   updateCoachData,
 } from "@/db/dal";
+import { featureEnum, roleEnum } from "@/db/schema/enums";
+import { auth } from "@/lib/auth/server";
 import {
   addMemberToClubRoomInConvex,
   createCoachRoomInConvex,
@@ -26,27 +33,16 @@ import {
   getClubRoomId,
 } from "@/lib/convex/server";
 import {
-  getOrCreateMember,
-  addSubscriptionToMember,
-  deleteMemberSubscription,
-  getSubscriptionWithClub,
-} from "@/db/dal";
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/lib/trpc/server";
 import {
   hasRole,
   isAdmin,
   requireAdmin,
   requireAdminOrSelf,
 } from "@/server/lib/userTools";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/lib/trpc/server";
-import { TUserFilter } from "@/app/admin/users/userFilter";
-import { featureEnum, roleEnum } from "@/db/schema/enums";
-import { userCoach } from "@/db/schema/user";
-import { auth } from "@/lib/auth/server";
-import { db } from "@/db";
 
 const UserFilter = z
   .object({

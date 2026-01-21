@@ -1,23 +1,23 @@
 import { getTranslations } from "next-intl/server";
 
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { CheckCircle, Circle } from "lucide-react";
 
-import {
-  getNotificationsForUserInConvex,
-  getNotificationTotalCountInConvex,
-} from "@/lib/convex/server";
 import {
   LayoutPage,
   LayoutPageList,
   LayoutPageMain,
 } from "@/components/layoutPage";
-import { NotificationContent } from "./NotificationContent";
 import { Button } from "@/components/ui/shadcn";
+import {
+  getNotificationsForUserInConvex,
+  getNotificationTotalCountInConvex,
+} from "@/lib/convex/server";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
+import { NotificationContent } from "./NotificationContent";
 
 const PER_PAGE = 20;
 

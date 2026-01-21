@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm";
 
-import { userMember, userMemberToSubscription } from "@/db/schema/user";
-import { subscription } from "@/db/schema/subscription";
 import { db } from "@/db";
+import { subscription } from "@/db/schema/subscription";
+import { userMember, userMemberToSubscription } from "@/db/schema/user";
 
 // ==================== MEMBER DATA ====================
 

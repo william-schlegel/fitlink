@@ -1,26 +1,26 @@
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { ExternalLink } from "lucide-react";
 
+import {
+  LayoutPage,
+  LayoutPageList,
+  LayoutPageMain,
+} from "@/components/layoutPage";
 import {
   CreateOffer,
   DeleteOffer,
   UpdateOffer,
 } from "@/components/modals/manageCoach";
-import {
-  LayoutPage,
-  LayoutPageMain,
-  LayoutPageList,
-} from "@/components/layoutPage";
 import { CoachOfferPage } from "@/components/sections/coachOffer";
 import { BadgeVariant, Button } from "@/components/ui/shadcn";
-import { getOfferName } from "@/lib/offers/serverOffer";
-import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
+import { getOfferName } from "@/lib/offers/serverOffer";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { isCUID } from "@/lib/utils";
 
 export default async function CoachOffer({

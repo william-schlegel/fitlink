@@ -5,9 +5,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/shadcn";
-import { MemberSubscriptionType } from "@/server/api/routers/users";
-import { getDataNames } from "@/server/api/routers/subscription";
 import { getDescription } from "@/lib/subscriptions";
+import { getDataNames } from "@/server/api/routers/subscription";
+import { MemberSubscriptionType } from "@/server/api/routers/users";
 import { List } from "./list";
 
 type SubscriptionProps = {

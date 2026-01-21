@@ -1,7 +1,7 @@
 import destination from "@turf/destination";
-import { getCoord } from "@turf/invariant";
 import distance from "@turf/distance";
 import { point } from "@turf/helpers";
+import { getCoord } from "@turf/invariant";
 /**
  * calculate the bounding box arround a point at a certain distance (top left and bottom right)
  * @param originLat latitude

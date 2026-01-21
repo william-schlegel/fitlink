@@ -1,41 +1,39 @@
-import { and, eq, inArray, or } from "drizzle-orm";
+import { and, inArray, or } from "drizzle-orm";
 import z from "zod";
 
 import {
-  getPlanningsForClub,
-  getPlanningById,
+  addPlanningActivity,
+  createActivityReservation,
+  createPlanning,
+  createPlanningReservation,
+  deletePlanning,
+  deletePlanningActivity,
+  deleteReservation,
+  duplicatePlanning,
+  getActivitiesForGroups,
+  getActivitiesWithNoCalendar,
   getClubDailyPlanning,
   getCoachDailyPlanning,
   getCoachPlanningForClub,
   getMemberDataWithSubscriptions,
-  getPlanningsForClubIds,
-  getActivitiesForGroups,
   getPlanningActivitiesWithFilters,
-  getActivitiesWithNoCalendar,
-  createPlanning,
-  updatePlanning,
-  duplicatePlanning,
-  deletePlanning,
   getPlanningActivityById,
-  addPlanningActivity,
+  getPlanningById,
+  getPlanningsForClub,
+  getPlanningsForClubIds,
+  updatePlanning,
   updatePlanningActivity,
-  deletePlanningActivity,
-  createPlanningReservation,
-  createActivityReservation,
-  deleteReservation,
 } from "@/db/dal";
+import { activity } from "@/db/schema/club";
+import { dayNameEnum, roomReservationEnum } from "@/db/schema/enums";
+import { planningActivity } from "@/db/schema/planning";
+import { userCoach } from "@/db/schema/user";
+import { getDayName } from "@/lib/dates/days";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { dayNameEnum, roomReservationEnum } from "@/db/schema/enums";
-import { planningActivity } from "@/db/schema/planning";
-import { getDayName } from "@/lib/dates/days";
-import { userCoach } from "@/db/schema/user";
-import { activity } from "@/db/schema/club";
-import { DayName } from "@/lib/dates/data";
-import { isCUID } from "@/lib/utils";
 
 const planningObject = z.object({
   id: z.cuid2(),
@@ -59,8 +57,12 @@ const planningActivityObject = z.object({
   coachId: z.string().optional(),
 });
 
-export { getClubDailyPlanning, getPlanningsForClub, getPlanningById };
-export { getCoachDailyPlanning };
+export {
+  getClubDailyPlanning,
+  getCoachDailyPlanning,
+  getPlanningById,
+  getPlanningsForClub,
+};
 
 export const planningRouter = createTRPCRouter({
   getPlanningsForClub: protectedProcedure

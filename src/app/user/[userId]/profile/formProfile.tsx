@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   FormProvider,
   SubmitHandler,
@@ -7,7 +8,6 @@ import {
   useFormContext,
   useWatch,
 } from "react-hook-form";
-import { useTranslations } from "next-intl";
 
 import { inferProcedureOutput } from "@trpc/server";
 
@@ -17,20 +17,20 @@ import { Trash } from "lucide-react";
 
 import { toast } from "sonner";
 
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldError,
-  FieldSet,
-} from "@/components/ui/shadcn/field";
-import { Textarea } from "@/components/ui/shadcn/textarea";
-import { UploadButton } from "@/components/uploadthing";
-import { Input } from "@/components/ui/shadcn/input";
 import ButtonIcon from "@/components/ui/buttonIcon";
 import { Button } from "@/components/ui/shadcn";
-import { AppRouter } from "@/server/api/root";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/shadcn/field";
+import { Input } from "@/components/ui/shadcn/input";
+import { Textarea } from "@/components/ui/shadcn/textarea";
+import { UploadButton } from "@/components/uploadthing";
 import { trpc } from "@/lib/trpc/client";
+import { AppRouter } from "@/server/api/root";
 
 type FormValues = {
   name: string;

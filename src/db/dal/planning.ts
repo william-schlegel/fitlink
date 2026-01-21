@@ -2,12 +2,12 @@ import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
 
 import { endOfDay, startOfDay } from "date-fns";
 
-import { planning, planningActivity, reservation } from "@/db/schema/planning";
-import { dayNameEnum } from "@/db/schema/enums";
-import { activity } from "@/db/schema/club";
-import { user } from "@/db/schema/auth";
-import { isCUID } from "@/lib/utils";
 import { db } from "@/db";
+import { user } from "@/db/schema/auth";
+import { activity } from "@/db/schema/club";
+import { dayNameEnum } from "@/db/schema/enums";
+import { planning, planningActivity, reservation } from "@/db/schema/planning";
+import { isCUID } from "@/lib/utils";
 
 // ==================== PLANNING QUERIES ====================
 

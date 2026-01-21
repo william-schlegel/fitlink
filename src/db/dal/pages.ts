@@ -1,5 +1,8 @@
-import { and, eq, InferSelectModel } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
+import { db } from "@/db";
+import { user } from "@/db/schema/auth";
+import { club } from "@/db/schema/club";
 import {
   pageSectionElementTypeEnum,
   pageSectionModelEnum,
@@ -7,10 +10,7 @@ import {
 } from "@/db/schema/enums";
 import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { userCoach } from "@/db/schema/user";
-import { club } from "@/db/schema/club";
-import { user } from "@/db/schema/auth";
 import { isCUID } from "@/lib/utils";
-import { db } from "@/db";
 
 // ==================== PAGE QUERIES ====================
 

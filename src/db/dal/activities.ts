@@ -1,18 +1,18 @@
 import { and, asc, eq, ilike, or } from "drizzle-orm";
 
+import { db } from "@/db";
 import {
   activity,
   activityGroup,
   club,
   roomActivities,
 } from "@/db/schema/club";
-import { db } from "@/db";
 
 import type {
-  CreateActivityInput,
-  UpdateActivityInput,
   CreateActivityGroupInput,
+  CreateActivityInput,
   UpdateActivityGroupInput,
+  UpdateActivityInput,
 } from "@/schemas/activities";
 
 // ==================== ACTIVITY ====================

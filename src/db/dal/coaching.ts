@@ -1,5 +1,8 @@
 import { and, eq, gte, inArray, lte, or, sql } from "drizzle-orm";
 
+import { db } from "@/db";
+import { user } from "@/db/schema/auth";
+import { club, site } from "@/db/schema/club";
 import {
   coachingLevel,
   coachingPrice,
@@ -7,13 +10,10 @@ import {
   selectedModuleForCoach,
 } from "@/db/schema/coach";
 import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
-import { LATITUDE, LONGITUDE, DEFAULT_RANGE } from "@/lib/defaultValues";
 import { page, pageSection, pageSectionElement } from "@/db/schema/page";
-import { calculateBBox } from "@/lib/distance";
-import { club, site } from "@/db/schema/club";
 import { userCoach } from "@/db/schema/user";
-import { user } from "@/db/schema/auth";
-import { db } from "@/db";
+import { DEFAULT_RANGE, LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { calculateBBox } from "@/lib/distance";
 
 // ==================== COACH QUERIES ====================
 

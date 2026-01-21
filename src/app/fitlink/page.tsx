@@ -1,13 +1,12 @@
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 
-import { AnimatedGradient } from "@/components/ui/shadcn/stripe-animated-gradient";
 import { FloatingChatWidget } from "@/components/assistant";
-import FindCoach from "@/components/sections/findCoach";
 import FindClub from "@/components/sections/findClub";
-import ButtonLink from "@/components/ui/buttonLink";
-import { cssVarToHex } from "@/lib/colorConversion";
+import FindCoach from "@/components/sections/findCoach";
 import Title from "@/components/title";
+import ButtonLink from "@/components/ui/buttonLink";
+import { AnimatedGradient } from "@/components/ui/shadcn/stripe-animated-gradient";
 
 export default async function FitlinkPage() {
   const t = await getTranslations("home");

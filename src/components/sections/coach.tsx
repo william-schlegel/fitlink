@@ -1,16 +1,36 @@
 "use client";
 
-import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
-import MapComponent, { Layer, Source } from "react-map-gl/mapbox";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
+import MapComponent, { Layer, Source } from "react-map-gl/mapbox";
 
 import { Info, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
+import { env } from "@/env";
+import { cssVarToHex } from "@/lib/colorConversion";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { trpc } from "@/lib/trpc/client";
+import { cn, isCUID } from "@/lib/utils";
+import { CoachDataOfferType } from "@/server/api/routers/users";
+import ThemeSelector, { TThemes } from "../themeSelector";
+import Title from "../title";
+import DeleteButton from "../ui/deleteButton";
+import { PageBadge } from "../ui/page/badge";
+import { PageButton } from "../ui/page/button";
+import {
+  PageCard,
+  PageCardAction,
+  PageCardHeader,
+  PageCardTitle,
+} from "../ui/page/card";
+import PageContainer from "../ui/page/container";
+import PageText from "../ui/page/text";
 import {
   Button,
   Checkbox,
@@ -19,37 +39,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "../ui/shadcn";
-import {
-  PageCard,
-  PageCardAction,
-  PageCardHeader,
-  PageCardTitle,
-} from "../ui/page/card";
+import { Field, FieldLabel } from "../ui/shadcn/field";
+import { Input } from "../ui/shadcn/input";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "../ui/shadcn/input-group";
-import { CoachDataOfferType } from "@/server/api/routers/users";
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import ThemeSelector, { TThemes } from "../themeSelector";
-import { Spinner } from "@/components/ui/shadcn/spinner";
-import { Field, FieldLabel } from "../ui/shadcn/field";
-import { cssVarToHex } from "@/lib/colorConversion";
 import { Textarea } from "../ui/shadcn/textarea";
-import PageContainer from "../ui/page/container";
-import { PageButton } from "../ui/page/button";
-import DeleteButton from "../ui/deleteButton";
 import { UploadButton } from "../uploadthing";
-import { PageBadge } from "../ui/page/badge";
-import { Input } from "../ui/shadcn/input";
 import { OfferBadge } from "./coachOffer";
-import { trpc } from "@/lib/trpc/client";
-import { cn, isCUID } from "@/lib/utils";
-import PageText from "../ui/page/text";
 import generateCircle from "./utils";
-import Title from "../title";
-import { env } from "@/env";
 
 type CoachCreationProps = {
   userId: string;

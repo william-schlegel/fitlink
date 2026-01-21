@@ -1,12 +1,12 @@
-import { getLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 
-import { ConvexClientProvider } from "@/lib/convex/provider";
 import { ErrorProviders } from "@/components/providers";
-import { TRPCProvider } from "@/lib/trpc/provider";
 import { getActualUser } from "@/lib/auth/server";
-import Navbar from "../components/navbar";
+import { ConvexClientProvider } from "@/lib/convex/provider";
+import { TRPCProvider } from "@/lib/trpc/provider";
 import Footer from "../components/footer";
+import Navbar from "../components/navbar";
 import "./globals.css";
 
 import { Toaster } from "@/components/ui/shadcn/sonner";

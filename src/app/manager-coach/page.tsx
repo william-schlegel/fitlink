@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 
 import { getTranslations } from "next-intl/server";
 
-import SelectCoachManager from "./selectCoachManager";
 import Title from "@/components/title";
+import SelectCoachManager from "./selectCoachManager";
 
 export default async function ManagerCoachPage({
   searchParams,

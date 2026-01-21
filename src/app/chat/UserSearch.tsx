@@ -1,24 +1,11 @@
 "use client";
 
-import { MessageCirclePlus, Search, UserIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useAction } from "convex/react";
+import { MessageCirclePlus, Search, UserIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/shadcn/input-group";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/shadcn/item";
 import {
   Avatar,
   AvatarFallback,
@@ -34,10 +21,23 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/shadcn";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/shadcn/input-group";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/shadcn/item";
 import { ScrollArea } from "@/components/ui/shadcn/scroll-area";
-import { api } from "../../../convex/_generated/api";
 import { tryCatch } from "@/lib/errors/utils";
 import { trpc } from "@/lib/trpc/client";
+import { api } from "../../../convex/_generated/api";
 
 type UserSearchProps = {
   currentUserId: string;
@@ -84,16 +84,12 @@ export function UserSearch({ currentUserId }: UserSearchProps) {
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={setOpen}
-      modal
-    >
+    <Dialog open={open} onOpenChange={setOpen} modal>
       <DialogTrigger>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" asChild >
+              <Button variant="ghost" size="icon" asChild>
                 <Search />
               </Button>
             </TooltipTrigger>
@@ -105,7 +101,6 @@ export function UserSearch({ currentUserId }: UserSearchProps) {
       </DialogTrigger>
 
       <DialogContent size="sm">
-
         <DialogTitle>{t("search-users")}</DialogTitle>
         <Field>
           <InputGroup>
@@ -157,7 +152,9 @@ export function UserSearch({ currentUserId }: UserSearchProps) {
                       </Avatar>
                     </ItemMedia>
                     <ItemContent>
-                      <ItemTitle className="font-semibold">{user.name}</ItemTitle>
+                      <ItemTitle className="font-semibold">
+                        {user.name}
+                      </ItemTitle>
                       {user.email && (
                         <ItemDescription>{user.email}</ItemDescription>
                       )}

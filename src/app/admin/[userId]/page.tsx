@@ -2,10 +2,10 @@ import { getTranslations } from "next-intl/server";
 
 import { BuildingIcon, HomeIcon, MapPinIcon, UserIcon } from "lucide-react";
 
+import Title from "@/components/title";
+import CardGroup from "@/components/ui/cardGroup";
 import { Card, CardHeader, CardTitle } from "@/components/ui/shadcn";
 import { getAdminData } from "@/server/api/routers/dashboard";
-import CardGroup from "@/components/ui/cardGroup";
-import Title from "@/components/title";
 
 export default async function AdminDashboard() {
   const adminData = await getAdminData();

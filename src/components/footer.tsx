@@ -1,10 +1,11 @@
 "use client";
 
-import { siYoutube, siX, siFacebook } from "simple-icons";
-import { useTranslations } from "next-intl";
-import { Stars } from "lucide-react";
 import { format } from "date-fns";
+import { Stars } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { siFacebook, siX, siYoutube } from "simple-icons";
 
+import { Button } from "./ui/shadcn";
 import {
   Item,
   ItemContent,
@@ -14,7 +15,6 @@ import {
   ItemMedia,
   ItemTitle,
 } from "./ui/shadcn/item";
-import { Button } from "./ui/shadcn";
 
 export default function Footer() {
   const t = useTranslations("common");

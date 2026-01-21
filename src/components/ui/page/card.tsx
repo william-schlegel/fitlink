@@ -101,10 +101,10 @@ function PageCardFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 export {
   PageCard,
-  PageCardHeader,
-  PageCardFooter,
-  PageCardTitle,
   PageCardAction,
-  PageCardDescription,
   PageCardContent,
+  PageCardDescription,
+  PageCardFooter,
+  PageCardHeader,
+  PageCardTitle,
 };

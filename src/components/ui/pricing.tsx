@@ -1,9 +1,11 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { type ReactNode, useState } from "react";
 
+import { Badge } from "@/components/ui/shadcn/badge";
+import { Button } from "@/components/ui/shadcn/button";
 import {
   Card,
   CardContent,
@@ -11,11 +13,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/shadcn/card";
-import { GetPricingById } from "@/server/api/routers/pricing";
-import { Button } from "@/components/ui/shadcn/button";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { ButtonGroup } from "./shadcn/button-group";
 import { cn } from "@/lib/utils";
+import { GetPricingById } from "@/server/api/routers/pricing";
+import { ButtonGroup } from "./shadcn/button-group";
 
 type Props = Readonly<{
   data: GetPricingById;

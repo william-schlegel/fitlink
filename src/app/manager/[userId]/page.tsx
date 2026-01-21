@@ -1,7 +1,7 @@
-import { redirect, RedirectType } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 import { startOfToday } from "date-fns";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { redirect, RedirectType } from "next/navigation";
 
 import {
   BuildingIcon,
@@ -19,6 +19,8 @@ import {
   ShowEventCard,
   UpdateEvent,
 } from "@/components/modals/manageEvent";
+import Title from "@/components/title";
+import CardGroup from "@/components/ui/cardGroup";
 import {
   Badge,
   Button,
@@ -27,21 +29,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/shadcn";
+import { Alert, AlertTitle } from "@/components/ui/shadcn/alert";
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemTitle,
 } from "@/components/ui/shadcn/item";
+import { getActualUser } from "@/lib/auth/server";
+import { getToday } from "@/lib/dates/serverDayName";
+import { formatDateLocalized } from "@/lib/formatDate";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getManagerDataForUserId } from "@/server/api/routers/dashboard";
 import { getClubDailyPlanning } from "@/server/api/routers/planning";
-import { Alert, AlertTitle } from "@/components/ui/shadcn/alert";
-import { formatDateLocalized } from "@/lib/formatDate";
-import { getToday } from "@/lib/dates/serverDayName";
-import { createTrpcCaller } from "@/lib/trpc/caller";
-import CardGroup from "@/components/ui/cardGroup";
-import { getActualUser } from "@/lib/auth/server";
-import Title from "@/components/title";
 /***
  *
  *  Manager dashboard
@@ -210,7 +210,10 @@ async function DailyPlanning({ clubId }: { clubId: string }) {
       </h4>
       <div className="flex shrink-0 flex-wrap items-start gap-2 p-2">
         {planning.planningActivities.map((activity) => (
-          <div key={activity.id} className="border border-border p-2 bg-background text-foreground">
+          <div
+            key={activity.id}
+            className="border border-border p-2 bg-background text-foreground"
+          >
             <p>
               <span className="text-xs">{activity.startTime}</span>
               {" ("}

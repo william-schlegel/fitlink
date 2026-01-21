@@ -1,32 +1,32 @@
 import z from "zod";
 
 import {
+  addCoachToClub,
+  createSiteForClub,
+  createClub as dalCreateClub,
+  deleteClub as dalDeleteClub,
   getClubById as dalGetClubById,
+  updateClub as dalUpdateClub,
+  updateClubActivities as dalUpdateClubActivities,
+  updateClubCalendar as dalUpdateClubCalendar,
+  getAllClubs,
+  getClubCoachRelation,
+  getClubForUpdate,
   getClubPagesForNav,
   getClubsForManager,
-  getAllClubs,
-  getClubForUpdate,
-  createClub as dalCreateClub,
-  createSiteForClub,
-  updateClub as dalUpdateClub,
-  updateClubConvexRoomId,
-  updateClubCalendar as dalUpdateClubCalendar,
-  deleteClub as dalDeleteClub,
-  updateClubActivities as dalUpdateClubActivities,
-  getClubCoachRelation,
-  addCoachToClub,
   getUserWithPricingFeatures,
+  updateClubConvexRoomId,
 } from "@/db/dal";
+import { createClubRoomInConvex } from "@/lib/convex/server";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
 import {
-  requireAdminOrSelf,
   requireAdminOrOwner,
+  requireAdminOrSelf,
 } from "@/server/lib/userTools";
-import { createClubRoomInConvex } from "@/lib/convex/server";
 
 export const clubRouter = createTRPCRouter({
   getClubById: protectedProcedure

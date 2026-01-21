@@ -2,6 +2,9 @@ import { and, desc, eq, lte } from "drizzle-orm";
 
 import { endOfDay } from "date-fns";
 
+import { db } from "@/db";
+import { room, site } from "@/db/schema/club";
+import { dayNameEnum } from "@/db/schema/enums";
 import {
   dayOpeningTime,
   openingCalendar,
@@ -9,9 +12,6 @@ import {
   openingCalendarRooms,
   openingCalendarSites,
 } from "@/db/schema/planning";
-import { dayNameEnum } from "@/db/schema/enums";
-import { room, site } from "@/db/schema/club";
-import { db } from "@/db";
 
 // ==================== CALENDAR QUERIES ====================
 

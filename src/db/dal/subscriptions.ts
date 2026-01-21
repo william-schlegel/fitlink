@@ -1,13 +1,13 @@
 import { asc, eq, inArray } from "drizzle-orm";
 
+import { db } from "@/db";
+import { activity, activityGroup, club, room, site } from "@/db/schema/club";
 import {
   subscriptionModeEnum,
   subscriptionRestrictionEnum,
 } from "@/db/schema/enums";
-import { activityGroup, club, room, site, activity } from "@/db/schema/club";
 import { subscription } from "@/db/schema/subscription";
 import { isCUID } from "@/lib/utils";
-import { db } from "@/db";
 
 // ==================== SUBSCRIPTION QUERIES ====================
 

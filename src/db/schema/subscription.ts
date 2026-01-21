@@ -1,15 +1,17 @@
+import { createId } from "@paralleldrive/cuid2";
+import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
+  integer,
   pgTable,
+  real,
   text,
   timestamp,
-  real,
-  integer,
 } from "drizzle-orm/pg-core";
-import { createId } from "@paralleldrive/cuid2";
-import { relations } from "drizzle-orm";
 
+import { user } from "./auth";
+import { activity, activityGroup, club, room, site } from "./club";
 import {
   dayNameEnum,
   featureEnum,
@@ -17,9 +19,7 @@ import {
   subscriptionModeEnum,
   subscriptionRestrictionEnum,
 } from "./enums";
-import { activity, activityGroup, club, room, site } from "./club";
 import { userMemberToSubscription } from "./user";
-import { user } from "./auth";
 
 export const paiement = pgTable(
   "Paiement",

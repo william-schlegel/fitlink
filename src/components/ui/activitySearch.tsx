@@ -1,28 +1,18 @@
 "use client";
 
-import { useDebounceValue } from "usehooks-ts";
+import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { useDebounceValue } from "usehooks-ts";
 
-import {
-  Field,
-  FieldContent,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "./shadcn";
+import { trpc } from "@/lib/trpc/client";
+import { cn } from "@/lib/utils";
+import { Field, FieldContent, FieldError, FieldLabel } from "./shadcn";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "./shadcn/input-group";
-import { Popover, PopoverContent } from "./shadcn/popover";
-import { Button } from "@/components/ui/shadcn/button";
-import { Label } from "@/components/ui/shadcn/label";
-import { Input } from "@/components/ui/shadcn/input";
-import { trpc } from "@/lib/trpc/client";
-import { cn } from "@/lib/utils";
 
 type Props = {
   label?: string;

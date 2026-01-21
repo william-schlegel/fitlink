@@ -1,19 +1,18 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 
+import createLink from "@/lib/createLink";
+import { cn } from "@/lib/utils";
 import {
   Field,
   FieldLabel,
   Select,
   SelectContent,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "./ui/shadcn";
-import createLink from "@/lib/createLink";
-import { cn } from "@/lib/utils";
 
 type SelectClubProps = {
   clubId: string;

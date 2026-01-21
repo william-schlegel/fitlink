@@ -3,10 +3,10 @@ import { notFound } from "next/navigation";
 import { ActivityGroupDisplayElement } from "@/components/sections/activities";
 import { ActivityDisplayCard } from "@/components/sections/activity";
 import PageNavigation from "@/components/sections/pageNavigation";
-import PageContainer from "@/components/ui/page/container";
 import { TThemes } from "@/components/themeSelector";
-import { createTrpcCaller } from "@/lib/trpc/caller";
 import Title from "@/components/title";
+import PageContainer from "@/components/ui/page/container";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { isCUID } from "@/lib/utils";
 
 export default async function ActivityGroup({

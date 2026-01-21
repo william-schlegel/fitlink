@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
+import Title from "@/components/title";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import FormAccount from "./formAccount";
-import Title from "@/components/title";
 
 export default async function Account({
   params,

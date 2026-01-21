@@ -3,6 +3,8 @@ import Link from "next/link";
 
 import { ExternalLink } from "lucide-react";
 
+import { DeleteUser, UpdateUser } from "@/components/modals/manageUser";
+import CardGroup from "@/components/ui/cardGroup";
 import {
   Badge,
   Button,
@@ -10,10 +12,8 @@ import {
   CardContent,
   CardHeader,
 } from "@/components/ui/shadcn";
-import { DeleteUser, UpdateUser } from "@/components/modals/manageUser";
-import { getUserFullById } from "@/server/api/routers/users";
-import CardGroup from "@/components/ui/cardGroup";
 import { formatMoney } from "@/lib/formatNumber";
+import { getUserFullById } from "@/server/api/routers/users";
 
 type UserContentProps = {
   userId: string;

@@ -2,12 +2,12 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import superjson from "superjson";
 
 import { toast } from "sonner";
 
-import { AppError, ErrorCode, NetworkError, AuthError } from "@/lib/errors";
+import { AppError, AuthError, ErrorCode, NetworkError } from "@/lib/errors";
 import { logger } from "@/lib/errors/logger";
 
 import { trpc } from "./client";

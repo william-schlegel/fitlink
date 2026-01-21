@@ -3,12 +3,12 @@ import Link from "next/link";
 
 import { PageSectionModel, PageTarget } from "@/lib/sections/data";
 
-import { Fragment, useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
+import { Fragment, useEffect, useState } from "react";
 
-import { Button, Collapsible, CollapsibleContent } from "../ui/shadcn";
 import { PageButton } from "../ui/page/button";
+import { Button, Collapsible, CollapsibleContent } from "../ui/shadcn";
 
 type PageProps = {
   id: string;

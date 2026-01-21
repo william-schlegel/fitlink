@@ -1,6 +1,6 @@
 import convert from "color-convert";
 
-import type { RGB, HSL, HSV, HWB, CMYK, XYZ, LAB, LCH } from "color-convert";
+import type { CMYK, HSL, HSV, HWB, LAB, LCH } from "color-convert";
 
 // Color space types as arrays
 type RGBArray = [number, number, number]; // [0-255, 0-255, 0-255]

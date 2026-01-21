@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
 import FindClub from "@/components/sections/findClub";
-import { createTrpcCaller } from "@/lib/trpc/caller";
 import Title from "@/components/title";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 
 export default async function Subscribe({
   params,

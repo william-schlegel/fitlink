@@ -1,21 +1,20 @@
-import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { redirect, RedirectType } from "next/navigation";
 
 import { ChevronLeft } from "lucide-react";
 
 import {
   LayoutPage,
-  LayoutPageMain,
   LayoutPageList,
+  LayoutPageMain,
 } from "@/components/layoutPage";
-import { getSitesForClub } from "@/server/api/routers/sites";
 import { CreateSite } from "@/components/modals/manageSite";
-import createLink, { createHref } from "@/lib/createLink";
 import LockedButton from "@/components/ui/lockedButton";
-import { createTrpcCaller } from "@/lib/trpc/caller";
 import { Button } from "@/components/ui/shadcn";
+import createLink, { createHref } from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import SiteContent from "./siteContent";
 
 export default async function ManageSites({

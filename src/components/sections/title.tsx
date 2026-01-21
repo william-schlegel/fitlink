@@ -1,25 +1,23 @@
 "use client";
 
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
-import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { startTransition, useEffect, useState } from "react";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 
 import { Trash } from "lucide-react";
 
 import { toast } from "sonner";
 
-import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/shadcn/field";
-import ThemeSelector, { TThemes } from "../themeSelector";
 import { Spinner } from "@/components/ui/shadcn/spinner";
-import { Textarea } from "../ui/shadcn/textarea";
-import DeleteButton from "../ui/deleteButton";
-import Confirmation from "../ui/confirmation";
-import { UploadButton } from "../uploadthing";
-import { getButtonSize } from "../ui/modal";
-import { Input } from "../ui/shadcn/input";
-import ButtonIcon from "../ui/buttonIcon";
 import { trpc } from "@/lib/trpc/client";
+import ThemeSelector, { TThemes } from "../themeSelector";
+import Confirmation from "../ui/confirmation";
+import DeleteButton from "../ui/deleteButton";
 import { Button } from "../ui/shadcn";
+import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/shadcn/field";
+import { Input } from "../ui/shadcn/input";
+import { Textarea } from "../ui/shadcn/textarea";
+import { UploadButton } from "../uploadthing";
 
 type TitleCreationProps = {
   clubId: string;

@@ -1,8 +1,8 @@
 "use client";
 
-import { startTransition, useEffect, useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useTranslations } from "next-intl";
+import { startTransition, useEffect, useState } from "react";
 
 import {
   Avatar,
@@ -14,14 +14,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/shadcn";
+import { formatDateLocalized } from "@/lib/formatDate";
+import { trpc } from "@/lib/trpc/client";
+import { api } from "../../../../../convex/_generated/api";
+import { Id } from "../../../../../convex/_generated/dataModel";
 import {
   NotificationForMessage,
   NotificationMessage,
 } from "./notificationMessage";
-import { Id } from "../../../../../convex/_generated/dataModel";
-import { api } from "../../../../../convex/_generated/api";
-import { formatDateLocalized } from "@/lib/formatDate";
-import { trpc } from "@/lib/trpc/client";
 import { FromTo } from "./types";
 
 type NotificationContentProps = {

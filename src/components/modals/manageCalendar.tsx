@@ -1,12 +1,21 @@
 "use client";
 
-import { startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { startTransition, useEffect, useState } from "react";
 
 import { CalendarPlus, Plus } from "lucide-react";
 
 import { toast } from "sonner";
 
+import { DayName, DAYS } from "@/lib/dates/data";
+import { fieldSet } from "@/lib/fieldGetSet";
+import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
+import { trpc } from "@/lib/trpc/client";
+import ButtonIcon from "../ui/buttonIcon";
+import Modal from "../ui/modal";
+import { Checkbox } from "../ui/shadcn/checkbox";
+import { Field, FieldLabel } from "../ui/shadcn/field";
+import { Input } from "../ui/shadcn/input";
 import {
   Table,
   TableBody,
@@ -15,15 +24,6 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/shadcn/table";
-import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
-import { Field, FieldLabel } from "../ui/shadcn/field";
-import { Checkbox } from "../ui/shadcn/checkbox";
-import { DayName, DAYS } from "@/lib/dates/data";
-import { fieldSet } from "@/lib/fieldGetSet";
-import { Input } from "../ui/shadcn/input";
-import ButtonIcon from "../ui/buttonIcon";
-import { trpc } from "@/lib/trpc/client";
-import Modal from "../ui/modal";
 
 type WorkingHoursSchema = {
   opening: string;

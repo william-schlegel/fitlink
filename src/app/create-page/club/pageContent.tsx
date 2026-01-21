@@ -1,33 +1,31 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
 import Link from "next/link";
+import { useMemo } from "react";
 
 import { useRouter } from "next/navigation";
 
 import { ExternalLink } from "lucide-react";
 
-import Head from "next/head";
-
 import { toast } from "sonner";
 
-import { ActivityGroupCreation } from "@/components/sections/activities";
 import { DeletePage, UpdatePage } from "@/components/modals/managePage";
-import { ButtonGroup } from "@/components/ui/shadcn/button-group";
-import { PlanningCreation } from "@/components/sections/planning";
+import { ActivityGroupCreation } from "@/components/sections/activities";
 import { ActivityCreation } from "@/components/sections/activity";
-import { usePageSection } from "@/lib/sections/useGetSection";
-import { OfferCreation } from "@/components/sections/offers";
-import { TitleCreation } from "@/components/sections/title";
 import { HeroCreation } from "@/components/sections/hero";
-import PublishPageButton from "../coach/publisPageButton";
-import { Spinner } from "@/components/ui/shadcn/spinner";
-import { PageSectionModel } from "@/lib/sections/data";
+import { OfferCreation } from "@/components/sections/offers";
+import { PlanningCreation } from "@/components/sections/planning";
+import { TitleCreation } from "@/components/sections/title";
 import { Button } from "@/components/ui/shadcn";
+import { ButtonGroup } from "@/components/ui/shadcn/button-group";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import createLink from "@/lib/createLink";
+import { PageSectionModel } from "@/lib/sections/data";
+import { usePageSection } from "@/lib/sections/useGetSection";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
+import PublishPageButton from "../coach/publisPageButton";
 
 type PageContentProps = {
   pageId: string;

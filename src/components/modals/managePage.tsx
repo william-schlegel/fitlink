@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 import {
   Controller,
   Path,
@@ -7,8 +9,6 @@ import {
   SubmitHandler,
   useForm,
 } from "react-hook-form";
-import { useTranslations } from "next-intl";
-import { useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -16,20 +16,19 @@ import { Pencil, Trash } from "lucide-react";
 
 import { toast } from "sonner";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
+import createLink from "@/lib/createLink";
 import {
   PAGE_TARGET_LIST,
   PageTarget,
   TARGET_SECTIONS,
 } from "@/lib/sections/data";
 import { usePageSection } from "@/lib/sections/useGetSection";
-import { Spinner } from "@/components/ui/shadcn/spinner";
-import Confirmation from "../ui/confirmation";
-import { getButtonSize } from "../ui/modal";
-import createLink from "@/lib/createLink";
-import SimpleForm from "../ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
+import Confirmation from "../ui/confirmation";
 import Modal from "../ui/modal";
+import SimpleForm from "../ui/simpleform";
 
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/shadcn";
 

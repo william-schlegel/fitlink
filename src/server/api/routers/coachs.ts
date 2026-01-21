@@ -1,61 +1,61 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { db } from "@/db";
 import {
+  createCertification as dalCreateCertification,
+  createCoachOffer as dalCreateCoachOffer,
+  createModule as dalCreateModule,
+  createOrganism as dalCreateOrganism,
+  deleteModule as dalDeleteModule,
+  deleteOrganism as dalDeleteOrganism,
   // Coaching
   getCoachById as dalGetCoachById,
-  getSelectedModulesForCoach,
-  getCoachHomePage,
-  getCoachsFromDistance,
-  getAllCoaches,
   getCoachsForClub as dalGetCoachsForClub,
-  getCoachData,
-  getOfferById,
-  getOfferWithDetails,
-  getCoachOffers,
-  getOffersForCompanies,
-  createCoachOffer as dalCreateCoachOffer,
-  updateCoachOffer as dalUpdateCoachOffer,
-  deleteCoachOffer,
   getOfferActivityByName as dalGetOfferActivityByName,
-  getUserWithPricingForOffer,
+  updateCertification as dalUpdateCertification,
+  updateCoachOffer as dalUpdateCoachOffer,
+  updateModule as dalUpdateModule,
+  updateOrganism as dalUpdateOrganism,
+  deleteCertification,
+  deleteCoachOffer,
+  deleteModuleActivityGroups,
+  deleteOrganismModuleLinks,
+  deleteSelectedModulesForCertification,
+  getAllCoaches,
   // Certifications
   getCertificationById,
-  getCertificationsForCoach,
-  getCoachWithCertifications,
-  getSelectedModulesForCertifications,
-  createCertification as dalCreateCertification,
-  updateCertification as dalUpdateCertification,
-  deleteCertification,
-  getCoachId,
-  getModulesByIds,
-  insertSelectedModulesForCoach,
-  deleteSelectedModulesForCertification,
-  getCertificationOrganisms,
   getCertificationOrganismById,
-  createOrganism as dalCreateOrganism,
-  updateOrganism as dalUpdateOrganism,
-  deleteOrganism as dalDeleteOrganism,
-  createModule as dalCreateModule,
-  updateModule as dalUpdateModule,
-  deleteModule as dalDeleteModule,
-  linkModuleToOrganism,
-  deleteOrganismModuleLinks,
-  updateActivitiesForModule,
+  getCertificationOrganisms,
+  getCertificationsForCoach,
+  getCoachData,
+  getCoachHomePage,
+  getCoachId,
+  getCoachOffers,
+  getCoachsFromDistance,
+  getCoachWithCertifications,
+  getModulesByIds,
+  getOfferById,
+  getOffersForCompanies,
+  getOfferWithDetails,
+  getSelectedModulesForCertifications,
+  getSelectedModulesForCoach,
+  getUserWithPricingForOffer,
   insertModuleActivityGroups,
-  deleteModuleActivityGroups,
+  insertSelectedModulesForCoach,
+  linkModuleToOrganism,
+  updateActivitiesForModule,
 } from "@/db/dal";
+import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
+import { DEFAULT_RANGE, LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { calculateDistance } from "@/lib/distance";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
-import { LATITUDE, LONGITUDE, DEFAULT_RANGE } from "@/lib/defaultValues";
-import { calculateDistance } from "@/lib/distance";
-import { isAdmin } from "@/server/lib/userTools";
 import { isCUID } from "@/lib/utils";
-import { db } from "@/db";
+import { isAdmin } from "@/server/lib/userTools";
 
 const CertificationData = z.object({
   id: z.cuid2(),

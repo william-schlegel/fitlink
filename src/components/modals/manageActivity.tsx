@@ -1,8 +1,8 @@
 "use client";
 
-import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
-import { Fragment, startTransition, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { startTransition, useEffect, useState } from "react";
+import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
 
 import { useRouter } from "next/navigation";
 
@@ -10,6 +10,13 @@ import { CalendarX, Pencil, Plus, Trash } from "lucide-react";
 
 import { toast } from "sonner";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
+import createLink from "@/lib/createLink";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import Confirmation from "../ui/confirmation";
+import Modal from "../ui/modal";
+import { Checkbox } from "../ui/shadcn/checkbox";
 import {
   Field,
   FieldError,
@@ -17,26 +24,19 @@ import {
   FieldLabel,
   FieldSet,
 } from "../ui/shadcn/field";
-import { Spinner } from "@/components/ui/shadcn/spinner";
-import Modal, { getButtonSize } from "../ui/modal";
-import { Checkbox } from "../ui/shadcn/checkbox";
-import Confirmation from "../ui/confirmation";
 import { Input } from "../ui/shadcn/input";
-import createLink from "@/lib/createLink";
-import { trpc } from "@/lib/trpc/client";
-import { isCUID } from "@/lib/utils";
 
 import {
   Button,
   type ButtonSize,
   type ButtonVariant,
 } from "@/components/ui/shadcn/button";
+import { Separator } from "@/components/ui/shadcn/separator";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "../ui/shadcn/input-group";
-import { Separator } from "@/components/ui/shadcn/separator";
 
 type AddActivityProps = {
   userId: string;

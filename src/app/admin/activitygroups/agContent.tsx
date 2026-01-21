@@ -6,8 +6,8 @@ import { useMemo } from "react";
 import { Star } from "lucide-react";
 
 import { DeleteGroup, UpdateGroup } from "@/components/modals/manageActivity";
-import { Item, ItemActions, ItemContent } from "@/components/ui/shadcn/item";
 import { Badge } from "@/components/ui/shadcn";
+import { Item, ItemActions, ItemContent } from "@/components/ui/shadcn/item";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 

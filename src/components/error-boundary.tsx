@@ -1,8 +1,9 @@
 "use client";
 
-import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 
+import { Button } from "@/components/ui/shadcn/button";
 import {
   Card,
   CardContent,
@@ -10,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/shadcn/card";
-import { Button } from "@/components/ui/shadcn/button";
 import { AppError, isAppError } from "@/lib/errors";
 import { logger } from "@/lib/errors/logger";
 

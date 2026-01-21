@@ -1,24 +1,24 @@
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { ChevronLeft } from "lucide-react";
 
 import {
+  LayoutPage,
+  LayoutPageList,
+  LayoutPageMain,
+} from "@/components/layoutPage";
+import {
   AddCoachToClub,
   CoachDataPresentation,
 } from "@/components/modals/manageClub";
-import {
-  LayoutPage,
-  LayoutPageMain,
-  LayoutPageList,
-} from "@/components/layoutPage";
-import createLink, { createHref } from "@/lib/createLink";
-import { createTrpcCaller } from "@/lib/trpc/caller";
-import { getActualUser } from "@/lib/auth/server";
 import { Button } from "@/components/ui/shadcn";
-import { CoachPlanning } from "./coachPlanning";
+import { getActualUser } from "@/lib/auth/server";
+import createLink, { createHref } from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
+import { createTrpcCaller } from "@/lib/trpc/caller";
+import { CoachPlanning } from "./coachPlanning";
 
 export default async function ManageCoachs({
   params,

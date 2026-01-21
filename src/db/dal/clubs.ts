@@ -1,10 +1,10 @@
 import { and, asc, eq, inArray } from "drizzle-orm";
 
-import { activity, club, clubCoachs, site } from "@/db/schema/club";
-import { openingCalendarClubs } from "@/db/schema/planning";
-import { page } from "@/db/schema/page";
-import { user } from "@/db/schema/auth";
 import { db } from "@/db";
+import { user } from "@/db/schema/auth";
+import { activity, club, clubCoachs, site } from "@/db/schema/club";
+import { page } from "@/db/schema/page";
+import { openingCalendarClubs } from "@/db/schema/planning";
 
 // ==================== CLUB QUERIES ====================
 

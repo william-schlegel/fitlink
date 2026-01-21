@@ -1,22 +1,32 @@
+import { createId } from "@paralleldrive/cuid2";
+import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
+  integer,
   pgTable,
+  real,
   text,
   timestamp,
-  real,
-  integer,
 } from "drizzle-orm/pg-core";
-import { createId } from "@paralleldrive/cuid2";
-import { relations } from "drizzle-orm";
 
 import {
-  coachCertification,
   certificationModule,
+  certificationModuleActivityGroups,
+  coachCertification,
   coachMarketPlace,
   coachMarketPlaceActivityGroups,
-  certificationModuleActivityGroups,
 } from "./coach";
+import { roomReservationEnum } from "./enums";
+import { page } from "./page";
+import {
+  openingCalendarClubs,
+  openingCalendarRooms,
+  openingCalendarSites,
+  planning,
+  planningActivity,
+  reservation,
+} from "./planning";
 import {
   subscription,
   subscriptionToActivity,
@@ -24,17 +34,7 @@ import {
   subscriptionToRoom,
   subscriptionToSite,
 } from "./subscription";
-import {
-  openingCalendarClubs,
-  openingCalendarSites,
-  openingCalendarRooms,
-  planning,
-  planningActivity,
-  reservation,
-} from "./planning";
 import { userCoach, userManager, userMember } from "./user";
-import { roomReservationEnum } from "./enums";
-import { page } from "./page";
 
 export const club = pgTable(
   "Club",

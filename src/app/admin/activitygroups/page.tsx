@@ -1,17 +1,17 @@
-import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { redirect, RedirectType } from "next/navigation";
 
 import { Star } from "lucide-react";
 
 import {
   LayoutPage,
-  LayoutPageMain,
   LayoutPageList,
+  LayoutPageMain,
 } from "@/components/layoutPage";
 import { NewGroup } from "@/components/modals/manageActivity";
 import { BadgeVariant } from "@/components/ui/shadcn";
-import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { AGContent } from "./agContent";
 
 export default async function ActivityGroupManagement({

@@ -2,6 +2,7 @@
 
 import { inferProcedureOutput } from "@trpc/server";
 
+import { List } from "@/app/member/[userId]/list";
 import {
   Badge,
   Card,
@@ -10,7 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/shadcn";
 import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
-import { List } from "@/app/member/[userId]/list";
 import { AppRouter } from "@/server/api/root";
 
 export default function OfferCard({

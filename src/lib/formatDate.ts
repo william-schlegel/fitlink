@@ -1,5 +1,5 @@
-import { intervalToDuration, startOfToday, format } from "date-fns";
-import { fr, enUS } from "date-fns/locale";
+import { format, intervalToDuration, startOfToday } from "date-fns";
+import { enUS, fr } from "date-fns/locale";
 
 import { Locale } from "@/i18n";
 

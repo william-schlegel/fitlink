@@ -1,9 +1,15 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import { Home, UserIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useQuery } from "convex/react";
 
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  BadgeVariant,
+} from "@/components/ui/shadcn";
 import {
   Item,
   ItemContent,
@@ -11,17 +17,11 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/shadcn/item";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  BadgeVariant,
-} from "@/components/ui/shadcn";
-import { LayoutPageLists } from "../../components/layoutPage";
-import { Id } from "../../../convex/_generated/dataModel";
-import { api } from "../../../convex/_generated/api";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
+import { api } from "../../../convex/_generated/api";
+import { Id } from "../../../convex/_generated/dataModel";
+import { LayoutPageLists } from "../../components/layoutPage";
 
 type RoomListProps = {
   userId: string;

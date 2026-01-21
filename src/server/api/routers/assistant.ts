@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 import {
+  getOffersForCompanies,
   searchClubsByActivityAndLocation,
   searchCoachesByActivityAndLocation,
-  getOffersForCompanies,
 } from "@/db/dal/coaching";
-import { createTRPCRouter, publicProcedure } from "@/lib/trpc/server";
+import { env } from "@/env";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { calculateDistance } from "@/lib/distance";
-import { env } from "@/env";
+import { createTRPCRouter, publicProcedure } from "@/lib/trpc/server";
 
 // Default search parameters
 const DEFAULT_RADIUS_KM = 20;

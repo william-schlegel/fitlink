@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
-import { LATITUDE, LONGITUDE, DEFAULT_RANGE } from "@/lib/defaultValues";
+import { DEFAULT_RANGE, LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 
 // ==================== COACH OFFER SCHEMAS ====================
 

@@ -1,11 +1,12 @@
-import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { redirect, RedirectType } from "next/navigation";
 
 import {
   CreateCertification,
   DeleteCertification,
   UpdateCertification,
 } from "@/components/modals/manageCertification";
+import Title from "@/components/title";
 import {
   Badge,
   Card,
@@ -15,11 +16,10 @@ import {
   CardTitle,
   Separator,
 } from "@/components/ui/shadcn";
-import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
-import Title from "@/components/title";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import DocButton from "./docButton";
 
 export default async function ManageCertifications({

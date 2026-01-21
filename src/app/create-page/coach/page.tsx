@@ -1,15 +1,15 @@
-import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { redirect, RedirectType } from "next/navigation";
 
 import { ExternalLink } from "lucide-react";
 
 import { CoachCreation } from "@/components/sections/coach";
+import Title from "@/components/title";
+import { Button } from "@/components/ui/shadcn";
+import { getActualUser } from "@/lib/auth/server";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import PublishPageButton from "./publisPageButton";
-import { getActualUser } from "@/lib/auth/server";
-import { Button } from "@/components/ui/shadcn";
-import Title from "@/components/title";
 
 export default async function CoachPage({
   params,

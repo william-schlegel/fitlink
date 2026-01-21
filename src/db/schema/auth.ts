@@ -1,3 +1,5 @@
+import { createId } from "@paralleldrive/cuid2";
+import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -6,13 +8,11 @@ import {
   timestamp,
   unique,
 } from "drizzle-orm/pg-core";
-import { createId } from "@paralleldrive/cuid2";
-import { relations } from "drizzle-orm";
 
-import { userCoach, userManager, userMember } from "./user";
-import { paiement, pricing } from "./subscription";
-import { reservation } from "./planning";
 import { roleEnum } from "./enums";
+import { reservation } from "./planning";
+import { paiement, pricing } from "./subscription";
+import { userCoach, userManager, userMember } from "./user";
 
 export const user = pgTable(
   "user",

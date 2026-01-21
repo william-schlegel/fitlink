@@ -1,23 +1,23 @@
-import { redirect, RedirectType } from "next/navigation";
 import { inferProcedureOutput } from "@trpc/server";
 import { getTranslations } from "next-intl/server";
+import { redirect, RedirectType } from "next/navigation";
 
+import {
+  LayoutPage,
+  LayoutPageList,
+  LayoutPageMain,
+} from "@/components/layoutPage";
 import {
   AddCoachToClub,
   CoachDataPresentation,
 } from "@/components/modals/manageClub";
-import {
-  LayoutPage,
-  LayoutPageMain,
-  LayoutPageList,
-} from "@/components/layoutPage";
-import SelectClub from "../../../components/selectClub";
-import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
-import { AppRouter } from "@/server/api/root";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { isCUID } from "@/lib/utils";
+import { AppRouter } from "@/server/api/root";
+import SelectClub from "../../../components/selectClub";
 
 export default async function CoachManagementForClub({
   searchParams,

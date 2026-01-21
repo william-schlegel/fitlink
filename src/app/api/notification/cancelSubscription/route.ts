@@ -1,17 +1,17 @@
+import { TRPCError } from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/http";
 import { NextResponse } from "next/server";
-import { TRPCError } from "@trpc/server";
 
 import { getTranslations } from "next-intl/server";
 
+import { getSession } from "@/lib/auth/server";
 import {
   createNotificationInConvex,
   getNotificationByIdInConvex,
   updateNotificationInConvex,
 } from "@/lib/convex/server";
-import { Id } from "../../../../../convex/_generated/dataModel";
-import { getSession } from "@/lib/auth/server";
 import { isCUID } from "@/lib/utils";
+import { Id } from "../../../../../convex/_generated/dataModel";
 
 type ResponseData = {
   success?: string;

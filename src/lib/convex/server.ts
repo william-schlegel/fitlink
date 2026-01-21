@@ -1,9 +1,9 @@
 import { ConvexHttpClient } from "convex/browser";
 
+import { env } from "@/env";
+import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { CreateNotificationInConvexArgs } from "./types";
-import { api } from "../../../convex/_generated/api";
-import { env } from "@/env";
 
 const convexHttpClient = new ConvexHttpClient(
   env.CONVEX_URL ?? process.env.CONVEX_URL ?? "",

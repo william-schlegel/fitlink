@@ -1,24 +1,26 @@
 "use client";
 
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Map, { Layer, Marker, Source, useMap } from "react-map-gl/mapbox";
 import { useHover, useLocalStorage } from "usehooks-ts";
-import { useTranslations } from "next-intl";
-import "mapbox-gl/dist/mapbox-gl.css";
-import Link from "next/link";
 
 import { inferProcedureOutput } from "@trpc/server";
 
 import { ExternalLink, MapPin, Search } from "lucide-react";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/shadcn/table";
+import { env } from "@/env";
+import { cssVarToHex } from "@/lib/colorConversion";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { trpc } from "@/lib/trpc/client";
+import { cn } from "@/lib/utils";
+import { AppRouter } from "@/server/api/root";
+import { type TThemes } from "../themeSelector";
+import AddressSearch, { AddressData } from "../ui/addressSearch";
+import ButtonIcon from "../ui/buttonIcon";
+import Rating from "../ui/rating";
 import {
   Badge,
   Button,
@@ -32,17 +34,15 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "../ui/shadcn/input-group";
-import AddressSearch, { AddressData } from "../ui/addressSearch";
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import { cssVarToHex } from "@/lib/colorConversion";
-import { type TThemes } from "../themeSelector";
-import { AppRouter } from "@/server/api/root";
-import ButtonIcon from "../ui/buttonIcon";
-import { trpc } from "@/lib/trpc/client";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/shadcn/table";
 import generateCircle from "./utils";
-import Rating from "../ui/rating";
-import { cn } from "@/lib/utils";
-import { env } from "@/env";
 
 type FindCoachProps = {
   address?: string;

@@ -1,7 +1,9 @@
 import { getLocale, getTranslations } from "next-intl/server";
 
-import { subscriptionRestrictionEnum } from "@/db/schema/enums";
-import { subscriptionModeEnum } from "@/db/schema/enums";
+import {
+  subscriptionModeEnum,
+  subscriptionRestrictionEnum,
+} from "@/db/schema/enums";
 
 export async function getDescription(
   mode: (typeof subscriptionModeEnum.enumValues)[number] | null | undefined,

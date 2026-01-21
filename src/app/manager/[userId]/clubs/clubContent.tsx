@@ -12,21 +12,28 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import {
-  useState,
-  useEffect,
-  ReactNode,
-  startTransition,
-  useMemo,
-} from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  ReactNode,
+  startTransition,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { CalendarX, ChevronRight, Euro, User } from "lucide-react";
 
 import { toast } from "sonner";
 
+import CalendarWeek from "@/components/calendarWeek";
+import AddActivity from "@/components/modals/manageActivity";
+import { CreateClubCalendar } from "@/components/modals/manageCalendar";
+import { DeleteClub, UpdateClub } from "@/components/modals/manageClub";
+import CollapsableGroup from "@/components/ui/collapsableGroup";
+import DeleteButton from "@/components/ui/deleteButton";
+import LockedButton from "@/components/ui/lockedButton";
 import {
   Badge,
   Button,
@@ -37,17 +44,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/shadcn";
-import { CreateClubCalendar } from "@/components/modals/manageCalendar";
-import { DeleteClub, UpdateClub } from "@/components/modals/manageClub";
-import CollapsableGroup from "@/components/ui/collapsableGroup";
-import AddActivity from "@/components/modals/manageActivity";
 import { Spinner } from "@/components/ui/shadcn/spinner";
-import LockedButton from "@/components/ui/lockedButton";
-import DeleteButton from "@/components/ui/deleteButton";
-import CalendarWeek from "@/components/calendarWeek";
 import { activityGroup } from "@/db/schema/club";
-import useUserInfo from "@/lib/useUserInfo";
 import { trpc } from "@/lib/trpc/client";
+import useUserInfo from "@/lib/useUserInfo";
 import { cn, isCUID } from "@/lib/utils";
 
 type ClubContentProps = {

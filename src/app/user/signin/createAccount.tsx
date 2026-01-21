@@ -1,13 +1,13 @@
 "use client";
 
-import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
 import { UserPlus } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 
 import { toast } from "sonner";
 
-import SimpleForm from "@/components/ui/simpleform";
 import Modal from "@/components/ui/modal";
+import SimpleForm from "@/components/ui/simpleform";
 import { trpc } from "@/lib/trpc/client";
 
 type AccountFormValues = {

@@ -1,14 +1,25 @@
 "use client";
 
-import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
-import { startTransition, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { startTransition, useEffect, useState } from "react";
+import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
 
 import { Trash } from "lucide-react";
 
 import { toast } from "sonner";
 
+import { Spinner } from "@/components/ui/shadcn/spinner";
+import { PageSectionModelEnum } from "@/db/schema/enums";
+import { usePageSection } from "@/lib/sections/useGetSection";
+import { trpc } from "@/lib/trpc/client";
+import { isCUID } from "@/lib/utils";
+import ThemeSelector, { TThemes } from "../themeSelector";
+import Confirmation from "../ui/confirmation";
+import DeleteButton from "../ui/deleteButton";
+import { PageButton } from "../ui/page/button";
+import PageContainer from "../ui/page/container";
+import PageText from "../ui/page/text";
 import {
   Button,
   Select,
@@ -18,26 +29,15 @@ import {
   SelectValue,
   Separator,
 } from "../ui/shadcn";
+import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/shadcn/field";
+import { Input } from "../ui/shadcn/input";
 import {
   InputGroup,
   InputGroupButton,
   InputGroupInput,
 } from "../ui/shadcn/input-group";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/shadcn/field";
-import { usePageSection } from "@/lib/sections/useGetSection";
-import ThemeSelector, { TThemes } from "../themeSelector";
-import { Spinner } from "@/components/ui/shadcn/spinner";
-import { PageSectionModelEnum } from "@/db/schema/enums";
 import { Textarea } from "../ui/shadcn/textarea";
-import PageContainer from "../ui/page/container";
-import { PageButton } from "../ui/page/button";
-import DeleteButton from "../ui/deleteButton";
-import Confirmation from "../ui/confirmation";
 import { UploadButton } from "../uploadthing";
-import { Input } from "../ui/shadcn/input";
-import { trpc } from "@/lib/trpc/client";
-import PageText from "../ui/page/text";
-import { isCUID } from "@/lib/utils";
 
 type HeroCreationProps = {
   clubId: string;

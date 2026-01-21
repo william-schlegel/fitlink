@@ -1,17 +1,17 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { LayoutPage, LayoutPageMain } from "@/components/layoutPage";
 import { Id } from "../../../convex/_generated/dataModel";
 
-import { MessageInput } from "./MessageInput";
 import { useUser } from "@/lib/auth/client";
+import { MessageInput } from "./MessageInput";
 import { MessageList } from "./MessageList";
-import { UserSearch } from "./UserSearch";
 import { RoomList } from "./RoomList";
+import { UserSearch } from "./UserSearch";
 
 export default function ConvexChat() {
   const searchParams = useSearchParams();

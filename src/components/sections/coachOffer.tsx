@@ -17,16 +17,16 @@ import {
 
 import Image from "next/image";
 
-import { Badge, Button, Card, CardContent, CardHeader } from "../ui/shadcn";
-import { useCoachingLevel } from "@/lib/offers/useOffers";
 import { Spinner } from "@/components/ui/shadcn/spinner";
-import { formatMoney } from "@/lib/formatNumber";
-import SendMessage from "../modals/sendMessage";
-import { PageBadge } from "../ui/page/badge";
 import { useUser } from "@/lib/auth/client";
+import { formatMoney } from "@/lib/formatNumber";
+import { useCoachingLevel } from "@/lib/offers/useOffers";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
+import SendMessage from "../modals/sendMessage";
+import { PageBadge } from "../ui/page/badge";
 import Rating from "../ui/rating";
+import { Badge, Button, Card, CardContent } from "../ui/shadcn";
 
 type CoachOfferPageProps = {
   offerId: string;

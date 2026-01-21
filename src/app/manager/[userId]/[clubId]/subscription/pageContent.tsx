@@ -1,7 +1,7 @@
 "use client";
 
-import { startTransition, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { startTransition, useEffect, useMemo, useState } from "react";
 
 import { toast } from "sonner";
 
@@ -13,24 +13,18 @@ import {
   useSubscriptionMode,
   useSubscriptionRestriction,
 } from "@/components/modals/manageSubscription";
-import {
-  Button,
-  Card,
-  Checkbox,
-  Field,
-  FieldLabel,
-} from "@/components/ui/shadcn";
+import CardGroup from "@/components/ui/cardGroup";
+import { Button, Checkbox, Field, FieldLabel } from "@/components/ui/shadcn";
+import { Alert } from "@/components/ui/shadcn/alert";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import {
   SubscriptionModeEnum,
   SubscriptionRestrictionEnum,
 } from "@/db/schema/enums";
-import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
-import { Spinner } from "@/components/ui/shadcn/spinner";
 import { formatDateLocalized } from "@/lib/formatDate";
-import { Alert } from "@/components/ui/shadcn/alert";
-import CardGroup from "@/components/ui/cardGroup";
 import { formatMoney } from "@/lib/formatNumber";
 import { trpc } from "@/lib/trpc/client";
+import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
 import { isCUID } from "@/lib/utils";
 
 type SubscriptionContentProps = {

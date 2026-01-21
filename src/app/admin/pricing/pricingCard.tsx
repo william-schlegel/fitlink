@@ -4,8 +4,8 @@ import { twMerge } from "tailwind-merge";
 
 import { Star, Trash } from "lucide-react";
 
-import { formatMoney } from "@/lib/formatNumber";
 import createLink from "@/lib/createLink";
+import { formatMoney } from "@/lib/formatNumber";
 import { Pricing } from "./page";
 
 export default function PricingCard({

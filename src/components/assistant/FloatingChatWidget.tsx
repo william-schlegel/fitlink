@@ -1,20 +1,27 @@
 "use client";
 
-import { X, Minimize2, Maximize2, Trash, Sparkles } from "lucide-react";
-import { useState, useCallback, useEffect, useRef } from "react";
-import { useTranslations, useLocale } from "next-intl";
-import Image from "next/image";
+import { Maximize2, Minimize2, Sparkles, Trash, X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import Confirmation from "@/components/ui/confirmation";
+import { Button } from "@/components/ui/shadcn/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
-import { ChatMessageList, type Message } from "./ChatMessageList";
-import { ChatInput, type ChatInputHandle } from "./ChatInput";
-import Confirmation from "@/components/ui/confirmation";
-import { Button } from "@/components/ui/shadcn/button";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarImage } from "../ui/shadcn";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "../ui/shadcn/item";
+import { ChatInput, type ChatInputHandle } from "./ChatInput";
+import { ChatMessageList, type Message } from "./ChatMessageList";
 
 type FloatingChatWidgetProps = {
   className?: string;
@@ -201,31 +208,25 @@ export function FloatingChatWidget({ className }: FloatingChatWidgetProps) {
           className={cn(
             "fixed bottom-6 right-6 z-50 flex flex-col rounded-2xl border bg-background shadow-2xl transition-all duration-300 overflow-hidden",
             isMinimized
-              ? "h-14 w-80"
+              ? "h-auto w-80"
               : "h-[600px] w-[450px] max-h-[80vh] max-w-[95vw]",
           )}
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b px-4 py-3 rounded-t-2xl bg-linear-to-r from-primary/10 to-primary/5">
-            <div className="flex items-center gap-3">
-              <div className="relative h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
-                <Image
-                  src="/images/fitlink-light.png"
-                  alt="Fitlink"
-                  width={24}
-                  height={24}
-                  className="object-contain"
-                />
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm">{t("title")}</h3>
+            <Item>
+              <ItemMedia variant="icon">
+                <Avatar>
+                  <AvatarImage src="/images/fitlink-light.png" alt="Fitlink" />
+                </Avatar>
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{t("title")}</ItemTitle>
                 {!isMinimized && (
-                  <p className="text-xs text-muted-foreground">
-                    {t("subtitle")}
-                  </p>
+                  <ItemDescription>{t("subtitle")}</ItemDescription>
                 )}
-              </div>
-            </div>
+              </ItemContent>
+            </Item>
             <div className="flex items-center gap-1">
               {!isMinimized && messages.length > 0 && (
                 <>

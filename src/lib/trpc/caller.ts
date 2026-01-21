@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 
-import { getActualUser } from "../auth/server";
 import { appRouter } from "@/server/api/root";
+import { getActualUser } from "../auth/server";
 
 export async function createTrpcCaller() {
   if (!appRouter) return;

@@ -1,5 +1,5 @@
-import { notFound } from "next/navigation";
 import Head from "next/head";
+import { notFound } from "next/navigation";
 
 import { CoachOfferPage } from "@/components/sections/coachOffer";
 import { createTrpcCaller } from "@/lib/trpc/caller";

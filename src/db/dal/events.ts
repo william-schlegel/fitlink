@@ -1,7 +1,7 @@
 import { desc, eq } from "drizzle-orm";
 
-import { event } from "@/db/schema/club";
 import { db } from "@/db";
+import { event } from "@/db/schema/club";
 
 // ==================== EVENT QUERIES ====================
 

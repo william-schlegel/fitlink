@@ -2,17 +2,16 @@ import { getTranslations } from "next-intl/server";
 
 import {
   LayoutPage,
-  LayoutPageMain,
-  LayoutPageList,
   LayoutPageContent,
+  LayoutPageList,
+  LayoutPageMain,
 } from "@/components/layoutPage";
-import { Badge, BadgeVariant } from "@/components/ui/shadcn";
-import { getAllUsers } from "@/server/api/routers/users";
 import Pagination from "@/components/ui/pagination";
+import { BadgeVariant } from "@/components/ui/shadcn";
 import { getActualUser } from "@/lib/auth/server";
-import { TUserFilter } from "./userFilter";
+import { getAllUsers } from "@/server/api/routers/users";
 import UserContent from "./userContent";
-import UserFilter from "./userFilter";
+import UserFilter, { TUserFilter } from "./userFilter";
 
 const PER_PAGE = 20;
 

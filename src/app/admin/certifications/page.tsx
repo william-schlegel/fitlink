@@ -1,25 +1,23 @@
-import { redirect, RedirectType } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { redirect, RedirectType } from "next/navigation";
 
 import Link from "next/link";
 
+import {
+  LayoutPage,
+  LayoutPageList,
+  LayoutPageMain,
+} from "@/components/layoutPage";
 import {
   CreateCertificationOrganism,
   DeleteCertificationGroup,
   UpdateCertificationGroup,
 } from "@/components/modals/manageCertification";
-import {
-  LayoutPage,
-  LayoutPageMain,
-  LayoutPageList,
-  LayoutPageContent,
-} from "@/components/layoutPage";
 import { Badge, Card, CardContent } from "@/components/ui/shadcn";
-import { Item, ItemContent } from "@/components/ui/shadcn/item";
-import createLink, { createHref } from "@/lib/createLink";
-import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getActualUser } from "@/lib/auth/server";
+import createLink, { createHref } from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
+import { createTrpcCaller } from "@/lib/trpc/caller";
 import { isCUID } from "@/lib/utils";
 
 export default async function CertificationsManagement({

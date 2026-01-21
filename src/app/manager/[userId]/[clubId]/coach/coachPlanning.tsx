@@ -4,13 +4,13 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import { Spinner } from "@/components/ui/shadcn/spinner";
-import { useDayName } from "@/lib/dates/useDayName";
 import { DayName } from "@/lib/dates/data";
+import { useDayName } from "@/lib/dates/useDayName";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 
-import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@/server/api/root";
+import type { inferRouterOutputs } from "@trpc/server";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 type CoachPlanningForClub =

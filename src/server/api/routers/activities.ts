@@ -2,41 +2,41 @@ import { z } from "zod";
 
 import { eq } from "drizzle-orm";
 
+import { db } from "@/db";
 import {
+  affectActivityToRoom,
+  createActivity,
+  createActivityGroup,
+  deleteActivity,
+  deleteActivityGroup,
+  getActivitiesForClub,
   getActivityById,
   getActivityByName,
   getActivityGroupById,
   getActivityGroupsForUser,
-  getAllActivityGroups,
-  getActivitiesForClub,
   getAllActivitiesForGroup,
+  getAllActivityGroups,
   getAllClubsForGroup,
-  createActivity,
-  updateActivity,
-  deleteActivity,
-  createActivityGroup,
-  updateActivityGroup,
-  deleteActivityGroup,
-  affectActivityToRoom,
   removeActivityFromRoom,
+  updateActivity,
+  updateActivityGroup,
 } from "@/db/dal";
-import {
-  activitySchema,
-  updateActivityGroupSchema,
-  roomActivitySchema,
-} from "@/schemas/activities";
-import {
-  requireAdmin,
-  requireAdminOrSelf,
-  requireAdminOrOwner,
-} from "@/server/lib/userTools";
+import { activityGroup } from "@/db/schema/club";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { activityGroup } from "@/db/schema/club";
-import { db } from "@/db";
+import {
+  activitySchema,
+  roomActivitySchema,
+  updateActivityGroupSchema,
+} from "@/schemas/activities";
+import {
+  requireAdmin,
+  requireAdminOrOwner,
+  requireAdminOrSelf,
+} from "@/server/lib/userTools";
 
 export const activityRouter = createTRPCRouter({
   getActivityById: protectedProcedure

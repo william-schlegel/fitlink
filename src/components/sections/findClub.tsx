@@ -1,14 +1,27 @@
 "use client";
 
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Map, { Layer, Marker, Source, useMap } from "react-map-gl/mapbox";
 import { useHover, useLocalStorage } from "usehooks-ts";
-import { useTranslations } from "next-intl";
-import "mapbox-gl/dist/mapbox-gl.css";
-import Link from "next/link";
 
 import { ExternalLink, MapPin, Search } from "lucide-react";
 
+import { env } from "@/env";
+import { cssVarToHex } from "@/lib/colorConversion";
+import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
+import { trpc } from "@/lib/trpc/client";
+import { type TThemes } from "../themeSelector";
+import AddressSearch, { AddressData } from "../ui/addressSearch";
+import ButtonIcon from "../ui/buttonIcon";
+import { Badge, Button, Field, FieldContent, FieldLabel } from "../ui/shadcn";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "../ui/shadcn/input-group";
 import {
   Table,
   TableBody,
@@ -17,20 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/shadcn/table";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "../ui/shadcn/input-group";
-import { Badge, Button, Field, FieldContent, FieldLabel } from "../ui/shadcn";
-import AddressSearch, { AddressData } from "../ui/addressSearch";
-import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
-import { cssVarToHex } from "@/lib/colorConversion";
-import { type TThemes } from "../themeSelector";
-import ButtonIcon from "../ui/buttonIcon";
-import { trpc } from "@/lib/trpc/client";
 import generateCircle from "./utils";
-import { env } from "@/env";
 
 type FindClubProps = {
   address?: string;

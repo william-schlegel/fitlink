@@ -1,27 +1,27 @@
 "use client";
 
 import {
+  Building2,
+  Dumbbell,
   ExternalLink,
+  Gift,
+  Home,
   MapPin,
   Star,
-  Dumbbell,
   Users,
-  Building2,
   Video,
-  Home,
-  Gift,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
+import { Badge } from "@/components/ui/shadcn/badge";
+import { Button } from "@/components/ui/shadcn/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/shadcn/card";
-import { Button } from "@/components/ui/shadcn/button";
-import { Badge } from "@/components/ui/shadcn/badge";
 import { formatMoney } from "@/lib/formatNumber";
 
 import type {

@@ -1,15 +1,15 @@
 import { and, eq, inArray } from "drizzle-orm";
 
+import { db, TxClient } from "@/db";
 import {
-  coachCertification,
-  selectedModuleForCoach,
-  certificationOrganism,
   certificationModule,
   certificationModuleActivityGroups,
+  certificationOrganism,
   certificationOrganismModules,
+  coachCertification,
+  selectedModuleForCoach,
 } from "@/db/schema/coach";
 import { userCoach } from "@/db/schema/user";
-import { db, TxClient } from "@/db";
 
 // ==================== CERTIFICATIONS ====================
 
