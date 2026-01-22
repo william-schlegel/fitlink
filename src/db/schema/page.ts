@@ -1,6 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
-import { boolean, index, pgTable, text } from "drizzle-orm/pg-core";
+import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 import { UserId } from "../types";
 import { club, event } from "./club";
@@ -68,6 +68,7 @@ export const page = pgTable(
     coachId: text("coach_id").unique().$type<UserId>(),
     published: boolean("published").default(false),
     eventId: text("event_id").unique(),
+    updatedAt: timestamp("updated_at").defaultNow(),
   },
   (table) => [
     index("page_club_idx").on(table.clubId),

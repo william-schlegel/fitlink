@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ActivityGroupDisplayCard } from "@/components/sections/activities";
@@ -12,6 +13,59 @@ import PageContainer from "@/components/ui/page/container";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { isCUID } from "@/lib/utils";
 
+// Revalidate this page periodically (ISR) so statically generated pages stay fresh.
+// Adjust as needed.
+export const revalidate = 60 * 60 * 24; // 24 hours
+
+export async function generateStaticParams() {
+  const caller = await createTrpcCaller();
+  if (!caller) return [] as Array<{ clubId: string; pageId: string }>;
+
+  // Expected to return pairs for routes like /presentation-page/club/[clubId]/[pageId]
+  const params = await caller.pages.listPublicClubPresentationParams();
+  return (params ?? []).filter(
+    (p) => p && isCUID(p.clubId) && isCUID(p.pageId),
+  );
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ clubId: string; pageId: string }>;
+}): Promise<Metadata> {
+  const { clubId, pageId } = await params;
+
+  // If IDs are invalid, treat as not found (noindex by default for 404s)
+  if (!isCUID(clubId) || !isCUID(pageId)) return {};
+
+  const caller = await createTrpcCaller();
+  if (!caller) return {};
+
+  const queryPage = await caller.pages.getClubPage(pageId);
+
+  // If the page doesn't exist or isn't visible/public, ensure it's not indexable.
+  // Prefer returning 404 in the page component; this metadata is a safety net.
+  if (!queryPage) {
+    return {
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const title = queryPage?.clubName ? `${queryPage.clubName}` : "Club";
+
+  return {
+    title,
+    alternates: {
+      canonical: `/presentation-page/club/${clubId}/${pageId}`,
+    },
+    robots: { index: true, follow: true },
+    openGraph: {
+      title,
+      url: `/presentation-page/club/${clubId}/${pageId}`,
+    },
+  };
+}
+
 export default async function ClubPresentation({
   params,
 }: {
@@ -23,17 +77,20 @@ export default async function ClubPresentation({
   if (!isCUID(clubId) || !isCUID(pageId)) return notFound();
   const queryPage = await caller.pages.getClubPage(pageId);
 
+  // If the page doesn't exist (or the server chooses not to return it when not public), 404.
+  if (!queryPage) return notFound();
+
   const queryClub = await caller.clubs.getClubPagesForNavByClubId(clubId);
 
   return (
-    <PageContainer theme={queryPage?.theme as TThemes}>
-      <Title title={queryPage?.clubName ?? ""} />
+    <PageContainer theme={queryPage.theme as TThemes}>
+      <Title title={queryPage.clubName ?? ""} />
       <PageNavigation
         clubId={clubId}
         logoUrl={queryClub?.logoUrl ?? ""}
         pages={queryClub?.pages ?? []}
       />
-      {queryPage?.sections.map((section) =>
+      {queryPage.sections.map((section) =>
         section.model === "HERO" ? (
           <HeroDisplay
             key={section.id}

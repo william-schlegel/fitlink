@@ -12,6 +12,8 @@ import {
   deletePage,
   deletePageSection,
   deletePageSectionElement,
+  getAllPublishedPagesForClub,
+  getAllPublishedPagesForCoach,
   getClubBasicInfo,
   getCoachDataForPage,
   getCoachUserForPage,
@@ -76,6 +78,22 @@ const PageSectionElementObject = z.object({
 export { getPagesForClub };
 
 export const pageRouter = createTRPCRouter({
+  listPublicClubPresentationParams: publicProcedure.query(async () => {
+    const pages = await getAllPublishedPagesForClub();
+    return pages.map((p) => ({
+      clubId: p.clubId,
+      pageId: p.id,
+      updatedAt: p.updatedAt,
+    }));
+  }),
+  listPublicCoachPresentationParams: publicProcedure.query(async () => {
+    const pages = await getAllPublishedPagesForCoach();
+    return pages.map((p) => ({
+      coachId: p.coachId,
+      pageId: p.id,
+      updatedAt: p.updatedAt,
+    }));
+  }),
   getPagesForManager: protectedProcedure
     .input(ZodUserId)
     .query(({ input }) => getPagesForManager(input)),

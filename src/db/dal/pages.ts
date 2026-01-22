@@ -47,6 +47,13 @@ export async function getPagesForManager(managerId: string) {
 export async function getPageForCoach(userId: UserId) {
   return db.query.page.findFirst({
     where: eq(page.coachId, userId),
+    with: {
+      coach: {
+        columns: {
+          publicName: true,
+        },
+      },
+    },
   });
 }
 
@@ -72,6 +79,25 @@ export async function getClubPage(pageId: string) {
 export async function getPublishedPagesForClub(clubId: string) {
   return db.query.page.findMany({
     where: and(eq(page.clubId, clubId), eq(page.published, true)),
+  });
+}
+
+export async function getAllPublishedPagesForCoach() {
+  return db.query.page.findMany({
+    where: and(eq(page.published, true), eq(page.target, "HOME")),
+    with: {
+      coach: {
+        with: {
+          user: true,
+        },
+      },
+    },
+  });
+}
+
+export async function getAllPublishedPagesForClub() {
+  return db.query.page.findMany({
+    where: and(eq(page.published, true)),
   });
 }
 
@@ -372,6 +398,6 @@ export async function createPageWithInitialSection(
       title: userName,
     });
 
-    return newPage[0];
+    return { ...newPage[0], coach: { publicName: userName } };
   });
 }
