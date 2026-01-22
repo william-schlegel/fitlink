@@ -12,11 +12,12 @@ import {
   CardContent,
   CardHeader,
 } from "@/components/ui/shadcn";
+import { UserId } from "@/db/types";
 import { formatMoney } from "@/lib/formatNumber";
 import { getUserFullById } from "@/server/api/routers/users";
 
 type UserContentProps = {
-  userId: string;
+  userId: UserId;
 };
 
 export default async function UserContent({ userId }: UserContentProps) {

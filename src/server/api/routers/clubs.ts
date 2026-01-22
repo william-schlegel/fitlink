@@ -17,6 +17,7 @@ import {
   getUserWithPricingFeatures,
   updateClubConvexRoomId,
 } from "@/db/dal";
+import { ZodUserId } from "@/db/types";
 import { createClubRoomInConvex } from "@/lib/convex/server";
 import {
   createTRPCRouter,
@@ -30,7 +31,7 @@ import {
 
 export const clubRouter = createTRPCRouter({
   getClubById: protectedProcedure
-    .input(z.object({ clubId: z.cuid2(), userId: z.string() }))
+    .input(z.object({ clubId: z.cuid2(), userId: ZodUserId }))
     .query(async ({ input }) => {
       if (!input.clubId || !input.userId) return null;
       const userData = await getUserWithPricingFeatures(input.userId);
@@ -64,7 +65,7 @@ export const clubRouter = createTRPCRouter({
     }),
 
   getClubsForManager: protectedProcedure
-    .input(z.string())
+    .input(ZodUserId)
     .query(async ({ input }) => {
       const userData = await getUserWithPricingFeatures(input);
       const take = userData?.pricing?.features.find(
@@ -82,7 +83,7 @@ export const clubRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         address: z.string(),
-        userId: z.string(),
+        userId: ZodUserId,
         searchAddress: z.string(),
         longitude: z.number(),
         latitude: z.number(),
@@ -192,7 +193,7 @@ export const clubRouter = createTRPCRouter({
     .input(
       z.object({
         clubId: z.cuid2(),
-        coachUserId: z.string(),
+        coachUserId: ZodUserId,
         managerId: z.string().optional(),
       }),
     )

@@ -36,6 +36,7 @@ import {
   ItemContent,
   ItemTitle,
 } from "@/components/ui/shadcn/item";
+import { UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import { getToday } from "@/lib/dates/serverDayName";
 import { formatDateLocalized } from "@/lib/formatDate";
@@ -51,7 +52,7 @@ import { getClubDailyPlanning } from "@/server/api/routers/planning";
 export default async function ManagerClubs({
   params,
 }: {
-  params: Promise<{ userId: string }>;
+  params: Promise<{ userId: UserId }>;
 }) {
   const user = await getActualUser();
   if (!user) redirect("/", RedirectType.replace);

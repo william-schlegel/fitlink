@@ -47,6 +47,7 @@ import {
   updateActivitiesForModule,
 } from "@/db/dal";
 import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
+import { ZodUserId } from "@/db/types";
 import { DEFAULT_RANGE, LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { calculateDistance } from "@/lib/distance";
 import {
@@ -68,7 +69,7 @@ const CertificationData = z.object({
 });
 
 const OfferData = z.object({
-  coachId: z.string(),
+  coachId: ZodUserId,
   id: z.cuid2(),
   name: z.string(),
   target: z.enum(coachingTargetEnum.enumValues),
@@ -97,64 +98,62 @@ const OfferData = z.object({
 });
 
 export const coachRouter = createTRPCRouter({
-  getCoachById: protectedProcedure
-    .input(z.string())
-    .query(async ({ input }) => {
-      const coach = await dalGetCoachById(input);
-      if (!coach) return null;
+  getCoachById: protectedProcedure.input(ZodUserId).query(async ({ input }) => {
+    const coach = await dalGetCoachById(input);
+    if (!coach) return null;
 
-      const certifications = coach.coachData?.certifications ?? [];
-      const certificationIds = certifications.map((c) => c.id);
-      const coachId = coach.coachData?.id;
+    const certifications = coach.coachData?.certifications ?? [];
+    const certificationIds = certifications.map((c) => c.id);
+    const coachId = coach.coachData?.id;
 
-      let selectedModules: Array<{
-        certificationId: string;
-        module: { id: string; name: string };
-      }> = [];
+    let selectedModules: Array<{
+      certificationId: string;
+      module: { id: string; name: string };
+    }> = [];
 
-      if (certificationIds.length > 0 && coachId) {
-        const modules = await getSelectedModulesForCoach(
-          coachId,
-          certificationIds,
-        );
+    if (certificationIds.length > 0 && coachId) {
+      const modules = await getSelectedModulesForCoach(
+        coachId,
+        certificationIds,
+      );
 
-        selectedModules = modules.map((sm) => ({
-          certificationId: sm.certificationId,
-          module: {
-            id: sm.module.id,
-            name: sm.module.name,
-          },
-        }));
-      }
-
-      const modulesByCertification = new Map<
-        string,
-        Array<{ id: string; name: string }>
-      >();
-      for (const sm of selectedModules) {
-        if (!modulesByCertification.has(sm.certificationId)) {
-          modulesByCertification.set(sm.certificationId, []);
-        }
-        modulesByCertification.get(sm.certificationId)!.push(sm.module);
-      }
-
-      const pages = await getCoachHomePage(coach?.id ?? "");
-      const imageData = pages[0];
-      const imgData = imageData?.sections?.[0]?.elements?.[0]?.imageUrls?.[0];
-      const imageUrl = imgData ?? coach.image ?? "/images/dummy.jpg";
-
-      const certificationModules = certifications.map((cert) => ({
-        id: cert.id,
-        name: cert.name,
-        modules: modulesByCertification.get(cert.id) ?? [],
+      selectedModules = modules.map((sm) => ({
+        certificationId: sm.certificationId,
+        module: {
+          id: sm.module.id,
+          name: sm.module.name,
+        },
       }));
+    }
 
-      return {
-        ...coach,
-        certificationModules,
-        imageUrl: imageUrl ?? "/images/dummy.jpg",
-      };
-    }),
+    const modulesByCertification = new Map<
+      string,
+      Array<{ id: string; name: string }>
+    >();
+    for (const sm of selectedModules) {
+      if (!modulesByCertification.has(sm.certificationId)) {
+        modulesByCertification.set(sm.certificationId, []);
+      }
+      modulesByCertification.get(sm.certificationId)!.push(sm.module);
+    }
+
+    const pages = await getCoachHomePage(coach?.id ?? "");
+    const imageData = pages[0];
+    const imgData = imageData?.sections?.[0]?.elements?.[0]?.imageUrls?.[0];
+    const imageUrl = imgData ?? coach.image ?? "/images/dummy.jpg";
+
+    const certificationModules = certifications.map((cert) => ({
+      id: cert.id,
+      name: cert.name,
+      modules: modulesByCertification.get(cert.id) ?? [],
+    }));
+
+    return {
+      ...coach,
+      certificationModules,
+      imageUrl: imageUrl ?? "/images/dummy.jpg",
+    };
+  }),
 
   getCoachsFromDistance: publicProcedure
     .input(
@@ -597,7 +596,7 @@ export const coachRouter = createTRPCRouter({
   updateCoachOffer: protectedProcedure
     .input(OfferData.partial())
     .mutation(async ({ input }) => {
-      const u = await getUserWithPricingForOffer(input.coachId ?? "");
+      const u = await getUserWithPricingForOffer(input.coachId);
       const pricingData = u?.pricing;
       const target = pricingData?.features.find(
         (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY",

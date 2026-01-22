@@ -12,6 +12,7 @@ import type {
   UpdateRoomInput,
   UpdateSiteInput,
 } from "@/schemas/sites";
+import { UserId } from "../types";
 
 // ==================== SITE QUERIES ====================
 
@@ -114,7 +115,7 @@ export async function deleteRoom(id: string) {
 
 // ==================== USER PRICING CHECK ====================
 
-export async function getUserWithPricingForSites(userId: string) {
+export async function getUserWithPricingForSites(userId: UserId) {
   return db.query.user.findFirst({
     where: eq(user.id, userId),
     with: {

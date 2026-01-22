@@ -8,6 +8,7 @@ import {
 } from "@/components/layoutPage";
 import Pagination from "@/components/ui/pagination";
 import { BadgeVariant } from "@/components/ui/shadcn";
+import { UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import { getAllUsers } from "@/server/api/routers/users";
 import UserContent from "./userContent";
@@ -18,7 +19,7 @@ const PER_PAGE = 20;
 export default async function UserManagement({
   searchParams,
 }: {
-  searchParams: Promise<{ filter: string; page: number; userId: string }>;
+  searchParams: Promise<{ filter: string; page: number; userId: UserId }>;
 }) {
   const { filter = "{}", page = 0, userId = "" } = await searchParams;
   const tCommon = await getTranslations("common");

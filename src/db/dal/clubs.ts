@@ -5,6 +5,7 @@ import { user } from "@/db/schema/auth";
 import { activity, club, clubCoachs, site } from "@/db/schema/club";
 import { page } from "@/db/schema/page";
 import { openingCalendarClubs } from "@/db/schema/planning";
+import { UserId } from "../types";
 
 // ==================== CLUB QUERIES ====================
 
@@ -190,7 +191,7 @@ export async function addCoachToClub(clubId: string, coachUserId: string) {
 
 // ==================== USER WITH PRICING (for feature checks) ====================
 
-export async function getUserWithPricingFeatures(userId: string) {
+export async function getUserWithPricingFeatures(userId: UserId) {
   return db.query.user.findFirst({
     where: eq(user.id, userId),
     with: {

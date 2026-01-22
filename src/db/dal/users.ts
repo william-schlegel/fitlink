@@ -6,10 +6,11 @@ import { roleEnum } from "@/db/schema/enums";
 import { reservation } from "@/db/schema/planning";
 import { pricing } from "@/db/schema/subscription";
 import { userCoach, userManager, userMember } from "@/db/schema/user";
+import { UserId } from "../types";
 
 // ==================== USER QUERIES ====================
 
-export async function getUserById(id: string) {
+export async function getUserById(id: UserId) {
   return db.query.user.findFirst({
     where: eq(user.id, id),
     with: {
@@ -24,7 +25,7 @@ export async function getUserByEmail(email: string) {
   });
 }
 
-export async function getUserWithPricing(id: string) {
+export async function getUserWithPricing(id: UserId) {
   return db.query.user.findFirst({
     where: eq(user.id, id),
     with: {
@@ -37,7 +38,7 @@ export async function getUserWithPricing(id: string) {
   });
 }
 
-export async function getUserFullById(id: string) {
+export async function getUserFullById(id: UserId) {
   return db.query.user.findFirst({
     where: eq(user.id, id),
     with: {
@@ -67,7 +68,7 @@ export async function getUserFullById(id: string) {
   });
 }
 
-export async function getUserAvatar(userId: string) {
+export async function getUserAvatar(userId: UserId) {
   const u = await db.query.user.findFirst({
     where: eq(user.id, userId),
   });
@@ -129,7 +130,7 @@ export async function searchUsers(query: string, limit: number = 20) {
 
 export async function updateUser(
   data: {
-    id: string;
+    id: UserId;
     name?: string;
     email?: string;
     phone?: string;
@@ -160,12 +161,12 @@ export async function updateUser(
     .returning();
 }
 
-export async function deleteUser(userId: string) {
+export async function deleteUser(userId: UserId) {
   return db.delete(user).where(eq(user.id, userId));
 }
 
 export async function updatePaymentPeriod(
-  userId: string,
+  userId: UserId,
   monthlyPayment: boolean,
 ) {
   return db.update(user).set({ monthlyPayment }).where(eq(user.id, userId));
@@ -173,7 +174,7 @@ export async function updatePaymentPeriod(
 
 // ==================== USER SUBSCRIPTIONS ====================
 
-export async function getUserSubscriptionsById(userId: string) {
+export async function getUserSubscriptionsById(userId: UserId) {
   return db.query.user.findFirst({
     where: eq(user.id, userId),
     with: {
@@ -200,7 +201,7 @@ export async function getUserSubscriptionsById(userId: string) {
 
 // ==================== USER RESERVATIONS ====================
 
-export async function getReservationsByUserId(userId: string, after: Date) {
+export async function getReservationsByUserId(userId: UserId, after: Date) {
   return db.query.reservation.findMany({
     where: and(eq(reservation.userId, userId), gte(reservation.date, after)),
     orderBy: [asc(reservation.date)],

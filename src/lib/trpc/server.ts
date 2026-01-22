@@ -5,6 +5,7 @@ import { ZodError } from "zod";
 
 import { db } from "@/db";
 import { user } from "@/db/schema/auth";
+import { UserId } from "@/db/types";
 import { auth } from "../auth/server";
 
 /**
@@ -72,7 +73,7 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   const u = await db.query.user.findFirst({
-    where: eq(user.id, ctx.user.id),
+    where: eq(user.id, ctx.user.id as UserId),
   });
   return next({
     ctx: {

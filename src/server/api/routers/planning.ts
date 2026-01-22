@@ -28,6 +28,7 @@ import { activity } from "@/db/schema/club";
 import { dayNameEnum, roomReservationEnum } from "@/db/schema/enums";
 import { planningActivity } from "@/db/schema/planning";
 import { userCoach } from "@/db/schema/user";
+import { ZodUserId } from "@/db/types";
 import { getDayName } from "@/lib/dates/days";
 import {
   createTRPCRouter,
@@ -146,7 +147,7 @@ export const planningRouter = createTRPCRouter({
   getMemberDailyPlanning: protectedProcedure
     .input(
       z.object({
-        memberId: z.string(),
+        memberId: ZodUserId,
         date: z.date(),
       }),
     )
@@ -351,7 +352,7 @@ export const planningRouter = createTRPCRouter({
   createPlanningReservation: protectedProcedure
     .input(
       z.object({
-        memberId: z.string(),
+        memberId: ZodUserId,
         planningActivityId: z.cuid2(),
         date: z.date(),
       }),
@@ -371,7 +372,7 @@ export const planningRouter = createTRPCRouter({
   createActivityReservation: protectedProcedure
     .input(
       z.object({
-        memberId: z.cuid2(),
+        memberId: ZodUserId,
         activityId: z.cuid2(),
         date: z.date(),
         activitySlot: z.number(),

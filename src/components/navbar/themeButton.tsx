@@ -4,11 +4,19 @@ import { MoonIcon, SunIcon } from "lucide-react";
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
-import { Toggle } from "../ui/shadcn/toggle";
+import { useTranslations } from "next-intl";
+import {
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/shadcn";
 
 type ThemeMode = "light" | "dark";
 
 export default function ThemeButton() {
+  const t = useTranslations("common");
   const [theme, setTheme] = useLocalStorage<ThemeMode>(
     "shadcn-theme",
     "light",
@@ -26,22 +34,31 @@ export default function ThemeButton() {
     }
   }, [theme]);
 
-  const onChangeTheme = (isDark: boolean) => {
-    const newTheme: ThemeMode = isDark ? "dark" : "light";
-    setTheme(newTheme);
+  const onChangeTheme = (theme: ThemeMode) => {
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (
-    <Toggle
-      pressed={theme === "dark"}
-      onPressedChange={onChangeTheme}
-      className="cursor-pointer"
-    >
-      {theme === "dark" ? (
-        <SunIcon className="size-6" />
-      ) : (
-        <MoonIcon className="size-6" />
-      )}
-    </Toggle>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            onClick={() => onChangeTheme(theme)}
+            className="cursor-pointer size-6"
+            variant="ghost"
+            aria-label={t("theme")}
+          >
+            {theme === "dark" ? (
+              <SunIcon className="size-6 text-foreground" />
+            ) : (
+              <MoonIcon className="size-6 text-foreground" />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          {theme === "dark" ? t("theme-light") : t("theme-dark")}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

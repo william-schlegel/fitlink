@@ -8,6 +8,7 @@ import { activity } from "@/db/schema/club";
 import { dayNameEnum } from "@/db/schema/enums";
 import { planning, planningActivity, reservation } from "@/db/schema/planning";
 import { isCUID } from "@/lib/utils";
+import { UserId } from "../types";
 
 // ==================== PLANNING QUERIES ====================
 
@@ -117,7 +118,7 @@ export async function getCoachPlanningForClub(coachId: string, clubId: string) {
   });
 }
 
-export async function getMemberDataWithSubscriptions(memberId: string) {
+export async function getMemberDataWithSubscriptions(memberId: UserId) {
   return db.query.user.findFirst({
     where: eq(user.id, memberId),
     with: {

@@ -14,6 +14,7 @@ import {
   updateRoom,
   updateSite,
 } from "@/db/dal";
+import { UserId } from "@/db/types";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { calculateDistance } from "@/lib/distance";
 import {
@@ -26,7 +27,7 @@ import { roomSchema, siteSchema } from "@/schemas/sites";
 // Export functions for use in server components
 export { getRoomById, getRoomsForSite, getSiteById, getSitesForClub };
 
-export async function getSitesForClubWithLimit(clubId: string, userId: string) {
+export async function getSitesForClubWithLimit(clubId: string, userId: UserId) {
   const u = await getUserWithPricingForSites(userId);
   const limit = u?.pricing?.features.find(
     (f) => f.feature === "MANAGER_MULTI_SITE",
@@ -37,7 +38,7 @@ export async function getSitesForClubWithLimit(clubId: string, userId: string) {
   return getSitesForClub(clubId, limit);
 }
 
-export async function getRoomsForSiteWithCheck(siteId: string, userId: string) {
+export async function getRoomsForSiteWithCheck(siteId: string, userId: UserId) {
   const u = await getUserWithPricingForSites(userId);
   if (!u?.pricing?.features.find((f) => f.feature === "MANAGER_ROOM"))
     return [];
@@ -53,7 +54,7 @@ export const siteRouter = createTRPCRouter({
   getSitesForClub: protectedProcedure
     .input(z.string())
     .query(async ({ ctx, input }) =>
-      getSitesForClubWithLimit(input, ctx.user.id),
+      getSitesForClubWithLimit(input, ctx.user.id as UserId),
     ),
 
   createSite: protectedProcedure
@@ -76,7 +77,7 @@ export const siteRouter = createTRPCRouter({
   getRoomsForSite: protectedProcedure
     .input(z.string())
     .query(async ({ ctx, input }) =>
-      getRoomsForSiteWithCheck(input, ctx.user.id),
+      getRoomsForSiteWithCheck(input, ctx.user.id as UserId),
     ),
 
   createRoom: protectedProcedure

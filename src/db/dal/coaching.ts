@@ -14,10 +14,11 @@ import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { userCoach } from "@/db/schema/user";
 import { DEFAULT_RANGE, LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { calculateBBox } from "@/lib/distance";
+import { UserId } from "../types";
 
 // ==================== COACH QUERIES ====================
 
-export async function getCoachById(userId: string) {
+export async function getCoachById(userId: UserId) {
   return db.query.user.findFirst({
     where: eq(user.id, userId),
     with: {
@@ -58,7 +59,7 @@ export async function getSelectedModulesForCoach(
   });
 }
 
-export async function getCoachHomePage(coachId: string) {
+export async function getCoachHomePage(coachId: UserId) {
   return db.query.page.findMany({
     where: and(eq(page.coachId, coachId), eq(page.target, "HOME")),
     with: {
@@ -381,7 +382,8 @@ export async function getOfferActivityByName(name: string) {
 
 // ==================== USER PRICING FOR OFFER VALIDATION ====================
 
-export async function getUserWithPricingForOffer(userId: string) {
+export async function getUserWithPricingForOffer(userId?: UserId) {
+  if (!userId) return null;
   return db.query.user.findFirst({
     where: eq(user.id, userId),
     with: {

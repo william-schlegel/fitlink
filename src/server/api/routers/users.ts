@@ -25,6 +25,7 @@ import {
   updateCoachData,
 } from "@/db/dal";
 import { featureEnum, roleEnum } from "@/db/schema/enums";
+import { UserId, ZodUserId } from "@/db/types";
 import { auth } from "@/lib/auth/server";
 import {
   addMemberToClubRoomInConvex,
@@ -70,7 +71,7 @@ export async function getAllUsers(input: {
   return dalGetAllUsers(input);
 }
 
-export async function getUserFullById(id: string) {
+export async function getUserFullById(id: UserId) {
   await isAdmin(true);
   return dalGetUserFullById(id);
 }
@@ -87,7 +88,7 @@ export const userRouter = createTRPCRouter({
   getUserById: publicProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: ZodUserId,
         options: z
           .object({
             withImage: z.boolean().optional().default(true),
@@ -149,11 +150,11 @@ export const userRouter = createTRPCRouter({
     }),
 
   getUserAvatar: protectedProcedure
-    .input(z.object({ userId: z.string() }))
+    .input(z.object({ userId: ZodUserId }))
     .query(({ input }) => getUserAvatar(input.userId)),
 
   getUserSubscriptionsById: protectedProcedure
-    .input(z.string())
+    .input(ZodUserId)
     .query(async ({ input }) => {
       const u = await getUserSubscriptionsById(input);
       return (
@@ -168,11 +169,11 @@ export const userRouter = createTRPCRouter({
     }),
 
   getReservationsByUserId: protectedProcedure
-    .input(z.object({ userId: z.string(), after: z.date() }))
+    .input(z.object({ userId: ZodUserId, after: z.date() }))
     .query(({ input }) => getReservationsByUserId(input.userId, input.after)),
 
   getUserFullById: protectedProcedure
-    .input(z.string())
+    .input(ZodUserId)
     .query(({ input }) => getUserFullById(input)),
 
   getAllUsers: protectedProcedure
@@ -197,7 +198,7 @@ export const userRouter = createTRPCRouter({
   updateUser: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: ZodUserId,
         name: z.string().optional(),
         email: z.email().optional(),
         phone: z.string().optional(),
@@ -288,15 +289,13 @@ export const userRouter = createTRPCRouter({
       return result;
     }),
 
-  deleteUser: protectedProcedure
-    .input(z.string())
-    .mutation(({ ctx, input }) => {
-      requireAdmin(ctx.user);
-      return dalDeleteUser(input);
-    }),
+  deleteUser: protectedProcedure.input(ZodUserId).mutation(({ ctx, input }) => {
+    requireAdmin(ctx.user);
+    return dalDeleteUser(input);
+  }),
 
   updatePaymentPeriod: protectedProcedure
-    .input(z.object({ userId: z.string(), monthlyPayment: z.boolean() }))
+    .input(z.object({ userId: ZodUserId, monthlyPayment: z.boolean() }))
     .mutation(({ ctx, input }) => {
       requireAdminOrSelf(ctx.user, input.userId);
       return dalUpdatePaymentPeriod(input.userId, input.monthlyPayment);

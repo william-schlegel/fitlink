@@ -36,6 +36,7 @@ import {
   pageTargetEnum,
 } from "@/db/schema/enums";
 import { pageSectionElement } from "@/db/schema/page";
+import { ZodUserId } from "@/db/types";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -46,7 +47,7 @@ const PageObject = z.object({
   id: z.cuid2(),
   name: z.string(),
   clubId: z.cuid2().optional(),
-  userId: z.string().optional(),
+  userId: ZodUserId.optional(),
   target: z.enum(pageTargetEnum.enumValues),
 });
 
@@ -76,7 +77,7 @@ export { getPagesForClub };
 
 export const pageRouter = createTRPCRouter({
   getPagesForManager: protectedProcedure
-    .input(z.string())
+    .input(ZodUserId)
     .query(({ input }) => getPagesForManager(input)),
 
   getPagesForClub: protectedProcedure
@@ -84,7 +85,7 @@ export const pageRouter = createTRPCRouter({
     .query(({ input }) => getPagesForClub(input)),
 
   getPageForCoach: publicProcedure
-    .input(z.object({ userId: z.string() }))
+    .input(z.object({ userId: ZodUserId }))
     .query(async ({ input }) => {
       const coachPage = await getPageForCoach(input.userId);
       if (coachPage) return coachPage;
@@ -257,7 +258,7 @@ export const pageRouter = createTRPCRouter({
 
   getCoachPage: publicProcedure.input(z.string()).query(async ({ input }) => {
     const coachPage = await dalGetCoachPage(input);
-    const coachUserId = coachPage?.coachId ?? "";
+    const coachUserId = coachPage?.coachId;
     const coachUser = await getCoachUserForPage(coachUserId);
 
     const image = coachPage?.sections
@@ -319,7 +320,7 @@ export const pageRouter = createTRPCRouter({
   }),
 
   getCoachDataForPage: publicProcedure
-    .input(z.string())
+    .input(ZodUserId)
     .query(async ({ input }) => {
       const userData = await getCoachDataForPage(input);
       const features = (userData?.pricing?.features ?? []) as Array<{
@@ -364,7 +365,7 @@ export const pageRouter = createTRPCRouter({
   updatePageStyleForCoach: protectedProcedure
     .input(
       z.object({
-        userId: z.string(),
+        userId: ZodUserId,
         pageStyle: z.string(),
       }),
     )

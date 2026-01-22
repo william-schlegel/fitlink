@@ -1,10 +1,9 @@
-import { z } from "zod";
-
 import {
   getAdminData as dalGetAdminData,
   getCoachDataForUserId as dalGetCoachData,
   getManagerDataForUserId as dalGetManagerData,
 } from "@/db/dal";
+import { UserId, ZodUserId } from "@/db/types";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 import { hasRole, isAdmin } from "@/server/lib/userTools";
 
@@ -13,7 +12,7 @@ export async function getAdminData() {
   return dalGetAdminData();
 }
 
-export async function getManagerDataForUserId(userId: string) {
+export async function getManagerDataForUserId(userId: UserId) {
   await hasRole(["MANAGER", "MANAGER_COACH", "ADMIN"], true);
   const clubData = await dalGetManagerData(userId);
 
@@ -59,17 +58,17 @@ export async function getManagerDataForUserId(userId: string) {
   };
 }
 
-export async function getCoachDataForUserId(userId: string) {
+export async function getCoachDataForUserId(userId: UserId) {
   await hasRole(["COACH", "MANAGER_COACH", "ADMIN"], true);
   return dalGetCoachData(userId);
 }
 
 export const dashboardRouter = createTRPCRouter({
   getManagerDataForUserId: protectedProcedure
-    .input(z.string())
+    .input(ZodUserId)
     .query(({ input }) => getManagerDataForUserId(input)),
   getCoachDataForUserId: protectedProcedure
-    .input(z.string())
+    .input(ZodUserId)
     .query(({ input }) => getCoachDataForUserId(input)),
   getAdminData: protectedProcedure.query(async () => getAdminData()),
 });

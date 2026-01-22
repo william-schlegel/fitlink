@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 
 import { db } from "@/db";
 import { user } from "@/db/schema/auth";
+import { UserId } from "@/db/types";
 import { env } from "@/env";
 import { sendEmail } from "../email";
 
@@ -49,7 +50,7 @@ export async function getActualUser() {
   const { id } = session.user;
   if (!id) return undefined;
   const actualUser = db.query.user.findFirst({
-    where: eq(user.id, id),
+    where: eq(user.id, id as UserId),
   });
 
   return actualUser;

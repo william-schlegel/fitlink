@@ -232,7 +232,8 @@
       "wrong-credentials": "Error in email or password",
       "password-min-length": "The password must be at least {min} characters long",
       "password-uppercase": "Password must contain an uppercase character",
-      "password-lowercase": "Password must contain at least one lowercase character"
+      "password-lowercase": "Password must contain at least one lowercase character",
+      "connect-with-magic-link": "Log in with a magic link"
     },
     "all-roles": "All the roles"
   },
@@ -652,7 +653,8 @@
       "company-offer": "Company offers",
       "insufficient-plan": "Your subscription does not give you access to this feature",
       "limited-plan": "Your subscription only gives you limited access to this feature",
-      "my-notifications": "My notifications"
+      "my-notifications": "My notifications",
+      "coach-management": "Coach management"
     },
     "api": {
       "error-accept-search-coach": "Error when accepting this request",
@@ -673,7 +675,10 @@
     },
     "footer-title": "Fitlink, the platform that connects all players in sport.",
     "language-french": "Passer au Français",
-    "language-english": "Passer à l'Anglais"
+    "language-english": "Passer à l'Anglais",
+    "theme": "Theme",
+    "theme-light": "Light theme",
+    "theme-dark": "Dark theme"
   },
   "dashboard": {
     "clubs": "{count, plural, =1 {Club} other {Clubs}}",

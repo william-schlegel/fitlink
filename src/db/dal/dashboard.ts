@@ -5,6 +5,7 @@ import { startOfToday } from "date-fns";
 import { db } from "@/db";
 import { user } from "@/db/schema/auth";
 import { club, event } from "@/db/schema/club";
+import { UserId } from "../types";
 
 // ==================== ADMIN DASHBOARD ====================
 
@@ -67,7 +68,7 @@ export async function getManagerDataForUserId(userId: string) {
 
 // ==================== COACH DASHBOARD ====================
 
-export async function getCoachDataForUserId(userId: string) {
+export async function getCoachDataForUserId(userId: UserId) {
   return db.query.user.findFirst({
     where: eq(user.id, userId),
     with: {

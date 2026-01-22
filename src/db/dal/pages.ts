@@ -11,6 +11,7 @@ import {
 import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { userCoach } from "@/db/schema/user";
 import { isCUID } from "@/lib/utils";
+import { UserId } from "../types";
 
 // ==================== PAGE QUERIES ====================
 
@@ -43,13 +44,13 @@ export async function getPagesForManager(managerId: string) {
   return rows.map((r) => ({ ...r.page, club: r.club }));
 }
 
-export async function getPageForCoach(userId: string) {
+export async function getPageForCoach(userId: UserId) {
   return db.query.page.findFirst({
     where: eq(page.coachId, userId),
   });
 }
 
-export async function getUserForPageCreation(userId: string) {
+export async function getUserForPageCreation(userId: UserId) {
   return db.query.user.findFirst({
     where: eq(user.id, userId),
   });
@@ -97,7 +98,8 @@ export async function getCoachPage(pageId: string) {
   });
 }
 
-export async function getCoachUserForPage(coachUserId: string) {
+export async function getCoachUserForPage(coachUserId?: UserId | null) {
+  if (!coachUserId) return null;
   return db.query.user.findFirst({
     where: eq(user.id, coachUserId),
     with: {
@@ -118,7 +120,7 @@ export async function getCoachUserForPage(coachUserId: string) {
   });
 }
 
-export async function getCoachDataForPage(userId: string) {
+export async function getCoachDataForPage(userId: UserId) {
   return db.query.user.findFirst({
     where: eq(user.id, userId),
     with: {
@@ -144,7 +146,7 @@ export async function getCoachDataForPage(userId: string) {
 export async function createPage(data: {
   name: string;
   clubId?: string;
-  coachId?: string;
+  coachId?: UserId;
   target: (typeof pageTargetEnum.enumValues)[number];
 }) {
   return db.insert(page).values(data).returning();
@@ -154,7 +156,7 @@ export async function updatePage(data: {
   id: string;
   name?: string;
   target?: (typeof pageTargetEnum.enumValues)[number];
-  userId?: string;
+  userId?: UserId;
 }) {
   return db
     .update(page)
@@ -320,7 +322,7 @@ export async function deletePageSectionElement(id: string) {
 // ==================== PAGE STYLE ====================
 
 export async function updatePageStyleForCoach(
-  userId: string,
+  userId: UserId,
   pageStyle: string,
 ) {
   return db
@@ -340,7 +342,7 @@ export async function updatePageStyleForClub(
 
 export async function createPageWithInitialSection(
   pageName: string,
-  coachId: string,
+  coachId: UserId,
   userName: string | null,
 ) {
   return db.transaction(async (tx) => {

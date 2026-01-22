@@ -681,7 +681,10 @@
     },
     "footer-title": "Fitlink, la plateforme qui relie tous les acteurs du sport.",
     "language-french": "Switch to French",
-    "language-english": "Switch to English"
+    "language-english": "Switch to English",
+    "theme": "Thème",
+    "theme-light": "Thème clair",
+    "theme-dark": "Thème sombre"
   },
   "dashboard": {
     "clubs": "{count, plural, =1 {Club} other {Clubs}}",

@@ -9,6 +9,7 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 
+import { AccountId, UserId } from "../types";
 import { roleEnum } from "./enums";
 import { reservation } from "./planning";
 import { paiement, pricing } from "./subscription";
@@ -17,7 +18,7 @@ import { userCoach, userManager, userMember } from "./user";
 export const user = pgTable(
   "user",
   {
-    id: text("id").primaryKey().$defaultFn(createId),
+    id: text("id").primaryKey().$defaultFn(createId).$type<UserId>(),
     name: text("name").notNull(),
     email: text("email").notNull().unique(),
     emailVerified: boolean("email_verified").notNull(),
@@ -75,7 +76,8 @@ export const session = pgTable("session", {
   userAgent: text("user_agent"),
   userId: text("user_id")
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
+    .references(() => user.id, { onDelete: "cascade" })
+    .$type<UserId>(),
   impersonatedBy: text("impersonated_by"),
 });
 
@@ -87,12 +89,13 @@ export const sessionRelations = relations(session, ({ one }) => ({
 }));
 
 export const account = pgTable("account", {
-  id: text("id").primaryKey().$defaultFn(createId),
+  id: text("id").primaryKey().$defaultFn(createId).$type<AccountId>(),
   accountId: text("account_id").notNull(),
   providerId: text("provider_id").notNull(),
   userId: text("user_id")
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
+    .references(() => user.id, { onDelete: "cascade" })
+    .$type<UserId>(),
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),

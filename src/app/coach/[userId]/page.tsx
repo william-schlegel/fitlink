@@ -24,6 +24,7 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/shadcn";
+import { UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import { DayName } from "@/lib/dates/data";
 import { getToday } from "@/lib/dates/serverDayName";
@@ -35,7 +36,7 @@ export default async function CoachDashboard({
   params,
   searchParams,
 }: {
-  params: Promise<{ userId: string }>;
+  params: Promise<{ userId: UserId }>;
   searchParams: Promise<{ day: DayName }>;
 }) {
   const { userId } = await params;
