@@ -10,15 +10,15 @@ import { TitleDisplay } from "@/components/sections/title";
 import { TThemes } from "@/components/themeSelector";
 import Title from "@/components/title";
 import PageContainer from "@/components/ui/page/container";
-import { createTrpcCaller } from "@/lib/trpc/caller";
+import { createTrpcCaller, createTrpcCallerStatic } from "@/lib/trpc/caller";
 import { isCUID } from "@/lib/utils";
 
 // Revalidate this page periodically (ISR) so statically generated pages stay fresh.
 // Adjust as needed.
-export const revalidate = 60 * 60 * 24; // 24 hours
+export const revalidate = 86400; // 24 hours
 
 export async function generateStaticParams() {
-  const caller = await createTrpcCaller();
+  const caller = await createTrpcCallerStatic();
   if (!caller) return [] as Array<{ clubId: string; pageId: string }>;
 
   // Expected to return pairs for routes like /presentation-page/club/[clubId]/[pageId]
@@ -38,7 +38,7 @@ export async function generateMetadata({
   // If IDs are invalid, treat as not found (noindex by default for 404s)
   if (!isCUID(clubId) || !isCUID(pageId)) return {};
 
-  const caller = await createTrpcCaller();
+  const caller = await createTrpcCallerStatic();
   if (!caller) return {};
 
   const queryPage = await caller.pages.getClubPage(pageId);

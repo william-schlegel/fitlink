@@ -2,22 +2,22 @@ import { notFound } from "next/navigation";
 
 import { CoachDisplay } from "@/components/sections/coach";
 import { UserId } from "@/db/types";
-import { createTrpcCaller } from "@/lib/trpc/caller";
+import { createTrpcCaller, createTrpcCallerStatic } from "@/lib/trpc/caller";
 import { isCUID } from "@/lib/utils";
 import { Metadata } from "next";
 // Revalidate this page periodically (ISR) so statically generated pages stay fresh.
 // Adjust as needed.
-export const revalidate = 60 * 60 * 24; // 24 hours
+export const revalidate = 86400; // 24 hours
 
 export async function generateStaticParams() {
-  const caller = await createTrpcCaller();
-  if (!caller) return [] as Array<{ clubId: string; pageId: string }>;
+  const caller = await createTrpcCallerStatic();
+  if (!caller) return [] as Array<{ userId: string; pageId: string }>;
 
-  // Expected to return pairs for routes like /presentation-page/club/[clubId]/[pageId]
-  const params = await caller.pages.listPublicClubPresentationParams();
-  return (params ?? []).filter(
-    (p) => p && isCUID(p.clubId) && isCUID(p.pageId),
-  );
+  // Expected to return pairs for routes like /presentation-page/coach/[userId]/[pageId]
+  const params = await caller.pages.listPublicCoachPresentationParams();
+  return (params ?? [])
+    .map((p) => ({ userId: p.coachId, pageId: p.pageId }))
+    .filter((p) => p && isCUID(p.userId) && isCUID(p.pageId));
 }
 
 export async function generateMetadata({
@@ -30,7 +30,7 @@ export async function generateMetadata({
   // If IDs are invalid, treat as not found (noindex by default for 404s)
   if (!Boolean(userId) || !isCUID(pageId)) return {};
 
-  const caller = await createTrpcCaller();
+  const caller = await createTrpcCallerStatic();
   if (!caller) return {};
 
   const queryPage = await caller.pages.getPageForCoach({ userId });

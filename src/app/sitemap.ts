@@ -3,7 +3,7 @@ import { isCUID } from "@/lib/utils";
 import type { MetadataRoute } from "next";
 
 // Revalidate sitemap periodically (ISR for metadata route)
-export const revalidate = 60 * 60 * 24; // 24 hours
+export const revalidate = 86400; // 24 hours
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const caller = await createTrpcCaller();
