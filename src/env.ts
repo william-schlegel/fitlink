@@ -25,6 +25,8 @@ export const env = createEnv({
     SMTP_FROM_NAME: z.string(),
     UPLOADTHING_SECRET: z.string(),
     UPLOADTHING_TOKEN: z.string(),
+    STRIPE_SECRET_KEY: z.string(),
+    STRIPE_WEBHOOK_SECRET: z.string().optional(),
     // Convex Configuration
     CONVEX_URL: z.url().optional(),
     CONVEX_DEPLOY_KEY: z.string().optional(),
@@ -48,6 +50,7 @@ export const env = createEnv({
     NEXT_PUBLIC_MAPBOX_TOKEN: z.string(),
     NEXT_PUBLIC_MAPQUEST_KEY: z.string(),
     NEXT_PUBLIC_CONVEX_URL: z.url().optional(),
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string(),
   },
 
   /**
@@ -66,6 +69,8 @@ export const env = createEnv({
     AWS_SECRET_ACCESS_KEY_WSC: process.env.AWS_SECRET_ACCESS_KEY_WSC,
     UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     CONVEX_URL: process.env.CONVEX_URL,
     CONVEX_DEPLOY_KEY: process.env.CONVEX_DEPLOY_KEY,
     GOOGLE_GEMINI_API_KEY: process.env.GOOGLE_GEMINI_API_KEY,
@@ -77,6 +82,8 @@ export const env = createEnv({
     NEXT_PUBLIC_MAPBOX_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
     NEXT_PUBLIC_MAPQUEST_KEY: process.env.NEXT_PUBLIC_MAPQUEST_KEY,
     NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     // SMTP Email Configuration
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_PORT: process.env.SMTP_PORT,

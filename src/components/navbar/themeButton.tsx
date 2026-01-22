@@ -2,8 +2,8 @@
 
 import { MoonIcon, SunIcon } from "lucide-react";
 import { useEffect } from "react";
-import { useLocalStorage } from "usehooks-ts";
 
+import useTheme, { ThemeMode } from "@/hooks/useTheme";
 import { useTranslations } from "next-intl";
 import {
   Button,
@@ -13,17 +13,9 @@ import {
   TooltipTrigger,
 } from "../ui/shadcn";
 
-type ThemeMode = "light" | "dark";
-
 export default function ThemeButton() {
   const t = useTranslations("common");
-  const [theme, setTheme] = useLocalStorage<ThemeMode>(
-    "shadcn-theme",
-    "light",
-    {
-      initializeWithValue: false,
-    },
-  );
+  const [theme, setTheme] = useTheme();
 
   useEffect(() => {
     const html = document.querySelector("html");

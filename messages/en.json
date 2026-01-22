@@ -458,7 +458,10 @@
       "select-monthly": "Pay {price} every month",
       "select-yearly": "Pay {price} every year on the anniversary date {date}",
       "payment-online": "Pay online",
-      "payment-club": "Pay directly to the club"
+      "payment-club": "Pay directly to the club",
+      "loading-payment-form": "Loading payment form",
+      "unable-to-start-payment": "Unable to make payment",
+      "payment-form": "Payment form"
     },
     "event": {
       "create": "Create",
