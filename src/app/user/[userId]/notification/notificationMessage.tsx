@@ -2,10 +2,18 @@
 
 import { isDate } from "date-fns";
 import { useTranslations } from "next-intl";
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
+import { useFormState } from "react-dom";
 
 import { toast } from "sonner";
 
+import {
+  acceptSearchCoachAction,
+  cancelSubscriptionAction,
+  refuseSearchCoachAction,
+  type NotificationActionState,
+  validateSubscriptionAction,
+} from "@/actions/notification";
 import SendMessage from "@/components/modals/sendMessage";
 import { Badge, Button } from "@/components/ui/shadcn";
 import { Spinner } from "@/components/ui/shadcn/spinner";
@@ -42,23 +50,31 @@ export function NotificationMessage({
 }: NotificationMessageProps) {
   const t = useTranslations("auth");
   const { getName } = useNotificationType();
+  const [acceptState, acceptAction] = useFormState(
+    acceptSearchCoachAction,
+    null,
+  );
+  const [refuseState, refuseAction] = useFormState(
+    refuseSearchCoachAction,
+    null,
+  );
+  const [validateState, validateAction] = useFormState(
+    validateSubscriptionAction,
+    null,
+  );
+  const [cancelState, cancelAction] = useFormState(
+    cancelSubscriptionAction,
+    null,
+  );
+
+  useActionToast(acceptState);
+  useActionToast(refuseState);
+  useActionToast(validateState);
+  useActionToast(cancelState);
 
   if (!notification) return null;
 
-  async function handleClick(link: string | null, id: string) {
-    if (!link) return;
-    const sp = new URLSearchParams({ notificationId: id });
-    const url = link.concat("?", sp.toString());
-    const res = await fetch(url);
-    const json = await res.json();
-    if (json.trpcerror) {
-      toast.error(json.error);
-    } else if (json.error) {
-      toast.error(t(json.error));
-    } else if (json.success) {
-      toast.success(json.success);
-    }
-  }
+  const notificationId = notification._id;
   const Elem: React.ReactNode[] = [];
   Elem.push(
     <Badge>
@@ -100,30 +116,18 @@ export function NotificationMessage({
     if (notification.type === "SEARCH_COACH")
       Elem.push(
         <div className="flex items-center gap-2">
-          <Button
-            variant="success"
-            type="button"
-            onClick={() =>
-              handleClick(
-                "/api/notification/acceptSearchCoach",
-                notification._id!.toString(),
-              )
-            }
-          >
-            {t("notification.accept")}
-          </Button>
-          <Button
-            variant="destructive"
-            type="button"
-            onClick={() =>
-              handleClick(
-                "/api/notification/refuseSearchCoach",
-                notification._id!.toString(),
-              )
-            }
-          >
-            {t("notification.refuse")}
-          </Button>
+          <form action={acceptAction} className="inline-flex">
+            <input type="hidden" name="notificationId" value={notificationId} />
+            <Button variant="success" type="submit">
+              {t("notification.accept")}
+            </Button>
+          </form>
+          <form action={refuseAction} className="inline-flex">
+            <input type="hidden" name="notificationId" value={notificationId} />
+            <Button variant="destructive" type="submit">
+              {t("notification.refuse")}
+            </Button>
+          </form>
           <SendMessage
             toUserId={notification.userFromId}
             fromUserId={notification.userId}
@@ -133,30 +137,18 @@ export function NotificationMessage({
     if (notification.type === "NEW_SUBSCRIPTION")
       Elem.push(
         <div className="flex items-center gap-2">
-          <Button
-            variant="success"
-            type="button"
-            onClick={() =>
-              handleClick(
-                "/api/notification/validateSubscription",
-                notification._id!.toString(),
-              )
-            }
-          >
-            {t("notification.validate")}
-          </Button>
-          <Button
-            variant="destructive"
-            type="button"
-            onClick={() =>
-              handleClick(
-                "/api/notification/cancelSubscription",
-                notification._id!.toString(),
-              )
-            }
-          >
-            {t("notification.cancel")}
-          </Button>
+          <form action={validateAction} className="inline-flex">
+            <input type="hidden" name="notificationId" value={notificationId} />
+            <Button variant="success" type="submit">
+              {t("notification.validate")}
+            </Button>
+          </form>
+          <form action={cancelAction} className="inline-flex">
+            <input type="hidden" name="notificationId" value={notificationId} />
+            <Button variant="destructive" type="submit">
+              {t("notification.cancel")}
+            </Button>
+          </form>
         </div>,
       );
   }
@@ -200,6 +192,23 @@ function SubscriptionInfo({ data }: SubscriptionInfoProps) {
       </div>
     </div>
   );
+}
+
+function useActionToast(state: NotificationActionState | null) {
+  useEffect(() => {
+    if (!state) return;
+    if (state.trpcerror) {
+      toast.error(state.error ?? state.trpcerror);
+      return;
+    }
+    if (state.error) {
+      toast.error(state.error);
+      return;
+    }
+    if (state.success) {
+      toast.success(state.success);
+    }
+  }, [state]);
 }
 
 function useNotificationType() {

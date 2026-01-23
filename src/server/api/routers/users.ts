@@ -342,7 +342,7 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         userId: z.string(),
-        subscriptionId: z.string(),
+        subscriptionId: z.cuid2(),
       }),
     )
     .mutation(async ({ input }) => {

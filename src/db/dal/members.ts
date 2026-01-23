@@ -31,10 +31,23 @@ export async function addSubscriptionToMember(
   memberId: string,
   subscriptionId: string,
 ) {
-  return db.insert(userMemberToSubscription).values({
-    userId: memberId,
-    subscriptionId,
+  const existing = await db.query.userMemberToSubscription.findFirst({
+    where: and(
+      eq(userMemberToSubscription.userId, memberId),
+      eq(userMemberToSubscription.subscriptionId, subscriptionId),
+    ),
   });
+  if (existing) return existing;
+
+  const [created] = await db
+    .insert(userMemberToSubscription)
+    .values({
+      userId: memberId,
+      subscriptionId,
+    })
+    .returning();
+
+  return created;
 }
 
 export async function deleteMemberSubscription(
