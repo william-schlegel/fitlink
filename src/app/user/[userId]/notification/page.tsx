@@ -3,7 +3,15 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { CheckCircle, Circle } from "lucide-react";
+import {
+  Check,
+  CheckCircle,
+  Circle,
+  CircleQuestionMark,
+  Euro,
+  HeartHandshake,
+  X,
+} from "lucide-react";
 
 import {
   LayoutPage,
@@ -17,7 +25,9 @@ import {
 } from "@/lib/convex/server";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
+import { Fragment } from "react/jsx-runtime";
 import { NotificationContent } from "./NotificationContent";
+import { NOTIFICATION_TYPES, NotificationType } from "./types";
 
 const PER_PAGE = 20;
 
@@ -51,15 +61,17 @@ export default async function ManageNotifications({
   const notificationList =
     notificationsData?.notifications.map((notification) => ({
       id: notification._id,
-      name: notification.message,
+      name:
+        notification.message ||
+        t(getName(notification.type as NotificationType)),
       link: createLink(
         { notificationId: notification._id, page: page.toString(), mode },
         href,
       ),
-      badgeIcon: notification.viewedAt ? (
-        <CheckCircle className="text-green-500" />
-      ) : (
-        <Circle className="text-gray-500" />
+      badgeIcon: getNotificationIcon(
+        notification.type as NotificationType,
+        notification.answeredAt,
+        notification.viewedAt,
       ),
     })) ?? [];
 
@@ -113,4 +125,54 @@ export default async function ManageNotifications({
       </LayoutPageMain>
     </LayoutPage>
   );
+}
+
+function getName(type: NotificationType | undefined) {
+  if (!type) return "?";
+  const nt = NOTIFICATION_TYPES.find((t) => t.value === type);
+  return nt?.label ? nt.label : "?";
+}
+
+function getNotificationIcon(
+  type: NotificationType,
+  answeredAt?: number,
+  viewedAt?: number,
+) {
+  const icons: React.ReactNode[] = [];
+
+  if (
+    type === "COACH_ACCEPT" ||
+    type === "CLUB_ACCEPT" ||
+    type === "SUBSCRIPTION_VALIDATED" ||
+    type === "REQUEST_VALIDATED"
+  )
+    icons.push(<HeartHandshake className="text-green-500" />);
+
+  if (
+    type === "COACH_REFUSE" ||
+    type === "CLUB_REFUSE" ||
+    type === "SUBSCRIPTION_REJECTED" ||
+    type === "REQUEST_REJECTED"
+  )
+    icons.push(<X className="text-destructive" />);
+
+  if (type === "SEARCH_COACH" || type === "SEARCH_CLUB")
+    icons.push(<CircleQuestionMark className="text-accent" />);
+
+  if (type === "NEW_SUBSCRIPTION")
+    icons.push(<Euro className=" text-accent" />);
+
+  if (answeredAt) icons.push(<Check className="text-green-500" />);
+
+  icons.push(
+    viewedAt ? (
+      <CheckCircle className="text-green-500" />
+    ) : (
+      <Circle className="text-gray-500" />
+    ),
+  );
+
+  return icons.map((icon, idx) => (
+    <Fragment key={"icon-" + idx}>{icon}</Fragment>
+  ));
 }

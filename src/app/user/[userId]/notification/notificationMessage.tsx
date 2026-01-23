@@ -2,8 +2,7 @@
 
 import { isDate } from "date-fns";
 import { useTranslations } from "next-intl";
-import React, { Fragment, useEffect } from "react";
-import { useFormState } from "react-dom";
+import React, { Fragment, useActionState, useEffect } from "react";
 
 import { toast } from "sonner";
 
@@ -50,19 +49,19 @@ export function NotificationMessage({
 }: NotificationMessageProps) {
   const t = useTranslations("auth");
   const { getName } = useNotificationType();
-  const [acceptState, acceptAction] = useFormState(
+  const [acceptState, acceptAction] = useActionState(
     acceptSearchCoachAction,
     null,
   );
-  const [refuseState, refuseAction] = useFormState(
+  const [refuseState, refuseAction] = useActionState(
     refuseSearchCoachAction,
     null,
   );
-  const [validateState, validateAction] = useFormState(
+  const [validateState, validateAction] = useActionState(
     validateSubscriptionAction,
     null,
   );
-  const [cancelState, cancelAction] = useFormState(
+  const [cancelState, cancelAction] = useActionState(
     cancelSubscriptionAction,
     null,
   );
