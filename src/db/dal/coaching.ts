@@ -14,7 +14,7 @@ import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { userCoach } from "@/db/schema/user";
 import { DEFAULT_RANGE, LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { calculateBBox } from "@/lib/distance";
-import { UserId } from "../types";
+import { ClubId, UserId } from "../types";
 
 // ==================== COACH QUERIES ====================
 
@@ -113,7 +113,7 @@ export async function getAllCoaches() {
   });
 }
 
-export async function getCoachsForClub(clubId: string) {
+export async function getCoachsForClub(clubId: ClubId) {
   return db.query.club.findFirst({
     where: eq(club.id, clubId),
     with: {
@@ -291,7 +291,7 @@ export async function createCoachOffer(data: {
 
 export async function updateCoachOffer(data: {
   id: string;
-  coachId?: string;
+  coachId?: UserId;
   name?: string;
   target?: (typeof coachingTargetEnum.enumValues)[number];
   excludingTaxes?: boolean;

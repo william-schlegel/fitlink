@@ -19,5 +19,6 @@ export * from "./activities";
 export * from "./certifications";
 export * from "./clubs";
 export * from "./coaching";
+export * from "./planning";
 export * from "./sites";
 export * from "./users";

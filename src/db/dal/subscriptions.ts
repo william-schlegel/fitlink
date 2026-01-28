@@ -8,6 +8,7 @@ import {
 } from "@/db/schema/enums";
 import { subscription } from "@/db/schema/subscription";
 import { isCUID } from "@/lib/utils";
+import { ActivityId, ClubId, RoomId, SiteId } from "../types";
 
 // ==================== SUBSCRIPTION QUERIES ====================
 
@@ -91,10 +92,10 @@ export async function deleteSubscription(id: string) {
 // ==================== DATA NAMES HELPER ====================
 
 export async function getDataNames(
-  siteIds: string[],
-  roomIds: string[],
+  siteIds: SiteId[],
+  roomIds: RoomId[],
   activityGroupIds: string[],
-  activityIds: string[],
+  activityIds: ActivityId[],
 ) {
   const sites = await db.query.site.findMany({
     where: inArray(site.id, siteIds),
@@ -117,7 +118,7 @@ export async function getDataNames(
 
 // ==================== POSSIBLE CHOICES ====================
 
-export async function getClubWithActivities(clubId: string) {
+export async function getClubWithActivities(clubId: ClubId) {
   return db.query.club.findFirst({
     where: eq(club.id, clubId),
     with: {
@@ -130,7 +131,7 @@ export async function getClubWithActivities(clubId: string) {
   });
 }
 
-export async function getSitesWithRoomActivities(siteIds: string[]) {
+export async function getSitesWithRoomActivities(siteIds: SiteId[]) {
   return db.query.site.findMany({
     where: inArray(site.id, siteIds),
     with: {
@@ -151,7 +152,7 @@ export async function getSitesWithRoomActivities(siteIds: string[]) {
   });
 }
 
-export async function getRoomsWithActivities(roomIds: string[]) {
+export async function getRoomsWithActivities(roomIds: RoomId[]) {
   return db.query.room.findMany({
     where: inArray(room.id, roomIds),
     with: {
@@ -168,13 +169,13 @@ export async function getRoomsWithActivities(roomIds: string[]) {
   });
 }
 
-export async function getActivitiesListForClub(clubId: string) {
+export async function getActivitiesListForClub(clubId: ClubId) {
   return db.query.activity.findMany({
     where: eq(activity.clubId, clubId),
   });
 }
 
-export async function getSitesWithRoomActivitiesBasic(siteIds: string[]) {
+export async function getSitesWithRoomActivitiesBasic(siteIds: SiteId[]) {
   return db.query.site.findMany({
     where: inArray(site.id, siteIds),
     with: {
@@ -191,7 +192,7 @@ export async function getSitesWithRoomActivitiesBasic(siteIds: string[]) {
   });
 }
 
-export async function getRoomsWithActivitiesBasic(roomIds: string[]) {
+export async function getRoomsWithActivitiesBasic(roomIds: RoomId[]) {
   return db.query.room.findMany({
     where: inArray(room.id, roomIds),
     with: {

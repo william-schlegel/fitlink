@@ -21,6 +21,7 @@ import {
   SubscriptionModeEnum,
   SubscriptionRestrictionEnum,
 } from "@/db/schema/enums";
+import { ActivityId } from "@/db/types";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { formatMoney } from "@/lib/formatNumber";
 import { trpc } from "@/lib/trpc/client";
@@ -108,7 +109,7 @@ export function SubscriptionContent({
     }));
   };
   const setSelectedActivities = (
-    value: string[] | ((prev: string[]) => string[]),
+    value: ActivityId[] | ((prev: ActivityId[]) => ActivityId[]),
   ) => {
     setSelections((prev) => ({
       ...prev,
@@ -162,7 +163,7 @@ export function SubscriptionContent({
       setSelectedActivityGroups((sel) => sel.filter((s) => s !== id));
     else setSelectedActivityGroups((sel) => sel.concat(id));
   }
-  function handleSelectActivity(id: string) {
+  function handleSelectActivity(id: ActivityId) {
     if (selectedActivities.includes(id))
       setSelectedActivities((sel) => sel.filter((s) => s !== id));
     else setSelectedActivities((sel) => sel.concat(id));
@@ -334,7 +335,7 @@ function SelectRestriction({
 type SelectableItemProps = {
   state: boolean;
   item: { id: string; name: string };
-  onClick: (id: string) => void;
+  onClick: (id: ActivityId) => void;
 };
 
 function SelectableItem({ state, item, onClick }: SelectableItemProps) {
@@ -343,7 +344,7 @@ function SelectableItem({ state, item, onClick }: SelectableItemProps) {
       <Checkbox
         id={item.id}
         checked={state}
-        onCheckedChange={() => onClick(item.id)}
+        onCheckedChange={() => onClick(item.id as ActivityId)}
       />
       <FieldLabel htmlFor={item.id}>{item.name}</FieldLabel>
     </Field>
@@ -359,7 +360,7 @@ type SelectDataForModeProps = {
   restriction: SubscriptionRestrictionEnum;
   mode: SubscriptionModeEnum;
   onSelectActivityGroup: (id: string) => void;
-  onSelectActivity: (id: string) => void;
+  onSelectActivity: (id: ActivityId) => void;
 };
 
 function SelectDataForMode({

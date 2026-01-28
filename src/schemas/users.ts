@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { roleEnum } from "@/db/schema/enums";
+import { ZodUserId } from "@/db/types";
 
 // ==================== USER FILTER SCHEMAS ====================
 
@@ -23,7 +24,7 @@ export const userFilterSchema = z
  * Schema for updating a user
  */
 export const updateUserSchema = z.object({
-  id: z.string(),
+  id: ZodUserId,
   name: z.string().optional(),
   email: z.email().optional(),
   phone: z.string().optional(),
@@ -48,7 +49,7 @@ export const updateUserSchema = z.object({
  * Schema for user DB updates (DAL layer)
  */
 export const updateUserDbSchema = z.object({
-  id: z.string(),
+  id: ZodUserId,
   name: z.string().optional(),
   email: z.email().optional(),
   phone: z.string().optional(),

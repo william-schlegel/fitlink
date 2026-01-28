@@ -47,7 +47,7 @@ import {
   updateActivitiesForModule,
 } from "@/db/dal";
 import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
-import { ZodUserId } from "@/db/types";
+import { ZodClubId, ZodUserId } from "@/db/types";
 import { DEFAULT_RANGE, LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { calculateDistance } from "@/lib/distance";
 import {
@@ -56,6 +56,7 @@ import {
   publicProcedure,
 } from "@/lib/trpc/server";
 import { isCUID } from "@/lib/utils";
+import { updateCertificationSchema, updateCoachOfferSchema } from "@/schemas";
 import { isAdmin } from "@/server/lib/userTools";
 
 const CertificationData = z.object({
@@ -227,7 +228,7 @@ export const coachRouter = createTRPCRouter({
     }),
 
   updateCertification: protectedProcedure
-    .input(CertificationData.partial())
+    .input(updateCertificationSchema)
     .mutation(({ input }) =>
       db.transaction(async (tx) => {
         const certifId = input.id;
@@ -278,7 +279,7 @@ export const coachRouter = createTRPCRouter({
   getAllCoachs: publicProcedure.query(() => getAllCoaches()),
 
   getCoachsForClub: publicProcedure
-    .input(z.cuid2())
+    .input(ZodClubId)
     .query(async ({ input }) => {
       const clb = await dalGetCoachsForClub(input);
       return (
@@ -594,7 +595,7 @@ export const coachRouter = createTRPCRouter({
     }),
 
   updateCoachOffer: protectedProcedure
-    .input(OfferData.partial())
+    .input(updateCoachOfferSchema)
     .mutation(async ({ input }) => {
       const u = await getUserWithPricingForOffer(input.coachId);
       const pricingData = u?.pricing;
@@ -605,7 +606,6 @@ export const coachRouter = createTRPCRouter({
         : "INDIVIDUAL";
 
       return dalUpdateCoachOffer({
-        id: input.id ?? "",
         ...input,
         target,
       });

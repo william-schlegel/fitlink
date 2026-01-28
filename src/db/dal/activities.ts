@@ -14,10 +14,11 @@ import type {
   UpdateActivityGroupInput,
   UpdateActivityInput,
 } from "@/schemas/activities";
+import { ActivityId, ClubId, RoomId, UserId } from "../types";
 
 // ==================== ACTIVITY ====================
 
-export async function getActivityById(id: string) {
+export async function getActivityById(id: ActivityId) {
   return db.query.activity.findFirst({
     where: eq(activity.id, id),
   });
@@ -31,7 +32,7 @@ export async function getActivityByName(name: string) {
   });
 }
 
-export async function getActivitiesForClub(clubId: string) {
+export async function getActivitiesForClub(clubId: ClubId) {
   return db.query.club.findFirst({
     where: eq(club.id, clubId),
     with: { activities: true },
@@ -57,13 +58,10 @@ export async function createActivity(data: CreateActivityInput) {
 }
 
 export async function updateActivity(data: UpdateActivityInput) {
-  return db
-    .update(activity)
-    .set(data)
-    .where(eq(activity.id, data.id ?? ""));
+  return db.update(activity).set(data).where(eq(activity.id, data.id));
 }
 
-export async function deleteActivity(activityId: string) {
+export async function deleteActivity(activityId: ActivityId) {
   return db.delete(activity).where(eq(activity.id, activityId));
 }
 
@@ -75,7 +73,7 @@ export async function getActivityGroupById(id: string) {
   });
 }
 
-export async function getActivityGroupsForUser(userId: string) {
+export async function getActivityGroupsForUser(userId: UserId) {
   return db.query.activityGroup.findMany({
     where: or(
       eq(activityGroup.default, true),
@@ -120,7 +118,10 @@ export async function deleteActivityGroup(groupId: string) {
 
 // ==================== ROOM ACTIVITIES ====================
 
-export async function affectActivityToRoom(roomId: string, activityId: string) {
+export async function affectActivityToRoom(
+  roomId: RoomId,
+  activityId: ActivityId,
+) {
   return db.insert(roomActivities).values({
     roomId,
     activityId,
@@ -128,8 +129,8 @@ export async function affectActivityToRoom(roomId: string, activityId: string) {
 }
 
 export async function removeActivityFromRoom(
-  roomId: string,
-  activityId: string,
+  roomId: RoomId,
+  activityId: ActivityId,
 ) {
   return db
     .delete(roomActivities)

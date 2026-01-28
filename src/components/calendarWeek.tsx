@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { DAYS } from "@/lib/dates/data";
 import { AppRouter } from "@/server/api/root";
+import { Fragment } from "react/jsx-runtime";
 
 type Calendar =
   inferRouterOutputs<AppRouter>["calendars"]["getCalendarForSite"];
@@ -32,20 +33,20 @@ function CalendarWeek({ calendar, isLoading }: Props) {
         </thead>
         <tbody>
           <tr>
-            {calendar.dayOpeningTimes.map((ot) => {
-              if (ot.dayOpeningTime.wholeDay)
+            {calendar.openingTimes.map((ot) => {
+              if (ot.wholeDay)
                 return (
                   <td
-                    key={ot.id}
+                    key={ot.day}
                     className="bg-primary text-center text-primary-content"
                   >
                     {t("whole-day")}
                   </td>
                 );
-              if (ot.dayOpeningTime.closed)
+              if (ot.closed)
                 return (
                   <td
-                    key={ot.id}
+                    key={ot.day}
                     className="bg-secondary text-center text-secondary-content"
                   >
                     {t("closed")}
@@ -53,15 +54,15 @@ function CalendarWeek({ calendar, isLoading }: Props) {
                 );
               return (
                 <td
-                  key={ot.id}
+                  key={ot.day}
                   className="bg-primary text-center text-primary-content"
                 >
-                  {/* {ot.workingHours.map((wh) => (
-                    <Fragment key={wh.id}>
+                  {ot.workingHours.map((wh) => (
+                    <Fragment key={wh.opening + wh.closing}>
                       <span>{wh.opening}</span>
                       <span className="ml-2">{wh.closing}</span>
                     </Fragment>
-                  ))} */}
+                  ))}
                 </td>
               );
             })}

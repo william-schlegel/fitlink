@@ -10,6 +10,7 @@ import {
 } from "@/components/layoutPage";
 import { CreatePage } from "@/components/modals/managePage";
 import SelectClub from "@/components/selectClub";
+import { ClubId, PageId, UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import createLink, { createHref } from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
@@ -22,9 +23,9 @@ export default async function ClubPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    userId: string;
-    clubId: string;
-    pageId: string;
+    userId: UserId;
+    clubId: ClubId;
+    pageId: PageId;
     section?: PageSectionModel;
   }>;
 }) {

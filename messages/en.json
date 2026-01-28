@@ -729,7 +729,8 @@
       "delete-reservation": "Delete reservation",
       "reservation-delete-message": "Do you really want to delete this reservation permanently?",
       "reservation-deleted": "Reservation deleted",
-      "no-reservations": "No reservations for the moment"
+      "no-reservations": "No reservations for the moment",
+      "reservation-created": "Reservation registered"
     },
     "club": {
       "activity": {

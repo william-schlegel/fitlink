@@ -205,7 +205,72 @@ export const CreateClubCalendar = ({ clubId }: ClubCalendarProps) => {
   const saveCalendar = trpc.calendars.createCalendar.useMutation();
 
   function onSubmit() {
-    saveCalendar.mutate({ calendar, clubId });
+    const calendarValues = calendar.openingTime.map((day) => ({
+      day: day.name,
+      wholeDay: day.wholeDay,
+      closed: day.closed,
+      workingHours: day.workingHours.map((hour) => ({
+        opening: hour.opening,
+        closing: hour.closing,
+      })),
+    }));
+    saveCalendar.mutate({
+      clubId,
+      calendar: { startDate: calendar.startDate, openingTimes: calendarValues },
+    });
+  }
+
+  useEffect(() => {
+    utils.calendars.getCalendarForClub.invalidate(clubId);
+  }, [saveCalendar.data, utils, clubId]);
+
+  return (
+    <Modal
+      title={t("create-club-calendar")}
+      handleSubmit={onSubmit}
+      submitButtonText={t("save-calendar")}
+      buttonIcon={<CalendarPlus />}
+      variant="outline"
+      buttonSize="icon"
+    >
+      <h3>{t("create-club-calendar")}</h3>
+      <FormCalendar
+        calendarValues={calendar}
+        onCalendarChange={updateCalendar}
+      />
+    </Modal>
+  );
+};
+
+type UpdateClubCalendarProps = {
+  clubId: string;
+  calendarId: string;
+};
+
+export const UpdateClubCalendar = ({
+  clubId,
+  calendarId,
+}: UpdateClubCalendarProps) => {
+  const t = useTranslations("calendar");
+  const utils = trpc.useUtils();
+  const { calendar, updateCalendar } = useFormCalendar();
+  const saveCalendar = trpc.calendars.updateCalendar.useMutation();
+
+  function onSubmit() {
+    const calendarValues = calendar.openingTime.map((day) => ({
+      day: day.name,
+      wholeDay: day.wholeDay,
+      closed: day.closed,
+      workingHours: day.workingHours.map((hour) => ({
+        opening: hour.opening,
+        closing: hour.closing,
+      })),
+    }));
+    saveCalendar.mutate({
+      calendarId,
+      clubId,
+      calendar: { startDate: calendar.startDate, openingTimes: calendarValues },
+    });
   }
 
   useEffect(() => {
@@ -243,7 +308,20 @@ export const CreateSiteCalendar = ({ siteId, clubId }: SiteCalendarProps) => {
   const utils = trpc.useUtils();
 
   function onSubmit() {
-    saveCalendar.mutate({ calendar, siteId });
+    const calendarValues = calendar.openingTime.map((day) => ({
+      day: day.name,
+      wholeDay: day.wholeDay,
+      closed: day.closed,
+      workingHours: day.workingHours.map((hour) => ({
+        opening: hour.opening,
+        closing: hour.closing,
+      })),
+    }));
+    saveCalendar.mutate({
+      siteId,
+      clubId,
+      calendar: { startDate: calendar.startDate, openingTimes: calendarValues },
+    });
   }
   useEffect(() => {
     utils.calendars.getCalendarForSite.invalidate({ clubId, siteId });
@@ -326,7 +404,24 @@ export const CreateRoomCalendar = ({
         openWithSite: sameAsSite,
       });
     } else {
-      saveCalendar.mutate({ calendar, roomId });
+      const calendarValues = calendar.openingTime.map((day) => ({
+        day: day.name,
+        wholeDay: day.wholeDay,
+        closed: day.closed,
+        workingHours: day.workingHours.map((hour) => ({
+          opening: hour.opening,
+          closing: hour.closing,
+        })),
+      }));
+      saveCalendar.mutate({
+        roomId,
+        clubId,
+        siteId,
+        calendar: {
+          startDate: calendar.startDate,
+          openingTimes: calendarValues,
+        },
+      });
     }
   }
 

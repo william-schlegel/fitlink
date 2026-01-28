@@ -206,15 +206,7 @@ export async function getReservationsByUserId(userId: UserId, after: Date) {
     where: and(eq(reservation.userId, userId), gte(reservation.date, after)),
     orderBy: [asc(reservation.date)],
     with: {
-      room: true,
-      activity: true,
-      planningActivity: {
-        with: {
-          activity: true,
-          coach: true,
-          room: true,
-        },
-      },
+      planning: true,
     },
   });
 }

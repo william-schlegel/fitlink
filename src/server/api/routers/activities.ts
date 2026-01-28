@@ -22,15 +22,17 @@ import {
   updateActivityGroup,
 } from "@/db/dal";
 import { activityGroup } from "@/db/schema/club";
+import { ZodActivityId, ZodClubId, ZodUserId } from "@/db/types";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
 import {
-  activitySchema,
+  createActivitySchema,
   roomActivitySchema,
   updateActivityGroupSchema,
+  updateActivitySchema,
 } from "@/schemas/activities";
 import {
   requireAdmin,
@@ -40,7 +42,7 @@ import {
 
 export const activityRouter = createTRPCRouter({
   getActivityById: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodActivityId)
     .query(({ input }) => getActivityById(input)),
 
   getActivityByName: publicProcedure
@@ -52,13 +54,13 @@ export const activityRouter = createTRPCRouter({
     .query(({ input }) => getActivityGroupById(input)),
 
   getActivityGroupsForUser: protectedProcedure
-    .input(z.string())
+    .input(ZodUserId)
     .query(({ input }) => getActivityGroupsForUser(input)),
 
   getAllActivityGroups: protectedProcedure.query(() => getAllActivityGroups()),
 
   getActivitiesForClub: protectedProcedure
-    .input(z.object({ clubId: z.cuid2(), userId: z.string() }))
+    .input(z.object({ clubId: ZodClubId, userId: ZodUserId }))
     .query(({ ctx, input }) => {
       requireAdminOrSelf(ctx.user, input.userId);
       return getActivitiesForClub(input.clubId);
@@ -79,18 +81,18 @@ export const activityRouter = createTRPCRouter({
     }),
 
   createActivity: protectedProcedure
-    .input(activitySchema.omit({ id: true }))
+    .input(createActivitySchema)
     .mutation(({ input }) => createActivity(input)),
 
   updateActivity: protectedProcedure
-    .input(activitySchema.partial())
+    .input(updateActivitySchema)
     .mutation(({ input }) => updateActivity(input)),
 
   deleteActivity: protectedProcedure
     .input(
       z.object({
-        activityId: z.cuid2(),
-        clubId: z.cuid2(),
+        activityId: ZodActivityId,
+        clubId: ZodClubId,
       }),
     )
     .mutation(({ input }) => deleteActivity(input.activityId)),
@@ -99,7 +101,7 @@ export const activityRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        userId: z.string().optional().nullable(),
+        userId: ZodUserId.optional().nullable(),
         default: z.boolean().optional().default(false),
       }),
     )

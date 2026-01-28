@@ -10,6 +10,7 @@ import {
 import { CreatePlanning } from "@/components/modals/managePlanning";
 import { PlanningName } from "@/components/planningName";
 import SelectClub from "@/components/selectClub";
+import { ClubId, PlanningId, UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
@@ -21,9 +22,9 @@ export default async function ClubPlanning({
   searchParams,
 }: {
   searchParams: Promise<{
-    clubId: string;
-    userId: string;
-    planningId: string;
+    clubId: ClubId;
+    userId: UserId;
+    planningId: PlanningId;
   }>;
 }) {
   const user = await getActualUser();

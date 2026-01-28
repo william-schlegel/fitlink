@@ -14,6 +14,7 @@ import {
   CoachDataPresentation,
 } from "@/components/modals/manageClub";
 import { Button } from "@/components/ui/shadcn";
+import { ClubId, UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import createLink, { createHref } from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
@@ -24,8 +25,8 @@ export default async function ManageCoachs({
   params,
   searchParams,
 }: {
-  params: Promise<{ userId: string; clubId: string }>;
-  searchParams: Promise<{ coachId: string }>;
+  params: Promise<{ userId: UserId; clubId: ClubId }>;
+  searchParams: Promise<{ coachId: UserId }>;
 }) {
   const user = await getActualUser();
   if (!user) redirect("/");
@@ -89,8 +90,8 @@ export default async function ManageCoachs({
 }
 
 type CoachContentProps = {
-  clubId: string;
-  coachId: string;
+  clubId: ClubId;
+  coachId: UserId;
 };
 
 async function CoachContent({ coachId, clubId }: CoachContentProps) {

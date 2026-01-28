@@ -18,7 +18,7 @@ import {
   coachOrganisms,
 } from "./coach";
 import { page } from "./page";
-import { planning, planningActivity } from "./planning";
+import { planning } from "./planning";
 import { subscription } from "./subscription";
 
 export const userCoach = pgTable(
@@ -55,7 +55,6 @@ export const userCoachRelations = relations(userCoach, ({ one, many }) => ({
   certifications: many(coachCertification),
   organisms: many(coachOrganisms),
   page: one(page),
-  planningActivities: many(planningActivity),
   plannings: many(planning),
   marketPlaceOffers: many(coachMarketPlace),
   clubs: many(clubCoachs),

@@ -2,6 +2,7 @@ import { desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { event } from "@/db/schema/club";
+import { ClubId } from "../types";
 
 // ==================== EVENT QUERIES ====================
 
@@ -12,7 +13,7 @@ export async function getEventById(id: string) {
   });
 }
 
-export async function getEventsForClub(clubId: string) {
+export async function getEventsForClub(clubId: ClubId) {
   return db.query.event.findMany({
     where: eq(event.clubId, clubId),
     orderBy: [desc(event.startDate)],
@@ -22,7 +23,7 @@ export async function getEventsForClub(clubId: string) {
 // ==================== EVENT MUTATIONS ====================
 
 export async function createEvent(data: {
-  clubId: string;
+  clubId: ClubId;
   name: string;
   brief: string;
   description: string;
@@ -45,7 +46,7 @@ export async function createEvent(data: {
 
 export async function updateEvent(data: {
   id: string;
-  clubId?: string;
+  clubId?: ClubId;
   name?: string;
   brief?: string;
   description?: string;

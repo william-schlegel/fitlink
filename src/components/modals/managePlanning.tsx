@@ -45,6 +45,7 @@ import {
 import { Copy, Pencil, Trash } from "lucide-react";
 
 import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
+import { ClubId, PlanningId, RoomId, SiteId } from "@/db/types";
 
 type CreatePlanningProps = {
   clubId: string;
@@ -72,7 +73,7 @@ export const CreatePlanning = ({
   const userId = user?.id ?? "";
   const createPlanning = trpc.plannings.createPlanningForClub.useMutation({
     onSuccess: (data) => {
-      utils.plannings.getPlanningsForClub.invalidate(clubId);
+      utils.plannings.getPlanningsForClub.invalidate({ clubId });
       toast.success(t("planning-created"));
       router.push(createLink({ clubId, planningId: data[0].id }));
     },
@@ -105,14 +106,15 @@ export const CreatePlanning = ({
   const onSubmit: SubmitHandler<CreatePlanningFormValues> = (data) => {
     createPlanning.mutate({
       clubId,
-      name: data.name ? data.name : undefined,
+      name: data.name,
       startDate: data.startDate,
-      endDate: isDate(data.endDate) ? data.endDate : undefined,
+      endDate: isDate(data.endDate) ? data.endDate : null,
       siteId: data.forSite && data.siteId ? data.siteId : undefined,
       roomId:
         data.forSite && data.siteId && data.forRoom && data.roomId
           ? data.roomId
           : undefined,
+      planningItems: [],
     });
   };
 
@@ -258,8 +260,8 @@ export const CreatePlanning = ({
 };
 
 type UpdatePlanningProps = {
-  clubId: string;
-  planningId: string;
+  clubId: ClubId;
+  planningId: PlanningId;
   variant?: ButtonVariant;
   buttonSize?: ButtonSize;
   duplicate?: boolean;
@@ -269,8 +271,8 @@ type UpdatePlanningFormValues = {
   name: string | null;
   startDate: Date;
   endDate?: Date | null;
-  siteId?: string | null;
-  roomId?: string | null;
+  siteId?: SiteId | null;
+  roomId?: RoomId | null;
 };
 
 export function UpdatePlanning({
@@ -290,9 +292,12 @@ export function UpdatePlanning({
     reset,
   } = useForm<UpdatePlanningFormValues>();
 
-  const queryPlanning = trpc.plannings.getPlanningById.useQuery(planningId, {
-    enabled: isCUID(planningId),
-  });
+  const queryPlanning = trpc.plannings.getPlanningById.useQuery(
+    { planningId },
+    {
+      enabled: isCUID(planningId),
+    },
+  );
 
   useEffect(() => {
     reset({
@@ -303,14 +308,14 @@ export function UpdatePlanning({
       roomId: queryPlanning.data?.roomId,
     });
     startTransition(() => {
-      setSiteName(queryPlanning.data?.site?.name ?? "");
-      setRoomName(queryPlanning.data?.room?.name ?? "");
+      setSiteName(queryPlanning.data?.siteName ?? "");
+      setRoomName(queryPlanning.data?.roomName ?? "");
     });
   }, [queryPlanning.data, reset]);
 
   const updatePlanning = trpc.plannings.updatePlanningForClub.useMutation({
     onSuccess: () => {
-      utils.plannings.getPlanningsForClub.invalidate(clubId);
+      utils.plannings.getPlanningsForClub.invalidate({ clubId });
       toast.success(t("planning-updated"));
     },
     onError(error) {
@@ -320,7 +325,7 @@ export function UpdatePlanning({
   const duplicatePlanning = trpc.plannings.duplicatePlanningForClub.useMutation(
     {
       onSuccess: () => {
-        utils.plannings.getPlanningsForClub.invalidate(clubId);
+        utils.plannings.getPlanningsForClub.invalidate({ clubId });
         toast.success(t("planning-created"));
       },
       onError(error) {
@@ -434,7 +439,7 @@ export function DeletePlanning({
 
   const deletePlanning = trpc.plannings.deletePlanning.useMutation({
     onSuccess: () => {
-      utils.plannings.getPlanningsForClub.invalidate(clubId);
+      utils.plannings.getPlanningsForClub.invalidate({ clubId });
       toast.success(t("planning-deleted"));
     },
     onError(error) {

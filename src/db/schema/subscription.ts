@@ -10,6 +10,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
+import { ActivityId } from "../types";
 import { user } from "./auth";
 import { activity, activityGroup, club, room, site } from "./club";
 import {
@@ -175,6 +176,7 @@ export const subscriptionToActivity = pgTable(
       .notNull()
       .references(() => subscription.id),
     activityId: text("activity_id")
+      .$type<ActivityId>()
       .notNull()
       .references(() => activity.id),
   },

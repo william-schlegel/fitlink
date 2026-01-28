@@ -36,7 +36,7 @@ import {
   ItemContent,
   ItemTitle,
 } from "@/components/ui/shadcn/item";
-import { UserId } from "@/db/types";
+import { ClubId, UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import { getToday } from "@/lib/dates/serverDayName";
 import { formatDateLocalized } from "@/lib/formatDate";
@@ -199,7 +199,7 @@ export default async function ManagerClubs({
   );
 }
 
-async function DailyPlanning({ clubId }: { clubId: string }) {
+async function DailyPlanning({ clubId }: { clubId: ClubId }) {
   const t = await getTranslations("dashboard");
   const day = getToday();
   const planning = await getClubDailyPlanning(clubId, day);
@@ -207,25 +207,25 @@ async function DailyPlanning({ clubId }: { clubId: string }) {
   return (
     <div className="flex flex-col items-center rounded border border-accent bg-card">
       <h4 className="w-full  bg-accent text-center text-accent-foreground">
-        {planning?.club?.name}
+        {planning.clubName}
       </h4>
       <div className="flex shrink-0 flex-wrap items-start gap-2 p-2">
-        {planning.planningActivities.map((activity) => (
+        {planning.planningItems.map((item) => (
           <div
-            key={activity.id}
+            key={item.slotId}
             className="border border-border p-2 bg-background text-foreground"
           >
             <p>
-              <span className="text-xs">{activity.startTime}</span>
+              <span className="text-xs">{item.startTime}</span>
               {" ("}
-              <span className="text-xs">{activity.duration}</span>
+              <span className="text-xs">{item.duration}</span>
               {"') "}
-              <span>{activity.activity.name}</span>
+              <span>{item.activityName}</span>
             </p>
             <p className="text-xs">
-              <span>{activity.room?.name}</span>
+              <span>{item.roomName}</span>
               {" - "}
-              <span>{activity.coach?.user.name}</span>
+              <span>{item.coachName}</span>
             </p>
           </div>
         ))}

@@ -10,6 +10,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
+import { ActivityId, ClubId, RoomId, SiteId, UserId } from "../types";
 import {
   certificationModule,
   certificationModuleActivityGroups,
@@ -19,14 +20,7 @@ import {
 } from "./coach";
 import { roomReservationEnum } from "./enums";
 import { page } from "./page";
-import {
-  openingCalendarClubs,
-  openingCalendarRooms,
-  openingCalendarSites,
-  planning,
-  planningActivity,
-  reservation,
-} from "./planning";
+import { openingCalendar, planning, reservation } from "./planning";
 import {
   subscription,
   subscriptionToActivity,
@@ -39,7 +33,7 @@ import { userCoach, userManager, userMember } from "./user";
 export const club = pgTable(
   "Club",
   {
-    id: text("id").primaryKey().$defaultFn(createId),
+    id: text("id").primaryKey().$defaultFn(createId).$type<ClubId>(),
     name: text("name").notNull(),
     address: text("address").notNull(),
     managerId: text("manager_id").notNull(),
@@ -62,7 +56,7 @@ export const clubRelations = relations(club, ({ one, many }) => ({
   subscriptions: many(subscription),
   events: many(event),
   marketPlaceSearchs: many(coachMarketPlace),
-  openingCalendars: many(openingCalendarClubs),
+  openingCalendars: many(openingCalendar),
   members: many(clubMembers),
   coaches: many(clubCoachs),
 }));
@@ -70,13 +64,13 @@ export const clubRelations = relations(club, ({ one, many }) => ({
 export const site = pgTable(
   "Site",
   {
-    id: text("id").primaryKey().$defaultFn(createId),
+    id: text("id").primaryKey().$defaultFn(createId).$type<SiteId>(),
     name: text("name").notNull(),
     address: text("address").notNull(),
     searchAddress: text("search_address"),
     latitude: real("latitude").default(48.8583701),
     longitude: real("longitude").default(2.2944813),
-    clubId: text("club_id").notNull(),
+    clubId: text("club_id").notNull().$type<ClubId>(),
     openWithClub: boolean("open_with_club").default(true),
   },
   (table) => [index("site_club_idx").on(table.clubId)],
@@ -88,24 +82,21 @@ export const siteRelations = relations(site, ({ one, many }) => ({
     references: [club.id],
   }),
   rooms: many(room),
-  plannings: many(planning),
-  planningActivities: many(planningActivity),
   subscriptions: many(subscriptionToSite),
   marketPlaceSearchs: many(coachMarketPlace),
-  openingCalendars: many(openingCalendarSites),
 }));
 
 export const room = pgTable(
   "Room",
   {
-    id: text("id").primaryKey().$defaultFn(createId),
+    id: text("id").primaryKey().$defaultFn(createId).$type<RoomId>(),
     name: text("name").notNull(),
     reservation: roomReservationEnum("reservation").default("NONE"),
     capacity: integer("capacity").notNull(),
     unavailable: boolean("unavailable").default(false),
     openWithClub: boolean("open_with_club").default(true),
     openWithSite: boolean("open_with_site").default(true),
-    siteId: text("site_id").notNull(),
+    siteId: text("site_id").notNull().$type<SiteId>(),
   },
   (table) => [index("room_site_idx").on(table.siteId)],
 );
@@ -115,11 +106,8 @@ export const roomRelations = relations(room, ({ one, many }) => ({
     fields: [room.siteId],
     references: [site.id],
   }),
-  plannings: many(planning),
-  planningActivities: many(planningActivity),
   subscriptions: many(subscriptionToRoom),
   reservations: many(reservation),
-  openingCalendars: many(openingCalendarRooms),
   activities: many(roomActivities),
 }));
 
@@ -127,7 +115,7 @@ export const event = pgTable(
   "Event",
   {
     id: text("id").primaryKey().$defaultFn(createId),
-    clubId: text("club_id").notNull(),
+    clubId: text("club_id").notNull().$type<ClubId>(),
     name: text("name").notNull(),
     brief: text("brief").notNull(),
     description: text("description").notNull(),
@@ -169,7 +157,7 @@ export const activityGroup = pgTable(
     id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     default: boolean("default").default(false),
-    coachId: text("coach_id"),
+    coachId: text("coach_id").$type<UserId>(),
   },
   (table) => [index("activity_group_coach_idx").on(table.coachId)],
 );
@@ -194,10 +182,10 @@ export const activityGroupRelations = relations(
 export const activity = pgTable(
   "Activity",
   {
-    id: text("id").primaryKey().$defaultFn(createId),
+    id: text("id").primaryKey().$defaultFn(createId).$type<ActivityId>(),
     name: text("name").notNull(),
     groupId: text("group_id").notNull(),
-    clubId: text("club_id").notNull(),
+    clubId: text("club_id").notNull().$type<ClubId>(),
     noCalendar: boolean("no_calendar").default(false),
     reservationDuration: integer("reservation_duration").default(60),
   },
@@ -216,7 +204,6 @@ export const activityRelations = relations(activity, ({ one, many }) => ({
     fields: [activity.clubId],
     references: [club.id],
   }),
-  planningActivities: many(planningActivity),
   subscriptions: many(subscriptionToActivity),
   reservations: many(reservation),
   rooms: many(roomActivities),
@@ -228,9 +215,11 @@ export const clubMembers = pgTable(
     id: text("id").primaryKey().$defaultFn(createId),
     clubId: text("club_id")
       .notNull()
+      .$type<ClubId>()
       .references(() => club.id),
     memberUserId: text("member_user_id")
       .notNull()
+      .$type<UserId>()
       .references(() => userMember.userId),
   },
   (table) => [
@@ -245,9 +234,11 @@ export const clubCoachs = pgTable(
     id: text("id").primaryKey().$defaultFn(createId),
     clubId: text("club_id")
       .notNull()
+      .$type<ClubId>()
       .references(() => club.id),
     coachUserId: text("coach_user_id")
       .notNull()
+      .$type<UserId>()
       .references(() => userCoach.userId),
   },
   (table) => [
@@ -262,9 +253,11 @@ export const roomActivities = pgTable(
     id: text("id").primaryKey().$defaultFn(createId),
     roomId: text("room_id")
       .notNull()
+      .$type<RoomId>()
       .references(() => room.id),
     activityId: text("activity_id")
       .notNull()
+      .$type<ActivityId>()
       .references(() => activity.id),
   },
   (table) => [

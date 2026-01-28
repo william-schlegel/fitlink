@@ -6,16 +6,18 @@ import {
   getCalendarForClub,
   getCalendarForRoom,
   getCalendarForSite,
+  updateCalendar,
 } from "@/db/dal";
 import { dayNameEnum } from "@/db/schema/enums";
+import { ZodCalendarId, ZodClubId, ZodRoomId, ZodSiteId } from "@/db/types";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 
 const CalendarData = {
   startDate: z.date().default(new Date()),
-  openingTime: z
+  openingTimes: z
     .array(
       z.object({
-        name: z.enum(dayNameEnum.enumValues),
+        day: z.enum(dayNameEnum.enumValues),
         workingHours: z.array(
           z.object({
             opening: z
@@ -37,11 +39,11 @@ const CalendarData = {
 
 export const calendarRouter = createTRPCRouter({
   getCalendarById: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodCalendarId)
     .query(({ input }) => getCalendarById(input)),
 
   getCalendarForClub: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodClubId)
     .query(async ({ input }) => {
       const calendarForClub = await getCalendarForClub(input);
       return calendarForClub ?? null;
@@ -50,8 +52,8 @@ export const calendarRouter = createTRPCRouter({
   getCalendarForSite: protectedProcedure
     .input(
       z.object({
-        siteId: z.cuid2(),
-        clubId: z.cuid2(),
+        siteId: ZodSiteId,
+        clubId: ZodClubId,
         openWithClub: z.boolean().default(false),
       }),
     )
@@ -60,9 +62,9 @@ export const calendarRouter = createTRPCRouter({
   getCalendarForRoom: protectedProcedure
     .input(
       z.object({
-        roomId: z.cuid2(),
-        siteId: z.cuid2(),
-        clubId: z.cuid2(),
+        roomId: ZodRoomId,
+        siteId: ZodSiteId,
+        clubId: ZodClubId,
       }),
     )
     .query(({ input }) =>
@@ -73,18 +75,38 @@ export const calendarRouter = createTRPCRouter({
     .input(
       z.object({
         calendar: z.object(CalendarData),
-        siteId: z.cuid2().optional(),
-        roomId: z.cuid2().optional(),
-        clubId: z.cuid2().optional(),
+        siteId: ZodSiteId.optional(),
+        roomId: ZodRoomId.optional(),
+        clubId: ZodClubId,
       }),
     )
     .mutation(({ input }) =>
       createCalendar({
         startDate: input.calendar.startDate,
-        openingTime: input.calendar.openingTime,
-        siteId: input.siteId,
-        roomId: input.roomId,
+        openingTimes: input.calendar.openingTimes,
+        siteId: input.siteId ?? null,
+        roomId: input.roomId ?? null,
         clubId: input.clubId,
+      }),
+    ),
+  updateCalendar: protectedProcedure
+    .input(
+      z.object({
+        calendar: z.object(CalendarData),
+        clubId: ZodClubId,
+        siteId: ZodSiteId.optional(),
+        roomId: ZodRoomId.optional(),
+        calendarId: ZodCalendarId,
+      }),
+    )
+    .mutation(({ input }) =>
+      updateCalendar({
+        id: input.calendarId,
+        clubId: input.clubId,
+        siteId: input.siteId ?? null,
+        roomId: input.roomId ?? null,
+        startDate: input.calendar.startDate,
+        openingTimes: input.calendar.openingTimes,
       }),
     ),
 });

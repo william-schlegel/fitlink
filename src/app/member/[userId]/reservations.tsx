@@ -1,7 +1,7 @@
 "use client";
 
 import { inferProcedureOutput } from "@trpc/server";
-import { format, startOfToday } from "date-fns";
+import { startOfToday } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -119,7 +119,7 @@ function MyReservation({ reservation, memberId, day }: MyReservationProps) {
           variant="ghost"
         />
       </div>
-      {reservation?.planningActivity ? (
+      {/* reservation?.planningActivity ? (
         <div className="p-2">
           <div className="space-x-2 text-center">
             <span className="font-semibold">
@@ -138,8 +138,8 @@ function MyReservation({ reservation, memberId, day }: MyReservationProps) {
             <span>{reservation.planningActivity?.room?.name}</span>
           </div>
         </div>
-      ) : null}
-      {reservation?.activity ? (
+      ) : null */}
+      {/* reservation?.activity ? (
         <div className="p-2">
           <div className="space-x-2 text-center">
             <span className="font-semibold">{reservation.activity?.name}</span>
@@ -156,7 +156,7 @@ function MyReservation({ reservation, memberId, day }: MyReservationProps) {
             <span>{reservation.room?.name}</span>
           </div>
         </div>
-      ) : null}
+      ) : null */}
     </div>
   );
 }

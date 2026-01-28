@@ -18,6 +18,7 @@ import {
 } from "@/components/modals/manageRoom";
 import { Button } from "@/components/ui/shadcn";
 import { Alert } from "@/components/ui/shadcn/alert";
+import { ClubId, RoomId, SiteId, UserId } from "@/db/types";
 import createLink, { createHref } from "@/lib/createLink";
 import { RESERVATIONS } from "@/lib/data";
 import { getHref } from "@/lib/getHref";
@@ -29,8 +30,8 @@ export default async function ManageRooms({
   params,
   searchParams,
 }: {
-  params: Promise<{ userId: string; clubId: string; siteId: string }>;
-  searchParams: Promise<{ roomId: string }>;
+  params: Promise<{ userId: UserId; clubId: ClubId; siteId: SiteId }>;
+  searchParams: Promise<{ roomId: RoomId }>;
 }) {
   const { clubId, userId, siteId } = await params;
   const { roomId } = (await searchParams) ?? {};
@@ -116,9 +117,9 @@ export default async function ManageRooms({
 }
 
 type RoomContentProps = {
-  clubId: string;
-  siteId: string;
-  roomId: string;
+  clubId: ClubId;
+  siteId: SiteId;
+  roomId: RoomId;
 };
 
 async function RoomContent({ clubId, siteId, roomId }: RoomContentProps) {

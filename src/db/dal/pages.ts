@@ -11,7 +11,7 @@ import {
 import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { userCoach } from "@/db/schema/user";
 import { isCUID } from "@/lib/utils";
-import { UserId } from "../types";
+import { ClubId, UserId } from "../types";
 
 // ==================== PAGE QUERIES ====================
 
@@ -28,14 +28,14 @@ export async function getPageById(id: string) {
   });
 }
 
-export function getPagesForClub(clubId: string) {
+export function getPagesForClub(clubId: ClubId) {
   if (!isCUID(clubId)) return [];
   return db.query.page.findMany({
     where: eq(page.clubId, clubId),
   });
 }
 
-export async function getPagesForManager(managerId: string) {
+export async function getPagesForManager(managerId: UserId) {
   const rows = await db
     .select({ page, club })
     .from(page)
@@ -76,7 +76,8 @@ export async function getClubPage(pageId: string) {
   });
 }
 
-export async function getPublishedPagesForClub(clubId: string) {
+export async function getPublishedPagesForClub(clubId: ClubId) {
+  if (!isCUID(clubId)) return [];
   return db.query.page.findMany({
     where: and(eq(page.clubId, clubId), eq(page.published, true)),
   });
@@ -101,7 +102,7 @@ export async function getAllPublishedPagesForClub() {
   });
 }
 
-export async function getClubBasicInfo(clubId: string) {
+export async function getClubBasicInfo(clubId: ClubId) {
   return db.query.club.findFirst({
     where: eq(club.id, clubId),
   });
@@ -171,7 +172,7 @@ export async function getCoachDataForPage(userId: UserId) {
 
 export async function createPage(data: {
   name: string;
-  clubId?: string;
+  clubId?: ClubId;
   coachId?: UserId;
   target: (typeof pageTargetEnum.enumValues)[number];
 }) {
@@ -358,7 +359,7 @@ export async function updatePageStyleForCoach(
 }
 
 export async function updatePageStyleForClub(
-  clubId: string,
+  clubId: ClubId,
   pageStyle: string,
 ) {
   return db.update(club).set({ pageStyle }).where(eq(club.id, clubId));

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
+import { ZodActivityId, ZodUserId } from "@/db/types";
 import { DEFAULT_RANGE, LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 
 // ==================== COACH OFFER SCHEMAS ====================
@@ -18,7 +19,7 @@ export const coachingPackSchema = z.object({
  */
 export const coachOfferSchema = z.object({
   id: z.cuid2(),
-  coachId: z.string(),
+  coachId: ZodUserId,
   name: z.string(),
   target: z.enum(coachingTargetEnum.enumValues),
   excludingTaxes: z.boolean(),
@@ -49,7 +50,7 @@ export const createCoachOfferSchema = coachOfferSchema.omit({ id: true });
  * Schema for updating a coaching offer
  */
 export const updateCoachOfferSchema = coachOfferSchema.partial().extend({
-  id: z.cuid2(),
+  id: ZodUserId,
 });
 
 // ==================== COACH SEARCH SCHEMAS ====================
@@ -81,7 +82,7 @@ export const companyOffersSearchSchema = z.object({
  */
 export const updateCoachDataSchema = z.object({
   id: z.string(),
-  userId: z.string(),
+  userId: ZodUserId,
   longitude: z.number().optional(),
   latitude: z.number().optional(),
   searchAddress: z.string().optional(),
@@ -89,7 +90,7 @@ export const updateCoachDataSchema = z.object({
   publicName: z.string().optional(),
   aboutMe: z.string().optional(),
   description: z.string().optional(),
-  coachingActivities: z.array(z.string()).optional(),
+  coachingActivities: z.array(ZodActivityId).optional(),
   convexRoomId: z.string().optional(),
 });
 

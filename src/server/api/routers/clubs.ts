@@ -17,7 +17,7 @@ import {
   getUserWithPricingFeatures,
   updateClubConvexRoomId,
 } from "@/db/dal";
-import { ZodUserId } from "@/db/types";
+import { ZodActivityId, ZodCalendarId, ZodClubId, ZodUserId } from "@/db/types";
 import { createClubRoomInConvex } from "@/lib/convex/server";
 import {
   createTRPCRouter,
@@ -31,7 +31,7 @@ import {
 
 export const clubRouter = createTRPCRouter({
   getClubById: protectedProcedure
-    .input(z.object({ clubId: z.cuid2(), userId: ZodUserId }))
+    .input(z.object({ clubId: ZodClubId, userId: ZodUserId }))
     .query(async ({ input }) => {
       if (!input.clubId || !input.userId) return null;
       const userData = await getUserWithPricingFeatures(input.userId);
@@ -44,7 +44,7 @@ export const clubRouter = createTRPCRouter({
     }),
 
   getClubPagesForNavByClubId: publicProcedure
-    .input(z.string())
+    .input(ZodClubId)
     .query(async ({ input }) => {
       const myClub = await getClubPagesForNav(input);
       if (!myClub) return { pages: [], logoUrl: "" };
@@ -131,7 +131,7 @@ export const clubRouter = createTRPCRouter({
   updateClub: protectedProcedure
     .input(
       z.object({
-        id: z.cuid2(),
+        id: ZodClubId,
         name: z.string(),
         address: z.string(),
         logoUrl: z.string().nullable(),
@@ -162,14 +162,14 @@ export const clubRouter = createTRPCRouter({
   updateClubCalendar: protectedProcedure
     .input(
       z.object({
-        id: z.cuid2(),
-        calendarId: z.cuid2(),
+        id: ZodClubId,
+        calendarId: ZodCalendarId,
       }),
     )
     .mutation(({ input }) => dalUpdateClubCalendar(input.id, input.calendarId)),
 
   deleteClub: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodClubId)
     .mutation(async ({ ctx, input }) => {
       const deletedClub = await getClubForUpdate(input);
       requireAdminOrOwner(ctx.user, deletedClub?.managerId);
@@ -179,8 +179,8 @@ export const clubRouter = createTRPCRouter({
   updateClubActivities: protectedProcedure
     .input(
       z.object({
-        id: z.cuid2(),
-        activities: z.array(z.string()),
+        id: ZodClubId,
+        activities: z.array(ZodActivityId),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -192,9 +192,9 @@ export const clubRouter = createTRPCRouter({
   updateClubCoach: protectedProcedure
     .input(
       z.object({
-        clubId: z.cuid2(),
+        clubId: ZodClubId,
         coachUserId: ZodUserId,
-        managerId: z.string().optional(),
+        managerId: ZodUserId.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

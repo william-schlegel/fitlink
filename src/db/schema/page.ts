@@ -2,7 +2,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-import { UserId } from "../types";
+import { ClubId, UserId } from "../types";
 import { club, event } from "./club";
 import {
   pageSectionElementTypeEnum,
@@ -64,7 +64,7 @@ export const page = pgTable(
     id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
     target: pageTargetEnum("target").default("HOME"),
-    clubId: text("club_id"),
+    clubId: text("club_id").$type<ClubId>(),
     coachId: text("coach_id").unique().$type<UserId>(),
     published: boolean("published").default(false),
     eventId: text("event_id").unique(),

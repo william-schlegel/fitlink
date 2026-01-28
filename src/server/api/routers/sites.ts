@@ -14,7 +14,14 @@ import {
   updateRoom,
   updateSite,
 } from "@/db/dal";
-import { UserId } from "@/db/types";
+import {
+  ClubId,
+  SiteId,
+  UserId,
+  ZodClubId,
+  ZodRoomId,
+  ZodSiteId,
+} from "@/db/types";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { calculateDistance } from "@/lib/distance";
 import {
@@ -22,12 +29,17 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { roomSchema, siteSchema } from "@/schemas/sites";
+import {
+  roomSchema,
+  siteSchema,
+  updateRoomSchema,
+  updateSiteSchema,
+} from "@/schemas/sites";
 
 // Export functions for use in server components
 export { getRoomById, getRoomsForSite, getSiteById, getSitesForClub };
 
-export async function getSitesForClubWithLimit(clubId: string, userId: UserId) {
+export async function getSitesForClubWithLimit(clubId: ClubId, userId: UserId) {
   const u = await getUserWithPricingForSites(userId);
   const limit = u?.pricing?.features.find(
     (f) => f.feature === "MANAGER_MULTI_SITE",
@@ -38,7 +50,7 @@ export async function getSitesForClubWithLimit(clubId: string, userId: UserId) {
   return getSitesForClub(clubId, limit);
 }
 
-export async function getRoomsForSiteWithCheck(siteId: string, userId: UserId) {
+export async function getRoomsForSiteWithCheck(siteId: SiteId, userId: UserId) {
   const u = await getUserWithPricingForSites(userId);
   if (!u?.pricing?.features.find((f) => f.feature === "MANAGER_ROOM"))
     return [];
@@ -48,11 +60,11 @@ export async function getRoomsForSiteWithCheck(siteId: string, userId: UserId) {
 
 export const siteRouter = createTRPCRouter({
   getSiteById: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodSiteId)
     .query(({ input }) => getSiteById(input)),
 
   getSitesForClub: protectedProcedure
-    .input(z.string())
+    .input(ZodClubId)
     .query(async ({ ctx, input }) =>
       getSitesForClubWithLimit(input, ctx.user.id as UserId),
     ),
@@ -62,20 +74,20 @@ export const siteRouter = createTRPCRouter({
     .mutation(({ input }) => createSite(input)),
 
   updateSite: protectedProcedure
-    .input(siteSchema.partial())
-    .mutation(({ input }) => updateSite({ id: input.id ?? "", ...input })),
+    .input(updateSiteSchema)
+    .mutation(({ input }) => updateSite(input)),
 
   deleteSite: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodSiteId)
     .mutation(({ input }) => deleteSite(input)),
 
   /** ------------------- ROOMS -------------------- **/
   getRoomById: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodRoomId)
     .query(({ input }) => getRoomById(input)),
 
   getRoomsForSite: protectedProcedure
-    .input(z.string())
+    .input(ZodSiteId)
     .query(async ({ ctx, input }) =>
       getRoomsForSiteWithCheck(input, ctx.user.id as UserId),
     ),
@@ -85,11 +97,11 @@ export const siteRouter = createTRPCRouter({
     .mutation(({ input }) => createRoom(input)),
 
   updateRoom: protectedProcedure
-    .input(roomSchema.partial())
-    .mutation(({ input }) => updateRoom({ id: input.id ?? "", ...input })),
+    .input(updateRoomSchema)
+    .mutation(({ input }) => updateRoom(input)),
 
   deleteRoom: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodRoomId)
     .mutation(({ input }) => deleteRoom(input)),
 
   getSitesFromDistance: publicProcedure

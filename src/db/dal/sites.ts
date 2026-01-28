@@ -12,18 +12,18 @@ import type {
   UpdateRoomInput,
   UpdateSiteInput,
 } from "@/schemas/sites";
-import { UserId } from "../types";
+import { ClubId, RoomId, SiteId, UserId } from "../types";
 
 // ==================== SITE QUERIES ====================
 
-export async function getSiteById(id: string) {
+export async function getSiteById(id: SiteId) {
   return db.query.site.findFirst({
     where: eq(site.id, id),
     with: { rooms: true },
   });
 }
 
-export async function getSitesForClub(clubId: string, limit?: number) {
+export async function getSitesForClub(clubId: ClubId, limit?: number) {
   return db.query.site.findMany({
     where: eq(site.clubId, clubId),
     with: { rooms: true },
@@ -73,19 +73,19 @@ export async function updateSite(data: UpdateSiteInput) {
     .returning();
 }
 
-export async function deleteSite(id: string) {
+export async function deleteSite(id: SiteId) {
   return db.delete(site).where(eq(site.id, id));
 }
 
 // ==================== ROOM QUERIES ====================
 
-export async function getRoomById(roomId: string) {
+export async function getRoomById(roomId: RoomId) {
   return db.query.room.findFirst({
     where: eq(room.id, roomId),
   });
 }
 
-export async function getRoomsForSite(siteId: string) {
+export async function getRoomsForSite(siteId: SiteId) {
   return db.query.room.findMany({
     where: eq(room.siteId, siteId),
     orderBy: [asc(room.name)],
@@ -109,7 +109,7 @@ export async function updateRoom(data: UpdateRoomInput) {
   return db.update(room).set(data).where(eq(room.id, data.id)).returning();
 }
 
-export async function deleteRoom(id: string) {
+export async function deleteRoom(id: RoomId) {
   return db.delete(room).where(eq(room.id, id));
 }
 

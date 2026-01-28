@@ -1,4 +1,4 @@
-import { and, inArray, or } from "drizzle-orm";
+import { inArray, or } from "drizzle-orm";
 import z from "zod";
 
 import {
@@ -10,13 +10,12 @@ import {
   deletePlanningActivity,
   deleteReservation,
   duplicatePlanning,
+  fillPlanningItems,
   getActivitiesForGroups,
-  getActivitiesWithNoCalendar,
   getClubDailyPlanning,
   getCoachDailyPlanning,
   getCoachPlanningForClub,
   getMemberDataWithSubscriptions,
-  getPlanningActivitiesWithFilters,
   getPlanningActivityById,
   getPlanningById,
   getPlanningsForClub,
@@ -25,38 +24,28 @@ import {
   updatePlanningActivity,
 } from "@/db/dal";
 import { activity } from "@/db/schema/club";
-import { dayNameEnum, roomReservationEnum } from "@/db/schema/enums";
-import { planningActivity } from "@/db/schema/planning";
-import { userCoach } from "@/db/schema/user";
-import { ZodUserId } from "@/db/types";
+import { dayNameEnum } from "@/db/schema/enums";
+import {
+  ActivityId,
+  ClubId,
+  RoomId,
+  SiteId,
+  ZodClubId,
+  ZodPlanningId,
+  ZodReservationId,
+  ZodUserId,
+} from "@/db/types";
 import { getDayName } from "@/lib/dates/days";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-
-const planningObject = z.object({
-  id: z.cuid2(),
-  clubId: z.cuid2(),
-  startDate: z.date().default(new Date(Date.now())),
-  siteId: z.cuid2().optional(),
-  roomId: z.cuid2().optional(),
-  endDate: z.date().optional(),
-  name: z.string().optional(),
-});
-
-const planningActivityObject = z.object({
-  id: z.cuid2(),
-  planningId: z.cuid2(),
-  activityId: z.cuid2(),
-  siteId: z.cuid2(),
-  roomId: z.cuid2().optional(),
-  day: z.enum(dayNameEnum.enumValues),
-  startTime: z.string(),
-  duration: z.number(),
-  coachId: z.string().optional(),
-});
+import {
+  planningItemSchema,
+  planningSchema,
+  PlanningSearchReturnData,
+} from "@/schemas";
 
 export {
   getClubDailyPlanning,
@@ -67,32 +56,39 @@ export {
 
 export const planningRouter = createTRPCRouter({
   getPlanningsForClub: protectedProcedure
-    .input(z.string())
-    .query(({ input }) => getPlanningsForClub(input)),
+    .input(z.object({ clubId: ZodClubId }))
+    .query(({ input }) => getPlanningsForClub(input.clubId)),
 
   getPlanningById: protectedProcedure
-    .input(z.cuid2())
-    .query(async ({ input }) => getPlanningById(input)),
+    .input(z.object({ planningId: ZodPlanningId }))
+    .query(async ({ input }) => getPlanningById(input.planningId)),
 
   getPlanningActivityById: protectedProcedure
-    .input(z.cuid2().nullable())
+    .input(z.object({ planningId: ZodPlanningId, slotId: z.string() }))
     .query(({ input }) => {
-      if (!input) return null;
-      return getPlanningActivityById(input);
+      if (!input.planningId || !input.slotId) return null;
+      return getPlanningActivityById(input.planningId, input.slotId);
     }),
 
   createPlanningForClub: protectedProcedure
-    .input(planningObject.omit({ id: true }))
+    .input(planningSchema.omit({ id: true }))
     .mutation(({ input }) => createPlanning(input)),
 
   updatePlanningForClub: protectedProcedure
-    .input(planningObject.partial())
-    .mutation(({ input }) => updatePlanning({ id: input.id ?? "", ...input })),
+    .input(planningSchema.partial())
+    .mutation(({ input }) => updatePlanning(input)),
 
   duplicatePlanningForClub: protectedProcedure
-    .input(planningObject.partial())
+    .input(
+      z.object({
+        id: ZodPlanningId,
+        name: z.string().optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }),
+    )
     .mutation(({ input }) =>
-      duplicatePlanning(input.id ?? "", {
+      duplicatePlanning(input.id, {
         name: input.name,
         startDate: input.startDate,
         endDate: input.endDate,
@@ -100,27 +96,39 @@ export const planningRouter = createTRPCRouter({
     ),
 
   deletePlanning: protectedProcedure
-    .input(z.string())
+    .input(ZodPlanningId)
     .mutation(({ input }) => deletePlanning(input)),
 
   addPlanningActivity: protectedProcedure
-    .input(planningActivityObject.omit({ id: true }))
-    .mutation(({ input }) => addPlanningActivity(input)),
+    .input(
+      z.object({
+        planningId: ZodPlanningId,
+        item: planningItemSchema.omit({ slotId: true }),
+      }),
+    )
+    .mutation(({ input }) =>
+      addPlanningActivity({
+        planningId: input.planningId,
+        item: input.item,
+      }),
+    ),
 
   updatePlanningActivity: protectedProcedure
-    .input(planningActivityObject.partial())
+    .input(z.object({ planningId: ZodPlanningId, item: planningItemSchema }))
     .mutation(({ input }) =>
-      updatePlanningActivity({ id: input.id ?? "", ...input }),
+      updatePlanningActivity(input.planningId, input.item),
     ),
 
   deletePlanningActivity: protectedProcedure
-    .input(z.string())
-    .mutation(({ input }) => deletePlanningActivity(input)),
+    .input(z.object({ planningId: ZodPlanningId, slotId: z.string() }))
+    .mutation(({ input }) =>
+      deletePlanningActivity(input.planningId, input.slotId),
+    ),
 
   getClubDailyPlanning: publicProcedure
     .input(
       z.object({
-        clubId: z.cuid2(),
+        clubId: ZodClubId,
         day: z.enum(dayNameEnum.enumValues),
       }),
     )
@@ -129,7 +137,7 @@ export const planningRouter = createTRPCRouter({
   getCoachDailyPlanning: protectedProcedure
     .input(
       z.object({
-        coachId: z.string(),
+        coachId: ZodUserId,
         day: z.enum(dayNameEnum.enumValues),
       }),
     )
@@ -138,8 +146,8 @@ export const planningRouter = createTRPCRouter({
   getCoachPlanningForClub: protectedProcedure
     .input(
       z.object({
-        coachId: z.string(),
-        clubId: z.cuid2(),
+        coachId: ZodUserId,
+        clubId: ZodClubId,
       }),
     )
     .query(({ input }) => getCoachPlanningForClub(input.coachId, input.clubId)),
@@ -159,107 +167,35 @@ export const planningRouter = createTRPCRouter({
             (s) => s.subscription.club.id,
           ),
         ),
-      );
+      ) as ClubId[];
       const planningClubs = await getPlanningsForClubIds(clubIds);
-
-      type PlanningWithClub = (typeof planningClubs)[number];
-
-      const planningData: Array<
-        PlanningWithClub & {
-          activities: Array<{
-            id: string;
-            day: (typeof dayNameEnum.enumValues)[number];
-            startTime: string;
-            duration: number;
-            planningId: string;
-            activityId: string;
-            coachId: string | null;
-            siteId: string;
-            roomId: string | null;
-            activity: NonNullable<
-              Awaited<ReturnType<typeof getPlanningActivityById>>
-            >["activity"];
-            site: NonNullable<
-              Awaited<ReturnType<typeof getPlanningActivitiesWithFilters>>
-            >[number]["site"];
-            room:
-              | NonNullable<
-                  Awaited<ReturnType<typeof getPlanningActivityById>>
-                >["room"]
-              | null;
-            coach: typeof userCoach.$inferSelect | null;
-            reservations: Array<{ id: string; date: Date }>;
-          }>;
-          withNoCalendar: Array<{
-            id: string;
-            name: string;
-            clubId: string;
-            reservationDuration: number | null;
-            rooms: Array<{
-              id: string;
-              name: string;
-              capacity: number;
-              reservation: (typeof roomReservationEnum.enumValues)[number];
-            }>;
-            reservations: Array<{ id: string; date: Date; roomName: string }>;
-          }>;
-        }
-      > = [];
-
       const dayName = getDayName(input.date);
+      const planningData: PlanningSearchReturnData[] = [];
 
       for (const planningClub of planningClubs) {
         const sub = userData?.memberData?.subscriptions
           .flatMap((s) => s.subscription)
           .filter((s) => s.clubId === planningClub.clubId);
 
-        const planningActivityConditions: ReturnType<typeof and>[] = [];
-        const activityConditions: ReturnType<typeof and>[] = [];
+        const activityIds = new Set<ActivityId>();
+        const siteIds = new Set<SiteId>();
+        const roomIds = new Set<RoomId>();
 
         for (const s of sub ?? []) {
-          const activityFilters: ReturnType<typeof or>[] = [];
-
           if (s.mode === "ACTIVITY_GROUP" && s.activitieGroups.length > 0) {
             const activityGroupIds = s.activitieGroups.map(
               (ag) => ag.activityGroupId,
             );
             const activitiesFromGroups =
               await getActivitiesForGroups(activityGroupIds);
-            const activityIds = activitiesFromGroups.map((a) => a.id);
-            if (activityIds.length > 0) {
-              activityFilters.push(
-                inArray(planningActivity.activityId, activityIds),
-              );
+            for (const a of activitiesFromGroups) {
+              activityIds.add(a.id);
             }
           }
 
           if (s.mode === "ACTIVITY" && s.activities.length > 0) {
-            const activityIds = s.activities.map((a) => a.activityId);
-            activityFilters.push(
-              inArray(planningActivity.activityId, activityIds),
-            );
-          }
-
-          const restrictionFilters: ReturnType<typeof or>[] = [];
-          if (s.restriction === "SITE" && s.sites.length > 0) {
-            const siteIds = s.sites.map((site) => site.siteId);
-            restrictionFilters.push(inArray(planningActivity.siteId, siteIds));
-          }
-          if (s.restriction === "ROOM" && s.rooms.length > 0) {
-            const roomIds = s.rooms.map((room) => room.roomId);
-            restrictionFilters.push(inArray(planningActivity.roomId, roomIds));
-          }
-
-          if (activityFilters.length > 0 || restrictionFilters.length > 0) {
-            const combinedFilters: ReturnType<typeof and>[] = [];
-            if (activityFilters.length > 0) {
-              combinedFilters.push(or(...activityFilters));
-            }
-            if (restrictionFilters.length > 0) {
-              combinedFilters.push(or(...restrictionFilters));
-            }
-            if (combinedFilters.length > 0) {
-              planningActivityConditions.push(and(...combinedFilters));
+            for (const a of s.activities) {
+              activityIds.add(a.activityId);
             }
           }
 
@@ -276,75 +212,84 @@ export const planningRouter = createTRPCRouter({
             const activityIds = s.activities.map((a) => a.activityId);
             activityNoCalFilters.push(inArray(activity.id, activityIds));
           }
-
-          if (activityNoCalFilters.length > 0) {
-            activityConditions.push(or(...activityNoCalFilters));
-          }
         }
 
-        const additionalPlanningConditions =
-          planningActivityConditions.length > 0
-            ? or(...planningActivityConditions)
-            : undefined;
+        const planItems = await fillPlanningItems(planningClub.planningItems, {
+          day: dayName,
+          activityIds: Array.from(activityIds),
+        });
 
-        const additionalActivityConditions =
-          activityConditions.length > 0 ? or(...activityConditions) : undefined;
-
-        const pa = await getPlanningActivitiesWithFilters(
-          planningClub.id,
-          dayName,
-          input.date,
-          additionalPlanningConditions,
-        );
-
-        const withNoCalendar = await getActivitiesWithNoCalendar(
-          planningClub.clubId,
-          input.date,
-          additionalActivityConditions,
+        const clb = planningClub.club?.find(
+          (c) => c.clubId === planningClub.clubId,
         );
 
         planningData.push({
-          ...planningClub,
-          activities: pa.map((p) => {
-            const allReservations = p.reservations.filter(
-              (r) => r.planningActivityId === p.id,
-            );
-            return {
-              ...p,
-              reservations: allReservations.map((r) => ({
-                id:
-                  r.userId === input.memberId
-                    ? (r.planningActivityId ?? p.id)
-                    : r.id,
-                date: r.date,
-              })),
-            };
-          }),
-          withNoCalendar: withNoCalendar.map((wnc) => {
-            const allReservations = (wnc.reservations ?? []).filter(
-              (r) => r.activityId === wnc.id,
-            );
-            return {
-              id: wnc.id,
-              name: wnc.name,
-              clubId: wnc.clubId,
-              reservationDuration: wnc.reservationDuration,
-              rooms: (wnc.rooms ?? []).map((ra) => ({
-                id: ra.room.id,
-                name: ra.room.name,
-                capacity: ra.room.capacity,
-                reservation: ra.room.reservation ?? "NONE",
-              })),
-              reservations: allReservations.map((r) => ({
-                id:
-                  r.userId === input.memberId ? (r.activityId ?? wnc.id) : r.id,
-                date: r.date,
-                roomName: r.room?.name ?? "",
-              })),
-            };
-          }),
+          clubId: planningClub.clubId,
+          clubName: clb?.name ?? "",
+          siteId: planningClub.siteId,
+          siteName: planningClub.site?.[0]?.name ?? "",
+          roomId: planningClub.roomId,
+          roomName: planningClub.room?.[0]?.name ?? "",
+          id: planningClub.id,
+          name: planningClub.name,
+          startDate: planningClub.startDate,
+          endDate: planningClub.endDate,
+          planningItems: planItems,
         });
+
+        // const pa = await getPlanningActivitiesWithFilters(
+        //   planningClub.id,
+        //   dayName,
+        //   input.date,
+        // );
+
+        // const withNoCalendar = await getActivitiesWithNoCalendar(
+        //   planningClub.clubId,
+        //   input.date,
+        // );
       }
+      //   planningData.push({
+      //     ...planningClub,
+      //     activities: pa.map((p) => {
+      //       const allReservations = p.reservations.filter(
+      //         (r) => r.planningActivityId === p.id,
+      //       );
+      //       return {
+      //         ...p,
+      //         reservations: allReservations.map((r) => ({
+      //           id:
+      //             r.userId === input.memberId
+      //               ? (r.planningActivityId ?? p.id)
+      //               : r.id,
+      //           date: r.date,
+      //         })),
+      //       };
+      //     }),
+      //     withNoCalendar: withNoCalendar.map((wnc) => {
+      //       const allReservations = (wnc.reservations ?? []).filter(
+      //         (r) => r.activityId === wnc.id,
+      //       );
+      //       return {
+      //         id: wnc.id,
+      //         name: wnc.name,
+      //         clubId: wnc.clubId,
+      //         reservationDuration: wnc.reservationDuration,
+      //         rooms: (wnc.rooms ?? []).map((ra) => ({
+      //           id: ra.room.id,
+      //           name: ra.room.name,
+      //           capacity: ra.room.capacity,
+      //           reservation: ra.room.reservation ?? "NONE",
+      //         })),
+      //         reservations: allReservations.map((r) => ({
+      //           id:
+      //             r.userId === input.memberId ? (r.activityId ?? wnc.id) : r.id,
+      //           date: r.date,
+      //           roomName: r.room?.name ?? "",
+      //         })),
+      //       };
+      //     }),
+      //   });
+      // }
 
       return planningData;
     }),
@@ -352,40 +297,42 @@ export const planningRouter = createTRPCRouter({
   createPlanningReservation: protectedProcedure
     .input(
       z.object({
-        memberId: ZodUserId,
-        planningActivityId: z.cuid2(),
         date: z.date(),
+        planningId: ZodPlanningId,
+        slotId: z.string(),
+        memberId: ZodUserId,
       }),
     )
     .mutation(({ input }) =>
       createPlanningReservation({
         date: input.date,
-        planningActivityId: input.planningActivityId,
+        planningId: input.planningId,
+        slotId: input.slotId,
         userId: input.memberId,
       }),
     ),
 
   deleteReservation: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodReservationId)
     .mutation(({ input }) => deleteReservation(input)),
 
   createActivityReservation: protectedProcedure
     .input(
       z.object({
-        memberId: ZodUserId,
-        activityId: z.cuid2(),
         date: z.date(),
-        activitySlot: z.number(),
-        roomId: z.cuid2(),
+        planningId: ZodPlanningId,
+        slotId: z.string(),
+        memberId: ZodUserId,
+        slotNumber: z.number(),
       }),
     )
     .mutation(({ input }) =>
       createActivityReservation({
         date: input.date,
-        activityId: input.activityId,
+        planningId: input.planningId,
+        slotId: input.slotId,
         userId: input.memberId,
-        activitySlot: input.activitySlot,
-        roomId: input.roomId,
+        slotNumber: input.slotNumber,
       }),
     ),
 });

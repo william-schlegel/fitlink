@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { roomReservationEnum } from "@/db/schema/enums";
+import { ZodClubId, ZodRoomId, ZodSiteId } from "@/db/types";
 
 // ==================== SITE SCHEMAS ====================
 
@@ -8,8 +9,8 @@ import { roomReservationEnum } from "@/db/schema/enums";
  * Base site schema with all fields
  */
 export const siteSchema = z.object({
-  id: z.cuid2(),
-  clubId: z.cuid2(),
+  id: ZodSiteId,
+  clubId: ZodClubId,
   name: z.string(),
   address: z.string(),
   searchAddress: z.string(),
@@ -26,7 +27,7 @@ export const createSiteSchema = siteSchema.omit({ id: true });
  * Schema for updating a site
  */
 export const updateSiteSchema = siteSchema.partial().extend({
-  id: z.cuid2(),
+  id: ZodSiteId,
 });
 
 // ==================== ROOM SCHEMAS ====================
@@ -35,8 +36,8 @@ export const updateSiteSchema = siteSchema.partial().extend({
  * Base room schema with all fields
  */
 export const roomSchema = z.object({
-  id: z.cuid2(),
-  siteId: z.cuid2(),
+  id: ZodRoomId,
+  siteId: ZodSiteId,
   name: z.string(),
   reservation: z.enum(roomReservationEnum.enumValues),
   capacity: z.number(),
@@ -54,7 +55,7 @@ export const createRoomSchema = roomSchema.omit({ id: true });
  * Schema for updating a room
  */
 export const updateRoomSchema = roomSchema.partial().extend({
-  id: z.cuid2(),
+  id: ZodRoomId,
 });
 
 // ==================== INFERRED TYPES ====================

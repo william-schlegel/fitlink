@@ -219,7 +219,7 @@ async function DailyPlanning({
   coachId,
   day,
 }: {
-  coachId: string;
+  coachId: UserId;
   day: DayName;
 }) {
   const t = await getTranslations("dashboard");
@@ -233,22 +233,22 @@ async function DailyPlanning({
           className="flex flex-col items-center rounded border border-secondary bg-card"
         >
           <div className="w-full  bg-secondary text-center text-secondary-content">
-            {plan.club.name}
+            {plan.clubName}
           </div>
           <div className="flex shrink-0 flex-wrap items-start gap-2 p-2">
-            {plan.planningActivities.map((activity) => (
-              <div key={activity.id} className="border border-border p-2">
+            {plan.planningItems.map((item) => (
+              <div key={item.slotId} className="border border-border p-2">
                 <p>
-                  <span className="text-xs">{activity.startTime}</span>
+                  <span className="text-xs">{item.startTime}</span>
                   {" ("}
-                  <span className="text-xs">{activity.duration}</span>
+                  <span className="text-xs">{item.duration}</span>
                   {"') "}
-                  <span>{activity.activity.name}</span>
+                  <span>{item.activityName}</span>
                 </p>
                 <p className="text-xs">
-                  <span>{activity.site?.name}</span>
+                  <span>{item.siteName}</span>
                   {" - "}
-                  <span>{activity.room?.name}</span>
+                  <span>{item.roomName}</span>
                 </p>
               </div>
             ))}

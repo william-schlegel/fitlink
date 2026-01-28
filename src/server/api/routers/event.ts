@@ -7,11 +7,12 @@ import {
   getEventsForClub,
   updateEvent,
 } from "@/db/dal";
+import { ZodClubId } from "@/db/types";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc/server";
 
 const eventObject = z.object({
   id: z.cuid2(),
-  clubId: z.cuid2(),
+  clubId: ZodClubId,
   name: z.string(),
   brief: z.string(),
   description: z.string(),
@@ -37,7 +38,7 @@ export const eventRouter = createTRPCRouter({
   }),
 
   getEventsForClub: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodClubId)
     .query(({ input }) => getEventsForClub(input)),
 
   createEvent: protectedProcedure

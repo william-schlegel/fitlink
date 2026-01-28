@@ -38,7 +38,7 @@ import {
   pageTargetEnum,
 } from "@/db/schema/enums";
 import { pageSectionElement } from "@/db/schema/page";
-import { ZodUserId } from "@/db/types";
+import { ZodClubId, ZodUserId } from "@/db/types";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -48,7 +48,7 @@ import {
 const PageObject = z.object({
   id: z.cuid2(),
   name: z.string(),
-  clubId: z.cuid2().optional(),
+  clubId: ZodClubId.optional(),
   userId: ZodUserId.optional(),
   target: z.enum(pageTargetEnum.enumValues),
 });
@@ -99,7 +99,7 @@ export const pageRouter = createTRPCRouter({
     .query(({ input }) => getPagesForManager(input)),
 
   getPagesForClub: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodClubId)
     .query(({ input }) => getPagesForClub(input)),
 
   getPageForCoach: publicProcedure
@@ -262,7 +262,9 @@ export const pageRouter = createTRPCRouter({
 
   getClubPage: publicProcedure.input(z.string()).query(async ({ input }) => {
     const clubPage = await dalGetClubPage(input);
-    const clubId = clubPage?.clubId ?? "";
+    if (!clubPage) return null;
+    const clubId = clubPage.clubId;
+    if (!clubId) return null;
     const allPages = await getPublishedPagesForClub(clubId);
     const myClub = await getClubBasicInfo(clubId);
     return {
@@ -394,7 +396,7 @@ export const pageRouter = createTRPCRouter({
   updatePageStyleForClub: protectedProcedure
     .input(
       z.object({
-        clubId: z.cuid2(),
+        clubId: ZodClubId,
         pageStyle: z.string(),
       }),
     )

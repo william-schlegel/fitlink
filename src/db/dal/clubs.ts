@@ -4,12 +4,12 @@ import { db } from "@/db";
 import { user } from "@/db/schema/auth";
 import { activity, club, clubCoachs, site } from "@/db/schema/club";
 import { page } from "@/db/schema/page";
-import { openingCalendarClubs } from "@/db/schema/planning";
-import { UserId } from "../types";
+import { openingCalendar } from "@/db/schema/planning";
+import { ActivityId, CalendarId, ClubId, UserId } from "../types";
 
 // ==================== CLUB QUERIES ====================
 
-export async function getClubById(clubId: string, siteLimit?: number) {
+export async function getClubById(clubId: ClubId, siteLimit?: number) {
   return db.query.club.findFirst({
     where: eq(club.id, clubId),
     with: {
@@ -32,7 +32,7 @@ export async function getClubById(clubId: string, siteLimit?: number) {
   });
 }
 
-export async function getClubPagesForNav(clubId: string) {
+export async function getClubPagesForNav(clubId: ClubId) {
   return db.query.club.findFirst({
     where: eq(club.id, clubId),
     with: {
@@ -61,7 +61,7 @@ export async function getAllClubs() {
   });
 }
 
-export async function getClubForUpdate(clubId: string) {
+export async function getClubForUpdate(clubId: ClubId) {
   return db.query.club.findFirst({
     where: eq(club.id, clubId),
     with: {
@@ -94,7 +94,7 @@ export async function createClub(data: {
 }
 
 export async function createSiteForClub(data: {
-  clubId: string;
+  clubId: ClubId;
   name: string;
   address: string;
   searchAddress: string;
@@ -112,7 +112,7 @@ export async function createSiteForClub(data: {
 }
 
 export async function updateClub(data: {
-  id: string;
+  id: ClubId;
   name: string;
   address: string;
   logoUrl: string | null;
@@ -131,32 +131,34 @@ export async function updateClub(data: {
 }
 
 export async function updateClubConvexRoomId(
-  clubId: string,
+  clubId: ClubId,
   convexRoomId: string,
 ) {
   return db.update(club).set({ convexRoomId }).where(eq(club.id, clubId));
 }
 
-export async function updateClubCalendar(clubId: string, calendarId: string) {
+export async function updateClubCalendar(
+  clubId: ClubId,
+  calendarId: CalendarId,
+) {
   return db
-    .update(openingCalendarClubs)
+    .update(openingCalendar)
     .set({
-      openingCalendarId: calendarId,
-      clubId,
+      id: calendarId,
     })
-    .where(eq(openingCalendarClubs.clubId, clubId))
+    .where(eq(openingCalendar.clubId, clubId))
     .returning();
 }
 
-export async function deleteClub(clubId: string) {
+export async function deleteClub(clubId: ClubId) {
   return db.delete(club).where(eq(club.id, clubId));
 }
 
 // ==================== CLUB ACTIVITIES ====================
 
 export async function updateClubActivities(
-  clubId: string,
-  activityIds: string[],
+  clubId: ClubId,
+  activityIds: ActivityId[],
 ) {
   return db
     .update(activity)
@@ -168,8 +170,8 @@ export async function updateClubActivities(
 // ==================== CLUB COACHES ====================
 
 export async function getClubCoachRelation(
-  clubId: string,
-  coachUserId: string,
+  clubId: ClubId,
+  coachUserId: UserId,
 ) {
   return db.query.clubCoachs.findFirst({
     where: and(
@@ -179,7 +181,7 @@ export async function getClubCoachRelation(
   });
 }
 
-export async function addCoachToClub(clubId: string, coachUserId: string) {
+export async function addCoachToClub(clubId: ClubId, coachUserId: UserId) {
   return db
     .insert(clubCoachs)
     .values({

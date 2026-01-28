@@ -21,6 +21,15 @@ import {
   subscriptionRestrictionEnum,
 } from "@/db/schema/enums";
 import {
+  ActivityId,
+  RoomId,
+  SiteId,
+  ZodActivityId,
+  ZodClubId,
+  ZodRoomId,
+  ZodSiteId,
+} from "@/db/types";
+import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
@@ -41,10 +50,10 @@ const subscriptionObject = z.object({
 });
 
 export async function getDataNames(
-  siteIds: string[],
-  roomIds: string[],
+  siteIds: SiteId[],
+  roomIds: RoomId[],
   activityGroupIds: string[],
-  activityIds: string[],
+  activityIds: ActivityId[],
 ) {
   return dalGetDataNames(siteIds, roomIds, activityGroupIds, activityIds);
 }
@@ -101,11 +110,11 @@ export const subscriptionRouter = createTRPCRouter({
   getPossibleChoice: protectedProcedure
     .input(
       z.object({
-        clubId: z.cuid2(),
+        clubId: ZodClubId,
         mode: z.enum(subscriptionModeEnum.enumValues),
         restriction: z.enum(subscriptionRestrictionEnum.enumValues),
-        siteIds: z.array(z.cuid2()),
-        roomIds: z.array(z.cuid2()),
+        siteIds: z.array(ZodSiteId),
+        roomIds: z.array(ZodRoomId),
       }),
     )
     .query(async ({ input }) => {
@@ -191,10 +200,10 @@ export const subscriptionRouter = createTRPCRouter({
   getDataNames: publicProcedure
     .input(
       z.object({
-        siteIds: z.array(z.cuid2()),
-        roomIds: z.array(z.cuid2()),
+        siteIds: z.array(ZodSiteId),
+        roomIds: z.array(ZodRoomId),
         activityGroupIds: z.array(z.cuid2()),
-        activityIds: z.array(z.cuid2()),
+        activityIds: z.array(ZodActivityId),
       }),
     )
     .query(async ({ input }) =>

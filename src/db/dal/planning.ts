@@ -1,37 +1,38 @@
-import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
-
-import { endOfDay, startOfDay } from "date-fns";
+import { and, asc, eq, inArray, lte } from "drizzle-orm";
 
 import { db } from "@/db";
 import { user } from "@/db/schema/auth";
-import { activity } from "@/db/schema/club";
+import { activity, room, site } from "@/db/schema/club";
 import { dayNameEnum } from "@/db/schema/enums";
-import { planning, planningActivity, reservation } from "@/db/schema/planning";
+import { planning, reservation } from "@/db/schema/planning";
 import { isCUID } from "@/lib/utils";
-import { UserId } from "../types";
+import {
+  CreatePlanningInput,
+  PlanningData,
+  PlanningSearchReturnData,
+  UpdatePlanningInput,
+} from "@/schemas";
+import { createId } from "@paralleldrive/cuid2";
+import {
+  ActivityId,
+  ClubId,
+  PlanningId,
+  ReservationId,
+  RoomId,
+  SiteId,
+  UserId,
+} from "../types";
 
 // ==================== PLANNING QUERIES ====================
 
-export async function getPlanningsForClub(clubId: string) {
+export async function getPlanningsForClub(clubId: ClubId) {
   if (!isCUID(clubId)) return [];
   return db.query.planning.findMany({
     where: eq(planning.clubId, clubId),
     orderBy: asc(planning.startDate),
-  });
-}
-
-export async function getPlanningById(planningId: string) {
-  if (!isCUID(planningId)) return null;
-  return db.query.planning.findFirst({
-    where: eq(planning.id, planningId),
     with: {
-      planningActivities: {
-        with: {
-          activity: true,
-          site: true,
-          room: true,
-          coach: true,
-        },
+      club: {
+        columns: { name: true },
       },
       site: {
         columns: { name: true },
@@ -43,79 +44,221 @@ export async function getPlanningById(planningId: string) {
   });
 }
 
+export async function getPlanningById(
+  planningId: PlanningId,
+): Promise<PlanningSearchReturnData | null> {
+  if (!isCUID(planningId)) return null;
+  const plan = await db.query.planning.findFirst({
+    where: eq(planning.id, planningId),
+    with: {
+      club: {
+        columns: { name: true },
+      },
+      site: {
+        columns: { name: true },
+      },
+      room: {
+        columns: { name: true },
+      },
+    },
+  });
+  if (!plan) return null;
+  const returnedData: PlanningSearchReturnData = {
+    id: plan.id,
+    name: plan.name,
+    clubId: plan.clubId,
+    clubName: plan.club?.[0]?.name ?? "",
+    siteId: plan.siteId,
+    siteName: plan.site?.[0]?.name ?? "",
+    roomId: plan.roomId,
+    roomName: plan.room?.[0]?.name ?? "",
+    startDate: plan.startDate,
+    endDate: plan.endDate,
+    planningItems: await fillPlanningItems(plan.planningItems),
+  };
+
+  return returnedData;
+}
+
+type PlanningFilters = {
+  day?: (typeof dayNameEnum.enumValues)[number];
+  coachIds?: UserId[];
+  roomIds?: RoomId[];
+  siteIds?: SiteId[];
+  activityIds?: ActivityId[];
+};
+
+export async function fillPlanningItems(
+  planningItems: PlanningData["planningItems"] | null,
+  filter?: PlanningFilters,
+) {
+  const cache = new Map<string, { name: string }>();
+  if (!planningItems) return [];
+  const planningItemsData: PlanningSearchReturnData["planningItems"] = [];
+  function planFilter(item: PlanningData["planningItems"][number]) {
+    if (filter?.day && item.day !== filter.day) return false;
+    if (
+      filter?.coachIds &&
+      item.coachId &&
+      !filter.coachIds.includes(item.coachId)
+    )
+      return false;
+    if (filter?.roomIds && item.roomId && !filter.roomIds.includes(item.roomId))
+      return false;
+    if (filter?.siteIds && item.siteId && !filter.siteIds.includes(item.siteId))
+      return false;
+    if (
+      filter?.activityIds &&
+      item.activityId &&
+      !filter.activityIds.includes(item.activityId)
+    )
+      return false;
+    return true;
+  }
+  await Promise.all(
+    planningItems.filter(planFilter).map(async (item) => {
+      let activityName = "";
+      if (cache.has(item.activityId) && item.activityId) {
+        activityName = cache.get(item.activityId)?.name ?? "";
+      } else {
+        const act = await db.query.activity.findFirst({
+          where: eq(activity.id, item.activityId),
+          columns: { name: true },
+        });
+        activityName = act?.name ?? "";
+        cache.set(item.activityId, { name: activityName });
+      }
+      let coachName = "";
+      if (item.coachId)
+        if (cache.has(item.coachId)) {
+          coachName = cache.get(item.coachId)?.name ?? "";
+        } else {
+          const coach = await db.query.user.findFirst({
+            where: eq(user.id, item.coachId),
+            columns: { name: true },
+          });
+          coachName = coach?.name ?? "";
+          cache.set(item.coachId, { name: coachName });
+        }
+      let roomName = "";
+      if (item.roomId)
+        if (cache.has(item.roomId)) {
+          roomName = cache.get(item.roomId)?.name ?? "";
+        } else {
+          const r = await db.query.room.findFirst({
+            where: eq(room.id, item.roomId),
+            columns: { name: true },
+          });
+          roomName = r?.name ?? "";
+          cache.set(item.roomId, { name: roomName });
+        }
+      let siteName = "";
+      if (item.siteId)
+        if (cache.has(item.siteId)) {
+          siteName = cache.get(item.siteId)?.name ?? "";
+        } else {
+          const s = await db.query.site.findFirst({
+            where: eq(site.id, item.siteId),
+            columns: { name: true },
+          });
+          siteName = s?.name ?? "";
+          cache.set(item.siteId, { name: siteName });
+        }
+      planningItemsData.push({
+        slotId: item.slotId,
+        activityId: item.activityId,
+        activityName,
+        day: item.day,
+        dayName: item.day,
+        startTime: item.startTime,
+        duration: item.duration,
+        coachId: item.coachId,
+        coachName,
+        roomId: item.roomId,
+        roomName,
+        siteId: item.siteId,
+        siteName,
+        deleted: item.deleted,
+      });
+    }),
+  );
+  return planningItemsData;
+}
+
 export async function getClubDailyPlanning(
-  clubId: string,
+  clubId: ClubId,
   day: (typeof dayNameEnum.enumValues)[number],
 ) {
   if (!isCUID(clubId)) return null;
-  return db.query.planning.findFirst({
+  const plan = await db.query.planning.findFirst({
     where: and(
       eq(planning.clubId, clubId),
       lte(planning.startDate, new Date(Date.now())),
     ),
     with: {
       club: true,
-      planningActivities: {
-        where: eq(planningActivity.day, day),
-        with: {
-          activity: true,
-          coach: { with: { user: true } },
-          room: true,
-          site: true,
-        },
-      },
+      site: true,
+      room: true,
     },
   });
+  if (!plan) return null;
+  return {
+    ...plan,
+    clubName: plan.club?.[0]?.name ?? "",
+    planningItems: await fillPlanningItems(plan.planningItems, { day }),
+  };
 }
 
 export async function getCoachDailyPlanning(
-  coachId: string,
+  coachId: UserId,
   day: (typeof dayNameEnum.enumValues)[number],
 ) {
   if (!isCUID(coachId)) return [];
-  return db.query.planning.findMany({
-    where: and(
-      eq(planning.clubId, coachId),
-      lte(planning.startDate, new Date(Date.now())),
-      eq(planningActivity.coachId, coachId),
-    ),
+  const plan = await db.query.planning.findMany({
+    where: and(lte(planning.startDate, new Date(Date.now()))),
     with: {
       club: true,
-      planningActivities: {
-        where: and(
-          eq(planningActivity.day, day),
-          eq(planningActivity.coachId, coachId),
-        ),
-        with: {
-          activity: true,
-          coach: true,
-          room: true,
-          site: true,
-        },
-      },
+      site: true,
+      room: true,
     },
   });
+  if (!plan) return null;
+  const plannings: PlanningSearchReturnData[] = [];
+  await Promise.all(
+    plan.map(async (p) => {
+      const planningItems = await fillPlanningItems(p.planningItems, {
+        day,
+        coachIds: [coachId],
+      });
+      plannings.push({
+        ...p,
+        clubName: p.club?.[0]?.name ?? "",
+        siteName: p.site?.[0]?.name ?? "",
+        roomName: p.room?.[0]?.name ?? "",
+        planningItems,
+      });
+    }),
+  );
+  return plannings;
 }
 
-export async function getCoachPlanningForClub(coachId: string, clubId: string) {
-  return db.query.planning.findFirst({
+export async function getCoachPlanningForClub(coachId: UserId, clubId: ClubId) {
+  const plan = await db.query.planning.findFirst({
     where: and(
       eq(planning.clubId, clubId),
       lte(planning.startDate, new Date(Date.now())),
     ),
     with: {
       club: true,
-      planningActivities: {
-        where: eq(planningActivity.coachId, coachId),
-        with: {
-          activity: true,
-          coach: true,
-          room: true,
-          site: true,
-        },
-      },
     },
   });
+  if (!plan) return null;
+  return {
+    ...plan,
+    planningItems: await fillPlanningItems(plan.planningItems, {
+      coachIds: [coachId],
+    }),
+  };
 }
 
 export async function getMemberDataWithSubscriptions(memberId: UserId) {
@@ -143,13 +286,13 @@ export async function getMemberDataWithSubscriptions(memberId: UserId) {
   });
 }
 
-export async function getPlanningsForClubIds(clubIds: string[]) {
+export async function getPlanningsForClubIds(clubIds: ClubId[]) {
   return db.query.planning.findMany({
     where: and(
       lte(planning.startDate, new Date(Date.now())),
       inArray(planning.clubId, clubIds),
     ),
-    with: { club: true },
+    with: { club: true, site: true, room: true },
   });
 }
 
@@ -161,101 +304,51 @@ export async function getActivitiesForGroups(groupIds: string[]) {
 }
 
 export async function getPlanningActivitiesWithFilters(
-  planningId: string,
-  day: (typeof dayNameEnum.enumValues)[number],
-  date: Date,
-  additionalConditions?: ReturnType<typeof and>,
+  planningId: PlanningId,
+  date?: Date,
+  filters?: PlanningFilters,
 ) {
-  const baseConditions = [
-    eq(planningActivity.day, day),
-    eq(planningActivity.planningId, planningId),
-  ];
-
-  if (additionalConditions) {
-    baseConditions.push(additionalConditions);
-  }
-
-  return db.query.planningActivity.findMany({
-    where: and(...baseConditions),
-    with: {
-      activity: true,
-      coach: true,
-      room: true,
-      site: true,
-      reservations: {
-        where: and(
-          gte(reservation.date, startOfDay(new Date(date))),
-          lte(reservation.date, endOfDay(new Date(date))),
-        ),
-      },
-    },
+  const plan = await db.query.planning.findFirst({
+    where: and(
+      eq(planning.id, planningId),
+      lte(planning.startDate, new Date(date ?? Date.now())),
+    ),
+    with: { club: true },
   });
+  if (!plan) return null;
+  return {
+    ...plan,
+    planningItems: await fillPlanningItems(plan.planningItems, filters),
+  };
 }
 
 export async function getActivitiesWithNoCalendar(
-  clubId: string,
-  date: Date,
-  additionalConditions?: ReturnType<typeof and>,
+  clubId: ClubId,
+  date?: Date,
+  filters?: PlanningFilters,
 ) {
   const baseConditions = [
     eq(activity.clubId, clubId),
     eq(activity.noCalendar, true),
   ];
 
-  if (additionalConditions) {
-    baseConditions.push(additionalConditions);
-  }
-
-  return db.query.activity.findMany({
+  const acts = await db.query.activity.findMany({
     where: and(...baseConditions),
     with: {
-      rooms: {
-        with: {
-          room: {
-            columns: {
-              id: true,
-              name: true,
-              capacity: true,
-              reservation: true,
-            },
-          },
-        },
-      },
-      reservations: {
-        where: and(
-          gte(reservation.date, startOfDay(new Date(date))),
-          lte(reservation.date, endOfDay(new Date(date))),
-        ),
-        with: {
-          room: true,
-        },
-      },
+      group: true,
+      club: true,
     },
   });
 }
 
 // ==================== PLANNING MUTATIONS ====================
 
-export async function createPlanning(data: {
-  clubId: string;
-  startDate?: Date;
-  siteId?: string;
-  roomId?: string;
-  endDate?: Date;
-  name?: string;
-}) {
+export async function createPlanning(data: CreatePlanningInput) {
   return db.insert(planning).values(data).returning();
 }
 
-export async function updatePlanning(data: {
-  id: string;
-  clubId?: string;
-  startDate?: Date;
-  siteId?: string;
-  roomId?: string;
-  endDate?: Date;
-  name?: string;
-}) {
+export async function updatePlanning(data: UpdatePlanningInput) {
+  if (!data.id) return null;
   return db
     .update(planning)
     .set(data)
@@ -264,102 +357,111 @@ export async function updatePlanning(data: {
 }
 
 export async function duplicatePlanning(
-  originalId: string,
+  originalId: PlanningId,
   newData: { name?: string; startDate?: Date; endDate?: Date },
 ) {
   const org = await db.query.planning.findFirst({
     where: eq(planning.id, originalId),
-    with: { planningActivities: true },
   });
 
   if (!org) return null;
 
-  return db.transaction(async (tx) => {
-    const newPlanning = await tx
-      .insert(planning)
-      .values({
-        clubId: org.clubId,
-        name: newData.name ?? org.name,
-        startDate: newData.startDate,
-        endDate: newData.endDate,
-        siteId: org.siteId,
-        roomId: org.roomId,
-      })
-      .returning();
-
-    await tx.insert(planningActivity).values(
-      org.planningActivities.map((pa) => ({
-        planningId: newPlanning[0].id,
-        day: pa.day,
-        startTime: pa.startTime,
-        duration: pa.duration,
-        activityId: pa.activityId,
-        coachId: pa.coachId,
-        siteId: pa.siteId,
-        roomId: pa.roomId,
+  const newPlanning = await db
+    .insert(planning)
+    .values({
+      clubId: org.clubId,
+      name: newData.name ?? org.name,
+      startDate: newData.startDate,
+      endDate: newData.endDate,
+      planningItems: org.planningItems?.map((item) => ({
+        ...item,
+        slotId: createId(),
       })),
-    );
+    })
+    .returning();
 
-    return newPlanning[0];
-  });
+  return newPlanning[0];
 }
 
-export async function deletePlanning(planningId: string) {
+export async function deletePlanning(planningId: PlanningId) {
   return db.delete(planning).where(eq(planning.id, planningId));
 }
 
 // ==================== PLANNING ACTIVITY ====================
 
-export async function getPlanningActivityById(id: string) {
-  if (!id) return null;
-  return db.query.planningActivity.findFirst({
-    where: eq(planningActivity.id, id),
-    with: {
-      activity: true,
-      site: {
-        with: { rooms: true },
-      },
-      room: true,
-      coach: true,
-    },
+export async function getPlanningActivityById(
+  planningId: PlanningId,
+  slotId: string,
+) {
+  if (!planningId || !slotId) return null;
+  const plan = await db.query.planning.findFirst({
+    where: eq(planning.id, planningId),
   });
+  if (!plan) return null;
+  const item = plan.planningItems?.find((item) => item.slotId === slotId);
+  if (!item) return null;
+  const completedItem = fillPlanningItems([item]);
+  return completedItem;
 }
 
 export async function addPlanningActivity(data: {
-  planningId: string;
-  activityId: string;
-  siteId: string;
-  roomId?: string;
-  day: (typeof dayNameEnum.enumValues)[number];
-  startTime: string;
-  duration: number;
-  coachId?: string;
+  planningId: PlanningId;
+  item: Omit<PlanningData["planningItems"][number], "slotId">;
 }) {
-  return db.insert(planningActivity).values(data).returning();
-}
-
-export async function updatePlanningActivity(data: {
-  id: string;
-  planningId?: string;
-  activityId?: string;
-  siteId?: string;
-  roomId?: string;
-  day?: (typeof dayNameEnum.enumValues)[number];
-  startTime?: string;
-  duration?: number;
-  coachId?: string;
-}) {
+  const plan = await db.query.planning.findFirst({
+    where: eq(planning.id, data.planningId),
+  });
+  if (!plan) return null;
+  const newItem = {
+    ...data.item,
+    slotId: createId(),
+  };
+  plan.planningItems?.push(newItem);
   return db
-    .update(planningActivity)
-    .set(data)
-    .where(eq(planningActivity.id, data.id))
+    .update(planning)
+    .set({ planningItems: plan.planningItems })
+    .where(eq(planning.id, data.planningId))
     .returning();
 }
 
-export async function deletePlanningActivity(id: string) {
+export async function updatePlanningActivity(
+  planningId: PlanningId,
+  item: PlanningData["planningItems"][number],
+) {
+  const plan = await db.query.planning.findFirst({
+    where: eq(planning.id, planningId),
+  });
+  if (!plan) return null;
+  const itemIndex = plan.planningItems?.findIndex(
+    (item) => item.slotId === item.slotId,
+  );
+  if (!itemIndex) return null;
+  plan.planningItems![itemIndex] = item;
   return db
-    .delete(planningActivity)
-    .where(eq(planningActivity.id, id))
+    .update(planning)
+    .set({ planningItems: plan.planningItems })
+    .where(eq(planning.id, planningId))
+    .returning();
+}
+
+export async function deletePlanningActivity(
+  planningId: PlanningId,
+  slotId: string,
+) {
+  const plan = await db.query.planning.findFirst({
+    where: eq(planning.id, planningId),
+  });
+  if (!plan) return null;
+  const itemToDelete = plan.planningItems?.find(
+    (item) => item.slotId === slotId,
+  );
+  if (!itemToDelete) return plan;
+  itemToDelete.deleted = true;
+
+  return db
+    .update(planning)
+    .set({ planningItems: plan.planningItems })
+    .where(eq(planning.id, planningId))
     .returning();
 }
 
@@ -367,38 +469,42 @@ export async function deletePlanningActivity(id: string) {
 
 export async function createPlanningReservation(data: {
   date: Date;
-  planningActivityId: string;
-  userId: string;
+  planningId: PlanningId;
+  slotId: string;
+  userId: UserId;
 }) {
   return db
     .insert(reservation)
     .values({
       date: data.date,
-      planningActivityId: data.planningActivityId,
+      planningId: data.planningId,
+      slotId: data.slotId,
       userId: data.userId,
+      reservationDate: new Date(),
     })
     .returning();
 }
 
 export async function createActivityReservation(data: {
   date: Date;
-  activityId: string;
-  userId: string;
-  activitySlot: number;
-  roomId: string;
+  planningId: PlanningId;
+  slotId: string;
+  userId: UserId;
+  slotNumber: number;
 }) {
   return db
     .insert(reservation)
     .values({
       date: data.date,
-      activityId: data.activityId,
+      planningId: data.planningId,
+      slotId: data.slotId,
       userId: data.userId,
-      activitySlot: data.activitySlot,
-      roomId: data.roomId,
+      reservationDate: new Date(),
+      slotNumber: data.slotNumber,
     })
     .returning();
 }
 
-export async function deleteReservation(id: string) {
+export async function deleteReservation(id: ReservationId) {
   return db.delete(reservation).where(eq(reservation.id, id));
 }

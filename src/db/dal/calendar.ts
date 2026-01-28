@@ -5,82 +5,105 @@ import { endOfDay } from "date-fns";
 import { db } from "@/db";
 import { room, site } from "@/db/schema/club";
 import { dayNameEnum } from "@/db/schema/enums";
+import { openingCalendar } from "@/db/schema/planning";
 import {
-  dayOpeningTime,
-  openingCalendar,
-  openingCalendarClubs,
-  openingCalendarRooms,
-  openingCalendarSites,
-} from "@/db/schema/planning";
+  CalendarData,
+  CreateCalendarInput,
+  UpdateCalendarInput,
+} from "@/schemas/planning";
+import { CalendarId, ClubId, RoomId, SiteId } from "../types";
 
 // ==================== CALENDAR QUERIES ====================
 
-export async function getCalendarById(id: string) {
-  return db.query.openingCalendar.findFirst({
-    where: eq(openingCalendar.id, id),
-    with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
-  });
+function convertOpeningCalendarToCalendarOutput(
+  calendar: typeof openingCalendar.$inferSelect,
+): CalendarData {
+  return {
+    id: calendar.id,
+    startDate: calendar.startDate,
+    clubId: calendar.clubId,
+    siteId: calendar.siteId,
+    roomId: calendar.roomId,
+    openingTimes: calendar.openingTimes ?? [],
+  };
 }
 
-export async function getCalendarForClub(clubId: string) {
+export async function getCalendarById(
+  id: CalendarId,
+): Promise<CalendarData | null> {
+  const calendar = await db.query.openingCalendar.findFirst({
+    where: eq(openingCalendar.id, id),
+  });
+  if (!calendar) {
+    return null;
+  }
+  return convertOpeningCalendarToCalendarOutput(calendar);
+}
+
+export async function getCalendarForClub(
+  clubId: ClubId,
+): Promise<CalendarData | null> {
   const now = endOfDay(new Date());
-  return db.query.openingCalendar.findFirst({
+  const calendar = await db.query.openingCalendar.findFirst({
     where: and(
-      eq(openingCalendar.id, clubId),
+      eq(openingCalendar.clubId, clubId),
       lte(openingCalendar.startDate, now),
     ),
     orderBy: desc(openingCalendar.startDate),
-    with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
   });
+  if (!calendar) return null;
+
+  return convertOpeningCalendarToCalendarOutput(calendar);
 }
 
-export async function getCalendarForSite(siteId: string, clubId: string) {
+export async function getCalendarForSite(
+  siteId: SiteId,
+  clubId: ClubId,
+): Promise<CalendarData | null> {
   const now = endOfDay(new Date());
   const siteCal = await db.query.openingCalendar.findFirst({
     where: and(
-      eq(openingCalendar.id, siteId),
+      eq(openingCalendar.siteId, siteId),
       lte(openingCalendar.startDate, now),
     ),
     orderBy: desc(openingCalendar.startDate),
-    with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
   });
 
   if (!siteCal) {
     const siteData = await db.query.site.findFirst({
       where: eq(site.id, siteId),
-      with: { openingCalendars: true },
     });
 
     if (siteData?.openWithClub) {
       const clubCal = await db.query.openingCalendar.findFirst({
         where: and(
-          eq(openingCalendar.id, clubId),
+          eq(openingCalendar.clubId, clubId),
           lte(openingCalendar.startDate, now),
         ),
         orderBy: desc(openingCalendar.startDate),
-        with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
       });
-      return clubCal ?? null;
+      if (!clubCal) return null;
+
+      return convertOpeningCalendarToCalendarOutput(clubCal);
     }
     return null;
   }
 
-  return siteCal;
+  return convertOpeningCalendarToCalendarOutput(siteCal);
 }
 
 export async function getCalendarForRoom(
-  roomId: string,
-  siteId: string,
-  clubId: string,
-) {
+  roomId: RoomId,
+  siteId: SiteId,
+  clubId: ClubId,
+): Promise<CalendarData | null> {
   const now = endOfDay(new Date());
   const roomCal = await db.query.openingCalendar.findFirst({
     where: and(
-      eq(openingCalendar.id, roomId),
+      eq(openingCalendar.roomId, roomId),
       lte(openingCalendar.startDate, now),
     ),
     orderBy: desc(openingCalendar.startDate),
-    with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
   });
 
   if (!roomCal) {
@@ -91,44 +114,46 @@ export async function getCalendarForRoom(
     if (roomData?.openWithSite) {
       const siteCal = await db.query.openingCalendar.findFirst({
         where: and(
-          eq(openingCalendar.id, siteId),
+          eq(openingCalendar.siteId, siteId),
           lte(openingCalendar.startDate, now),
         ),
         orderBy: desc(openingCalendar.startDate),
-        with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
       });
 
       if (!siteCal) {
         const siteData = await db.query.site.findFirst({
           where: eq(site.id, siteId),
-          with: { openingCalendars: true },
         });
 
         if (siteData?.openWithClub) {
-          return db.query.openingCalendar.findFirst({
+          const clubCal = await db.query.openingCalendar.findFirst({
             where: and(
-              eq(openingCalendar.id, clubId),
+              eq(openingCalendar.clubId, clubId),
               lte(openingCalendar.startDate, now),
             ),
             orderBy: desc(openingCalendar.startDate),
-            with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
           });
+          if (!clubCal) return null;
+          return convertOpeningCalendarToCalendarOutput(clubCal);
         }
       }
-      return siteCal;
+      if (!siteCal) return null;
+      return convertOpeningCalendarToCalendarOutput(siteCal);
     } else if (roomData?.openWithClub) {
-      return db.query.openingCalendar.findFirst({
+      const clubCal = await db.query.openingCalendar.findFirst({
         where: and(
-          eq(openingCalendar.id, clubId),
+          eq(openingCalendar.clubId, clubId),
           lte(openingCalendar.startDate, now),
         ),
         orderBy: desc(openingCalendar.startDate),
-        with: { dayOpeningTimes: { with: { dayOpeningTime: true } } },
       });
+      if (!clubCal) return null;
+      return convertOpeningCalendarToCalendarOutput(clubCal);
     }
   }
 
-  return roomCal;
+  if (!roomCal) return null;
+  return convertOpeningCalendarToCalendarOutput(roomCal);
 }
 
 // ==================== CALENDAR MUTATIONS ====================
@@ -143,52 +168,16 @@ export type OpeningTimeInput = {
   }>;
 };
 
-export async function createCalendar(data: {
-  startDate: Date;
-  openingTime: OpeningTimeInput[];
-  siteId?: string;
-  roomId?: string;
-  clubId?: string;
-}) {
-  return db.transaction(async (tx) => {
-    const calendar = await tx
-      .insert(openingCalendar)
-      .values({
-        startDate: data.startDate,
-      })
-      .returning();
+export async function createCalendar(data: CreateCalendarInput) {
+  const calendar = await db.insert(openingCalendar).values(data).returning();
+  return calendar[0];
+}
 
-    const calendarId = calendar[0].id;
-
-    const createOT = data.openingTime.map((i) => ({
-      name: i.name,
-      wholeDay: i.wholeDay,
-      closed: i.closed,
-    }));
-
-    await tx.insert(dayOpeningTime).values(createOT);
-
-    if (data.siteId) {
-      await tx.insert(openingCalendarSites).values({
-        siteId: data.siteId,
-        openingCalendarId: calendarId,
-      });
-    }
-
-    if (data.roomId) {
-      await tx.insert(openingCalendarRooms).values({
-        roomId: data.roomId,
-        openingCalendarId: calendarId,
-      });
-    }
-
-    if (data.clubId) {
-      await tx.insert(openingCalendarClubs).values({
-        clubId: data.clubId,
-        openingCalendarId: calendarId,
-      });
-    }
-
-    return calendar;
-  });
+export async function updateCalendar(data: UpdateCalendarInput) {
+  const calendar = await db
+    .update(openingCalendar)
+    .set(data)
+    .where(eq(openingCalendar.id, data.id))
+    .returning();
+  return calendar[0];
 }
