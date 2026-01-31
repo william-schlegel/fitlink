@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getSubscriptionById } from "@/db/dal";
+import { SubscriptionId } from "@/db/types";
 import { stripe } from "@/lib/stripe/server";
 
 const requestSchema = z.object({
@@ -13,7 +14,9 @@ const requestSchema = z.object({
 export async function POST(request: Request) {
   try {
     const body = requestSchema.parse(await request.json());
-    const subscription = await getSubscriptionById(body.subscriptionId);
+    const subscription = await getSubscriptionById(
+      body.subscriptionId as SubscriptionId,
+    );
 
     if (!subscription) {
       return NextResponse.json(
@@ -23,8 +26,8 @@ export async function POST(request: Request) {
     }
 
     const baseAmount = body.monthly
-      ? subscription.monthly ?? 0
-      : subscription.yearly ?? 0;
+      ? (subscription.monthly ?? 0)
+      : (subscription.yearly ?? 0);
     const inscriptionFee = subscription.inscriptionFee ?? 0;
     const totalAmount = baseAmount + inscriptionFee;
 
@@ -49,7 +52,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
     const message =
-      error instanceof z.ZodError ? "Invalid request payload." : "Server error.";
+      error instanceof z.ZodError
+        ? "Invalid request payload."
+        : "Server error.";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

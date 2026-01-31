@@ -20,17 +20,17 @@ export default async function Subscription({
   const { shortInfo } = await getDescription(
     subscription.mode,
     subscription.restriction,
-    subscription.activitieGroups.map((ag) => ag.activityGroup.id),
-    subscription.activities.map((ag) => ag.activity.id),
-    subscription.sites.map((ag) => ag.site.id),
-    subscription.rooms.map((ag) => ag.room.id),
+    subscription.activityGroups,
+    subscription.activities,
+    subscription.sites,
+    subscription.rooms,
   );
 
   const { sites, rooms, activityGroups, activities } = await getDataNames(
-    subscription.sites.map((ag) => ag.site.id),
-    subscription.rooms.map((ag) => ag.room.id),
-    subscription.activitieGroups.map((ag) => ag.activityGroup.id),
-    subscription.activities.map((ag) => ag.activity.id),
+    subscription.sites,
+    subscription.rooms,
+    subscription.activityGroups,
+    subscription.activities,
   );
 
   return (

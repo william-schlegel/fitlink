@@ -2,7 +2,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-import { ClubId, UserId } from "../types";
+import { ClubId, PageId, UserId } from "../types";
 import { club, event } from "./club";
 import {
   pageSectionElementTypeEnum,
@@ -20,7 +20,7 @@ export const pageSectionElement = pgTable(
     elementType: pageSectionElementTypeEnum("element_type"),
     content: text("content"),
     link: text("link"),
-    pageId: text("page_id"),
+    pageId: text("page_id").$type<PageId>(),
     pageSection: pageSectionModelEnum("page_section"),
     sectionId: text("section_id").notNull(),
     optionValue: text("option_value"),
@@ -46,7 +46,7 @@ export const pageSection = pgTable(
     model: pageSectionModelEnum("model").notNull(),
     title: text("title"),
     subTitle: text("sub_title"),
-    pageId: text("page_id").notNull(),
+    pageId: text("page_id").notNull().$type<PageId>(),
   },
   (table) => [index("page_section_page_idx").on(table.pageId)],
 );
@@ -61,18 +61,18 @@ export const pageSectionRelations = relations(pageSection, ({ one, many }) => ({
 export const page = pgTable(
   "Page",
   {
-    id: text("id").primaryKey().$defaultFn(createId),
+    id: text("id").primaryKey().$defaultFn(createId).$type<PageId>(),
     name: text("name").notNull(),
     target: pageTargetEnum("target").default("HOME"),
     clubId: text("club_id").$type<ClubId>(),
-    coachId: text("coach_id").unique().$type<UserId>(),
+    coachUserId: text("coach_user_id").unique().$type<UserId>(),
     published: boolean("published").default(false),
     eventId: text("event_id").unique(),
     updatedAt: timestamp("updated_at").defaultNow(),
   },
   (table) => [
     index("page_club_idx").on(table.clubId),
-    index("page_coach_idx").on(table.coachId),
+    index("page_coach_idx").on(table.coachUserId),
     index("page_event_idx").on(table.eventId),
   ],
 );
@@ -83,7 +83,7 @@ export const pageRelations = relations(page, ({ one, many }) => ({
     references: [club.id],
   }),
   coach: one(userCoach, {
-    fields: [page.coachId],
+    fields: [page.coachUserId],
     references: [userCoach.userId],
   }),
   event: one(event, {

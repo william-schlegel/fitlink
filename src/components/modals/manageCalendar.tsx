@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 
-import { CalendarPlus, Plus } from "lucide-react";
+import { Calendar, CalendarPlus, Plus } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -279,11 +279,10 @@ export const UpdateClubCalendar = ({
 
   return (
     <Modal
-      title={t("create-club-calendar")}
+      title={t("update-club-calendar")}
       handleSubmit={onSubmit}
       submitButtonText={t("save-calendar")}
-      buttonIcon={<CalendarPlus />}
-      variant="outline"
+      buttonIcon={<Calendar />}
       buttonSize="icon"
     >
       <h3>{t("create-club-calendar")}</h3>

@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect, RedirectType } from "next/navigation";
 
-import { CalendarCheck, CalendarClock, ChevronLeft, X } from "lucide-react";
+import { CalendarCheck, CalendarHeart, ChevronLeft, X } from "lucide-react";
 
 import CalendarWeek from "@/components/calendarWeek";
 import {
@@ -55,7 +55,7 @@ export default async function ManageRooms({
     return <div>{t("club.manager-only")}</div>;
 
   const siteQuery = await getSiteById(siteId);
-  const roomQuery = await caller.sites.getRoomsForSite(siteId);
+  const roomQuery = await caller.sites.getRoomsForSite({ siteId });
   if (!roomId && roomQuery.length > 0)
     redirect(createLink({ roomId: roomQuery[0]?.id }, href));
 
@@ -73,9 +73,9 @@ export default async function ManageRooms({
       link: createLink({ roomId: room.id }, href),
       badgeIcon:
         room.reservation === "MANDATORY" ? (
-          <CalendarCheck className="text-secondary" />
+          <CalendarCheck />
         ) : room.reservation === "POSSIBLE" ? (
-          <CalendarClock className="text-primary" />
+          <CalendarHeart />
         ) : undefined,
       badgeText: room.unavailable ? t("club.room.closed") : null,
     }),

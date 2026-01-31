@@ -1,4 +1,3 @@
-import { inArray, or } from "drizzle-orm";
 import z from "zod";
 
 import {
@@ -23,7 +22,6 @@ import {
   updatePlanning,
   updatePlanningActivity,
 } from "@/db/dal";
-import { activity } from "@/db/schema/club";
 import { dayNameEnum } from "@/db/schema/enums";
 import {
   ActivityId,
@@ -114,7 +112,12 @@ export const planningRouter = createTRPCRouter({
     ),
 
   updatePlanningActivity: protectedProcedure
-    .input(z.object({ planningId: ZodPlanningId, item: planningItemSchema }))
+    .input(
+      z.object({
+        planningId: ZodPlanningId,
+        item: planningItemSchema.partial(),
+      }),
+    )
     .mutation(({ input }) =>
       updatePlanningActivity(input.planningId, input.item),
     ),
@@ -137,20 +140,22 @@ export const planningRouter = createTRPCRouter({
   getCoachDailyPlanning: protectedProcedure
     .input(
       z.object({
-        coachId: ZodUserId,
+        coachUserId: ZodUserId,
         day: z.enum(dayNameEnum.enumValues),
       }),
     )
-    .query(({ input }) => getCoachDailyPlanning(input.coachId, input.day)),
+    .query(({ input }) => getCoachDailyPlanning(input.coachUserId, input.day)),
 
   getCoachPlanningForClub: protectedProcedure
     .input(
       z.object({
-        coachId: ZodUserId,
+        coachUserId: ZodUserId,
         clubId: ZodClubId,
       }),
     )
-    .query(({ input }) => getCoachPlanningForClub(input.coachId, input.clubId)),
+    .query(({ input }) =>
+      getCoachPlanningForClub(input.coachUserId, input.clubId),
+    ),
 
   getMemberDailyPlanning: protectedProcedure
     .input(
@@ -163,29 +168,28 @@ export const planningRouter = createTRPCRouter({
       const userData = await getMemberDataWithSubscriptions(input.memberId);
       const clubIds = Array.from(
         new Set(
-          userData?.memberData?.subscriptions.map(
-            (s) => s.subscription.club.id,
-          ),
+          userData?.memberData?.subscriptions.map((s) => s.subscription.clubId),
         ),
       ) as ClubId[];
       const planningClubs = await getPlanningsForClubIds(clubIds);
       const dayName = getDayName(input.date);
       const planningData: PlanningSearchReturnData[] = [];
+      console.log("planningClubs :>> ", planningClubs);
 
       for (const planningClub of planningClubs) {
         const sub = userData?.memberData?.subscriptions
           .flatMap((s) => s.subscription)
           .filter((s) => s.clubId === planningClub.clubId);
 
+        console.log("sub :>> ", sub);
+
         const activityIds = new Set<ActivityId>();
         const siteIds = new Set<SiteId>();
         const roomIds = new Set<RoomId>();
 
         for (const s of sub ?? []) {
-          if (s.mode === "ACTIVITY_GROUP" && s.activitieGroups.length > 0) {
-            const activityGroupIds = s.activitieGroups.map(
-              (ag) => ag.activityGroupId,
-            );
+          if (s.mode === "ACTIVITY_GROUP" && s.activityGroups.length > 0) {
+            const activityGroupIds = s.activityGroups;
             const activitiesFromGroups =
               await getActivitiesForGroups(activityGroupIds);
             for (const a of activitiesFromGroups) {
@@ -195,22 +199,8 @@ export const planningRouter = createTRPCRouter({
 
           if (s.mode === "ACTIVITY" && s.activities.length > 0) {
             for (const a of s.activities) {
-              activityIds.add(a.activityId);
+              activityIds.add(a);
             }
-          }
-
-          const activityNoCalFilters: ReturnType<typeof or>[] = [];
-          if (s.mode === "ACTIVITY_GROUP" && s.activitieGroups.length > 0) {
-            const activityGroupIds = s.activitieGroups.map(
-              (ag) => ag.activityGroupId,
-            );
-            activityNoCalFilters.push(
-              inArray(activity.groupId, activityGroupIds),
-            );
-          }
-          if (s.mode === "ACTIVITY" && s.activities.length > 0) {
-            const activityIds = s.activities.map((a) => a.activityId);
-            activityNoCalFilters.push(inArray(activity.id, activityIds));
           }
         }
 
@@ -219,17 +209,13 @@ export const planningRouter = createTRPCRouter({
           activityIds: Array.from(activityIds),
         });
 
-        const clb = planningClub.club?.find(
-          (c) => c.clubId === planningClub.clubId,
-        );
-
         planningData.push({
           clubId: planningClub.clubId,
-          clubName: clb?.name ?? "",
+          clubName: planningClub.club.name,
           siteId: planningClub.siteId,
-          siteName: planningClub.site?.[0]?.name ?? "",
+          siteName: planningClub.site?.name ?? "",
           roomId: planningClub.roomId,
-          roomName: planningClub.room?.[0]?.name ?? "",
+          roomName: planningClub.room?.name ?? "",
           id: planningClub.id,
           name: planningClub.name,
           startDate: planningClub.startDate,

@@ -21,7 +21,15 @@ import {
   SubscriptionModeEnum,
   SubscriptionRestrictionEnum,
 } from "@/db/schema/enums";
-import { ActivityId } from "@/db/types";
+import {
+  ActivityGroupId,
+  ActivityId,
+  ClubId,
+  RoomId,
+  SiteId,
+  SubscriptionId,
+  UserId,
+} from "@/db/types";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { formatMoney } from "@/lib/formatNumber";
 import { trpc } from "@/lib/trpc/client";
@@ -29,9 +37,9 @@ import { useDisplaySubscriptionInfo } from "@/lib/useDisplaySubscription";
 import { isCUID } from "@/lib/utils";
 
 type SubscriptionContentProps = {
-  clubId: string;
-  subscriptionId: string;
-  userId: string;
+  clubId: ClubId;
+  subscriptionId: SubscriptionId;
+  userId: UserId;
 };
 
 export function SubscriptionContent({
@@ -60,11 +68,10 @@ export function SubscriptionContent({
       };
     }
     return {
-      sites: subQuery.data.sites.map((s) => s.siteId) ?? [],
-      rooms: subQuery.data.rooms.map((s) => s.roomId) ?? [],
-      activityGroups:
-        subQuery.data.activitieGroups.map((s) => s.activityGroupId) ?? [],
-      activities: subQuery.data.activities.map((s) => s.activityId) ?? [],
+      sites: subQuery.data.sites,
+      rooms: subQuery.data.rooms,
+      activityGroups: subQuery.data.activityGroups,
+      activities: subQuery.data.activities,
     };
   }, [subQuery.data]);
 
@@ -84,7 +91,7 @@ export function SubscriptionContent({
   const selectedActivities = selections.activities;
 
   const setSelectedSites = (
-    value: string[] | ((prev: string[]) => string[]),
+    value: SiteId[] | ((prev: SiteId[]) => SiteId[]),
   ) => {
     setSelections((prev) => ({
       ...prev,
@@ -92,7 +99,7 @@ export function SubscriptionContent({
     }));
   };
   const setSelectedRooms = (
-    value: string[] | ((prev: string[]) => string[]),
+    value: RoomId[] | ((prev: RoomId[]) => RoomId[]),
   ) => {
     setSelections((prev) => ({
       ...prev,
@@ -100,7 +107,7 @@ export function SubscriptionContent({
     }));
   };
   const setSelectedActivityGroups = (
-    value: string[] | ((prev: string[]) => string[]),
+    value: ActivityGroupId[] | ((prev: ActivityGroupId[]) => ActivityGroupId[]),
   ) => {
     setSelections((prev) => ({
       ...prev,
@@ -148,17 +155,17 @@ export function SubscriptionContent({
     });
   }
 
-  function handleSelectSite(id: string) {
+  function handleSelectSite(id: SiteId) {
     if (selectedSites.includes(id))
       setSelectedSites((sel) => sel.filter((s) => s !== id));
     else setSelectedSites((sel) => sel.concat(id));
   }
-  function handleSelectRoom(id: string) {
+  function handleSelectRoom(id: RoomId) {
     if (selectedRooms.includes(id))
       setSelectedRooms((sel) => sel.filter((s) => s !== id));
     else setSelectedRooms((sel) => sel.concat(id));
   }
-  function handleSelectActivityGroup(id: string) {
+  function handleSelectActivityGroup(id: ActivityGroupId) {
     if (selectedActivityGroups.includes(id))
       setSelectedActivityGroups((sel) => sel.filter((s) => s !== id));
     else setSelectedActivityGroups((sel) => sel.concat(id));
@@ -271,13 +278,13 @@ export function SubscriptionContent({
 }
 
 type SelectRestrictionProps = {
-  clubId: string;
-  userId: string;
+  clubId: ClubId;
+  userId: UserId;
   restriction: SubscriptionRestrictionEnum;
-  siteIds: string[];
-  roomIds: string[];
-  onSelectSite: (siteId: string) => void;
-  onSelectRoom: (roomId: string) => void;
+  siteIds: SiteId[];
+  roomIds: RoomId[];
+  onSelectSite: (siteId: SiteId) => void;
+  onSelectRoom: (roomId: RoomId) => void;
 };
 function SelectRestriction({
   clubId,
@@ -303,7 +310,7 @@ function SelectRestriction({
               key={site.id}
               state={siteIds.includes(site.id)}
               item={{ id: site.id, name: site.name }}
-              onClick={(id) => onSelectSite(id)}
+              onClick={(id) => onSelectSite(id as SiteId)}
             />
           ))
         : null}
@@ -322,7 +329,7 @@ function SelectRestriction({
                   key={room.id}
                   state={roomIds.includes(room.id)}
                   item={{ id: room.id, name: room.name }}
-                  onClick={(id) => onSelectRoom(id)}
+                  onClick={(id) => onSelectRoom(id as RoomId)}
                 />
               ))}
             </div>
@@ -335,7 +342,7 @@ function SelectRestriction({
 type SelectableItemProps = {
   state: boolean;
   item: { id: string; name: string };
-  onClick: (id: ActivityId) => void;
+  onClick: (id: string) => void;
 };
 
 function SelectableItem({ state, item, onClick }: SelectableItemProps) {
@@ -359,7 +366,7 @@ type SelectDataForModeProps = {
   activityIds: string[];
   restriction: SubscriptionRestrictionEnum;
   mode: SubscriptionModeEnum;
-  onSelectActivityGroup: (id: string) => void;
+  onSelectActivityGroup: (id: ActivityGroupId) => void;
   onSelectActivity: (id: ActivityId) => void;
 };
 
@@ -400,7 +407,7 @@ function SelectDataForMode({
               key={ag.id}
               state={activityGroupIds.includes(ag.id)}
               item={{ id: ag.id, name: ag.name }}
-              onClick={(id) => onSelectActivityGroup(id)}
+              onClick={(id) => onSelectActivityGroup(id as ActivityGroupId)}
             />
           ))
         : null}
@@ -410,7 +417,7 @@ function SelectDataForMode({
               key={ag.id}
               state={activityIds.includes(ag.id)}
               item={{ id: ag.id, name: ag.name }}
-              onClick={(id) => onSelectActivity(id)}
+              onClick={(id) => onSelectActivity(id as ActivityId)}
             />
           ))
         : null}

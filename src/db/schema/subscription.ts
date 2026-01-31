@@ -10,9 +10,17 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
-import { ActivityId } from "../types";
+import {
+  ActivityGroupId,
+  ActivityId,
+  ClubId,
+  RoomId,
+  SiteId,
+  SubscriptionId,
+  UserId,
+} from "../types";
 import { user } from "./auth";
-import { activity, activityGroup, club, room, site } from "./club";
+import { club } from "./club";
 import {
   dayNameEnum,
   featureEnum,
@@ -20,14 +28,13 @@ import {
   subscriptionModeEnum,
   subscriptionRestrictionEnum,
 } from "./enums";
-import { userMemberToSubscription } from "./user";
 
 export const paiement = pgTable(
   "Paiement",
   {
     id: text("id").primaryKey().$defaultFn(createId),
-    userId: text("user_id").notNull(),
-    subscriptionId: text("subscription_id").notNull(),
+    userId: text("user_id").notNull().$type<UserId>(),
+    subscriptionId: text("subscription_id").notNull().$type<SubscriptionId>(),
     amount: real("amount").notNull(),
     paiementDate: timestamp("paiement_date").notNull(),
   },
@@ -51,7 +58,7 @@ export const paiementRelations = relations(paiement, ({ one }) => ({
 export const subscription = pgTable(
   "Subscription",
   {
-    id: text("id").primaryKey().$defaultFn(createId),
+    id: text("id").primaryKey().$defaultFn(createId).$type<SubscriptionId>(),
     name: text("name").notNull(),
     mode: subscriptionModeEnum("mode").default("ALL_INCLUSIVE"),
     restriction: subscriptionRestrictionEnum("restriction").default("CLUB"),
@@ -64,7 +71,19 @@ export const subscription = pgTable(
     cancelationFee: real("cancelation_fee").default(0),
     inscriptionFee: real("inscription_fee").default(0),
     day: dayNameEnum("day"),
-    clubId: text("club_id").notNull(),
+    clubId: text("club_id").notNull().$type<ClubId>(),
+    activityGroups: text("activitie_groups")
+      .array()
+      .$type<ActivityGroupId[]>()
+      .notNull()
+      .default([]),
+    activities: text("activities")
+      .array()
+      .$type<ActivityId[]>()
+      .notNull()
+      .default([]),
+    sites: text("sites").array().$type<SiteId[]>().notNull().default([]),
+    rooms: text("rooms").array().$type<RoomId[]>().notNull().default([]),
   },
   (table) => [index("subscription_club_idx").on(table.clubId)],
 );
@@ -77,11 +96,7 @@ export const subscriptionRelations = relations(
       references: [club.id],
     }),
     paiements: many(paiement),
-    activitieGroups: many(subscriptionToActivityGroup),
-    activities: many(subscriptionToActivity),
-    users: many(userMemberToSubscription),
-    sites: many(subscriptionToSite),
-    rooms: many(subscriptionToRoom),
+    users: many(userToMemberSubscription),
   }),
 );
 
@@ -137,125 +152,26 @@ export const pricingFeatureRelations = relations(pricingFeature, ({ one }) => ({
   }),
 }));
 
-export const subscriptionToActivityGroup = pgTable(
-  "SubscriptionToActivityGroup",
+export const userToMemberSubscription = pgTable(
+  "UserToMemberSubscription",
   {
-    subscriptionId: text("subscription_id")
-      .notNull()
-      .references(() => subscription.id),
-    activityGroupId: text("activity_group_id")
-      .notNull()
-      .references(() => activityGroup.id),
+    id: text("id").primaryKey().$defaultFn(createId),
+    userId: text("user_id").notNull().$type<UserId>(),
+    subscriptionId: text("subscription_id").notNull().$type<SubscriptionId>(),
   },
-  (table) => [
-    index("subscription_to_activity_group_idx").on(
-      table.subscriptionId,
-      table.activityGroupId,
-    ),
-  ],
+  (table) => [index("user_to_member_subscription_idx").on(table.userId)],
 );
 
-export const subscriptionToActivityGroupRelations = relations(
-  subscriptionToActivityGroup,
+export const userToMemberSubscriptionRelations = relations(
+  userToMemberSubscription,
   ({ one }) => ({
+    user: one(user, {
+      fields: [userToMemberSubscription.userId],
+      references: [user.id],
+    }),
     subscription: one(subscription, {
-      fields: [subscriptionToActivityGroup.subscriptionId],
+      fields: [userToMemberSubscription.subscriptionId],
       references: [subscription.id],
-    }),
-    activityGroup: one(activityGroup, {
-      fields: [subscriptionToActivityGroup.activityGroupId],
-      references: [activityGroup.id],
-    }),
-  }),
-);
-
-export const subscriptionToActivity = pgTable(
-  "SubscriptionToActivity",
-  {
-    subscriptionId: text("subscription_id")
-      .notNull()
-      .references(() => subscription.id),
-    activityId: text("activity_id")
-      .$type<ActivityId>()
-      .notNull()
-      .references(() => activity.id),
-  },
-  (table) => [
-    index("subscription_to_activity_idx").on(
-      table.subscriptionId,
-      table.activityId,
-    ),
-  ],
-);
-
-export const subscriptionToActivityRelations = relations(
-  subscriptionToActivity,
-  ({ one }) => ({
-    subscription: one(subscription, {
-      fields: [subscriptionToActivity.subscriptionId],
-      references: [subscription.id],
-    }),
-    activity: one(activity, {
-      fields: [subscriptionToActivity.activityId],
-      references: [activity.id],
-    }),
-  }),
-);
-
-export const subscriptionToSite = pgTable(
-  "SubscriptionToSite",
-  {
-    subscriptionId: text("subscription_id")
-      .notNull()
-      .references(() => subscription.id),
-    siteId: text("site_id")
-      .notNull()
-      .references(() => site.id),
-  },
-  (table) => [
-    index("subscription_to_site_idx").on(table.subscriptionId, table.siteId),
-  ],
-);
-
-export const subscriptionToSiteRelations = relations(
-  subscriptionToSite,
-  ({ one }) => ({
-    subscription: one(subscription, {
-      fields: [subscriptionToSite.subscriptionId],
-      references: [subscription.id],
-    }),
-    site: one(site, {
-      fields: [subscriptionToSite.siteId],
-      references: [site.id],
-    }),
-  }),
-);
-
-export const subscriptionToRoom = pgTable(
-  "SubscriptionToRoom",
-  {
-    subscriptionId: text("subscription_id")
-      .notNull()
-      .references(() => subscription.id),
-    roomId: text("room_id")
-      .notNull()
-      .references(() => room.id),
-  },
-  (table) => [
-    index("subscription_to_room_idx").on(table.subscriptionId, table.roomId),
-  ],
-);
-
-export const subscriptionToRoomRelations = relations(
-  subscriptionToRoom,
-  ({ one }) => ({
-    subscription: one(subscription, {
-      fields: [subscriptionToRoom.subscriptionId],
-      references: [subscription.id],
-    }),
-    room: one(room, {
-      fields: [subscriptionToRoom.roomId],
-      references: [room.id],
     }),
   }),
 );

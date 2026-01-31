@@ -5,6 +5,7 @@ import {
   searchClubsByActivityAndLocation,
   searchCoachesByActivityAndLocation,
 } from "@/db/dal/coaching";
+import { ZodActivityId } from "@/db/types";
 import { env } from "@/env";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { calculateDistance } from "@/lib/distance";
@@ -17,7 +18,7 @@ const DEFAULT_LIMIT = 20;
 
 // Input schema for search procedures
 const searchInputSchema = z.object({
-  activity: z.string().optional(),
+  activity: ZodActivityId.optional(),
   lat: z.number().default(LATITUDE),
   lng: z.number().default(LONGITUDE),
   radiusKm: z.number().min(1).max(100).default(DEFAULT_RADIUS_KM),
@@ -31,7 +32,7 @@ const locationInputSchema = z.object({
 
 // Input schema for company offers search
 const companyOffersInputSchema = z.object({
-  activity: z.string().optional(),
+  activity: ZodActivityId.optional(),
   lat: z.number().default(LATITUDE),
   lng: z.number().default(LONGITUDE),
   radiusKm: z.number().min(1).max(100).default(DEFAULT_COMPANY_RADIUS_KM),
@@ -107,7 +108,7 @@ export const assistantRouter = createTRPCRouter({
       // Add distance and transform data
       return sites.map((site) => {
         // Get activity groups from club activities
-        const activityGroups = [
+        const activityGroupsName = [
           ...new Set(site.club.activities.map((a) => a.group.name)),
         ].sort();
 
@@ -124,7 +125,7 @@ export const assistantRouter = createTRPCRouter({
           longitude: site.longitude,
           clubId: site.clubId,
           clubName: site.club.name,
-          activityGroups,
+          activityGroupsName,
           pageId: homePage?.id,
           pagePublished: !!homePage,
           distance: calculateDistance(
@@ -188,7 +189,7 @@ export const assistantRouter = createTRPCRouter({
           id: offer.CoachingPrice.id,
           name: offer.CoachingPrice.name,
           description: offer.CoachingPrice.description,
-          coachId: offer.CoachingPrice.coachId,
+          coachUserId: offer.CoachingPrice.coachUserId,
           coachName: offer.user_coaches?.publicName ?? "Coach",
           coachAddress: offer.user_coaches?.searchAddress,
           physical: offer.CoachingPrice.physical,

@@ -4,6 +4,7 @@ import {
   subscriptionModeEnum,
   subscriptionRestrictionEnum,
 } from "@/db/schema/enums";
+import { ActivityGroupId, ActivityId, RoomId, SiteId } from "@/db/types";
 
 export async function getDescription(
   mode: (typeof subscriptionModeEnum.enumValues)[number] | null | undefined,
@@ -11,10 +12,10 @@ export async function getDescription(
     | (typeof subscriptionRestrictionEnum.enumValues)[number]
     | null
     | undefined,
-  activityGroups: string[],
-  activities: string[],
-  sites: string[],
-  rooms: string[],
+  activityGroups: ActivityGroupId[],
+  activities: ActivityId[],
+  sites: SiteId[],
+  rooms: RoomId[],
 ) {
   const locale = await getLocale();
   const t = await getTranslations("club");

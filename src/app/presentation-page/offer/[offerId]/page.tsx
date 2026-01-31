@@ -14,7 +14,7 @@ export default async function Offer({
   if (!caller) return null;
   const offerId = (await params).offerId;
   if (!isCUID(offerId)) return notFound();
-  const offerData = await caller.coachs.getOfferWithDetails(offerId);
+  const offerData = await caller.coachs.getOfferWithDetails({ offerId });
 
   return (
     <div

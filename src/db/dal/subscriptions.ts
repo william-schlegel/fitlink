@@ -8,24 +8,27 @@ import {
 } from "@/db/schema/enums";
 import { subscription } from "@/db/schema/subscription";
 import { isCUID } from "@/lib/utils";
-import { ActivityId, ClubId, RoomId, SiteId } from "../types";
+import {
+  ActivityGroupId,
+  ActivityId,
+  ClubId,
+  RoomId,
+  SiteId,
+  SubscriptionId,
+} from "../types";
 
 // ==================== SUBSCRIPTION QUERIES ====================
 
-export async function getSubscriptionById(id: string) {
+export async function getSubscriptionById(id: SubscriptionId) {
   return db.query.subscription.findFirst({
     where: eq(subscription.id, id),
     with: {
-      sites: true,
-      rooms: true,
-      activities: true,
-      activitieGroups: true,
       users: true,
     },
   });
 }
 
-export async function getSubscriptionsForClub(clubId: string) {
+export async function getSubscriptionsForClub(clubId: ClubId) {
   if (!isCUID(clubId)) return [];
   return db.query.subscription.findMany({
     where: eq(subscription.clubId, clubId),
@@ -43,7 +46,7 @@ export async function createSubscription(data: {
   monthly: number;
   yearly: number;
   cancelationFee: number;
-  clubId: string;
+  clubId: ClubId;
   mode: (typeof subscriptionModeEnum.enumValues)[number];
   restriction: (typeof subscriptionRestrictionEnum.enumValues)[number];
 }) {
@@ -51,7 +54,7 @@ export async function createSubscription(data: {
 }
 
 export async function updateSubscription(data: {
-  id: string;
+  id: SubscriptionId;
   name?: string;
   highlight?: string;
   description?: string;
@@ -59,7 +62,7 @@ export async function updateSubscription(data: {
   monthly?: number;
   yearly?: number;
   cancelationFee?: number;
-  clubId?: string;
+  clubId?: ClubId;
   mode?: (typeof subscriptionModeEnum.enumValues)[number];
   restriction?: (typeof subscriptionRestrictionEnum.enumValues)[number];
 }) {
@@ -70,7 +73,27 @@ export async function updateSubscription(data: {
     .returning();
 }
 
-export async function deleteSubscription(id: string) {
+export async function dalUpdateSubscriptionSelection(data: {
+  subscriptionId: SubscriptionId;
+  sites: SiteId[];
+  rooms: RoomId[];
+  activityGroups: ActivityGroupId[];
+  activities: ActivityId[];
+}) {
+  if (!isCUID(data.subscriptionId)) return;
+
+  db.update(subscription)
+    .set({
+      sites: data.sites,
+      rooms: data.rooms,
+      activityGroups: data.activityGroups,
+      activities: data.activities,
+    })
+    .where(eq(subscription.id, data.subscriptionId))
+    .returning();
+}
+
+export async function deleteSubscription(id: SubscriptionId) {
   const sub = await db.query.subscription.findFirst({
     where: eq(subscription.id, id),
     with: { users: { columns: { userId: true } } },
@@ -94,7 +117,7 @@ export async function deleteSubscription(id: string) {
 export async function getDataNames(
   siteIds: SiteId[],
   roomIds: RoomId[],
-  activityGroupIds: string[],
+  activityGroupIds: ActivityGroupId[],
   activityIds: ActivityId[],
 ) {
   const sites = await db.query.site.findMany({

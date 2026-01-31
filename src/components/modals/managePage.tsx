@@ -35,6 +35,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/shadcn";
 import { SelectValue } from "@radix-ui/react-select";
 
 import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
+import { ClubId, PageId } from "@/db/types";
 
 type CreatePageProps = {
   clubId: string;
@@ -237,8 +238,8 @@ export function UpdatePage({
 }
 
 type DeletePageProps = {
-  clubId: string;
-  pageId: string;
+  clubId: ClubId;
+  pageId: PageId;
   variant?: ButtonVariant;
   buttonSize?: ButtonSize;
 };
@@ -265,7 +266,7 @@ export function DeletePage({
     <Confirmation
       title={t("club.page-deletion")}
       message={t("club.page-deletion-message")}
-      onConfirm={() => deletePage.mutate(pageId)}
+      onConfirm={() => deletePage.mutate({ pageId })}
       buttonIcon={<Trash />}
       variant={variant}
       textConfirmation={t("club.page-deletion-confirmation")}

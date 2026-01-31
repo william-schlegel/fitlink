@@ -14,7 +14,7 @@ import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { userCoach } from "@/db/schema/user";
 import { DEFAULT_RANGE, LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { calculateBBox } from "@/lib/distance";
-import { ClubId, UserId } from "../types";
+import { ActivityId, ClubId, UserId } from "../types";
 
 // ==================== COACH QUERIES ====================
 
@@ -39,13 +39,13 @@ export async function getCoachById(userId: UserId) {
 }
 
 export async function getSelectedModulesForCoach(
-  coachId: string,
+  coachUserId: UserId,
   certificationIds: string[],
 ) {
   if (certificationIds.length === 0) return [];
   return db.query.selectedModuleForCoach.findMany({
     where: and(
-      eq(selectedModuleForCoach.coachId, coachId),
+      eq(selectedModuleForCoach.coachUserId, coachUserId),
       inArray(selectedModuleForCoach.certificationId, certificationIds),
     ),
     with: {
@@ -59,9 +59,9 @@ export async function getSelectedModulesForCoach(
   });
 }
 
-export async function getCoachHomePage(coachId: UserId) {
+export async function getCoachHomePage(coachUserId: UserId) {
   return db.query.page.findMany({
-    where: and(eq(page.coachId, coachId), eq(page.target, "HOME")),
+    where: and(eq(page.coachUserId, coachUserId), eq(page.target, "HOME")),
     with: {
       sections: {
         with: {
@@ -126,7 +126,7 @@ export async function getCoachsForClub(clubId: ClubId) {
   });
 }
 
-export async function getCoachData(userId: string) {
+export async function getCoachData(userId: UserId) {
   return db.query.userCoach.findFirst({
     where: eq(userCoach.userId, userId),
     with: {
@@ -176,9 +176,9 @@ export async function getOfferWithDetails(id: string) {
   });
 }
 
-export async function getCoachOffers(coachId: string) {
+export async function getCoachOffers(coachUserId: UserId) {
   return db.query.coachingPrice.findMany({
-    where: eq(coachingPrice.coachId, coachId),
+    where: eq(coachingPrice.coachUserId, coachUserId),
     with: {
       coachingLevel: true,
     },
@@ -216,11 +216,11 @@ export async function getOffersForCompanies(
         lte(coachingPrice.perHourPhysical, priceMax),
       ),
     )
-    .leftJoin(uc, eq(coachingPrice.coachId, uc.userId));
+    .leftJoin(uc, eq(coachingPrice.coachUserId, uc.userId));
 }
 
 export async function createCoachOffer(data: {
-  coachId: string;
+  userId: UserId;
   name: string;
   target: (typeof coachingTargetEnum.enumValues)[number];
   excludingTaxes: boolean;
@@ -249,7 +249,7 @@ export async function createCoachOffer(data: {
         description: data.description,
         target: data.target,
         excludingTaxes: data.excludingTaxes,
-        coachId: data.coachId,
+        coachUserId: data.userId,
         inHouse: data.inHouse,
         physical: data.physical,
         myPlace: data.myPlace,
@@ -291,7 +291,7 @@ export async function createCoachOffer(data: {
 
 export async function updateCoachOffer(data: {
   id: string;
-  coachId?: UserId;
+  coachUserId?: UserId;
   name?: string;
   target?: (typeof coachingTargetEnum.enumValues)[number];
   excludingTaxes?: boolean;
@@ -325,7 +325,7 @@ export async function updateCoachOffer(data: {
         description: data.description,
         target: data.target,
         excludingTaxes: data.excludingTaxes,
-        coachId: data.coachId,
+        coachUserId: data.coachUserId,
         inHouse: data.inHouse,
         physical: data.physical,
         myPlace: data.myPlace,
@@ -400,7 +400,7 @@ const DEFAULT_ASSISTANT_RADIUS = 20;
 const DEFAULT_ASSISTANT_LIMIT = 20;
 
 export type AssistantSearchInput = {
-  activity?: string;
+  activity?: ActivityId;
   lat: number;
   lng: number;
   radiusKm?: number;

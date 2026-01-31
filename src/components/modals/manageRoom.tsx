@@ -62,7 +62,7 @@ export const CreateRoom = ({
   const router = useRouter();
   const createRoom = trpc.sites.createRoom.useMutation({
     onSuccess: (data) => {
-      utils.sites.getRoomsForSite.invalidate(siteId);
+      utils.sites.getRoomsForSite.invalidate({ siteId });
       router.push(createLink({ roomId: data[0].id }));
       form.reset();
       toast.success(t("room.created"));
@@ -136,7 +136,7 @@ export const UpdateRoom = ({
   }, [queryRoom.data, form]);
   const updateRoom = trpc.sites.updateRoom.useMutation({
     onSuccess: () => {
-      utils.sites.getRoomsForSite.invalidate(siteId);
+      utils.sites.getRoomsForSite.invalidate({ siteId });
       utils.sites.getRoomById.invalidate(roomId);
       form.reset();
       toast.success(t("room.updated"));
@@ -193,7 +193,7 @@ export const DeleteRoom = ({
 
   const deleteRoom = trpc.sites.deleteRoom.useMutation({
     onSuccess: () => {
-      utils.sites.getRoomsForSite.invalidate(siteId);
+      utils.sites.getRoomsForSite.invalidate({ siteId });
       toast.success(t("room.deleted"));
     },
     onError(error) {

@@ -50,7 +50,7 @@ export const planningItemSchema = z.object({
   day: z.enum(dayNameEnum.enumValues),
   startTime: z.string(),
   duration: z.number(),
-  coachId: ZodUserId.nullable(),
+  coachUserId: ZodUserId.nullable(),
   roomId: ZodRoomId.nullable(),
   siteId: ZodSiteId.nullable(),
   deleted: z.boolean().default(false),
@@ -72,6 +72,24 @@ export type CreatePlanningInput = Omit<PlanningData, "id">;
 export type UpdatePlanningInput = Partial<PlanningData>;
 
 export type PlanningItemData = z.infer<typeof planningItemSchema>;
+export type UpdatePlanningItemInput = Partial<PlanningItemData>;
+
+export const planningSearchItemSchema = z.object({
+  slotId: z.string(),
+  activityId: ZodActivityId,
+  activityName: z.string(),
+  day: z.enum(dayNameEnum.enumValues),
+  dayName: z.string(),
+  startTime: z.string(),
+  duration: z.number(),
+  coachUserId: ZodUserId.nullable(),
+  coachName: z.string(),
+  roomId: ZodRoomId.nullable(),
+  roomName: z.string(),
+  siteId: ZodSiteId.nullable(),
+  siteName: z.string(),
+  deleted: z.boolean().default(false),
+});
 
 export const planningSearchReturnSchema = z.object({
   id: ZodPlanningId,
@@ -84,25 +102,10 @@ export const planningSearchReturnSchema = z.object({
   clubName: z.string(),
   startDate: z.date(),
   endDate: z.date().nullable(),
-  planningItems: z.array(
-    z.object({
-      slotId: z.string(),
-      activityId: ZodActivityId,
-      activityName: z.string(),
-      day: z.enum(dayNameEnum.enumValues),
-      dayName: z.string(),
-      startTime: z.string(),
-      duration: z.number(),
-      coachId: ZodUserId.nullable(),
-      coachName: z.string(),
-      roomId: ZodRoomId.nullable(),
-      roomName: z.string(),
-      siteId: ZodSiteId.nullable(),
-      siteName: z.string(),
-      deleted: z.boolean().default(false),
-    }),
-  ),
+  planningItems: z.array(planningSearchItemSchema),
 });
+
+export type PlanningSearchItemData = z.infer<typeof planningSearchItemSchema>;
 
 export type PlanningSearchReturnData = z.infer<
   typeof planningSearchReturnSchema

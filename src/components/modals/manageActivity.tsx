@@ -564,7 +564,7 @@ export function UpdateGroup({
               <Checkbox
                 checked={defaultGroup}
                 onCheckedChange={(checked) => setDefaultGroup(Boolean(checked))}
-                disabled={!groupQuery.data?.coachId}
+                disabled={!groupQuery.data?.coachUserId}
               />
               <FieldLabel>{t("group.default")}</FieldLabel>
             </Field>

@@ -11,9 +11,10 @@ import {
   PlanningData,
   PlanningSearchReturnData,
   UpdatePlanningInput,
+  UpdatePlanningItemInput,
 } from "@/schemas";
-import { createId } from "@paralleldrive/cuid2";
 import {
+  ActivityGroupId,
   ActivityId,
   ClubId,
   PlanningId,
@@ -67,11 +68,11 @@ export async function getPlanningById(
     id: plan.id,
     name: plan.name,
     clubId: plan.clubId,
-    clubName: plan.club?.[0]?.name ?? "",
+    clubName: plan.club?.name ?? "",
     siteId: plan.siteId,
-    siteName: plan.site?.[0]?.name ?? "",
+    siteName: plan.site?.name ?? "",
     roomId: plan.roomId,
-    roomName: plan.room?.[0]?.name ?? "",
+    roomName: plan.room?.name ?? "",
     startDate: plan.startDate,
     endDate: plan.endDate,
     planningItems: await fillPlanningItems(plan.planningItems),
@@ -82,7 +83,7 @@ export async function getPlanningById(
 
 type PlanningFilters = {
   day?: (typeof dayNameEnum.enumValues)[number];
-  coachIds?: UserId[];
+  coachUserIds?: UserId[];
   roomIds?: RoomId[];
   siteIds?: SiteId[];
   activityIds?: ActivityId[];
@@ -98,9 +99,9 @@ export async function fillPlanningItems(
   function planFilter(item: PlanningData["planningItems"][number]) {
     if (filter?.day && item.day !== filter.day) return false;
     if (
-      filter?.coachIds &&
-      item.coachId &&
-      !filter.coachIds.includes(item.coachId)
+      filter?.coachUserIds &&
+      item.coachUserId &&
+      !filter.coachUserIds.includes(item.coachUserId)
     )
       return false;
     if (filter?.roomIds && item.roomId && !filter.roomIds.includes(item.roomId))
@@ -129,16 +130,16 @@ export async function fillPlanningItems(
         cache.set(item.activityId, { name: activityName });
       }
       let coachName = "";
-      if (item.coachId)
-        if (cache.has(item.coachId)) {
-          coachName = cache.get(item.coachId)?.name ?? "";
+      if (item.coachUserId)
+        if (cache.has(item.coachUserId)) {
+          coachName = cache.get(item.coachUserId)?.name ?? "";
         } else {
           const coach = await db.query.user.findFirst({
-            where: eq(user.id, item.coachId),
+            where: eq(user.id, item.coachUserId),
             columns: { name: true },
           });
           coachName = coach?.name ?? "";
-          cache.set(item.coachId, { name: coachName });
+          cache.set(item.coachUserId, { name: coachName });
         }
       let roomName = "";
       if (item.roomId)
@@ -172,7 +173,7 @@ export async function fillPlanningItems(
         dayName: item.day,
         startTime: item.startTime,
         duration: item.duration,
-        coachId: item.coachId,
+        coachUserId: item.coachUserId,
         coachName,
         roomId: item.roomId,
         roomName,
@@ -204,16 +205,16 @@ export async function getClubDailyPlanning(
   if (!plan) return null;
   return {
     ...plan,
-    clubName: plan.club?.[0]?.name ?? "",
+    clubName: plan.club?.name ?? "",
     planningItems: await fillPlanningItems(plan.planningItems, { day }),
   };
 }
 
 export async function getCoachDailyPlanning(
-  coachId: UserId,
+  coachUserId: UserId,
   day: (typeof dayNameEnum.enumValues)[number],
 ) {
-  if (!isCUID(coachId)) return [];
+  if (!isCUID(coachUserId)) return [];
   const plan = await db.query.planning.findMany({
     where: and(lte(planning.startDate, new Date(Date.now()))),
     with: {
@@ -228,13 +229,13 @@ export async function getCoachDailyPlanning(
     plan.map(async (p) => {
       const planningItems = await fillPlanningItems(p.planningItems, {
         day,
-        coachIds: [coachId],
+        coachUserIds: [coachUserId],
       });
       plannings.push({
         ...p,
-        clubName: p.club?.[0]?.name ?? "",
-        siteName: p.site?.[0]?.name ?? "",
-        roomName: p.room?.[0]?.name ?? "",
+        clubName: p.club?.name ?? "",
+        siteName: p.site?.name ?? "",
+        roomName: p.room?.name ?? "",
         planningItems,
       });
     }),
@@ -242,7 +243,10 @@ export async function getCoachDailyPlanning(
   return plannings;
 }
 
-export async function getCoachPlanningForClub(coachId: UserId, clubId: ClubId) {
+export async function getCoachPlanningForClub(
+  coachUserId: UserId,
+  clubId: ClubId,
+) {
   const plan = await db.query.planning.findFirst({
     where: and(
       eq(planning.clubId, clubId),
@@ -256,7 +260,7 @@ export async function getCoachPlanningForClub(coachId: UserId, clubId: ClubId) {
   return {
     ...plan,
     planningItems: await fillPlanningItems(plan.planningItems, {
-      coachIds: [coachId],
+      coachUserIds: [coachUserId],
     }),
   };
 }
@@ -269,15 +273,7 @@ export async function getMemberDataWithSubscriptions(memberId: UserId) {
         with: {
           subscriptions: {
             with: {
-              subscription: {
-                with: {
-                  activitieGroups: true,
-                  activities: true,
-                  rooms: true,
-                  sites: true,
-                  club: true,
-                },
-              },
+              subscription: true,
             },
           },
         },
@@ -296,7 +292,7 @@ export async function getPlanningsForClubIds(clubIds: ClubId[]) {
   });
 }
 
-export async function getActivitiesForGroups(groupIds: string[]) {
+export async function getActivitiesForGroups(groupIds: ActivityGroupId[]) {
   return db.query.activity.findMany({
     where: inArray(activity.groupId, groupIds),
     columns: { id: true },
@@ -375,7 +371,7 @@ export async function duplicatePlanning(
       endDate: newData.endDate,
       planningItems: org.planningItems?.map((item) => ({
         ...item,
-        slotId: createId(),
+        slotId: crypto.randomUUID(),
       })),
     })
     .returning();
@@ -400,8 +396,8 @@ export async function getPlanningActivityById(
   if (!plan) return null;
   const item = plan.planningItems?.find((item) => item.slotId === slotId);
   if (!item) return null;
-  const completedItem = fillPlanningItems([item]);
-  return completedItem;
+  const completedItem = await fillPlanningItems([item]);
+  return completedItem[0];
 }
 
 export async function addPlanningActivity(data: {
@@ -414,7 +410,7 @@ export async function addPlanningActivity(data: {
   if (!plan) return null;
   const newItem = {
     ...data.item,
-    slotId: createId(),
+    slotId: crypto.randomUUID(),
   };
   plan.planningItems?.push(newItem);
   return db
@@ -426,20 +422,24 @@ export async function addPlanningActivity(data: {
 
 export async function updatePlanningActivity(
   planningId: PlanningId,
-  item: PlanningData["planningItems"][number],
+  item: UpdatePlanningItemInput,
 ) {
   const plan = await db.query.planning.findFirst({
     where: eq(planning.id, planningId),
   });
   if (!plan) return null;
   const itemIndex = plan.planningItems?.findIndex(
-    (item) => item.slotId === item.slotId,
+    (i) => i.slotId === item.slotId,
   );
-  if (!itemIndex) return null;
-  plan.planningItems![itemIndex] = item;
+  if (itemIndex === undefined || itemIndex < 0) return null;
+  const newItems = [...(plan.planningItems ?? [])];
+  newItems[itemIndex] = {
+    ...newItems[itemIndex],
+    ...item,
+  };
   return db
     .update(planning)
-    .set({ planningItems: plan.planningItems })
+    .set({ planningItems: newItems })
     .where(eq(planning.id, planningId))
     .returning();
 }

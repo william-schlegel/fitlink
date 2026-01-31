@@ -11,6 +11,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
+import { ActivityGroupId, ClubId, SiteId, UserId } from "../types";
 import { activityGroup, club, site } from "./club";
 import {
   coachingLevelListEnum,
@@ -60,16 +61,16 @@ export const coachingPrice = pgTable(
     perHourWebcam: real("per_hour_webcam").default(0),
     perDayWebcam: real("per_day_webcam").default(0),
     freeHours: integer("free_hours").default(0),
-    coachId: text("coach_id").notNull(),
+    coachUserId: text("coach_user_id").notNull().$type<UserId>(),
   },
-  (table) => [index("coaching_price_coach_idx").on(table.coachId)],
+  (table) => [index("coaching_price_coach_idx").on(table.coachUserId)],
 );
 
 export const coachingPriceRelations = relations(
   coachingPrice,
   ({ one, many }) => ({
     coach: one(userCoach, {
-      fields: [coachingPrice.coachId],
+      fields: [coachingPrice.coachUserId],
       references: [userCoach.userId],
     }),
     coachingLevel: many(coachingLevel),
@@ -163,17 +164,17 @@ export const coachCertification = pgTable(
     name: text("name").notNull(),
     obtainedIn: timestamp("obtained_in").notNull(),
     documentUrl: text("document_url").unique(),
-    coachId: text("coach_id").notNull(),
+    coachUserId: text("coach_user_id").notNull().$type<UserId>(),
     manualModule: text("manual_module"),
   },
-  (table) => [index("certification_coach_idx").on(table.coachId)],
+  (table) => [index("certification_coach_idx").on(table.coachUserId)],
 );
 
 export const certificationRelations = relations(
   coachCertification,
   ({ one, many }) => ({
     coach: one(userCoach, {
-      fields: [coachCertification.coachId],
+      fields: [coachCertification.coachUserId],
       references: [userCoach.userId],
     }),
     activityGroups: many(activityGroup),
@@ -185,9 +186,10 @@ export const certificationRelations = relations(
 export const selectedModuleForCoach = pgTable(
   "SelectedModuleForCoach",
   {
-    coachId: text("coach_id")
+    coachUserId: text("coach_user_id")
       .notNull()
-      .references(() => userCoach.id),
+      .references(() => userCoach.id)
+      .$type<UserId>(),
     certificationId: text("certification_id")
       .notNull()
       .references(() => coachCertification.id),
@@ -201,7 +203,7 @@ export const selectedModuleForCoach = pgTable(
   (table) => [
     primaryKey({
       columns: [
-        table.coachId,
+        table.coachUserId,
         table.certificationId,
         table.certificationModuleId,
         table.certificationOrganismId,
@@ -214,7 +216,7 @@ export const selectedModuleForCoachRelations = relations(
   selectedModuleForCoach,
   ({ one }) => ({
     coach: one(userCoach, {
-      fields: [selectedModuleForCoach.coachId],
+      fields: [selectedModuleForCoach.coachUserId],
       references: [userCoach.id],
     }),
     certification: one(coachCertification, {
@@ -319,8 +321,8 @@ export const coachMarketPlace = pgTable(
   {
     id: text("id").primaryKey().$defaultFn(createId),
     type: coachMarketPlaceTypeEnum("type").notNull(),
-    clubId: text("club_id"),
-    coachId: text("coach_id"),
+    clubId: text("club_id").$type<ClubId>(),
+    coachId: text("coach_id").$type<UserId>(),
     publicationDate: timestamp("publication_date").notNull(),
     title: text("title").notNull(),
     content: text("content").notNull(),
@@ -359,7 +361,8 @@ export const coachMarketPlaceSites = pgTable("CoachMarketPlaceSites", {
     .references(() => coachMarketPlace.id),
   siteId: text("site_id")
     .notNull()
-    .references(() => site.id),
+    .references(() => site.id)
+    .$type<SiteId>(),
 });
 
 export const coachMarketPlaceSitesRelations = relations(
@@ -410,7 +413,8 @@ export const coachMarketPlaceActivityGroups = pgTable(
       .references(() => coachMarketPlace.id),
     activityGroupId: text("activity_group_id")
       .notNull()
-      .references(() => activityGroup.id),
+      .references(() => activityGroup.id)
+      .$type<ActivityGroupId>(),
   },
 );
 

@@ -190,7 +190,7 @@ function UpdatePlanning({ clubId, pageId, planningId }: UpdatePlanningProps) {
     PlanningFormValues | undefined
   >();
   const queryPlanning = trpc.pages.getPageSectionElementById.useQuery(
-    planningId,
+    { sectionElementId: planningId },
     {
       enabled: isCUID(planningId),
       refetchOnWindowFocus: false,
@@ -282,7 +282,7 @@ function DeletePlanning({ pageId, planningId }: UpdatePlanningProps) {
       title={t("planning.deletion")}
       buttonIcon={<Trash />}
       onConfirm={() => {
-        deletePlanning.mutate(planningId);
+        deletePlanning.mutate({ sectionElementId: planningId });
       }}
       variant="destructive"
       buttonSize="icon"

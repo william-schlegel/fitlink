@@ -10,6 +10,7 @@ import {
 } from "@/components/layoutPage";
 import { NewGroup } from "@/components/modals/manageActivity";
 import { BadgeVariant } from "@/components/ui/shadcn";
+import { ActivityGroupId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { AGContent } from "./agContent";
@@ -17,7 +18,7 @@ import { AGContent } from "./agContent";
 export default async function ActivityGroupManagement({
   searchParams,
 }: {
-  searchParams: Promise<{ agId?: string }>;
+  searchParams: Promise<{ agId?: ActivityGroupId }>;
 }) {
   const user = await getActualUser();
   if (!user) redirect("/", RedirectType.replace);

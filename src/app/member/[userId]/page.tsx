@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 
 import Title from "@/components/title";
 import { Button } from "@/components/ui/shadcn";
+import { UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import PlanningAndReservations from "./reservations";
@@ -20,7 +21,7 @@ import Subscription from "./subscription";
 export default async function MemberDashboard({
   params,
 }: {
-  params: Promise<{ userId: string }>;
+  params: Promise<{ userId: UserId }>;
 }) {
   const user = await getActualUser();
   const userId = (await params).userId;

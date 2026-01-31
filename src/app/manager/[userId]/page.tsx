@@ -203,7 +203,12 @@ async function DailyPlanning({ clubId }: { clubId: ClubId }) {
   const t = await getTranslations("dashboard");
   const day = getToday();
   const planning = await getClubDailyPlanning(clubId, day);
-  if (!planning) return <div>{t("no-planning")}</div>;
+  if (!planning || planning.planningItems.length === 0)
+    return (
+      <Alert variant="info">
+        <AlertTitle>{t("no-planning")}</AlertTitle>
+      </Alert>
+    );
   return (
     <div className="flex flex-col items-center rounded border border-accent bg-card">
       <h4 className="w-full  bg-accent text-center text-accent-foreground">

@@ -38,7 +38,7 @@ import {
   pageTargetEnum,
 } from "@/db/schema/enums";
 import { pageSectionElement } from "@/db/schema/page";
-import { ZodClubId, ZodUserId } from "@/db/types";
+import { ZodClubId, ZodPageId, ZodUserId } from "@/db/types";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -46,7 +46,7 @@ import {
 } from "@/lib/trpc/server";
 
 const PageObject = z.object({
-  id: z.cuid2(),
+  id: ZodPageId,
   name: z.string(),
   clubId: ZodClubId.optional(),
   userId: ZodUserId.optional(),
@@ -56,7 +56,7 @@ const PageObject = z.object({
 const PageSectionObject = z.object({
   id: z.cuid2(),
   model: z.enum(pageSectionModelEnum.enumValues),
-  pageId: z.cuid2(),
+  pageId: ZodPageId,
   title: z.string().optional(),
   subTitle: z.string().optional(),
 });
@@ -68,8 +68,8 @@ const PageSectionElementObject = z.object({
   subTitle: z.string().optional(),
   elementType: z.enum(pageSectionElementTypeEnum.enumValues),
   content: z.string().optional(),
-  link: z.string().url().optional(),
-  pageId: z.cuid2().optional(),
+  link: z.url().optional(),
+  pageId: ZodPageId.optional(),
   pageSection: z.enum(pageSectionModelEnum.enumValues).optional(),
   sectionId: z.cuid2(),
   optionValue: z.string().optional(),
@@ -89,7 +89,7 @@ export const pageRouter = createTRPCRouter({
   listPublicCoachPresentationParams: publicProcedure.query(async () => {
     const pages = await getAllPublishedPagesForCoach();
     return pages.map((p) => ({
-      coachId: p.coachId,
+      coachUserId: p.coachUserId,
       pageId: p.id,
       updatedAt: p.updatedAt,
     }));
@@ -120,13 +120,13 @@ export const pageRouter = createTRPCRouter({
     }),
 
   getPageById: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodPageId)
     .query(({ input }) => getPageById(input)),
 
   getPageSection: publicProcedure
     .input(
       z.object({
-        pageId: z.cuid2(),
+        pageId: ZodPageId,
         section: z.enum(pageSectionModelEnum.enumValues),
         createIfNone: z.boolean().optional().default(false),
         createElement: z
@@ -187,16 +187,16 @@ export const pageRouter = createTRPCRouter({
   getPageSectionElements: publicProcedure
     .input(
       z.object({
-        pageId: z.cuid2(),
+        pageId: ZodPageId,
         section: z.enum(pageSectionModelEnum.enumValues),
       }),
     )
     .query(({ input }) => getPageSectionElements(input.pageId, input.section)),
 
   getPageSectionElementById: protectedProcedure
-    .input(z.cuid2())
+    .input(z.object({ sectionElementId: z.cuid2() }))
     .query(async ({ input }) => {
-      const elem = await getPageSectionElementById(input);
+      const elem = await getPageSectionElementById(input.sectionElementId);
       if (!elem) return null;
       return {
         id: elem.id,
@@ -219,7 +219,7 @@ export const pageRouter = createTRPCRouter({
       createPage({
         name: input.name,
         clubId: input.clubId,
-        coachId: input.userId,
+        coachUserId: input.userId,
         target: input.target,
       }),
     ),
@@ -229,8 +229,8 @@ export const pageRouter = createTRPCRouter({
     .mutation(({ input }) => updatePage(input)),
 
   deletePage: protectedProcedure
-    .input(z.string())
-    .mutation(({ input }) => deletePage(input)),
+    .input(z.object({ pageId: ZodPageId }))
+    .mutation(({ input }) => deletePage(input.pageId)),
 
   createPageSection: protectedProcedure
     .input(PageSectionObject.omit({ id: true }))
@@ -257,92 +257,97 @@ export const pageRouter = createTRPCRouter({
     .mutation(({ input }) => updatePageSectionElement(input)),
 
   deletePageSectionElement: protectedProcedure
-    .input(z.string())
-    .mutation(({ input }) => deletePageSectionElement(input)),
+    .input(z.object({ sectionElementId: z.string() }))
+    .mutation(({ input }) => deletePageSectionElement(input.sectionElementId)),
 
-  getClubPage: publicProcedure.input(z.string()).query(async ({ input }) => {
-    const clubPage = await dalGetClubPage(input);
-    if (!clubPage) return null;
-    const clubId = clubPage.clubId;
-    if (!clubId) return null;
-    const allPages = await getPublishedPagesForClub(clubId);
-    const myClub = await getClubBasicInfo(clubId);
-    return {
-      clubId,
-      sections: clubPage?.sections ?? [],
-      pages: allPages.map((p) => p.target),
-      theme: myClub?.pageStyle ?? "light",
-      clubName: myClub?.name ?? "",
-    };
-  }),
+  getClubPage: publicProcedure
+    .input(z.object({ pageId: ZodPageId }))
+    .query(async ({ input }) => {
+      const clubPage = await dalGetClubPage(input.pageId);
+      if (!clubPage) return null;
+      const clubId = clubPage.clubId;
+      if (!clubId) return null;
+      const allPages = await getPublishedPagesForClub(clubId);
+      const myClub = await getClubBasicInfo(clubId);
+      return {
+        clubId,
+        sections: clubPage?.sections ?? [],
+        pages: allPages.map((p) => p.target),
+        theme: myClub?.pageStyle ?? "light",
+        clubName: myClub?.name ?? "",
+      };
+    }),
 
-  getCoachPage: publicProcedure.input(z.string()).query(async ({ input }) => {
-    const coachPage = await dalGetCoachPage(input);
-    const coachUserId = coachPage?.coachId;
-    const coachUser = await getCoachUserForPage(coachUserId);
+  getCoachPage: publicProcedure
+    .input(z.object({ pageId: ZodPageId }))
+    .query(async ({ input }) => {
+      const coachPage = await dalGetCoachPage(input.pageId);
+      const coachUserId = coachPage?.coachUserId;
+      const coachUser = await getCoachUserForPage(coachUserId);
 
-    const image = coachPage?.sections
-      .find((s) => s.model === "HERO")
-      ?.elements.find((e) => e.elementType === "HERO_CONTENT")?.imageUrls?.[0];
-    const hero = coachPage?.sections
-      .find((s) => s.model === "HERO")
-      ?.elements.find((e) => e.elementType === "HERO_CONTENT");
-    const options = new Map(
-      coachPage?.sections
+      const image = coachPage?.sections
         .find((s) => s.model === "HERO")
-        ?.elements.filter((e) => e.elementType === "OPTION")
-        .map((o) => [o.title, o.optionValue]),
-    );
-    const activities =
-      coachUser?.coachData?.coachingActivities?.map((a, idx) => ({
-        id: `${idx}-${a}`,
-        name: a,
-      })) ?? [];
-    const features = (coachUser?.pricing?.features ?? []) as Array<{
-      feature: string;
-    }>;
-    const certificationOk = !!features.find(
-      (f) => f.feature === "COACH_CERTIFICATION",
-    );
+        ?.elements.find((e) => e.elementType === "HERO_CONTENT")
+        ?.imageUrls?.[0];
+      const hero = coachPage?.sections
+        .find((s) => s.model === "HERO")
+        ?.elements.find((e) => e.elementType === "HERO_CONTENT");
+      const options = new Map(
+        coachPage?.sections
+          .find((s) => s.model === "HERO")
+          ?.elements.filter((e) => e.elementType === "OPTION")
+          .map((o) => [o.title, o.optionValue]),
+      );
+      const activities =
+        coachUser?.coachData?.coachingActivities?.map((a, idx) => ({
+          id: `${idx}-${a}`,
+          name: a,
+        })) ?? [];
+      const features = (coachUser?.pricing?.features ?? []) as Array<{
+        feature: string;
+      }>;
+      const certificationOk = !!features.find(
+        (f) => f.feature === "COACH_CERTIFICATION",
+      );
 
-    const certifications = certificationOk
-      ? (coachUser?.coachData?.certifications.map((c) => ({
-          id: c.id,
-          name: c.name,
-        })) ?? [])
-      : [];
-    const offersOk = !!features.find((f) => f.feature === "COACH_OFFER");
-    const offerCompaniesOk = !!features.find(
-      (f) => f.feature === "COACH_OFFER_COMPANY",
-    );
-    const offers = offersOk
-      ? (coachUser?.coachData?.coachingPrices.filter((c) =>
-          offerCompaniesOk ? true : c.target === "INDIVIDUAL",
-        ) ?? [])
-      : [];
+      const certifications = certificationOk
+        ? (coachUser?.coachData?.certifications.map((c) => ({
+            id: c.id,
+            name: c.name,
+          })) ?? [])
+        : [];
+      const offersOk = !!features.find((f) => f.feature === "COACH_OFFER");
+      const offerCompaniesOk = !!features.find(
+        (f) => f.feature === "COACH_OFFER_COMPANY",
+      );
+      const offers = offersOk
+        ? (coachUser?.coachData?.coachingPrices.filter((c) =>
+            offerCompaniesOk ? true : c.target === "INDIVIDUAL",
+          ) ?? [])
+        : [];
 
-    return {
-      email: coachUser?.email,
-      phone: coachUser?.phone,
-      searchAddress: coachUser?.coachData?.searchAddress,
-      longitude: coachUser?.coachData?.longitude,
-      latitude: coachUser?.coachData?.latitude,
-      range: coachUser?.coachData?.range,
-      hero,
-      options,
-      activities,
-      certifications,
-      pageStyle: coachUser?.coachData?.pageStyle,
-      publicName: coachUser?.coachData?.publicName,
-      offers,
-      image,
-    };
-  }),
+      return {
+        email: coachUser?.email,
+        phone: coachUser?.phone,
+        searchAddress: coachUser?.coachData?.searchAddress,
+        longitude: coachUser?.coachData?.longitude,
+        latitude: coachUser?.coachData?.latitude,
+        range: coachUser?.coachData?.range,
+        hero,
+        options,
+        activities,
+        certifications,
+        pageStyle: coachUser?.coachData?.pageStyle,
+        publicName: coachUser?.coachData?.publicName,
+        offers,
+        image,
+      };
+    }),
 
   getCoachDataForPage: publicProcedure
-    .input(ZodUserId)
+    .input(z.object({ coachUserId: ZodUserId }))
     .query(async ({ input }) => {
-      const userData = await getCoachDataForPage(input);
+      const userData = await getCoachDataForPage(input.coachUserId);
       const features = (userData?.pricing?.features ?? []) as Array<{
         feature: string;
       }>;
@@ -377,7 +382,7 @@ export const pageRouter = createTRPCRouter({
     }),
 
   updatePagePublication: protectedProcedure
-    .input(z.object({ pageId: z.cuid2(), published: z.boolean() }))
+    .input(z.object({ pageId: ZodPageId, published: z.boolean() }))
     .mutation(({ input }) =>
       updatePagePublication(input.pageId, input.published),
     ),

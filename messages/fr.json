@@ -265,7 +265,8 @@
     "calendar-updated": "Horaires d'ouverture mis à jour",
     "calendar-deleted": "Horaires d'ouverture supprimés",
     "activity-updated": "Activité enregistrée",
-    "activity-deleted": "Activité supprimée"
+    "activity-deleted": "Activité supprimée",
+    "update-club-calendar": "Mettre à jour les horaires du club"
   },
   "club": {
     "manager-only": "Cette page est réservée aux managers de clubs",

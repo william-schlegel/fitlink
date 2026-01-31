@@ -46,7 +46,7 @@ const ActivitySearch = ({
   const [showList, setShowList] = useState(false);
 
   const activities = trpc.coachs.getOfferActivityByName.useQuery(
-    debouncedActivity,
+    { activityName: debouncedActivity },
     { enabled: debouncedActivity !== "" },
   );
 

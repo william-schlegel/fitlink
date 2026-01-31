@@ -6,15 +6,16 @@ import {
   SubscriptionModeEnum,
   SubscriptionRestrictionEnum,
 } from "@/db/schema/enums";
+import { ActivityGroupId, ActivityId, RoomId, SiteId } from "@/db/types";
 import { trpc } from "./trpc/client";
 
 export function useDisplaySubscriptionInfo(
   mode: SubscriptionModeEnum | undefined,
   restriction: SubscriptionRestrictionEnum | undefined,
-  activityGroupIds: string[],
-  activityIds: string[],
-  siteIds: string[],
-  roomIds: string[],
+  activityGroupIds: ActivityGroupId[],
+  activityIds: ActivityId[],
+  siteIds: SiteId[],
+  roomIds: RoomId[],
 ) {
   const t = useTranslations("club");
   const locale = useLocale();

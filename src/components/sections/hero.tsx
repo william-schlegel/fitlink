@@ -200,7 +200,7 @@ export const HeroCreation = ({ clubId, pageId }: HeroCreationProps) => {
             });
         }
       } else if (cta) {
-        await deleteSectionElement.mutateAsync(cta.id);
+        await deleteSectionElement.mutateAsync({ sectionElementId: cta.id });
       }
     } else {
       const section = await createSection.mutateAsync({

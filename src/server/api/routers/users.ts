@@ -25,7 +25,12 @@ import {
   updateCoachData,
 } from "@/db/dal";
 import { featureEnum, roleEnum } from "@/db/schema/enums";
-import { UserId, ZodUserId } from "@/db/types";
+import {
+  UserId,
+  ZodActivityId,
+  ZodSubscriptionId,
+  ZodUserId,
+} from "@/db/types";
 import { auth } from "@/lib/auth/server";
 import {
   addMemberToClubRoomInConvex,
@@ -157,15 +162,7 @@ export const userRouter = createTRPCRouter({
     .input(ZodUserId)
     .query(async ({ input }) => {
       const u = await getUserSubscriptionsById(input);
-      return (
-        u?.memberData?.subscriptions?.map(({ subscription: s }) => ({
-          ...s,
-          activitieGroups: s.activitieGroups.map((j) => j.activityGroup),
-          activities: s.activities.map((j) => j.activity),
-          sites: s.sites.map((j) => j.site),
-          rooms: s.rooms.map((j) => j.room),
-        })) ?? []
-      );
+      return u?.memberData?.subscriptions ?? [];
     }),
 
   getReservationsByUserId: protectedProcedure
@@ -216,7 +213,7 @@ export const userRouter = createTRPCRouter({
         description: z.string().optional(),
         publicName: z.string().optional(),
         aboutMe: z.string().optional(),
-        coachingActivities: z.array(z.string()).optional(),
+        coachingActivities: z.array(ZodActivityId).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -304,8 +301,8 @@ export const userRouter = createTRPCRouter({
   addSubscriptionWithValidation: protectedProcedure
     .input(
       z.object({
-        userId: z.string(),
-        subscriptionId: z.string(),
+        userId: ZodUserId,
+        subscriptionId: ZodSubscriptionId,
         monthly: z.boolean().default(true),
         online: z.boolean().default(false),
       }),
@@ -341,18 +338,18 @@ export const userRouter = createTRPCRouter({
   validateSubscription: protectedProcedure
     .input(
       z.object({
-        userId: z.string(),
-        subscriptionId: z.cuid2(),
+        userId: ZodUserId,
+        subscriptionId: ZodSubscriptionId,
       }),
     )
     .mutation(async ({ input }) => {
       await hasRole(["ADMIN", "MANAGER", "MANAGER_COACH"]);
       const member = await getOrCreateMember(input.userId);
-      return addSubscriptionToMember(member.id, input.subscriptionId);
+      return addSubscriptionToMember(member.userId, input.subscriptionId);
     }),
 
   deleteSubscription: protectedProcedure
-    .input(z.object({ userId: z.string(), subscriptionId: z.cuid2() }))
+    .input(z.object({ userId: ZodUserId, subscriptionId: ZodSubscriptionId }))
     .mutation(({ input }) =>
       deleteMemberSubscription(input.userId, input.subscriptionId),
     ),

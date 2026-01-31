@@ -16,6 +16,7 @@ import {
   CardTitle,
   Separator,
 } from "@/components/ui/shadcn";
+import { UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
@@ -27,7 +28,7 @@ export default async function ManageCertifications({
   searchParams,
 }: {
   params: Promise<{
-    userId: string;
+    userId: UserId;
   }>;
   searchParams: Promise<{
     certificationId: string;
@@ -52,8 +53,9 @@ export default async function ManageCertifications({
   const caller = await createTrpcCaller();
   if (!caller) return null;
 
-  const certificationQuery =
-    await caller.coachs.getCertificationsForCoach(userId);
+  const certificationQuery = await caller.coachs.getCertificationsForCoach({
+    coachUserId: userId,
+  });
   if (
     certificationQuery &&
     !certificationId &&
@@ -94,7 +96,7 @@ export default async function ManageCertifications({
             count: certificationQuery?.certifications?.length ?? 0,
           })}
         </h1>
-        <CreateCertification userId={userId} />
+        <CreateCertification coachUserId={userId} />
       </div>
       <div className="flex gap-4">
         <div className="flex flex-wrap gap-4">
@@ -127,12 +129,12 @@ export default async function ManageCertifications({
               <DocButton documentUrl={certification.documentUrl ?? ""} />
               <CardFooter className="flex justify-end gap-2">
                 <UpdateCertification
-                  userId={userId}
+                  coachUserId={userId}
                   certificationId={certification.id}
                   buttonSize="default"
                 />
                 <DeleteCertification
-                  userId={userId}
+                  coachUserId={userId}
                   certificationId={certification.id}
                   buttonSize="default"
                 />

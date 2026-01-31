@@ -10,7 +10,14 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
-import { ActivityId, ClubId, RoomId, SiteId, UserId } from "../types";
+import {
+  ActivityGroupId,
+  ActivityId,
+  ClubId,
+  RoomId,
+  SiteId,
+  UserId,
+} from "../types";
 import {
   certificationModule,
   certificationModuleActivityGroups,
@@ -21,13 +28,7 @@ import {
 import { roomReservationEnum } from "./enums";
 import { page } from "./page";
 import { openingCalendar, planning, reservation } from "./planning";
-import {
-  subscription,
-  subscriptionToActivity,
-  subscriptionToActivityGroup,
-  subscriptionToRoom,
-  subscriptionToSite,
-} from "./subscription";
+import { subscription } from "./subscription";
 import { userCoach, userManager, userMember } from "./user";
 
 export const club = pgTable(
@@ -36,7 +37,7 @@ export const club = pgTable(
     id: text("id").primaryKey().$defaultFn(createId).$type<ClubId>(),
     name: text("name").notNull(),
     address: text("address").notNull(),
-    managerId: text("manager_id").notNull(),
+    managerId: text("manager_id").notNull().$type<UserId>(),
     pageStyle: text("page_style").default("light"),
     logoUrl: text("logo_url").unique(),
     convexRoomId: text("convex_room_id"),
@@ -82,8 +83,9 @@ export const siteRelations = relations(site, ({ one, many }) => ({
     references: [club.id],
   }),
   rooms: many(room),
-  subscriptions: many(subscriptionToSite),
   marketPlaceSearchs: many(coachMarketPlace),
+  plannings: many(planning),
+  openingCalendars: many(openingCalendar),
 }));
 
 export const room = pgTable(
@@ -106,9 +108,10 @@ export const roomRelations = relations(room, ({ one, many }) => ({
     fields: [room.siteId],
     references: [site.id],
   }),
-  subscriptions: many(subscriptionToRoom),
   reservations: many(reservation),
   activities: many(roomActivities),
+  plannings: many(planning),
+  openingCalendars: many(openingCalendar),
 }));
 
 export const event = pgTable(
@@ -154,12 +157,12 @@ export const eventRelations = relations(event, ({ one }) => ({
 export const activityGroup = pgTable(
   "ActivityGroup",
   {
-    id: text("id").primaryKey().$defaultFn(createId),
+    id: text("id").primaryKey().$defaultFn(createId).$type<ActivityGroupId>(),
     name: text("name").notNull(),
     default: boolean("default").default(false),
-    coachId: text("coach_id").$type<UserId>(),
+    coachUserId: text("coach_user_id").$type<UserId>(),
   },
-  (table) => [index("activity_group_coach_idx").on(table.coachId)],
+  (table) => [index("activity_group_coach_idx").on(table.coachUserId)],
 );
 
 export const activityGroupRelations = relations(
@@ -167,13 +170,12 @@ export const activityGroupRelations = relations(
   ({ one, many }) => ({
     activities: many(activity),
     coach: one(userCoach, {
-      fields: [activityGroup.coachId],
+      fields: [activityGroup.coachUserId],
       references: [userCoach.id],
     }),
     coachCertification: many(coachCertification),
     certificationModules: many(certificationModule),
     certificationModuleActivityGroups: many(certificationModuleActivityGroups),
-    subscriptions: many(subscriptionToActivityGroup),
     marketPlaceSearchs: many(coachMarketPlace),
     coachMarketPlaceActivityGroups: many(coachMarketPlaceActivityGroups),
   }),
@@ -184,7 +186,7 @@ export const activity = pgTable(
   {
     id: text("id").primaryKey().$defaultFn(createId).$type<ActivityId>(),
     name: text("name").notNull(),
-    groupId: text("group_id").notNull(),
+    groupId: text("group_id").notNull().$type<ActivityGroupId>(),
     clubId: text("club_id").notNull().$type<ClubId>(),
     noCalendar: boolean("no_calendar").default(false),
     reservationDuration: integer("reservation_duration").default(60),
@@ -204,7 +206,6 @@ export const activityRelations = relations(activity, ({ one, many }) => ({
     fields: [activity.clubId],
     references: [club.id],
   }),
-  subscriptions: many(subscriptionToActivity),
   reservations: many(reservation),
   rooms: many(roomActivities),
 }));

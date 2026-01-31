@@ -216,10 +216,13 @@ function UpdateOffer({ clubId, pageId, offerId }: UpdateOfferProps) {
   const t = useTranslations("pages");
   const [close, setClose] = useState(false);
   const [initialData, setInitialData] = useState<OfferFormValues | undefined>();
-  const queryOffer = trpc.pages.getPageSectionElementById.useQuery(offerId, {
-    enabled: isCUID(offerId),
-    refetchOnWindowFocus: false,
-  });
+  const queryOffer = trpc.pages.getPageSectionElementById.useQuery(
+    { sectionElementId: offerId },
+    {
+      enabled: isCUID(offerId),
+      refetchOnWindowFocus: false,
+    },
+  );
 
   useEffect(() => {
     if (queryOffer.data) {
@@ -318,7 +321,7 @@ function DeleteOffer({ pageId, offerId }: UpdateOfferProps) {
       title={t("offer.deletion")}
       buttonIcon={<Trash />}
       onConfirm={() => {
-        deleteOffer.mutate(offerId);
+        deleteOffer.mutate({ sectionElementId: offerId });
       }}
       variant="destructive"
       buttonSize="icon"
@@ -548,10 +551,10 @@ function OfferContentCard({
     useDisplaySubscriptionInfo(
       offerQuery.data?.mode ?? undefined,
       offerQuery.data?.restriction ?? undefined,
-      offerQuery.data?.activitieGroups.map((ag) => ag.activityGroupId) ?? [],
-      offerQuery.data?.activities.map((ag) => ag.activityId) ?? [],
-      offerQuery.data?.sites.map((ag) => ag.siteId) ?? [],
-      offerQuery.data?.rooms.map((ag) => ag.roomId) ?? [],
+      offerQuery.data?.activityGroups ?? [],
+      offerQuery.data?.activities ?? [],
+      offerQuery.data?.sites ?? [],
+      offerQuery.data?.rooms ?? [],
     );
   const t = useTranslations();
 

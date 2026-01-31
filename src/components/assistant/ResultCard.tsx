@@ -59,14 +59,14 @@ export function ClubResultCard({ club }: ClubCardProps) {
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="flex flex-wrap gap-1">
-          {club.activityGroups.slice(0, 4).map((activity) => (
+          {club.activityGroupsName.slice(0, 4).map((activity) => (
             <Badge key={activity} variant="outline" className="text-xs">
               {activity}
             </Badge>
           ))}
-          {club.activityGroups.length > 4 && (
+          {club.activityGroupsName.length > 4 && (
             <Badge variant="outline" className="text-xs">
-              +{club.activityGroups.length - 4}
+              +{club.activityGroupsName.length - 4}
             </Badge>
           )}
         </div>

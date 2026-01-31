@@ -11,6 +11,7 @@ import {
   AddCoachToClub,
   CoachDataPresentation,
 } from "@/components/modals/manageClub";
+import { ClubId, UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
@@ -23,9 +24,9 @@ export default async function CoachManagementForClub({
   searchParams,
 }: {
   searchParams: Promise<{
-    clubId: string;
-    userId: string;
-    coachId: string;
+    clubId: ClubId;
+    userId: UserId;
+    coachId: UserId;
   }>;
 }) {
   const { userId, clubId, coachId } = await searchParams;
@@ -54,7 +55,7 @@ export default async function CoachManagementForClub({
     AppRouter["coachs"]["getCoachsForClub"]
   > = [];
   if (isCUID(clubId)) {
-    queryCoachs = await caller.coachs.getCoachsForClub(clubId);
+    queryCoachs = await caller.coachs.getCoachsForClub({ clubId });
     if (queryCoachs.length && !coachId)
       redirect(
         createLink({ clubId, coachId: queryCoachs[0]?.id }, href),
@@ -65,7 +66,7 @@ export default async function CoachManagementForClub({
     | inferProcedureOutput<AppRouter["coachs"]["getCoachById"]>
     | undefined = undefined;
   if (Boolean(coachId)) {
-    queryCoach = await caller.coachs.getCoachById(coachId);
+    queryCoach = await caller.coachs.getCoachById({ userId: coachId });
   }
 
   const coachList = queryCoachs.map((coach) => ({

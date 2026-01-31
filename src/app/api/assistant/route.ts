@@ -23,6 +23,7 @@ import type {
 } from "@/lib/llm/gemini";
 
 // Import translations directly
+import { ActivityId } from "@/db/types";
 import enMessages from "../../../../messages/en.json";
 import frMessages from "../../../../messages/fr.json";
 
@@ -92,7 +93,7 @@ async function resolveLocation(
 // Tool executor implementation
 const toolExecutor = {
   searchClubs: async (args: {
-    activity?: string;
+    activity?: ActivityId;
     lat: number;
     lng: number;
     radiusKm?: number;
@@ -107,7 +108,7 @@ const toolExecutor = {
     });
 
     return sites.map((site) => {
-      const activityGroups = [
+      const activityGroupsName = [
         ...new Set(site.club.activities.map((a) => a.group.name)),
       ].sort();
 
@@ -123,7 +124,7 @@ const toolExecutor = {
         longitude: site.longitude,
         clubId: site.clubId,
         clubName: site.club.name,
-        activityGroups,
+        activityGroupsName,
         pageId: homePage?.id,
         pagePublished: !!homePage,
         distance: calculateDistance(
@@ -137,7 +138,7 @@ const toolExecutor = {
   },
 
   searchCoaches: async (args: {
-    activity?: string;
+    activity?: ActivityId;
     lat: number;
     lng: number;
     radiusKm?: number;
@@ -179,7 +180,7 @@ const toolExecutor = {
   },
 
   searchCompanyOffers: async (args: {
-    activity?: string;
+    activity?: ActivityId;
     lat: number;
     lng: number;
     radiusKm?: number;
@@ -202,7 +203,7 @@ const toolExecutor = {
         id: offer.CoachingPrice.id,
         name: offer.CoachingPrice.name,
         description: offer.CoachingPrice.description,
-        coachId: offer.CoachingPrice.coachId,
+        coachUserId: offer.CoachingPrice.coachUserId,
         coachName: offer.user_coaches?.publicName ?? "Coach",
         coachAddress: offer.user_coaches?.searchAddress ?? null,
         physical: offer.CoachingPrice.physical,

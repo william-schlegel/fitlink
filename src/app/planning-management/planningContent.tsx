@@ -11,7 +11,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { useTranslations } from "next-intl";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 
 import { Trash } from "lucide-react";
@@ -42,14 +42,28 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/shadcn/input-group";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/shadcn/popover";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { room } from "@/db/schema/club";
-import { ActivityId, ClubId, PlanningId, SiteId, UserId } from "@/db/types";
+import {
+  ActivityId,
+  ClubId,
+  PlanningId,
+  RoomId,
+  SiteId,
+  UserId,
+} from "@/db/types";
 import { DayName, DAYS } from "@/lib/dates/data";
 import { useDayName } from "@/lib/dates/useDayName";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
+import { PlanningItemData, PlanningSearchItemData } from "@/schemas";
 import { CSS } from "@dnd-kit/utilities";
+import { toast } from "sonner";
 
 const HHOUR = "h-12"; // 3rem 48px
 const HHOUR_PX = 48;
@@ -77,8 +91,10 @@ type DropData = {
 type DropFormData = {
   startTime: string;
   duration: number;
-  roomId: string;
-  coachId: string;
+  activityId: ActivityId;
+  roomId: RoomId;
+  coachUserId: UserId;
+  siteId: SiteId;
 };
 
 export function PlanningContent({
@@ -151,16 +167,21 @@ export function PlanningContent({
   }
 
   function handleSaveActivity(data: DropFormData) {
-    // addActivity.mutate({
-    //   planningId,
-    //   siteId: dropData.siteId as SiteId,
-    //   activityId: dropData.activityId,
-    //   day: dropData.day,
-    //   coachId: data.coachId ? data.coachId : undefined,
-    //   roomId: data.roomId ? data.roomId : undefined,
-    //   startTime: data.startTime,
-    //   duration: data.duration,
-    // });
+    const newPlanningItem: PlanningItemData = {
+      slotId: crypto.randomUUID(),
+      day: dropData.day,
+      siteId: dropData.siteId,
+      activityId: dropData.activityId,
+      coachUserId: data.coachUserId ? data.coachUserId : null,
+      roomId: data.roomId ? data.roomId : null,
+      startTime: data.startTime,
+      duration: data.duration,
+      deleted: false,
+    };
+    addActivity.mutate({
+      planningId,
+      item: newPlanningItem,
+    });
     setIsOpen(false);
   }
 
@@ -249,9 +270,9 @@ export function PlanningContent({
                             id={`${day.value} ${site.id}`}
                             data={{ day: day.value, site: site.id }}
                           >
-                            <div>planning activity</div>
-                            {/* <PlanningActivities
+                            <PlanningActivities
                               clubId={clubId}
+                              planningId={planningId}
                               activities={
                                 queryPlanning.data?.planningItems.filter(
                                   (pa) =>
@@ -259,7 +280,7 @@ export function PlanningContent({
                                     pa.siteId === site.id,
                                 ) ?? []
                               }
-                            /> */}
+                            />
                           </DropSite>
                         </div>
                       ))}
@@ -285,181 +306,189 @@ function DayLabel({ day }: { day: (typeof DAYS)[number]["label"] }) {
   );
 }
 
-// type PlanningActivityCompleted = NonNullable<
-//   Awaited<ReturnType<typeof getPlanningById>>
-// >["planningActivities"][number];
+type PlanningActivitiesProps = {
+  activities: PlanningSearchItemData[];
+  clubId: ClubId;
+  planningId: PlanningId;
+};
 
-// type PlanningActivitiesProps = {
-//   activities: PlanningActivityCompleted[];
-//   clubId: string;
-// };
+function PlanningActivities({
+  activities,
+  clubId,
+  planningId,
+}: PlanningActivitiesProps) {
+  const HSlots = useMemo(() => {
+    if (!activities) return [];
+    const hs = activities.map((activity) => ({
+      activity,
+      position: 0,
+      nbPosition: 1,
+    }));
 
-// function PlanningActivities({ activities, clubId }: PlanningActivitiesProps) {
-//   const HSlots = useMemo(() => {
-//     if (!activities) return [];
-//     const hs = activities.map((activity) => ({
-//       activity,
-//       position: 0,
-//       nbPosition: 1,
-//     }));
+    for (let a = 0; a < hs.length; a++) {
+      const hmA = hs[a]?.activity.startTime.split(":") ?? ["0", "0"];
+      const startA = Number(hmA[0]) + Number(hmA[1]) / 60;
+      const durationA = (hs[a]?.activity.duration ?? 0) / 60;
+      for (let b = a + 1; b < hs.length; b++) {
+        const hmB = hs[b]?.activity.startTime.split(":") ?? ["0", "0"];
+        const startB = Number(hmB[0]) + Number(hmB[1]) / 60;
+        const durationB = (hs[b]?.activity.duration ?? 0) / 60;
+        if (
+          (startB >= startA && startB < startA + durationA) ||
+          (startB <= startA && startA < startB + durationB)
+        ) {
+          const elemB = hs[b];
+          const elemA = hs[a];
+          if (elemB && elemA) {
+            elemB.position += 1;
+            elemB.nbPosition += 1;
+            elemA.nbPosition += 1;
+          }
+        }
+      }
+    }
+    return hs;
+  }, [activities]);
 
-//     for (let a = 0; a < hs.length; a++) {
-//       const hmA = hs[a]?.activity.startTime.split(":") ?? ["0", "0"];
-//       const startA = Number(hmA[0]) + Number(hmA[1]) / 60;
-//       const durationA = (hs[a]?.activity.duration ?? 0) / 60;
-//       for (let b = a + 1; b < hs.length; b++) {
-//         const hmB = hs[b]?.activity.startTime.split(":") ?? ["0", "0"];
-//         const startB = Number(hmB[0]) + Number(hmB[1]) / 60;
-//         const durationB = (hs[b]?.activity.duration ?? 0) / 60;
-//         if (
-//           (startB >= startA && startB < startA + durationA) ||
-//           (startB <= startA && startA < startB + durationB)
-//         ) {
-//           const elemB = hs[b];
-//           const elemA = hs[a];
-//           if (elemB && elemA) {
-//             elemB.position += 1;
-//             elemB.nbPosition += 1;
-//             elemA.nbPosition += 1;
-//           }
-//         }
-//       }
-//     }
-//     return hs;
-//   }, [activities]);
+  return (
+    <>
+      {HSlots.map((slot) => (
+        <PlanningActivity
+          clubId={clubId}
+          planningId={planningId}
+          key={slot.activity.slotId}
+          planningActivity={slot.activity}
+          position={slot.position}
+          nbPosition={slot.nbPosition}
+        />
+      ))}
+    </>
+  );
+}
 
-//   return (
-//     <>
-//       {HSlots.map((slot) => (
-//         <PlanningActivity
-//           clubId={clubId}
-//           key={slot.activity.id}
-//           planningActivity={slot.activity}
-//           position={slot.position}
-//           nbPosition={slot.nbPosition}
-//         />
-//       ))}
-//     </>
-//   );
-// }
+type PlanningActivityProps = {
+  planningId: PlanningId;
+  planningActivity: PlanningSearchItemData;
+  position: number;
+  nbPosition: number;
+  clubId: ClubId;
+};
 
-// type PlanningActivityProps = {
-//   planningActivity: PlanningActivityCompleted;
-//   position: number;
-//   nbPosition: number;
-//   clubId: string;
-// };
+function PlanningActivity({
+  planningId,
+  planningActivity,
+  position,
+  nbPosition,
+  clubId,
+}: PlanningActivityProps) {
+  const hm = planningActivity.startTime.split(":");
+  const top = HHOUR_PX * (Number(hm[0]) - START_HOUR + Number(hm[1]) / 60);
+  const height = HHOUR_PX * (planningActivity.duration / 60);
+  const w = 100 / nbPosition;
+  const [open, setOpen] = useState(false);
 
-// function PlanningActivity({
-//   planningActivity,
-//   position,
-//   nbPosition,
-//   clubId,
-// }: PlanningActivityProps) {
-//   const hm = planningActivity.startTime.split(":");
-//   const top = HHOUR_PX * (Number(hm[0]) - START_HOUR + Number(hm[1]) / 60);
-//   const height = HHOUR_PX * (planningActivity.duration / 60);
-//   const w = 100 / nbPosition;
-//   const [open, setOpen] = useState(false);
+  function onClose() {
+    setOpen(false);
+  }
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        asChild
+        className="absolute"
+        style={{ top, height, width: `${w}%`, left: `${position * w}%` }}
+      >
+        <Button variant="outline" onClick={() => setOpen(true)}>
+          {planningActivity.activityName} ({planningActivity.duration}
+          {"'"})
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent>
+        <PopupActivityDetails
+          planningId={planningId}
+          slotId={planningActivity.slotId}
+          siteId={planningActivity.siteId!}
+          clubId={clubId}
+          onClose={onClose}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
 
-//   function onClose() {
-//     setOpen(false);
-//   }
-//   return (
-//     <Popover open={open} onOpenChange={setOpen}>
-//       <PopoverTrigger
-//         asChild
-//         className="absolute"
-//         style={{ top, height, width: `${w}%`, left: `${position * w}%` }}
-//       >
-//         <Button variant="outline" onClick={() => setOpen(true)}>
-//           {planningActivity.activity.name} ({planningActivity.duration}
-//           {"'"})
-//         </Button>
-//       </PopoverTrigger>
-//       <PopoverContent>
-//         <PopupActivityDetails
-//           activityId={planningActivity.id}
-//           clubId={clubId}
-//           onClose={onClose}
-//         />
-//       </PopoverContent>
-//     </Popover>
-//   );
-// }
+type PopupActivityDetailsProps = {
+  planningId: PlanningId;
+  slotId: string;
+  clubId: ClubId;
+  siteId: SiteId;
+  onClose: () => void;
+};
 
-// type PopupActivityDetailsProps = {
-//   activityId: string;
-//   clubId: string;
-//   onClose: () => void;
-// };
+function PopupActivityDetails({
+  planningId,
+  slotId,
+  clubId,
+  siteId,
+  onClose,
+}: PopupActivityDetailsProps) {
+  const t = useTranslations("calendar");
 
-// function PopupActivityDetails({
-//   activityId,
-//   clubId,
-//   onClose,
-// }: PopupActivityDetailsProps) {
-//   const t = useTranslations("calendar");
+  const queryPlanning = trpc.plannings.getPlanningActivityById.useQuery(
+    { planningId, slotId },
+    { enabled: Boolean(slotId) },
+  );
+  const utils = trpc.useUtils();
+  const updatePlanning = trpc.plannings.updatePlanningActivity.useMutation({
+    onSuccess(data) {
+      utils.plannings.getPlanningById.invalidate({ planningId: data?.[0]?.id });
+      toast.success(t("activity-updated"));
+    },
+  });
+  const deletePlanning = trpc.plannings.deletePlanningActivity.useMutation({
+    onSuccess(data) {
+      utils.plannings.getPlanningById.invalidate({
+        planningId: Array.isArray(data) ? data?.[0]?.id : data?.id,
+      });
+      toast.success(t("activity-deleted"));
+    },
+  });
+  function handleSaveActivity(data: DropFormData) {
+    if (slotId)
+      updatePlanning.mutate({
+        planningId,
+        item: {
+          slotId,
+          activityId: data.activityId,
+          coachUserId: data.coachUserId ?? null,
+          roomId: data.roomId ?? null,
+          siteId,
+          startTime: data.startTime,
+          duration: data.duration,
+        },
+      });
+    onClose();
+  }
+  function handleDelete() {
+    if (slotId) deletePlanning.mutate({ planningId, slotId });
+    onClose();
+  }
 
-//   const queryPlanning = trpc.plannings.getPlanningActivityById.useQuery(
-//     activityId,
-//     { enabled: activityId !== "" && activityId !== null },
-//   );
-//   const utils = trpc.useUtils();
-//   const updatePlanning = trpc.plannings.updatePlanningActivity.useMutation({
-//     onSuccess(data) {
-//       utils.plannings.getPlanningById.invalidate(data[0].planningId);
-//       toast.success(t("activity-updated"));
-//     },
-//   });
-//   const deletePlanning = trpc.plannings.deletePlanningActivity.useMutation({
-//     onSuccess(data) {
-//       utils.plannings.getPlanningById.invalidate(data[0].planningId);
-//       toast.success(t("activity-deleted"));
-//     },
-//   });
-//   const { getName } = useDayName();
-//   function handleSaveActivity(data: DropFormData) {
-//     if (activityId)
-//       updatePlanning.mutate({
-//         id: activityId,
-//         coachId: data.coachId ? data.coachId : undefined,
-//         roomId: data.roomId ? data.roomId : undefined,
-//         startTime: data.startTime,
-//         duration: data.duration,
-//       });
-//     onClose();
-//   }
-//   function handleDelete() {
-//     if (activityId) deletePlanning.mutate(activityId);
-//     onClose();
-//   }
-
-//   return (
-//     <div>
-//       {queryPlanning.isLoading ? (
-//         <Spinner />
-//       ) : (
-//         <FormActivity
-//           clubId={clubId}
-//           activityName={queryPlanning.data?.activity.name ?? ""}
-//           dayName={getName(queryPlanning.data?.day)}
-//           handleSaveActivity={handleSaveActivity}
-//           rooms={queryPlanning.data?.site?.rooms ?? []}
-//           siteName={queryPlanning.data?.site?.name ?? ""}
-//           handleDelete={handleDelete}
-//           update
-//           initialData={{
-//             coachId: queryPlanning.data?.coachId ?? "",
-//             roomId: queryPlanning.data?.roomId ?? "",
-//             duration: queryPlanning.data?.duration ?? 0,
-//             startTime: queryPlanning.data?.startTime ?? "",
-//           }}
-//         />
-//       )}
-//     </div>
-//   );
-// }
+  return (
+    <div>
+      {queryPlanning.isLoading ? (
+        <Spinner />
+      ) : (
+        <FormActivity
+          clubId={clubId}
+          siteId={siteId}
+          planningData={queryPlanning.data}
+          handleSaveActivity={handleSaveActivity}
+          handleDelete={handleDelete}
+          update
+        />
+      )}
+    </div>
+  );
+}
 
 function DraggableActivity({ id, name }: { id: string; name: string }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
@@ -505,25 +534,19 @@ function DropSite({ id, data, children }: DropSiteProps) {
 type FormActivityProps = {
   handleSaveActivity: SubmitHandler<DropFormData>;
   handleDelete?: () => void;
-  clubId: string;
-  dayName: string;
-  siteName: string;
-  activityName: string;
-  rooms: (typeof room.$inferSelect)[];
+  clubId: ClubId;
+  siteId: SiteId;
+  planningData?: PlanningSearchItemData | null;
   update?: boolean;
-  initialData?: DropFormData;
 };
 
 function FormActivity({
   handleSaveActivity,
   clubId,
-  dayName,
-  siteName,
-  activityName,
-  rooms,
+  siteId,
   update = false,
   handleDelete,
-  initialData,
+  planningData,
 }: FormActivityProps) {
   const t = useTranslations("planning");
   const {
@@ -531,27 +554,35 @@ function FormActivity({
     handleSubmit,
     control,
     formState: { errors },
-    reset,
-  } = useForm<DropFormData>();
-  const queryCoachs = trpc.coachs.getCoachsForClub.useQuery(clubId);
-
-  useEffect(() => {
-    reset(initialData);
-  }, [initialData, reset]);
+  } = useForm<DropFormData>({
+    defaultValues: {
+      startTime: planningData?.startTime,
+      duration: planningData?.duration,
+      activityId: planningData?.activityId,
+      roomId: planningData?.roomId ?? ("" as RoomId),
+      coachUserId: planningData?.coachUserId ?? ("" as UserId),
+    },
+  });
+  const queryCoachs = trpc.coachs.getCoachsForClub.useQuery({ clubId });
+  const rooms = trpc.sites.getRoomsForSite.useQuery(
+    { siteId: siteId },
+    { enabled: isCUID(planningData?.siteId) },
+  );
+  const { getName } = useDayName();
 
   return (
     <form onSubmit={handleSubmit(handleSaveActivity)} className="space-y-2">
       <h2 className="flex items-center gap-4">
         {t("day")}
-        <span className="text-primary">{dayName}</span>
+        <span className="text-primary">{getName(planningData?.day)}</span>
       </h2>
       <div className="space-x-4">
         <label>{t("site")}</label>
-        <span className="text-primary">{siteName}</span>
+        <span className="text-primary">{planningData?.siteName}</span>
       </div>
       <div className="space-x-4">
         <label>{t("activity")}</label>
-        <span className="text-primary">{activityName}</span>
+        <span className="text-primary">{planningData?.activityName}</span>
       </div>
       <Field orientation="horizontal">
         <FieldLabel>{t("start-hour")}</FieldLabel>
@@ -583,7 +614,7 @@ function FormActivity({
         <FieldLabel>{t("coach")}</FieldLabel>
         <Controller
           control={control}
-          name="coachId"
+          name="coachUserId"
           render={({ field }) => (
             <Select value={field.value} onValueChange={field.onChange}>
               <SelectTrigger className="w-full">
@@ -611,7 +642,7 @@ function FormActivity({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {rooms?.map((room) => (
+                {rooms?.data?.map((room) => (
                   <SelectItem key={room.id} value={room.id}>
                     {room.name}
                   </SelectItem>

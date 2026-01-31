@@ -12,6 +12,7 @@ import { Info, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
 
 import { Spinner } from "@/components/ui/shadcn/spinner";
+import { PageId } from "@/db/types";
 import { env } from "@/env";
 import { cssVarToHex } from "@/lib/colorConversion";
 import { LATITUDE, LONGITUDE } from "@/lib/defaultValues";
@@ -74,10 +75,13 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
       refetchOnWindowFocus: false,
     },
   );
-  const queryCoachData = trpc.pages.getCoachDataForPage.useQuery(userId, {
-    enabled: Boolean(userId),
-    refetchOnWindowFocus: false,
-  });
+  const queryCoachData = trpc.pages.getCoachDataForPage.useQuery(
+    { coachUserId: userId },
+    {
+      enabled: Boolean(userId),
+      refetchOnWindowFocus: false,
+    },
+  );
   const fields = useWatch({ control: form.control });
   const [previewTheme, setPreviewTheme] = useState<TThemes>("cupcake");
   const updatePageStyle = trpc.pages.updatePageStyleForCoach.useMutation({
@@ -365,11 +369,11 @@ export const CoachCreation = ({ userId, pageId }: CoachCreationProps) => {
 };
 
 type CoachDisplayProps = {
-  pageId: string;
+  pageId: PageId;
 };
 
 export const CoachDisplay = ({ pageId }: CoachDisplayProps) => {
-  const queryPage = trpc.pages.getCoachPage.useQuery(pageId);
+  const queryPage = trpc.pages.getCoachPage.useQuery({ pageId });
   const hero = queryPage.data?.hero;
   if (queryPage.isLoading) return <Spinner />;
   if (!queryPage.data) return <div>No page defined for this coach</div>;

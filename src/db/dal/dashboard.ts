@@ -27,7 +27,7 @@ export async function getAdminData() {
 
 // ==================== MANAGER DASHBOARD ====================
 
-export async function getManagerDataForUserId(userId: string) {
+export async function getManagerDataForUserId(userId: UserId) {
   const clubData = await db.query.club.findMany({
     where: eq(club.managerId, userId),
     with: {

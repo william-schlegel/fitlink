@@ -127,6 +127,7 @@ export const CreatePlanning = ({
       title={t("create-new-planning")}
       variant={variant}
       handleSubmit={handleSubmit(onSubmit, onError)}
+      size="sm"
     >
       <h3>{t("create-new-planning")}</h3>
       <form onSubmit={handleSubmit(onSubmit, onError)}>
@@ -290,7 +291,12 @@ export function UpdatePlanning({
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<UpdatePlanningFormValues>();
+    control,
+  } = useForm<UpdatePlanningFormValues>({
+    defaultValues: {
+      startDate: new Date(),
+    },
+  });
 
   const queryPlanning = trpc.plannings.getPlanningById.useQuery(
     { planningId },
@@ -298,11 +304,10 @@ export function UpdatePlanning({
       enabled: isCUID(planningId),
     },
   );
-
   useEffect(() => {
     reset({
       name: queryPlanning.data?.name,
-      startDate: queryPlanning.data?.startDate ?? new Date(Date.now()),
+      startDate: queryPlanning.data?.startDate ?? new Date(),
       endDate: queryPlanning.data?.endDate,
       siteId: queryPlanning.data?.siteId,
       roomId: queryPlanning.data?.roomId,
@@ -367,6 +372,7 @@ export function UpdatePlanning({
       handleSubmit={handleSubmit(onSubmit, onError)}
       variant={variant}
       buttonSize={buttonSize}
+      size="sm"
     >
       <h3 className="flex gap-2">
         {t(duplicate ? "duplicate-planning" : "update-planning")}
@@ -398,14 +404,28 @@ export function UpdatePlanning({
               <FieldLabel htmlFor="update-planning-start-date">
                 {t("start-date")}
               </FieldLabel>
-              <Input
-                id="update-planning-start-date"
-                {...register("startDate", {
-                  valueAsDate: true,
-                  required: t("date-mandatory") ?? true,
-                })}
-                type="date"
-                defaultValue={formatDateAsYYYYMMDD()}
+              <Controller
+                control={control}
+                name="startDate"
+                rules={{ required: t("date-mandatory") ?? true }}
+                render={({ field }) => (
+                  <Input
+                    id="update-planning-start-date"
+                    type="date"
+                    value={
+                      field.value
+                        ? formatDateAsYYYYMMDD(field.value)
+                        : ""
+                    }
+                    onChange={(event) =>
+                      field.onChange(
+                        event.target.value
+                          ? new Date(event.target.value)
+                          : null,
+                      )
+                    }
+                  />
+                )}
               />
               {errors.startDate && (
                 <FieldError>{t("date-mandatory")}</FieldError>
@@ -415,10 +435,25 @@ export function UpdatePlanning({
               <FieldLabel htmlFor="update-planning-end-date">
                 {t("end-date")}
               </FieldLabel>
-              <Input
-                id="update-planning-end-date"
-                {...register("endDate", { valueAsDate: true })}
-                type="date"
+              <Controller
+                control={control}
+                name="endDate"
+                render={({ field }) => (
+                  <Input
+                    id="update-planning-end-date"
+                    type="date"
+                    value={
+                      field.value ? formatDateAsYYYYMMDD(field.value) : ""
+                    }
+                    onChange={(event) =>
+                      field.onChange(
+                        event.target.value
+                          ? new Date(event.target.value)
+                          : null,
+                      )
+                    }
+                  />
+                )}
               />
             </Field>
           </FieldGroup>

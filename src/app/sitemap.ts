@@ -24,9 +24,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
   const coaches = (coachParams ?? [])
-    .filter((p) => p && Boolean(p.coachId) && isCUID(p.pageId))
+    .filter((p) => p && Boolean(p.coachUserId) && isCUID(p.pageId))
     .map((p) => ({
-      url: `/presentation-page/coach/${p.coachId}/${p.pageId}`,
+      url: `/presentation-page/coach/${p.coachUserId}/${p.pageId}`,
       lastModified: p.updatedAt ? new Date(p.updatedAt) : undefined,
       changeFrequency: "weekly" as const,
       priority: 0.7,

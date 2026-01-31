@@ -26,10 +26,10 @@ export default function OfferCard({
     useDisplaySubscriptionInfo(
       offer?.mode ?? undefined,
       offer?.restriction ?? undefined,
-      offer?.activitieGroups.map((ag) => ag.activityGroupId) ?? [],
-      offer?.activities.map((ag) => ag.activityId) ?? [],
-      offer?.sites.map((ag) => ag.siteId) ?? [],
-      offer?.rooms.map((ag) => ag.roomId) ?? [],
+      offer?.activityGroups ?? [],
+      offer?.activities ?? [],
+      offer?.sites ?? [],
+      offer?.rooms ?? [],
     );
   if (!offer) return null;
 

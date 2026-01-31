@@ -41,9 +41,12 @@ export function CoachOfferPage({
   withContact,
 }: CoachOfferPageProps) {
   const t = useTranslations("coach");
-  const offerQuery = trpc.coachs.getOfferWithDetails.useQuery(offerId, {
-    enabled: isCUID(offerId),
-  });
+  const offerQuery = trpc.coachs.getOfferWithDetails.useQuery(
+    { offerId },
+    {
+      enabled: isCUID(offerId),
+    },
+  );
   const { getName: getNameLevel } = useCoachingLevel();
   const locale = useLocale();
 

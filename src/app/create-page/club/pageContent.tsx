@@ -20,6 +20,7 @@ import { TitleCreation } from "@/components/sections/title";
 import { Button } from "@/components/ui/shadcn";
 import { ButtonGroup } from "@/components/ui/shadcn/button-group";
 import { Spinner } from "@/components/ui/shadcn/spinner";
+import { ClubId, PageId } from "@/db/types";
 import createLink from "@/lib/createLink";
 import { PageSectionModel } from "@/lib/sections/data";
 import { usePageSection } from "@/lib/sections/useGetSection";
@@ -28,8 +29,8 @@ import { isCUID } from "@/lib/utils";
 import PublishPageButton from "../coach/publisPageButton";
 
 type PageContentProps = {
-  pageId: string;
-  clubId: string;
+  pageId: PageId;
+  clubId: ClubId;
   section?: PageSectionModel;
 };
 

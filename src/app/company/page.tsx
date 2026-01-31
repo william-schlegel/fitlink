@@ -197,9 +197,12 @@ export default function CoachPage() {
 
 function OfferCard({ id }: { id: string }) {
   const t = useTranslations();
-  const offer = trpc.coachs.getOfferWithDetails.useQuery(id, {
-    enabled: isCUID(id),
-  });
+  const offer = trpc.coachs.getOfferWithDetails.useQuery(
+    { offerId: id },
+    {
+      enabled: isCUID(id),
+    },
+  );
 
   const locale = useLocale();
   if (offer.isLoading) return <Spinner />;

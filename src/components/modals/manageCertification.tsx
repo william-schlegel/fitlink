@@ -33,6 +33,7 @@ import { UploadButton } from "../uploadthing";
 import { Field, FieldError, FieldLabel } from "../ui/shadcn";
 
 import type { ButtonSize, ButtonVariant } from "@/components/ui/shadcn/button";
+import { UserId } from "@/db/types";
 
 type CertificationFormValues = {
   name: string;
@@ -44,7 +45,7 @@ type CertificationFormValues = {
 };
 
 type CreateCertificationProps = {
-  userId: string;
+  coachUserId: string;
 };
 
 type OptionItem = {
@@ -52,7 +53,9 @@ type OptionItem = {
   selected: boolean;
 };
 
-export const CreateCertification = ({ userId }: CreateCertificationProps) => {
+export const CreateCertification = ({
+  coachUserId,
+}: CreateCertificationProps) => {
   const [organismId, setOrganismId] = useState("");
   const [moduleIds, setModuleIds] = useState<Map<string, OptionItem>>(
     new Map(),
@@ -88,8 +91,10 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
   const addCertification = trpc.coachs.createCertification.useMutation({
     onSuccess() {
       toast.success(t("certification-created"));
-      utils.coachs.getCertificationsForCoach.invalidate(userId);
-      router.push(createLink({ userId, tab: "certifications" }));
+      utils.coachs.getCertificationsForCoach.invalidate({
+        coachUserId,
+      });
+      router.push(createLink({ userId: coachUserId, tab: "certifications" }));
     },
     onError(error) {
       toast.error(error.message);
@@ -107,7 +112,7 @@ export const CreateCertification = ({ userId }: CreateCertificationProps) => {
 
   const onSubmit = async () => {
     addCertification.mutate({
-      userId,
+      coachUserId,
       name: selectedGroup?.name ?? "?",
       obtainedIn: obtentionDate,
       activityGroups: Array.from(activityIds.values())
@@ -292,7 +297,7 @@ function ActivitySelector({
 }
 
 type UpdateCertificationProps = {
-  userId: string;
+  coachUserId: UserId;
   certificationId: string;
   variant?: ButtonVariant;
   buttonSize?: ButtonSize;
@@ -300,7 +305,7 @@ type UpdateCertificationProps = {
 
 export const UpdateCertification = ({
   certificationId,
-  userId,
+  coachUserId,
   variant = "outline",
   buttonSize = "icon",
 }: UpdateCertificationProps) => {
@@ -312,8 +317,9 @@ export const UpdateCertification = ({
     reset,
   } = useForm<CertificationFormValues>();
   const t = useTranslations("coach");
-  const queryCertification =
-    trpc.coachs.getCertificationById.useQuery(certificationId);
+  const queryCertification = trpc.coachs.getCertificationById.useQuery({
+    certificationId,
+  });
 
   useEffect(() => {
     if (queryCertification.data) {
@@ -325,7 +331,9 @@ export const UpdateCertification = ({
   const updateCertification = trpc.coachs.updateCertification.useMutation({
     onSuccess: () => {
       toast.success(t("certification-updated"));
-      utils.coachs.getCertificationsForCoach.invalidate(userId);
+      utils.coachs.getCertificationsForCoach.invalidate({
+        coachUserId,
+      });
     },
     onError(error) {
       toast.error(error.message);
@@ -333,7 +341,11 @@ export const UpdateCertification = ({
   });
 
   const onSubmit: SubmitHandler<CertificationFormValues> = (data) => {
-    updateCertification.mutate({ id: certificationId, ...data });
+    updateCertification.mutate({
+      coachUserId,
+      id: certificationId,
+      ...data,
+    });
   };
 
   const onError: SubmitErrorHandler<CertificationFormValues> = (errors) => {
@@ -370,7 +382,7 @@ export const UpdateCertification = ({
 };
 
 export const DeleteCertification = ({
-  userId,
+  coachUserId,
   certificationId,
   variant = "destructive",
   buttonSize = "icon",
@@ -380,7 +392,7 @@ export const DeleteCertification = ({
 
   const deleteCertification = trpc.coachs.deleteCertification.useMutation({
     onSuccess: () => {
-      utils.coachs.getCertificationsForCoach.invalidate(userId);
+      utils.coachs.getCertificationsForCoach.invalidate({ coachUserId });
       toast.success(t("certification-deleted"));
     },
     onError(error) {
@@ -465,20 +477,22 @@ export const CreateCertificationOrganism = ({
 };
 
 type UpdateGroupProps = {
-  groupId: string;
+  certificationOrganismId: string;
   variant?: ButtonVariant;
   buttonSize?: ButtonSize;
 };
 
 export function UpdateCertificationGroup({
-  groupId,
+  certificationOrganismId,
   variant = "outline",
   buttonSize = "icon",
 }: UpdateGroupProps) {
   const t = useTranslations("admin");
   const utils = trpc.useUtils();
   const [data, setData] = useState<CertificationGroupForm>(emptyData);
-  const queryGroup = trpc.coachs.getCertificationOrganismById.useQuery(groupId);
+  const queryGroup = trpc.coachs.getCertificationOrganismById.useQuery({
+    certificationOrganismId,
+  });
 
   useEffect(() => {
     if (queryGroup.data) {
@@ -510,7 +524,7 @@ export function UpdateCertificationGroup({
 
   const onSubmit = () => {
     updateGroup.mutate({
-      id: groupId,
+      id: certificationOrganismId,
       name: data?.name ?? "",
       modules: data?.modules.map((m) => ({
         name: m.name,
@@ -535,7 +549,7 @@ export function UpdateCertificationGroup({
         <CertificationGroupForm
           data={data}
           setData={setData}
-          groupId={groupId}
+          organismId={certificationOrganismId}
         />
       )}
     </Modal>
@@ -543,10 +557,12 @@ export function UpdateCertificationGroup({
 }
 
 type DeleteGroupProps = {
-  groupId: string;
+  certificationOrganismId: string;
 };
 
-export function DeleteCertificationGroup({ groupId }: DeleteGroupProps) {
+export function DeleteCertificationGroup({
+  certificationOrganismId,
+}: DeleteGroupProps) {
   const utils = trpc.useUtils();
   const deleteGroup = trpc.coachs.deleteOrganism.useMutation({
     onSuccess() {
@@ -563,7 +579,9 @@ export function DeleteCertificationGroup({ groupId }: DeleteGroupProps) {
     <Confirmation
       title={t("group-deletion")}
       message={t("group-deletion-message")}
-      onConfirm={() => deleteGroup.mutate(groupId)}
+      onConfirm={() =>
+        deleteGroup.mutate({ organismId: certificationOrganismId })
+      }
       buttonIcon={<Trash />}
       variant="destructive"
       textConfirmation={t("group-deletion-confirmation")}
@@ -575,13 +593,13 @@ export function DeleteCertificationGroup({ groupId }: DeleteGroupProps) {
 type CertificationGroupFormProps = {
   data: CertificationGroupForm;
   setData: Dispatch<SetStateAction<CertificationGroupForm>>;
-  groupId?: string;
+  organismId?: string;
 };
 
 function CertificationGroupForm({
   data,
   setData,
-  groupId,
+  organismId,
 }: CertificationGroupFormProps) {
   const t = useTranslations("admin");
   const refOpt = useRef<HTMLInputElement>(null);
@@ -595,14 +613,16 @@ function CertificationGroupForm({
   const selectedModule = data.modules.find((m) => m.dbId === moduleId);
   const addActivities = trpc.coachs.updateActivitiesForModule.useMutation({
     onSuccess() {
-      if (groupId)
-        utils.coachs.getCertificationOrganismById.invalidate(groupId);
+      if (organismId)
+        utils.coachs.getCertificationOrganismById.invalidate({
+          certificationOrganismId: organismId,
+        });
     },
   });
 
   function handleDeleteModule(id: number) {
     const mod = data.modules[id];
-    if (!mod?.dbId?.startsWith("MOD-") && groupId)
+    if (!mod?.dbId?.startsWith("MOD-") && organismId)
       deleteModule.mutate(mod?.dbId ?? "");
 
     const mods = data.modules.filter((_, idx) => idx !== id);
@@ -641,7 +661,7 @@ function CertificationGroupForm({
     }
     mod.activityIds.push(activityId);
     setData({ ...data });
-    if (groupId && mod.dbId) {
+    if (organismId && mod.dbId) {
       addActivities.mutate({
         moduleId: mod.dbId,
         activityIds: mod.activityIds,
@@ -658,7 +678,7 @@ function CertificationGroupForm({
     }
     mod.activityIds = mod.activityIds.filter((a) => a !== activityId);
     setData({ ...data });
-    if (groupId && mod.dbId) {
+    if (organismId && mod.dbId) {
       addActivities.mutate({
         moduleId: mod.dbId,
         activityIds: mod.activityIds,

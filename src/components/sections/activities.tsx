@@ -15,6 +15,7 @@ import Image from "next/image";
 
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { pageSectionElement } from "@/db/schema/page";
+import { ActivityGroupId, ClubId, PageId } from "@/db/types";
 import { trpc } from "@/lib/trpc/client";
 import { cn, isCUID } from "@/lib/utils";
 import ThemeSelector, { TThemes } from "../themeSelector";
@@ -44,8 +45,8 @@ import { Textarea } from "../ui/shadcn/textarea";
 import { UploadButton } from "../uploadthing";
 
 type ActivityGroupCreationProps = {
-  clubId: string;
-  pageId: string;
+  clubId: ClubId;
+  pageId: PageId;
 };
 
 type ActivityGroupForm = {
@@ -216,19 +217,19 @@ export const ActivityGroupCreation = ({
         {querySection.data?.id ? (
           <>
             <div className="flex flex-wrap gap-2">
-              {querySection.data.elements.map((activity) => (
-                <Card key={activity.id}>
+              {querySection.data.elements.map((activityGroup) => (
+                <Card key={activityGroup.id}>
                   <CardContent>
-                    <h4 className="text-center">{activity.title}</h4>
+                    <h4 className="text-center">{activityGroup.title}</h4>
                     <Separator />
                     <div className="flex items-center justify-center gap-2">
                       <UpdateActivityGroup
                         pageId={pageId}
-                        activityId={activity.id!}
+                        activityGroupId={activityGroup.id! as ActivityGroupId}
                       />
                       <DeleteActivityGroup
                         pageId={pageId}
-                        activityId={activity.id!}
+                        activityGroupId={activityGroup.id! as ActivityGroupId}
                       />
                     </div>
                   </CardContent>
@@ -319,19 +320,22 @@ function AddActivityGroup({ pageId, sectionId }: ActivityProps) {
 }
 
 type UpdateActivityGroupProps = {
-  pageId: string;
-  activityId: string;
+  pageId: PageId;
+  activityGroupId: ActivityGroupId;
 };
 
-function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
+function UpdateActivityGroup({
+  pageId,
+  activityGroupId,
+}: UpdateActivityGroupProps) {
   const utils = trpc.useUtils();
   const t = useTranslations("pages");
   const [close, setClose] = useState(false);
   const [initialData, setInitialData] = useState<ActivityForm | undefined>();
   const queryActivity = trpc.pages.getPageSectionElementById.useQuery(
-    activityId,
+    { sectionElementId: activityGroupId },
     {
-      enabled: isCUID(activityId),
+      enabled: isCUID(activityGroupId),
       refetchOnWindowFocus: false,
     },
   );
@@ -364,7 +368,7 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
 
   async function handleSubmit(data: ActivityForm) {
     updateAG.mutate({
-      id: activityId,
+      id: activityGroupId,
       pageId,
       title: data.title,
       subTitle: data.subTitle,
@@ -397,7 +401,10 @@ function UpdateActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
   );
 }
 
-function DeleteActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
+function DeleteActivityGroup({
+  pageId,
+  activityGroupId,
+}: UpdateActivityGroupProps) {
   const utils = trpc.useUtils();
   const t = useTranslations("pages");
 
@@ -420,7 +427,7 @@ function DeleteActivityGroup({ pageId, activityId }: UpdateActivityGroupProps) {
       title={t("activity-group.deletion")}
       buttonIcon={<Trash />}
       onConfirm={() => {
-        deleteActivity.mutate(activityId);
+        deleteActivity.mutate({ sectionElementId: activityGroupId });
       }}
       variant="destructive"
       buttonSize="icon"
@@ -687,7 +694,7 @@ export const ActivityGroupDisplayElement = ({
   elementId: string;
 }) => {
   const queryElement = trpc.pages.getPageSectionElementById.useQuery(
-    elementId,
+    { sectionElementId: elementId },
     {
       enabled: isCUID(elementId),
     },

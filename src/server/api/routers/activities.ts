@@ -22,7 +22,12 @@ import {
   updateActivityGroup,
 } from "@/db/dal";
 import { activityGroup } from "@/db/schema/club";
-import { ZodActivityId, ZodClubId, ZodUserId } from "@/db/types";
+import {
+  ZodActivityGroupId,
+  ZodActivityId,
+  ZodClubId,
+  ZodUserId,
+} from "@/db/types";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -50,7 +55,7 @@ export const activityRouter = createTRPCRouter({
     .query(({ input }) => getActivityByName(input)),
 
   getActivityGroupById: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodActivityGroupId)
     .query(({ input }) => getActivityGroupById(input)),
 
   getActivityGroupsForUser: protectedProcedure
@@ -67,14 +72,14 @@ export const activityRouter = createTRPCRouter({
     }),
 
   getAllActivitiesForGroup: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodActivityGroupId)
     .query(({ ctx, input }) => {
       requireAdmin(ctx.user);
       return getAllActivitiesForGroup(input);
     }),
 
   getAllClubsForGroup: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodActivityGroupId)
     .query(({ ctx, input }) => {
       requireAdmin(ctx.user);
       return getAllClubsForGroup(input);
@@ -108,7 +113,7 @@ export const activityRouter = createTRPCRouter({
     .mutation(({ input }) =>
       createActivityGroup({
         name: input.name,
-        coachId: input.userId,
+        coachUserId: input.userId,
         default: input.default,
       }),
     ),
@@ -120,14 +125,14 @@ export const activityRouter = createTRPCRouter({
   deleteGroup: protectedProcedure
     .input(
       z.object({
-        groupId: z.cuid2(),
+        groupId: ZodActivityGroupId,
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const group = await db.query.activityGroup.findFirst({
         where: eq(activityGroup.id, input.groupId),
       });
-      requireAdminOrOwner(ctx.user, group?.coachId);
+      requireAdminOrOwner(ctx.user, group?.coachUserId);
       return deleteActivityGroup(input.groupId);
     }),
 

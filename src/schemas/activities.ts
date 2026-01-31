@@ -1,4 +1,10 @@
-import { ZodActivityId, ZodClubId, ZodRoomId, ZodUserId } from "@/db/types";
+import {
+  ZodActivityGroupId,
+  ZodActivityId,
+  ZodClubId,
+  ZodRoomId,
+  ZodUserId,
+} from "@/db/types";
 import { z } from "zod";
 
 // ==================== ACTIVITY SCHEMAS ====================
@@ -12,7 +18,7 @@ export const activitySchema = z.object({
   noCalendar: z.boolean().default(false),
   reservationDuration: z.number().default(60),
   clubId: ZodClubId,
-  groupId: z.cuid2(),
+  groupId: ZodActivityGroupId,
 });
 
 /**
@@ -33,9 +39,9 @@ export const updateActivitySchema = activitySchema.partial().extend({
  * Base activity group schema
  */
 export const activityGroupSchema = z.object({
-  id: z.cuid2(),
+  id: ZodActivityGroupId,
   name: z.string(),
-  coachId: ZodUserId.optional().nullable(),
+  coachUserId: ZodUserId.optional().nullable(),
   default: z.boolean().optional().default(false),
 });
 
@@ -48,7 +54,7 @@ export const createActivityGroupSchema = activityGroupSchema.omit({ id: true });
  * Schema for updating an activity group
  */
 export const updateActivityGroupSchema = z.object({
-  id: z.cuid2(),
+  id: ZodActivityGroupId,
   name: z.string(),
   default: z.boolean().optional().default(false),
 });

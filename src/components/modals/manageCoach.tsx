@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { CoachingTargetEnum } from "@/db/schema/enums";
+import { UserId } from "@/db/types";
 import { useUser } from "@/lib/auth/client";
 import { formatDateAsYYYYMMDD } from "@/lib/formatDate";
 import { formatMoney } from "@/lib/formatNumber";
@@ -85,14 +86,14 @@ type TPack = {
   packPrice: number;
 };
 
-export const CreateOffer = ({ userId }: { userId: string }) => {
+export const CreateOffer = ({ userId }: { userId: UserId }) => {
   const utils = trpc.useUtils();
   const t = useTranslations("coach");
   const [closeModal, setCloseModal] = useState(false);
 
   const createOffer = trpc.coachs.createCoachOffer.useMutation({
     onSuccess: () => {
-      utils.coachs.getCoachOffers.invalidate(userId);
+      utils.coachs.getCoachOffers.invalidate({ coachUserId: userId });
       toast.success(t("offer.created"));
     },
     onError(error) {
@@ -105,7 +106,7 @@ export const CreateOffer = ({ userId }: { userId: string }) => {
       (l) => l.value,
     );
     createOffer.mutate({
-      coachId: userId,
+      userId,
       ...data,
       startDate: new Date(data.startDate),
       levels,
@@ -128,7 +129,7 @@ export const CreateOffer = ({ userId }: { userId: string }) => {
 };
 
 type PropsUpdateDelete = {
-  userId: string;
+  userId: UserId;
   offerId: string;
 };
 
@@ -138,10 +139,13 @@ export const UpdateOffer = ({ userId, offerId }: PropsUpdateDelete) => {
   const [initialData, setInitialData] = useState<OfferFormValues | undefined>();
   const [closeModal, setCloseModal] = useState(false);
 
-  const queryOffer = trpc.coachs.getOfferById.useQuery(offerId, {
-    enabled: isCUID(offerId),
-    refetchOnWindowFocus: false,
-  });
+  const queryOffer = trpc.coachs.getOfferById.useQuery(
+    { offerId },
+    {
+      enabled: isCUID(offerId),
+      refetchOnWindowFocus: false,
+    },
+  );
 
   useEffect(() => {
     if (queryOffer.data) {
@@ -183,9 +187,9 @@ export const UpdateOffer = ({ userId, offerId }: PropsUpdateDelete) => {
 
   const updateOffer = trpc.coachs.updateCoachOffer.useMutation({
     onSuccess: () => {
-      utils.coachs.getCoachOffers.invalidate(userId);
-      utils.coachs.getOfferById.invalidate(offerId);
-      utils.coachs.getOfferWithDetails.invalidate(offerId);
+      utils.coachs.getCoachOffers.invalidate({ coachUserId: userId });
+      utils.coachs.getOfferById.invalidate({ offerId });
+      utils.coachs.getOfferWithDetails.invalidate({ offerId });
       toast.success(t("offer.updated"));
     },
     onError(error) {
@@ -241,8 +245,8 @@ export const DeleteOffer = ({ offerId, userId }: PropsUpdateDelete) => {
 
   const deleteOffer = trpc.coachs.deleteCoachOffer.useMutation({
     onSuccess: () => {
-      utils.coachs.getCoachOffers.invalidate(userId);
-      utils.coachs.getOfferById.invalidate(offerId);
+      utils.coachs.getCoachOffers.invalidate({ coachUserId: userId });
+      utils.coachs.getOfferById.invalidate({ offerId });
       toast.success(t("offer.deleted"));
     },
     onError(error) {
@@ -255,7 +259,7 @@ export const DeleteOffer = ({ offerId, userId }: PropsUpdateDelete) => {
       message={t("offer.deletion-message")}
       title={t("offer.deletion")}
       onConfirm={() => {
-        deleteOffer.mutate(offerId);
+        deleteOffer.mutate({ offerId });
       }}
       buttonIcon={<Trash className="stroke-destructive" />}
       variant="outline"

@@ -71,7 +71,9 @@ type CGContentProps = {
 async function CGContent({ cgId }: CGContentProps) {
   const caller = await createTrpcCaller();
   if (!caller || !isCUID(cgId)) return null;
-  const cgQuery = await caller.coachs.getCertificationOrganismById(cgId);
+  const cgQuery = await caller.coachs.getCertificationOrganismById({
+    certificationOrganismId: cgId,
+  });
   const t = await getTranslations("admin");
   const href = await getHref();
 
@@ -84,8 +86,8 @@ async function CGContent({ cgId }: CGContentProps) {
           <h2>{cgQuery?.name}</h2>
         </div>
         <div className="flex items-center gap-2">
-          <UpdateCertificationGroup groupId={cgId} />
-          <DeleteCertificationGroup groupId={cgId} />
+          <UpdateCertificationGroup certificationOrganismId={cgId} />
+          <DeleteCertificationGroup certificationOrganismId={cgId} />
         </div>
       </div>
       <section className="grid max-h-screen grid-cols-2 gap-2 overflow-y-auto overflow-x-hidden">

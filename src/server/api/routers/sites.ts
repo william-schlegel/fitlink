@@ -87,9 +87,9 @@ export const siteRouter = createTRPCRouter({
     .query(({ input }) => getRoomById(input)),
 
   getRoomsForSite: protectedProcedure
-    .input(ZodSiteId)
+    .input(z.object({ siteId: ZodSiteId }))
     .query(async ({ ctx, input }) =>
-      getRoomsForSiteWithCheck(input, ctx.user.id as UserId),
+      getRoomsForSiteWithCheck(input.siteId, ctx.user.id as UserId),
     ),
 
   createRoom: protectedProcedure

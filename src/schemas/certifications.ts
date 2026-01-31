@@ -1,3 +1,9 @@
+import {
+  ZodActivityGroupId,
+  ZodActivityId,
+  ZodCoachId,
+  ZodUserId,
+} from "@/db/types";
 import { z } from "zod";
 
 // ==================== CERTIFICATION SCHEMAS ====================
@@ -10,9 +16,9 @@ export const certificationSchema = z.object({
   name: z.string(),
   obtainedIn: z.date(),
   documentUrl: z.string().optional(),
-  userId: z.string(),
+  coachId: ZodCoachId,
   modules: z.array(z.cuid2()),
-  activityGroups: z.array(z.cuid2()),
+  activityGroups: z.array(ZodActivityGroupId),
 });
 
 /**
@@ -23,7 +29,9 @@ export const createCertificationSchema = certificationSchema.omit({ id: true });
 /**
  * Schema for updating a certification
  */
-export const updateCertificationSchema = certificationSchema.partial();
+export const updateCertificationSchema = certificationSchema.partial().extend({
+  coachUserId: ZodUserId,
+});
 
 /**
  * Schema for certification data stored in DB (DAL layer)
@@ -32,7 +40,7 @@ export const certificationDbSchema = z.object({
   id: z.cuid2(),
   name: z.string(),
   obtainedIn: z.date(),
-  coachId: z.string(),
+  coachUserId: ZodUserId,
   documentUrl: z.string().optional(),
 });
 
@@ -57,7 +65,7 @@ export const createOrganismSchema = z.object({
   modules: z.array(
     z.object({
       name: z.string(),
-      activityIds: z.array(z.cuid2()),
+      activityIds: z.array(ZodActivityId),
     }),
   ),
 });
@@ -68,7 +76,7 @@ export const updateOrganismSchema = z.object({
   modules: z.array(
     z.object({
       name: z.string(),
-      activityIds: z.array(z.cuid2()),
+      activityIds: z.array(ZodActivityId),
     }),
   ),
 });
@@ -87,13 +95,13 @@ export const moduleSchema = z.object({
 export const createModuleSchema = z.object({
   name: z.string(),
   organismId: z.cuid2(),
-  activityIds: z.array(z.cuid2()),
+  activityIds: z.array(ZodActivityId),
 });
 
 export const updateModuleSchema = z.object({
   id: z.cuid2(),
   name: z.string(),
-  activityIds: z.array(z.cuid2()),
+  activityIds: z.array(ZodActivityId),
 });
 
 export const createModuleDbSchema = z.object({

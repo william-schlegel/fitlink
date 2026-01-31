@@ -29,7 +29,10 @@ import { toast } from "sonner";
 
 import CalendarWeek from "@/components/calendarWeek";
 import AddActivity from "@/components/modals/manageActivity";
-import { CreateClubCalendar } from "@/components/modals/manageCalendar";
+import {
+  CreateClubCalendar,
+  UpdateClubCalendar,
+} from "@/components/modals/manageCalendar";
 import { DeleteClub, UpdateClub } from "@/components/modals/manageClub";
 import CollapsableGroup from "@/components/ui/collapsableGroup";
 import DeleteButton from "@/components/ui/deleteButton";
@@ -46,13 +49,14 @@ import {
 } from "@/components/ui/shadcn";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { activityGroup } from "@/db/schema/club";
+import { ClubId, UserId } from "@/db/types";
 import { trpc } from "@/lib/trpc/client";
 import useUserInfo from "@/lib/useUserInfo";
 import { cn, isCUID } from "@/lib/utils";
 
 type ClubContentProps = {
-  userId: string;
-  clubId: string;
+  userId: UserId;
+  clubId: ClubId;
 };
 
 export function ClubContent({ userId, clubId }: ClubContentProps) {
@@ -64,6 +68,10 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
       enabled: isCUID(clubId),
     },
   );
+
+  const actualCalendar = trpc.calendars.getCalendarForClub.useQuery(clubId, {
+    enabled: isCUID(clubId),
+  });
   const [groups, setGroups] = useState<(typeof activityGroup.$inferSelect)[]>(
     [],
   );
@@ -186,6 +194,12 @@ export function ClubContent({ userId, clubId }: ClubContentProps) {
             {t("subscription.manage-subscriptions")}
           </Link>
         </Button>
+        {actualCalendar.data ? (
+          <UpdateClubCalendar
+            clubId={clubId}
+            calendarId={actualCalendar.data.id}
+          />
+        ) : null}
       </div>
       {calendarQuery.data ? (
         <CalendarWeek

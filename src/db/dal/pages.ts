@@ -11,11 +11,11 @@ import {
 import { page, pageSection, pageSectionElement } from "@/db/schema/page";
 import { userCoach } from "@/db/schema/user";
 import { isCUID } from "@/lib/utils";
-import { ClubId, UserId } from "../types";
+import { ClubId, PageId, UserId } from "../types";
 
 // ==================== PAGE QUERIES ====================
 
-export async function getPageById(id: string) {
+export async function getPageById(id: PageId) {
   return db.query.page.findFirst({
     where: eq(page.id, id),
     with: {
@@ -46,7 +46,7 @@ export async function getPagesForManager(managerId: UserId) {
 
 export async function getPageForCoach(userId: UserId) {
   return db.query.page.findFirst({
-    where: eq(page.coachId, userId),
+    where: eq(page.coachUserId, userId),
     with: {
       coach: {
         columns: {
@@ -63,7 +63,7 @@ export async function getUserForPageCreation(userId: UserId) {
   });
 }
 
-export async function getClubPage(pageId: string) {
+export async function getClubPage(pageId: PageId) {
   return db.query.page.findFirst({
     where: and(eq(page.id, pageId), eq(page.published, true)),
     with: {
@@ -108,7 +108,7 @@ export async function getClubBasicInfo(clubId: ClubId) {
   });
 }
 
-export async function getCoachPage(pageId: string) {
+export async function getCoachPage(pageId: PageId) {
   return db.query.page.findFirst({
     where: and(
       eq(page.id, pageId),
@@ -173,30 +173,30 @@ export async function getCoachDataForPage(userId: UserId) {
 export async function createPage(data: {
   name: string;
   clubId?: ClubId;
-  coachId?: UserId;
+  coachUserId?: UserId;
   target: (typeof pageTargetEnum.enumValues)[number];
 }) {
   return db.insert(page).values(data).returning();
 }
 
 export async function updatePage(data: {
-  id: string;
+  id: PageId;
   name?: string;
   target?: (typeof pageTargetEnum.enumValues)[number];
-  userId?: UserId;
+  coachUserId?: UserId;
 }) {
   return db
     .update(page)
     .set({
       name: data.name,
       target: data.target,
-      coachId: data.userId,
+      coachUserId: data.coachUserId,
     })
     .where(eq(page.id, data.id));
 }
 
 export async function updatePagePublication(
-  pageId: string,
+  pageId: PageId,
   published: boolean,
 ) {
   return db
@@ -206,14 +206,14 @@ export async function updatePagePublication(
     .returning();
 }
 
-export async function deletePage(pageId: string) {
+export async function deletePage(pageId: PageId) {
   return db.delete(page).where(eq(page.id, pageId));
 }
 
 // ==================== PAGE SECTION QUERIES ====================
 
 export async function getPageSection(
-  pageId: string,
+  pageId: PageId,
   sectionModel: (typeof pageSectionModelEnum.enumValues)[number],
 ) {
   return db.query.pageSection.findFirst({
@@ -229,7 +229,7 @@ export async function getPageSection(
 }
 
 export async function getPageSectionElements(
-  pageId: string,
+  pageId: PageId,
   sectionModel: (typeof pageSectionModelEnum.enumValues)[number],
 ) {
   const section = await db.query.pageSection.findFirst({
@@ -248,7 +248,7 @@ export async function getPageSectionElements(
 
 export async function createPageSection(data: {
   model: (typeof pageSectionModelEnum.enumValues)[number];
-  pageId: string;
+  pageId: PageId;
   title?: string;
   subTitle?: string;
 }) {
@@ -258,7 +258,7 @@ export async function createPageSection(data: {
 export async function updatePageSection(data: {
   id: string;
   model?: (typeof pageSectionModelEnum.enumValues)[number];
-  pageId?: string;
+  pageId?: PageId;
   title?: string;
   subTitle?: string;
 }) {
@@ -293,7 +293,7 @@ export async function createPageSectionElement(data: {
   elementType: (typeof pageSectionElementTypeEnum.enumValues)[number];
   content?: string;
   link?: string;
-  pageId?: string;
+  pageId?: PageId;
   pageSection?: (typeof pageSectionModelEnum.enumValues)[number];
   sectionId: string;
   optionValue?: string;
@@ -322,7 +322,7 @@ export async function updatePageSectionElement(data: {
   subTitle?: string;
   content?: string;
   link?: string;
-  pageId?: string;
+  pageId?: PageId;
   pageSection?: (typeof pageSectionModelEnum.enumValues)[number];
   optionValue?: string;
 }) {
@@ -369,7 +369,7 @@ export async function updatePageStyleForClub(
 
 export async function createPageWithInitialSection(
   pageName: string,
-  coachId: UserId,
+  coachUserId: UserId,
   userName: string | null,
 ) {
   return db.transaction(async (tx) => {
@@ -378,7 +378,7 @@ export async function createPageWithInitialSection(
       .values({
         name: pageName,
         target: "HOME",
-        coachId,
+        coachUserId,
       })
       .returning();
 

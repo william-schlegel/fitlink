@@ -23,19 +23,19 @@ import { ClubId, UserId } from "@/db/types";
 // type WeekDayActivity = { day: DayName; dayOrder: number; activities: PaData[] };
 
 export function CoachPlanning({
-  coachId,
+  coachUserId,
   clubId,
 }: {
-  coachId: UserId;
+  coachUserId: UserId;
   clubId: ClubId;
 }) {
   const t = useTranslations("club");
   const { getName, getDayNumber } = useDayName();
 
   const planning = trpc.plannings.getCoachPlanningForClub.useQuery(
-    { coachId, clubId },
+    { coachUserId, clubId },
     {
-      enabled: isCUID(coachId),
+      enabled: isCUID(coachUserId),
     },
   );
 

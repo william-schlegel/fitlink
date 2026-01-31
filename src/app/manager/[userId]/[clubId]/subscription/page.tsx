@@ -11,6 +11,7 @@ import {
 } from "@/components/layoutPage";
 import { CreateSubscription } from "@/components/modals/manageSubscription";
 import { Button } from "@/components/ui/shadcn";
+import { ClubId, SubscriptionId, UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import createLink, { createHref } from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
@@ -23,11 +24,11 @@ export default async function ManageSubscriptions({
   searchParams,
 }: {
   params: Promise<{
-    userId: string;
-    clubId: string;
+    userId: UserId;
+    clubId: ClubId;
   }>;
   searchParams: Promise<{
-    subscriptionId: string;
+    subscriptionId: SubscriptionId;
   }>;
 }) {
   const { userId, clubId } = await params;

@@ -20,6 +20,7 @@ import {
   UserId,
 } from "../types";
 import { user } from "./auth";
+import { club, room, site } from "./club";
 import { dayNameEnum } from "./enums";
 
 export type OpeningData = {
@@ -43,10 +44,19 @@ export const openingCalendar = pgTable("OpeningCalendar", {
 
 export const openingCalendarRelations = relations(
   openingCalendar,
-  ({ many }) => ({
-    club: many(openingCalendar),
-    site: many(openingCalendar),
-    room: many(openingCalendar),
+  ({ one }) => ({
+    club: one(club, {
+      fields: [openingCalendar.clubId],
+      references: [club.id],
+    }),
+    site: one(site, {
+      fields: [openingCalendar.siteId],
+      references: [site.id],
+    }),
+    room: one(room, {
+      fields: [openingCalendar.roomId],
+      references: [room.id],
+    }),
   }),
 );
 
@@ -56,7 +66,7 @@ export type PlanningData = {
   day: (typeof dayNameEnum.enumValues)[number];
   startTime: string;
   duration: number;
-  coachId: UserId | null;
+  coachUserId: UserId | null;
   roomId: RoomId | null;
   siteId: SiteId | null;
   deleted: boolean;
@@ -81,10 +91,19 @@ export const planning = pgTable(
   ],
 );
 
-export const planningRelations = relations(planning, ({ many }) => ({
-  club: many(planning),
-  site: many(planning),
-  room: many(planning),
+export const planningRelations = relations(planning, ({ one }) => ({
+  club: one(club, {
+    fields: [planning.clubId],
+    references: [club.id],
+  }),
+  site: one(site, {
+    fields: [planning.siteId],
+    references: [site.id],
+  }),
+  room: one(room, {
+    fields: [planning.roomId],
+    references: [room.id],
+  }),
 }));
 
 export const reservation = pgTable(

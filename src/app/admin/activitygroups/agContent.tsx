@@ -8,15 +8,16 @@ import { Star } from "lucide-react";
 import { DeleteGroup, UpdateGroup } from "@/components/modals/manageActivity";
 import { Badge } from "@/components/ui/shadcn";
 import { Item, ItemActions, ItemContent } from "@/components/ui/shadcn/item";
+import { ActivityGroupId, ClubId } from "@/db/types";
 import { trpc } from "@/lib/trpc/client";
 import { isCUID } from "@/lib/utils";
 
 type AGContentProps = {
-  agId: string;
+  agId: ActivityGroupId;
 };
 
 type ClubGroup = {
-  id: string;
+  id: ClubId;
   name: string;
   activities: number;
 };

@@ -16,6 +16,7 @@ import {
 } from "@/components/modals/manageCoach";
 import { CoachOfferPage } from "@/components/sections/coachOffer";
 import { BadgeVariant, Button } from "@/components/ui/shadcn";
+import { UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
@@ -43,7 +44,9 @@ export default async function CoachOffer({
   const href = await getHref();
   const caller = await createTrpcCaller();
   if (!caller) return null;
-  const offerQuery = await caller.coachs.getCoachOffers(userId);
+  const offerQuery = await caller.coachs.getCoachOffers({
+    coachUserId: userId,
+  });
 
   if (!offerId && offerQuery.length > 0)
     redirect(createLink({ offerId: offerQuery[0]?.id }, href));
@@ -77,7 +80,7 @@ export default async function CoachOffer({
   );
 }
 type OfferContentProps = {
-  userId: string;
+  userId: UserId;
   offerId: string;
 };
 
@@ -86,7 +89,7 @@ async function OfferContent({ userId, offerId }: OfferContentProps) {
   const caller = await createTrpcCaller();
   if (!caller) return null;
   const offerQuery = isCUID(offerId)
-    ? await caller.coachs.getOfferById(offerId)
+    ? await caller.coachs.getOfferById({ offerId })
     : null;
   if (!offerQuery) return null;
   return (

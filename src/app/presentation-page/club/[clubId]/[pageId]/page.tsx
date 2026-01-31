@@ -10,6 +10,7 @@ import { TitleDisplay } from "@/components/sections/title";
 import { TThemes } from "@/components/themeSelector";
 import Title from "@/components/title";
 import PageContainer from "@/components/ui/page/container";
+import { ClubId, PageId } from "@/db/types";
 import { createTrpcCaller, createTrpcCallerStatic } from "@/lib/trpc/caller";
 import { isCUID } from "@/lib/utils";
 
@@ -31,7 +32,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ clubId: string; pageId: string }>;
+  params: Promise<{ clubId: ClubId; pageId: PageId }>;
 }): Promise<Metadata> {
   const { clubId, pageId } = await params;
 
@@ -41,7 +42,7 @@ export async function generateMetadata({
   const caller = await createTrpcCallerStatic();
   if (!caller) return {};
 
-  const queryPage = await caller.pages.getClubPage(pageId);
+  const queryPage = await caller.pages.getClubPage({ pageId });
 
   // If the page doesn't exist or isn't visible/public, ensure it's not indexable.
   // Prefer returning 404 in the page component; this metadata is a safety net.
@@ -69,13 +70,13 @@ export async function generateMetadata({
 export default async function ClubPresentation({
   params,
 }: {
-  params: Promise<{ clubId: string; pageId: string }>;
+  params: Promise<{ clubId: ClubId; pageId: PageId }>;
 }) {
   const { clubId, pageId } = await params;
   const caller = await createTrpcCaller();
   if (!caller) return null;
   if (!isCUID(clubId) || !isCUID(pageId)) return notFound();
-  const queryPage = await caller.pages.getClubPage(pageId);
+  const queryPage = await caller.pages.getClubPage({ pageId });
 
   // If the page doesn't exist (or the server chooses not to return it when not public), 404.
   if (!queryPage) return notFound();

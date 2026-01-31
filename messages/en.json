@@ -264,7 +264,8 @@
     "calendar-updated": "Opening hours updated",
     "calendar-deleted": "Opening hours deleted",
     "activity-updated": "Activity recorded",
-    "activity-deleted": "Activity deleted"
+    "activity-deleted": "Activity deleted",
+    "update-club-calendar": "Update club opening hours"
   },
   "club": {
     "manager-only": "This page is reserved for club managers",

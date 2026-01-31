@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { CoachDisplay } from "@/components/sections/coach";
-import { UserId } from "@/db/types";
+import { PageId, UserId } from "@/db/types";
 import { createTrpcCaller, createTrpcCallerStatic } from "@/lib/trpc/caller";
 import { isCUID } from "@/lib/utils";
 import { Metadata } from "next";
@@ -16,7 +16,7 @@ export async function generateStaticParams() {
   // Expected to return pairs for routes like /presentation-page/coach/[userId]/[pageId]
   const params = await caller.pages.listPublicCoachPresentationParams();
   return (params ?? [])
-    .map((p) => ({ userId: p.coachId, pageId: p.pageId }))
+    .map((p) => ({ userId: p.coachUserId, pageId: p.pageId }))
     .filter((p) => p && isCUID(p.userId) && isCUID(p.pageId));
 }
 
@@ -63,7 +63,7 @@ export async function generateMetadata({
 export default async function CoachPresentation({
   params,
 }: {
-  params: Promise<{ userId: string; pageId: string }>;
+  params: Promise<{ userId: UserId; pageId: PageId }>;
 }) {
   const paramsValue = await params;
   const userId = paramsValue.userId;

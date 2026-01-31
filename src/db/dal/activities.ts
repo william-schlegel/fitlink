@@ -14,7 +14,7 @@ import type {
   UpdateActivityGroupInput,
   UpdateActivityInput,
 } from "@/schemas/activities";
-import { ActivityId, ClubId, RoomId, UserId } from "../types";
+import { ActivityGroupId, ActivityId, ClubId, RoomId, UserId } from "../types";
 
 // ==================== ACTIVITY ====================
 
@@ -39,14 +39,14 @@ export async function getActivitiesForClub(clubId: ClubId) {
   });
 }
 
-export async function getAllActivitiesForGroup(groupId: string) {
+export async function getAllActivitiesForGroup(groupId: ActivityGroupId) {
   return db.query.activity.findMany({
     where: eq(activity.groupId, groupId),
     with: { club: { columns: { name: true } } },
   });
 }
 
-export async function getAllClubsForGroup(groupId: string) {
+export async function getAllClubsForGroup(groupId: ActivityGroupId) {
   return db.query.activity.findMany({
     where: eq(activity.groupId, groupId),
     with: { club: { columns: { name: true, id: true } } },
@@ -67,7 +67,7 @@ export async function deleteActivity(activityId: ActivityId) {
 
 // ==================== ACTIVITY GROUP ====================
 
-export async function getActivityGroupById(id: string) {
+export async function getActivityGroupById(id: ActivityGroupId) {
   return db.query.activityGroup.findFirst({
     where: eq(activityGroup.id, id),
   });
@@ -77,7 +77,7 @@ export async function getActivityGroupsForUser(userId: UserId) {
   return db.query.activityGroup.findMany({
     where: or(
       eq(activityGroup.default, true),
-      eq(activityGroup.coachId, userId),
+      eq(activityGroup.coachUserId, userId),
     ),
     with: { activities: true },
     orderBy: asc(activityGroup.name),
@@ -96,7 +96,7 @@ export async function createActivityGroup(data: CreateActivityGroupInput) {
     .insert(activityGroup)
     .values({
       name: data.name,
-      coachId: data.coachId,
+      coachUserId: data.coachUserId,
       default: data.default,
     })
     .returning();
@@ -112,7 +112,7 @@ export async function updateActivityGroup(data: UpdateActivityGroupInput) {
     .where(eq(activityGroup.id, data.id));
 }
 
-export async function deleteActivityGroup(groupId: string) {
+export async function deleteActivityGroup(groupId: ActivityGroupId) {
   return db.delete(activityGroup).where(eq(activityGroup.id, groupId));
 }
 

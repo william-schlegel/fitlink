@@ -14,6 +14,7 @@ import Image from "next/image";
 
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { pageSectionElement } from "@/db/schema/page";
+import { ClubId, PageId } from "@/db/types";
 import { trpc } from "@/lib/trpc/client";
 import { cn, isCUID } from "@/lib/utils";
 import ThemeSelector, { TThemes } from "../themeSelector";
@@ -42,8 +43,8 @@ import { Textarea } from "../ui/shadcn/textarea";
 import { UploadButton } from "../uploadthing";
 
 type ActivityCreationProps = {
-  clubId: string;
-  pageId: string;
+  clubId: ClubId;
+  pageId: PageId;
 };
 
 type ActivityForm = {
@@ -211,7 +212,7 @@ function AddActivity({ pageId, sectionId }: ActivityProps) {
 }
 
 type UpdateActivityProps = {
-  pageId: string;
+  pageId: PageId;
   activityId: string;
 };
 
@@ -221,7 +222,7 @@ function UpdateActivity({ pageId, activityId }: UpdateActivityProps) {
   const [close, setClose] = useState(false);
   const [initialData, setInitialData] = useState<ActivityForm | undefined>();
   const queryActivity = trpc.pages.getPageSectionElementById.useQuery(
-    activityId,
+    { sectionElementId: activityId },
     {
       enabled: isCUID(activityId),
       refetchOnWindowFocus: false,
@@ -314,7 +315,7 @@ function DeleteActivity({ pageId, activityId }: UpdateActivityProps) {
       title={t("activity.deletion")}
       buttonIcon={<Trash />}
       onConfirm={() => {
-        deleteActivity.mutate(activityId);
+        deleteActivity.mutate({ sectionElementId: activityId });
       }}
       variant="destructive"
       buttonSize="icon"

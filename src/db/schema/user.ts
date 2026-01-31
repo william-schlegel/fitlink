@@ -9,6 +9,15 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
+import {
+  ActivityId,
+  CoachId,
+  ManagerId,
+  MemberId,
+  PageId,
+  SubscriptionId,
+  UserId,
+} from "../types";
 import { user } from "./auth";
 import { activityGroup, club, clubCoachs, clubMembers } from "./club";
 import {
@@ -24,8 +33,8 @@ import { subscription } from "./subscription";
 export const userCoach = pgTable(
   "UserCoach",
   {
-    id: text("id").primaryKey().$defaultFn(createId),
-    userId: text("user_id").notNull().unique(),
+    id: text("id").primaryKey().$defaultFn(createId).$type<CoachId>(),
+    userId: text("user_id").notNull().unique().$type<UserId>(),
     publicName: text("public_name"),
     description: text("description"),
     aboutMe: text("about_me"),
@@ -38,9 +47,13 @@ export const userCoach = pgTable(
     youtubeLink: text("youtube_link"),
     instagramLink: text("instagram_link"),
     rating: real("rating").default(0),
+    pageId: text("page_id").$type<PageId>(),
     pageStyle: text("page_style").default("light"),
     convexRoomId: text("convex_room_id"),
-    coachingActivities: text("coaching_activities").array().default([]),
+    coachingActivities: text("coaching_activities")
+      .array()
+      .default([])
+      .$type<ActivityId[]>(),
   },
   (table) => [index("user_coach_user_idx").on(table.userId)],
 );
@@ -54,15 +67,18 @@ export const userCoachRelations = relations(userCoach, ({ one, many }) => ({
   coachingPrices: many(coachingPrice),
   certifications: many(coachCertification),
   organisms: many(coachOrganisms),
-  page: one(page),
+  page: one(page, {
+    fields: [userCoach.pageId],
+    references: [page.id],
+  }),
   plannings: many(planning),
   marketPlaceOffers: many(coachMarketPlace),
   clubs: many(clubCoachs),
 }));
 
 export const userMember = pgTable("UserMember", {
-  id: text("id").primaryKey().$defaultFn(createId),
-  userId: text("user_id").notNull().unique(),
+  id: text("id").primaryKey().$defaultFn(createId).$type<MemberId>(),
+  userId: text("user_id").notNull().unique().$type<UserId>(),
   inscriptionFeeOffered: boolean("inscription_fee_offered").default(false),
   cancelationFeeOffered: boolean("cancelation_fee_offered").default(false),
   subscriptionStart: timestamp("subscription_start"),
@@ -83,10 +99,12 @@ export const userMemberToSubscription = pgTable(
     id: text("id").primaryKey().$defaultFn(createId),
     userId: text("user_id")
       .notNull()
-      .references(() => userMember.id),
+      .references(() => userMember.id)
+      .$type<UserId>(),
     subscriptionId: text("subscription_id")
       .notNull()
-      .references(() => subscription.id),
+      .references(() => subscription.id)
+      .$type<SubscriptionId>(),
   },
   (table) => [
     index("user_member_to_subscription_idx").on(table.userId),
@@ -111,8 +129,8 @@ export const userMemberToSubscriptionRelations = relations(
 );
 
 export const userManager = pgTable("UserManager", {
-  id: text("id").primaryKey().$defaultFn(createId),
-  userId: text("user_id").notNull().unique(),
+  id: text("id").primaryKey().$defaultFn(createId).$type<ManagerId>(),
+  userId: text("user_id").notNull().unique().$type<UserId>(),
 });
 
 export const userManagerRelations = relations(userManager, ({ one, many }) => ({

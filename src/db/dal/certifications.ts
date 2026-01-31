@@ -10,6 +10,7 @@ import {
   selectedModuleForCoach,
 } from "@/db/schema/coach";
 import { userCoach } from "@/db/schema/user";
+import { UserId } from "../types";
 
 // ==================== CERTIFICATIONS ====================
 
@@ -32,15 +33,15 @@ export async function getCertificationById(id: string) {
   });
 }
 
-export async function getCertificationsForCoach(coachUserId: string) {
+export async function getCertificationsForCoach(coachUserId: UserId) {
   return db.query.coachCertification.findMany({
-    where: eq(coachCertification.coachId, coachUserId),
+    where: eq(coachCertification.coachUserId, coachUserId),
   });
 }
 
-export async function getCoachWithCertifications(userId: string) {
+export async function getCoachWithCertifications(coachUserId: UserId) {
   return db.query.userCoach.findFirst({
-    where: eq(userCoach.userId, userId),
+    where: eq(userCoach.userId, coachUserId),
     columns: {
       id: true,
       userId: true,
@@ -62,13 +63,13 @@ export async function getCoachWithCertifications(userId: string) {
 }
 
 export async function getSelectedModulesForCertifications(
-  coachId: string,
+  coachUserId: UserId,
   certificationIds: string[],
 ) {
   if (certificationIds.length === 0) return [];
   return db.query.selectedModuleForCoach.findMany({
     where: and(
-      eq(selectedModuleForCoach.coachId, coachId),
+      eq(selectedModuleForCoach.coachUserId, coachUserId),
       inArray(selectedModuleForCoach.certificationId, certificationIds),
     ),
     with: {
@@ -87,7 +88,7 @@ export async function createCertification(
   data: {
     name: string;
     obtainedIn: Date;
-    coachId: string;
+    coachUserId: UserId;
     documentUrl?: string;
   },
   tx?: TxClient,
@@ -98,7 +99,7 @@ export async function createCertification(
     .values({
       name: data.name,
       obtainedIn: data.obtainedIn,
-      coachId: data.coachId,
+      coachUserId: data.coachUserId,
       documentUrl: data.documentUrl,
     })
     .returning();
@@ -109,7 +110,7 @@ export async function updateCertification(
     id: string;
     name?: string;
     obtainedIn?: Date;
-    coachId?: string;
+    coachUserId?: UserId;
   },
   tx?: TxClient,
 ) {
@@ -119,7 +120,7 @@ export async function updateCertification(
     .set({
       name: data.name,
       obtainedIn: data.obtainedIn,
-      coachId: data.coachId,
+      coachUserId: data.coachUserId,
     })
     .where(eq(coachCertification.id, data.id))
     .returning();
@@ -131,7 +132,7 @@ export async function deleteCertification(id: string) {
 
 // ==================== SELECTED MODULES FOR COACH ====================
 
-export async function getCoachId(userId: string, tx?: TxClient) {
+export async function getCoachId(userId: UserId, tx?: TxClient) {
   const client = tx ?? db;
   return client.query.userCoach.findFirst({
     where: eq(userCoach.userId, userId),
@@ -149,7 +150,7 @@ export async function getModulesByIds(moduleIds: string[], tx?: TxClient) {
 
 export async function insertSelectedModulesForCoach(
   modules: Array<{
-    coachId: string;
+    coachUserId: UserId;
     certificationId: string;
     certificationModuleId: string;
     certificationOrganismId: string;

@@ -46,7 +46,7 @@ export async function getClubPagesForNav(clubId: ClubId) {
   });
 }
 
-export async function getClubsForManager(managerId: string, limit?: number) {
+export async function getClubsForManager(managerId: UserId, limit?: number) {
   return db.query.club.findMany({
     where: eq(club.managerId, managerId),
     orderBy: asc(club.name),
@@ -79,7 +79,7 @@ export async function getClubForUpdate(clubId: ClubId) {
 export async function createClub(data: {
   name: string;
   address: string;
-  managerId: string;
+  managerId: UserId;
   logoUrl?: string;
 }) {
   return db

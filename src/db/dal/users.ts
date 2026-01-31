@@ -6,7 +6,7 @@ import { roleEnum } from "@/db/schema/enums";
 import { reservation } from "@/db/schema/planning";
 import { pricing } from "@/db/schema/subscription";
 import { userCoach, userManager, userMember } from "@/db/schema/user";
-import { UserId } from "../types";
+import { ActivityId, CoachId, UserId } from "../types";
 
 // ==================== USER QUERIES ====================
 
@@ -182,15 +182,7 @@ export async function getUserSubscriptionsById(userId: UserId) {
         with: {
           subscriptions: {
             with: {
-              subscription: {
-                with: {
-                  activitieGroups: { with: { activityGroup: true } },
-                  activities: { with: { activity: true } },
-                  sites: { with: { site: true } },
-                  rooms: { with: { room: true } },
-                  club: true,
-                },
-              },
+              subscription: true,
             },
           },
         },
@@ -224,7 +216,7 @@ export async function getPricingData(pricingId: string) {
 
 // ==================== COACH DATA FOR USER ====================
 
-export async function getOrCreateCoachData(userId: string, tx?: TxClient) {
+export async function getOrCreateCoachData(userId: UserId, tx?: TxClient) {
   const client = tx ?? db;
   let coachData = await client.query.userCoach.findFirst({
     where: eq(userCoach.userId, userId),
@@ -241,8 +233,8 @@ export async function getOrCreateCoachData(userId: string, tx?: TxClient) {
 
 export async function updateCoachData(
   data: {
-    id: string;
-    userId: string;
+    id: CoachId;
+    userId: UserId;
     longitude?: number;
     latitude?: number;
     searchAddress?: string;
@@ -250,7 +242,7 @@ export async function updateCoachData(
     publicName?: string;
     aboutMe?: string;
     description?: string;
-    coachingActivities?: string[];
+    coachingActivities?: ActivityId[];
     convexRoomId?: string;
   },
   tx?: TxClient,
@@ -276,7 +268,7 @@ export async function updateCoachData(
 
 // ==================== MEMBER DATA ====================
 
-export async function getMemberData(memberId: string) {
+export async function getMemberData(memberId: UserId) {
   const md = await db.query.userMember.findFirst({
     where: eq(userMember.userId, memberId),
     with: {
@@ -284,10 +276,6 @@ export async function getMemberData(memberId: string) {
         with: {
           subscription: {
             with: {
-              activitieGroups: { with: { activityGroup: true } },
-              activities: { with: { activity: true } },
-              sites: { with: { site: true } },
-              rooms: { with: { room: true } },
               club: true,
             },
           },

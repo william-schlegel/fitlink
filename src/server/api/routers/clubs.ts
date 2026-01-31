@@ -194,12 +194,11 @@ export const clubRouter = createTRPCRouter({
       z.object({
         clubId: ZodClubId,
         coachUserId: ZodUserId,
-        managerId: ZodUserId.optional(),
+        managerUserId: ZodUserId.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const coachId = input.coachUserId;
-      requireAdminOrOwner(ctx.user, coachId);
+      requireAdminOrOwner(ctx.user, input.coachUserId);
 
       const existing = await getClubCoachRelation(
         input.clubId,

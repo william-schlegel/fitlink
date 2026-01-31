@@ -1,3 +1,4 @@
+import { ActivityId, ClubId, PageId, SiteId, UserId } from "@/db/types";
 import { type PromptTranslations, type ResponseTranslations } from "./gemini";
 import {
   getConfiguredProvider,
@@ -27,30 +28,30 @@ const DEFAULT_RESPONSES: ResponseTranslations = {
 
 // Types for search results
 export type ClubResult = {
-  siteId: string;
+  siteId: SiteId;
   siteName: string;
   siteAddress: string;
   latitude: number | null;
   longitude: number | null;
-  clubId: string;
+  clubId: ClubId;
   clubName: string;
-  activityGroups: string[];
-  pageId?: string;
+  activityGroupsName: string[];
+  pageId?: PageId;
   pagePublished: boolean;
   distance: number;
 };
 
 export type CoachResult = {
   id: string;
-  userId: string;
+  userId: UserId;
   publicName: string | null;
   description: string | null;
   rating: number | null;
-  coachingActivities: string[] | null;
+  coachingActivities: ActivityId[] | null;
   latitude: number | null;
   longitude: number | null;
   range: number | null;
-  pageId?: string;
+  pageId?: PageId;
   pagePublished?: boolean;
   userName: string | null;
   userImage: string | null;
@@ -67,7 +68,7 @@ export type CompanyOfferResult = {
   id: string;
   name: string;
   description: string | null;
-  coachId: string;
+  coachUserId: UserId;
   coachName: string;
   coachAddress: string | null;
   physical: boolean | null;
@@ -96,14 +97,14 @@ export type AssistantMessage = {
 // Tool executor type
 type ToolExecutor = {
   searchClubs: (args: {
-    activity?: string;
+    activity?: ActivityId;
     lat: number;
     lng: number;
     radiusKm?: number;
     limit?: number;
   }) => Promise<ClubResult[]>;
   searchCoaches: (args: {
-    activity?: string;
+    activity?: ActivityId;
     lat: number;
     lng: number;
     radiusKm?: number;
@@ -111,7 +112,7 @@ type ToolExecutor = {
   }) => Promise<CoachResult[]>;
   resolveLocation: (args: { address: string }) => Promise<LocationResult[]>;
   searchCompanyOffers: (args: {
-    activity?: string;
+    activity?: ActivityId;
     lat: number;
     lng: number;
     radiusKm?: number;
@@ -141,7 +142,7 @@ async function executeToolCalls(
     switch (call.name) {
       case "search_clubs": {
         const args = call.args as {
-          activity?: string;
+          activity?: ActivityId;
           lat: number;
           lng: number;
           radiusKm?: number;
@@ -152,7 +153,7 @@ async function executeToolCalls(
       }
       case "search_coaches": {
         const args = call.args as {
-          activity?: string;
+          activity?: ActivityId;
           lat: number;
           lng: number;
           radiusKm?: number;
@@ -168,7 +169,7 @@ async function executeToolCalls(
       }
       case "search_company_offers": {
         const args = call.args as {
-          activity?: string;
+          activity?: ActivityId;
           lat: number;
           lng: number;
           radiusKm?: number;
@@ -206,7 +207,7 @@ function formatResultsForModel(results: {
         ? `/presentation-page/club/${club.clubId}/${club.pageId}`
         : null;
       parts.push(
-        `${i + 1}. ${club.clubName} (${club.siteName}) - ${club.distance.toFixed(1)}km away - Activities: ${club.activityGroups.join(", ")}${pageUrl ? ` - Profile: ${pageUrl}` : ""}`,
+        `${i + 1}. ${club.clubName} (${club.siteName}) - ${club.distance.toFixed(1)}km away - Activities: ${club.activityGroupsName.join(", ")}${pageUrl ? ` - Profile: ${pageUrl}` : ""}`,
       );
     });
   }
@@ -355,7 +356,7 @@ export function createToolExecutor(trpcCaller: {
   assistant: {
     searchClubs: {
       query: (input: {
-        activity?: string;
+        activity?: ActivityId;
         lat: number;
         lng: number;
         radiusKm?: number;
@@ -364,7 +365,7 @@ export function createToolExecutor(trpcCaller: {
     };
     searchCoaches: {
       query: (input: {
-        activity?: string;
+        activity?: ActivityId;
         lat: number;
         lng: number;
         radiusKm?: number;
@@ -376,7 +377,7 @@ export function createToolExecutor(trpcCaller: {
     };
     searchCompanyOffers: {
       query: (input: {
-        activity?: string;
+        activity?: ActivityId;
         lat: number;
         lng: number;
         radiusKm?: number;

@@ -72,7 +72,7 @@ export async function acceptSearchCoachAction(
     const updated = await caller.clubs.updateClubCoach({
       clubId,
       coachUserId: notification.userId,
-      managerId: notification.userFromId,
+      managerUserId: notification.userFromId,
     });
     if (updated) {
       const answer = await createNotificationInConvex({

@@ -30,7 +30,6 @@ import {
   getCertificationsForCoach,
   getCoachData,
   getCoachHomePage,
-  getCoachId,
   getCoachOffers,
   getCoachsFromDistance,
   getCoachWithCertifications,
@@ -47,7 +46,7 @@ import {
   updateActivitiesForModule,
 } from "@/db/dal";
 import { coachingLevelListEnum, coachingTargetEnum } from "@/db/schema/enums";
-import { ZodClubId, ZodUserId } from "@/db/types";
+import { ZodActivityGroupId, ZodClubId, ZodUserId } from "@/db/types";
 import { DEFAULT_RANGE, LATITUDE, LONGITUDE } from "@/lib/defaultValues";
 import { calculateDistance } from "@/lib/distance";
 import {
@@ -64,13 +63,13 @@ const CertificationData = z.object({
   name: z.string(),
   obtainedIn: z.date(),
   documentUrl: z.string().optional(),
-  userId: z.string(),
+  coachUserId: ZodUserId,
   modules: z.array(z.cuid2()),
-  activityGroups: z.array(z.cuid2()),
+  activityGroups: z.array(ZodActivityGroupId),
 });
 
 const OfferData = z.object({
-  coachId: ZodUserId,
+  userId: ZodUserId,
   id: z.cuid2(),
   name: z.string(),
   target: z.enum(coachingTargetEnum.enumValues),
@@ -99,62 +98,63 @@ const OfferData = z.object({
 });
 
 export const coachRouter = createTRPCRouter({
-  getCoachById: protectedProcedure.input(ZodUserId).query(async ({ input }) => {
-    const coach = await dalGetCoachById(input);
-    if (!coach) return null;
+  getCoachById: protectedProcedure
+    .input(z.object({ userId: ZodUserId }))
+    .query(async ({ input }) => {
+      const coach = await dalGetCoachById(input.userId);
+      if (!coach) return null;
 
-    const certifications = coach.coachData?.certifications ?? [];
-    const certificationIds = certifications.map((c) => c.id);
-    const coachId = coach.coachData?.id;
+      const certifications = coach.coachData?.certifications ?? [];
+      const certificationIds = certifications.map((c) => c.id);
 
-    let selectedModules: Array<{
-      certificationId: string;
-      module: { id: string; name: string };
-    }> = [];
+      let selectedModules: Array<{
+        certificationId: string;
+        module: { id: string; name: string };
+      }> = [];
 
-    if (certificationIds.length > 0 && coachId) {
-      const modules = await getSelectedModulesForCoach(
-        coachId,
-        certificationIds,
-      );
+      if (certificationIds.length > 0 && input.userId) {
+        const modules = await getSelectedModulesForCoach(
+          input.userId,
+          certificationIds,
+        );
 
-      selectedModules = modules.map((sm) => ({
-        certificationId: sm.certificationId,
-        module: {
-          id: sm.module.id,
-          name: sm.module.name,
-        },
-      }));
-    }
-
-    const modulesByCertification = new Map<
-      string,
-      Array<{ id: string; name: string }>
-    >();
-    for (const sm of selectedModules) {
-      if (!modulesByCertification.has(sm.certificationId)) {
-        modulesByCertification.set(sm.certificationId, []);
+        selectedModules = modules.map((sm) => ({
+          certificationId: sm.certificationId,
+          module: {
+            id: sm.module.id,
+            name: sm.module.name,
+          },
+        }));
       }
-      modulesByCertification.get(sm.certificationId)!.push(sm.module);
-    }
 
-    const pages = await getCoachHomePage(coach?.id ?? "");
-    const imageData = pages[0];
-    const imgData = imageData?.sections?.[0]?.elements?.[0]?.imageUrls?.[0];
-    const imageUrl = imgData ?? coach.image ?? "/images/dummy.jpg";
+      const modulesByCertification = new Map<
+        string,
+        Array<{ id: string; name: string }>
+      >();
+      for (const sm of selectedModules) {
+        if (!modulesByCertification.has(sm.certificationId)) {
+          modulesByCertification.set(sm.certificationId, []);
+        }
+        modulesByCertification.get(sm.certificationId)!.push(sm.module);
+      }
 
-    const certificationModules = certifications.map((cert) => ({
-      id: cert.id,
-      name: cert.name,
-      modules: modulesByCertification.get(cert.id) ?? [],
-    }));
+      const pages = await getCoachHomePage(coach?.id ?? "");
+      const imageData = pages[0];
+      const imgData = imageData?.sections?.[0]?.elements?.[0]?.imageUrls?.[0];
+      const imageUrl = imgData ?? coach.image ?? "/images/dummy.jpg";
 
-    return {
-      ...coach,
-      certificationModules,
-      imageUrl: imageUrl ?? "/images/dummy.jpg",
-    };
-  }),
+      const certificationModules = certifications.map((cert) => ({
+        id: cert.id,
+        name: cert.name,
+        modules: modulesByCertification.get(cert.id) ?? [],
+      }));
+
+      return {
+        ...coach,
+        certificationModules,
+        imageUrl: imageUrl ?? "/images/dummy.jpg",
+      };
+    }),
 
   getCoachsFromDistance: publicProcedure
     .input(
@@ -195,7 +195,7 @@ export const coachRouter = createTRPCRouter({
           {
             name: input.name,
             obtainedIn: input.obtainedIn,
-            coachId: input.userId,
+            coachUserId: input.coachUserId,
             documentUrl: input.documentUrl,
           },
           tx,
@@ -204,7 +204,6 @@ export const coachRouter = createTRPCRouter({
         const certifId = certif[0].id;
 
         if (input.modules.length) {
-          const coach = await getCoachId(input.userId, tx);
           const modules = await getModulesByIds(input.modules, tx);
           const byId = new Map(modules.map((m) => [m.id, m]));
           await insertSelectedModulesForCoach(
@@ -215,7 +214,7 @@ export const coachRouter = createTRPCRouter({
                   Boolean(m),
               )
               .map((m) => ({
-                coachId: coach?.id ?? "",
+                coachUserId: input.coachUserId,
                 certificationId: certifId,
                 certificationModuleId: m.id,
                 certificationOrganismId: m.certificationOrganismId,
@@ -242,13 +241,12 @@ export const coachRouter = createTRPCRouter({
             id: certifId,
             name: input.name,
             obtainedIn: input.obtainedIn,
-            coachId: input.userId,
+            coachUserId: input.coachUserId,
           },
           tx,
         );
         await deleteSelectedModulesForCertification(certifId, tx);
         if (input.modules?.length) {
-          const coach = await getCoachId(input.userId ?? "", tx);
           const modules = await getModulesByIds(input.modules, tx);
           const byId = new Map(modules.map((m) => [m.id, m]));
           await insertSelectedModulesForCoach(
@@ -259,7 +257,7 @@ export const coachRouter = createTRPCRouter({
                   Boolean(m),
               )
               .map((m) => ({
-                coachId: coach?.id ?? "",
+                coachUserId: input.coachUserId,
                 certificationId: certifId,
                 certificationModuleId: m.id,
                 certificationOrganismId: m.certificationOrganismId,
@@ -279,9 +277,9 @@ export const coachRouter = createTRPCRouter({
   getAllCoachs: publicProcedure.query(() => getAllCoaches()),
 
   getCoachsForClub: publicProcedure
-    .input(ZodClubId)
+    .input(z.object({ clubId: ZodClubId }))
     .query(async ({ input }) => {
-      const clb = await dalGetCoachsForClub(input);
+      const clb = await dalGetCoachsForClub(input.clubId);
       return (
         clb?.coaches.map(
           (c: { coach: { user: { id: string; name: string } } }) =>
@@ -291,17 +289,17 @@ export const coachRouter = createTRPCRouter({
     }),
 
   getCertificationsForCoach: protectedProcedure
-    .input(z.string())
+    .input(z.object({ coachUserId: ZodUserId }))
     .query(async ({ input }) => {
-      const coach = await getCoachWithCertifications(input);
+      const coach = await getCoachWithCertifications(input.coachUserId);
       if (!coach) return null;
 
-      const certifications = await getCertificationsForCoach(input);
+      const certifications = await getCertificationsForCoach(coach.userId);
       const certificationIds = certifications.map((c) => c.id);
       const selectedModules =
         certificationIds.length > 0
           ? await getSelectedModulesForCertifications(
-              coach.id,
+              coach.userId,
               certificationIds,
             )
           : [];
@@ -334,9 +332,9 @@ export const coachRouter = createTRPCRouter({
     }),
 
   getCertificationById: protectedProcedure
-    .input(z.cuid2())
+    .input(z.object({ certificationId: z.cuid2() }))
     .query(async ({ input }) => {
-      const cert = await getCertificationById(input);
+      const cert = await getCertificationById(input.certificationId);
       if (!cert) return cert;
       return {
         ...cert,
@@ -367,9 +365,11 @@ export const coachRouter = createTRPCRouter({
   }),
 
   getCertificationOrganismById: protectedProcedure
-    .input(z.cuid2())
+    .input(z.object({ certificationOrganismId: z.cuid2() }))
     .query(async ({ input }) => {
-      const cg = await getCertificationOrganismById(input);
+      const cg = await getCertificationOrganismById(
+        input.certificationOrganismId,
+      );
       if (!cg) return null;
       type CoachWithCount = {
         id: string;
@@ -487,10 +487,10 @@ export const coachRouter = createTRPCRouter({
     ),
 
   deleteOrganism: protectedProcedure
-    .input(z.cuid2())
+    .input(z.object({ organismId: z.cuid2() }))
     .mutation(async ({ input }) => {
       await isAdmin(true);
-      return dalDeleteOrganism(input);
+      return dalDeleteOrganism(input.organismId);
     }),
 
   createModule: protectedProcedure
@@ -536,12 +536,12 @@ export const coachRouter = createTRPCRouter({
     }),
 
   getCoachData: protectedProcedure
-    .input(z.cuid2())
-    .query(({ input }) => getCoachData(input)),
+    .input(z.object({ coachUserId: ZodUserId }))
+    .query(({ input }) => getCoachData(input.coachUserId)),
 
   getOfferById: protectedProcedure
-    .input(z.cuid2())
-    .query(({ input }) => getOfferById(input)),
+    .input(z.object({ offerId: z.cuid2() }))
+    .query(({ input }) => getOfferById(input.offerId)),
 
   getOffersForCompanies: publicProcedure
     .input(
@@ -565,9 +565,9 @@ export const coachRouter = createTRPCRouter({
     ),
 
   getOfferWithDetails: publicProcedure
-    .input(z.cuid2())
+    .input(z.object({ offerId: z.cuid2() }))
     .query(async ({ input }) => {
-      const offer = await getOfferWithDetails(input);
+      const offer = await getOfferWithDetails(input.offerId);
       const pageImage =
         offer?.coach.page?.sections?.[0]?.elements?.[0]?.imageUrls?.[0];
       const imageUrl =
@@ -577,13 +577,13 @@ export const coachRouter = createTRPCRouter({
     }),
 
   getCoachOffers: protectedProcedure
-    .input(z.string())
-    .query(({ input }) => getCoachOffers(input)),
+    .input(z.object({ coachUserId: ZodUserId }))
+    .query(({ input }) => getCoachOffers(input.coachUserId)),
 
   createCoachOffer: protectedProcedure
     .input(OfferData.omit({ id: true }))
     .mutation(async ({ input }) => {
-      const u = await getUserWithPricingForOffer(input.coachId);
+      const u = await getUserWithPricingForOffer(input.userId);
       const pricingData = u?.pricing;
       const target = pricingData?.features.find(
         (f: { feature: string }) => f.feature === "COACH_OFFER_COMPANY",
@@ -612,19 +612,21 @@ export const coachRouter = createTRPCRouter({
     }),
 
   deleteCoachOffer: protectedProcedure
-    .input(z.cuid2())
-    .mutation(({ input }) => deleteCoachOffer(input)),
+    .input(z.object({ offerId: z.cuid2() }))
+    .mutation(({ input }) => deleteCoachOffer(input.offerId)),
 
   getOfferActivityByName: publicProcedure
-    .input(z.string())
+    .input(z.object({ activityName: z.string() }))
     .query(async ({ input }) => {
-      const coaches = await dalGetOfferActivityByName(input);
+      const coaches = await dalGetOfferActivityByName(input.activityName);
 
       const allActivities = new Set<string>();
       coaches.forEach((coach) => {
         if (coach.coachingActivities) {
           coach.coachingActivities.forEach((activity) => {
-            if (activity.toLowerCase().includes(input.toLowerCase())) {
+            if (
+              activity.toLowerCase().includes(input.activityName.toLowerCase())
+            ) {
               allActivities.add(activity);
             }
           });

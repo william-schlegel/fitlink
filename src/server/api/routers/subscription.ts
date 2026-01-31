@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
@@ -8,6 +7,7 @@ import {
   getSubscriptionById as dalGetSubscriptionById,
   getSubscriptionsForClub as dalGetSubscriptionsForClub,
   updateSubscription as dalUpdateSubscription,
+  dalUpdateSubscriptionSelection,
   getActivitiesListForClub,
   getClubWithActivities,
   getRoomsWithActivities,
@@ -21,13 +21,17 @@ import {
   subscriptionRestrictionEnum,
 } from "@/db/schema/enums";
 import {
+  ActivityGroupId,
   ActivityId,
+  ClubId,
   RoomId,
   SiteId,
+  ZodActivityGroupId,
   ZodActivityId,
   ZodClubId,
   ZodRoomId,
   ZodSiteId,
+  ZodSubscriptionId,
 } from "@/db/types";
 import {
   createTRPCRouter,
@@ -36,7 +40,7 @@ import {
 } from "@/lib/trpc/server";
 
 const subscriptionObject = z.object({
-  id: z.cuid2(),
+  id: ZodSubscriptionId,
   name: z.string(),
   highlight: z.string(),
   description: z.string(),
@@ -44,7 +48,7 @@ const subscriptionObject = z.object({
   monthly: z.number(),
   yearly: z.number(),
   cancelationFee: z.number(),
-  clubId: z.cuid2(),
+  clubId: ZodClubId,
   mode: z.enum(subscriptionModeEnum.enumValues),
   restriction: z.enum(subscriptionRestrictionEnum.enumValues),
 });
@@ -52,23 +56,23 @@ const subscriptionObject = z.object({
 export async function getDataNames(
   siteIds: SiteId[],
   roomIds: RoomId[],
-  activityGroupIds: string[],
+  activityGroupIds: ActivityGroupId[],
   activityIds: ActivityId[],
 ) {
   return dalGetDataNames(siteIds, roomIds, activityGroupIds, activityIds);
 }
 
-export async function getSubscriptionsForClub(clubId: string) {
+export async function getSubscriptionsForClub(clubId: ClubId) {
   return dalGetSubscriptionsForClub(clubId);
 }
 
 export const subscriptionRouter = createTRPCRouter({
   getSubscriptionById: publicProcedure
-    .input(z.cuid2())
+    .input(ZodSubscriptionId)
     .query(({ input }) => dalGetSubscriptionById(input)),
 
   getSubscriptionsForClub: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodClubId)
     .query(({ input }) => getSubscriptionsForClub(input)),
 
   createSubscription: protectedProcedure
@@ -76,35 +80,27 @@ export const subscriptionRouter = createTRPCRouter({
     .mutation(({ input }) => dalCreateSubscription(input)),
 
   updateSubscription: protectedProcedure
-    .input(subscriptionObject.partial())
-    .mutation(({ input }) =>
-      dalUpdateSubscription({ id: input.id ?? "", ...input }),
-    ),
+    .input(subscriptionObject.partial().extend({ id: ZodSubscriptionId }))
+    .mutation(({ input }) => dalUpdateSubscription({ ...input })),
 
   updateSubscriptionSelection: protectedProcedure
     .input(
       z.object({
-        subscriptionId: z.cuid2(),
-        sites: z.array(z.cuid2()),
-        rooms: z.array(z.cuid2()),
-        activityGroups: z.array(z.cuid2()),
-        activities: z.array(z.cuid2()),
+        subscriptionId: ZodSubscriptionId,
+        sites: z.array(ZodSiteId),
+        rooms: z.array(ZodRoomId),
+        activityGroups: z.array(ZodActivityGroupId),
+        activities: z.array(ZodActivityId),
       }),
     )
-    .mutation(() => {
-      return null;
+    .mutation(({ input }) => {
+      dalUpdateSubscriptionSelection({ ...input });
     }),
 
   deleteSubscription: protectedProcedure
-    .input(z.cuid2())
+    .input(ZodSubscriptionId)
     .mutation(async ({ input }) => {
-      const result = await dalDeleteSubscription(input);
-      if (!result)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `unknown subscription ${input}`,
-        });
-      return result;
+      return dalDeleteSubscription(input);
     }),
 
   getPossibleChoice: protectedProcedure
@@ -202,7 +198,7 @@ export const subscriptionRouter = createTRPCRouter({
       z.object({
         siteIds: z.array(ZodSiteId),
         roomIds: z.array(ZodRoomId),
-        activityGroupIds: z.array(z.cuid2()),
+        activityGroupIds: z.array(ZodActivityGroupId),
         activityIds: z.array(ZodActivityId),
       }),
     )

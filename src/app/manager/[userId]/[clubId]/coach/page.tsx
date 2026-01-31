@@ -38,14 +38,14 @@ export default async function ManageCoachs({
   )
     return <div>{t("manager-only")}</div>;
   const { userId, clubId } = await params;
-  const coachId = (await searchParams).coachId;
+  const coachUserId = (await searchParams).coachId;
   const caller = await createTrpcCaller();
   if (!caller) return null;
   const clubQuery = await caller.clubs.getClubById({ clubId, userId });
 
-  const coachsQuery = await caller.coachs.getCoachsForClub(clubId);
+  const coachsQuery = await caller.coachs.getCoachsForClub({ clubId });
   const href = await getHref();
-  if (coachsQuery.length && !coachId)
+  if (coachsQuery.length && !coachUserId)
     redirect(createLink({ coachId: coachsQuery[0]?.id }, href));
 
   const coachList = coachsQuery.map((coach) => ({
@@ -77,12 +77,12 @@ export default async function ManageCoachs({
       <LayoutPageMain>
         <LayoutPageList
           list={coachList}
-          itemId={coachId}
+          itemId={coachUserId}
           noItemsText={t("coach.no-coachs")}
         />
 
-        {Boolean(coachId) ? (
-          <CoachContent clubId={clubId} coachId={coachId} />
+        {Boolean(coachUserId) ? (
+          <CoachContent clubId={clubId} coachUserId={coachUserId} />
         ) : null}
       </LayoutPageMain>
     </LayoutPage>
@@ -91,14 +91,14 @@ export default async function ManageCoachs({
 
 type CoachContentProps = {
   clubId: ClubId;
-  coachId: UserId;
+  coachUserId: UserId;
 };
 
-async function CoachContent({ coachId, clubId }: CoachContentProps) {
+async function CoachContent({ coachUserId, clubId }: CoachContentProps) {
   const t = await getTranslations("club");
   const caller = await createTrpcCaller();
   if (!caller) return null;
-  const queryCoach = await caller.coachs.getCoachById(coachId);
+  const queryCoach = await caller.coachs.getCoachById({ userId: coachUserId });
   if (!queryCoach) return <div>{t("coach.coach-unknown")}</div>;
   return (
     <section className="w-full space-y-4">
@@ -128,7 +128,7 @@ async function CoachContent({ coachId, clubId }: CoachContentProps) {
       </article>
       <article className="rounded-md border border-primary p-2">
         <h2>{t("coach.weekly-planning")}</h2>
-        <CoachPlanning coachId={coachId} clubId={clubId} />
+        <CoachPlanning coachUserId={coachUserId} clubId={clubId} />
       </article>
     </section>
   );

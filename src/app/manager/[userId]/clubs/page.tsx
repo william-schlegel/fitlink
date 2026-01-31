@@ -9,6 +9,7 @@ import {
 } from "@/components/layoutPage";
 import CreateClub from "@/components/modals/manageClub";
 import LockedButton from "@/components/ui/lockedButton";
+import { ClubId, UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import createLink from "@/lib/createLink";
 import { getHref } from "@/lib/getHref";
@@ -19,8 +20,8 @@ export default async function ManageClubs({
   params,
   searchParams,
 }: {
-  params: Promise<{ userId: string }>;
-  searchParams: Promise<{ clubId: string }>;
+  params: Promise<{ userId: UserId }>;
+  searchParams: Promise<{ clubId: ClubId }>;
 }) {
   const user = await getActualUser();
   const t = await getTranslations("club");
