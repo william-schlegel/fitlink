@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gte, ilike, SQL } from "drizzle-orm";
+import { and, asc, between, count, eq, gte, ilike, SQL } from "drizzle-orm";
 
 import { db, TxClient } from "@/db";
 import { user } from "@/db/schema/auth";
@@ -6,6 +6,7 @@ import { roleEnum } from "@/db/schema/enums";
 import { reservation } from "@/db/schema/planning";
 import { pricing } from "@/db/schema/subscription";
 import { userCoach, userManager, userMember } from "@/db/schema/user";
+import { endOfDay, startOfDay } from "date-fns";
 import { ActivityId, CoachId, UserId } from "../types";
 
 // ==================== USER QUERIES ====================
@@ -200,6 +201,18 @@ export async function getReservationsByUserId(userId: UserId, after: Date) {
     with: {
       planning: true,
     },
+  });
+}
+
+export async function getReservationsByUserIdForDate(
+  userId: UserId,
+  date: Date,
+) {
+  return db.query.reservation.findMany({
+    where: and(
+      eq(reservation.userId, userId),
+      between(reservation.date, startOfDay(date), endOfDay(date)),
+    ),
   });
 }
 

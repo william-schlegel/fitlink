@@ -177,6 +177,7 @@ export function PlanningContent({
       startTime: data.startTime,
       duration: data.duration,
       deleted: false,
+      noCalendar: false,
     };
     addActivity.mutate({
       planningId,

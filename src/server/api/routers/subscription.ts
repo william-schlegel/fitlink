@@ -93,8 +93,8 @@ export const subscriptionRouter = createTRPCRouter({
         activities: z.array(ZodActivityId),
       }),
     )
-    .mutation(({ input }) => {
-      dalUpdateSubscriptionSelection({ ...input });
+    .mutation(async ({ input }) => {
+      return dalUpdateSubscriptionSelection({ ...input });
     }),
 
   deleteSubscription: protectedProcedure

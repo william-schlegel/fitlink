@@ -54,6 +54,7 @@ export const planningItemSchema = z.object({
   roomId: ZodRoomId.nullable(),
   siteId: ZodSiteId.nullable(),
   deleted: z.boolean().default(false),
+  noCalendar: z.boolean().default(false),
 });
 
 export const planningSchema = z.object({
@@ -89,6 +90,7 @@ export const planningSearchItemSchema = z.object({
   siteId: ZodSiteId.nullable(),
   siteName: z.string(),
   deleted: z.boolean().default(false),
+  noCalendar: z.boolean().default(false),
 });
 
 export const planningSearchReturnSchema = z.object({

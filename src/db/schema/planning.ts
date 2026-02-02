@@ -70,6 +70,7 @@ export type PlanningData = {
   roomId: RoomId | null;
   siteId: SiteId | null;
   deleted: boolean;
+  noCalendar: boolean;
 };
 
 export const planning = pgTable(

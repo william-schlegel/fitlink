@@ -5,6 +5,7 @@ import { user } from "@/db/schema/auth";
 import { activity, room, site } from "@/db/schema/club";
 import { dayNameEnum } from "@/db/schema/enums";
 import { planning, reservation } from "@/db/schema/planning";
+import { getDayName } from "@/lib/dates/days";
 import { isCUID } from "@/lib/utils";
 import {
   CreatePlanningInput,
@@ -23,6 +24,8 @@ import {
   SiteId,
   UserId,
 } from "../types";
+import { getActivitiesForClub } from "./activities";
+import { getReservationsByUserIdForDate } from "./users";
 
 // ==================== PLANNING QUERIES ====================
 
@@ -180,6 +183,7 @@ export async function fillPlanningItems(
         siteId: item.siteId,
         siteName,
         deleted: item.deleted,
+        noCalendar: item.noCalendar,
       });
     }),
   );
@@ -280,6 +284,150 @@ export async function getMemberDataWithSubscriptions(memberId: UserId) {
       },
     },
   });
+}
+
+export type ReservationData = {
+  id: ReservationId;
+  slotNumber: number | null;
+  planningId: PlanningId | null;
+  slotId: string | null;
+};
+
+export async function getMemberDailyPlanning(memberId: UserId, date: Date) {
+  const userData = await getMemberDataWithSubscriptions(memberId);
+  const clubIds = Array.from(
+    new Set(
+      userData?.memberData?.subscriptions.map((s) => s.subscription.clubId),
+    ),
+  );
+  const planningClubs = await getPlanningsForClubIds(clubIds);
+  const dayName = getDayName(date);
+  const planningData: PlanningSearchReturnData[] = [];
+
+  for (const planningClub of planningClubs) {
+    const sub = userData?.memberData?.subscriptions
+      .flatMap((s) => s.subscription)
+      .filter((s) => s.clubId === planningClub.clubId);
+
+    const activityIds = new Set<ActivityId>();
+
+    for (const s of sub ?? []) {
+      if (s.mode === "ALL_INCLUSIVE") {
+        const clubActivities = await getActivitiesForClub(planningClub.clubId);
+        for (const a of clubActivities?.activities ?? []) {
+          activityIds.add(a.id);
+        }
+      }
+      if (s.mode === "DAY" && s.day === dayName) {
+        const clubActivities = await getActivitiesForClub(planningClub.clubId);
+        for (const a of clubActivities?.activities ?? []) {
+          activityIds.add(a.id);
+        }
+      }
+      if (s.mode === "COURSE") {
+        // TODO: manage subscriptions per sourse
+      }
+      if (s.mode === "ACTIVITY_GROUP" && s.activityGroups.length > 0) {
+        const activityGroupIds = s.activityGroups;
+        const activitiesFromGroups =
+          await getActivitiesForGroups(activityGroupIds);
+        for (const a of activitiesFromGroups) {
+          activityIds.add(a.id);
+        }
+      }
+
+      if (s.mode === "ACTIVITY" && s.activities.length > 0) {
+        for (const a of s.activities) {
+          activityIds.add(a);
+        }
+      }
+    }
+
+    const planItems = await fillPlanningItems(planningClub.planningItems, {
+      day: dayName,
+      activityIds: Array.from(activityIds),
+    });
+
+    planningData.push({
+      clubId: planningClub.clubId,
+      clubName: planningClub.club.name,
+      siteId: planningClub.siteId,
+      siteName: planningClub.site?.name ?? "",
+      roomId: planningClub.roomId,
+      roomName: planningClub.room?.name ?? "",
+      id: planningClub.id,
+      name: planningClub.name,
+      startDate: planningClub.startDate,
+      endDate: planningClub.endDate,
+      planningItems: planItems,
+    });
+
+    // const pa = await getPlanningActivitiesWithFilters(
+    //   planningClub.id,
+    //   dayName,
+    //   input.date,
+    // );
+
+    // const withNoCalendar = await getActivitiesWithNoCalendar(
+    //   planningClub.clubId,
+    //   input.date,
+    // );
+  }
+  const userReservations = await getReservationsByUserIdForDate(memberId, date);
+  //   planningData.push({
+  //     ...planningClub,
+  //     activities: pa.map((p) => {
+  //       const allReservations = p.reservations.filter(
+  //         (r) => r.planningActivityId === p.id,
+  //       );
+  //       return {
+  //         ...p,
+  //         reservations: allReservations.map((r) => ({
+  //           id:
+  //             r.userId === input.memberId
+  //               ? (r.planningActivityId ?? p.id)
+  //               : r.id,
+  //           date: r.date,
+  //         })),
+  //       };
+  //     }),
+  //     withNoCalendar: withNoCalendar.map((wnc) => {
+  //       const allReservations = (wnc.reservations ?? []).filter(
+  //         (r) => r.activityId === wnc.id,
+  //       );
+  //       return {
+  //         id: wnc.id,
+  //         name: wnc.name,
+  //         clubId: wnc.clubId,
+  //         reservationDuration: wnc.reservationDuration,
+  //         rooms: (wnc.rooms ?? []).map((ra) => ({
+  //           id: ra.room.id,
+  //           name: ra.room.name,
+  //           capacity: ra.room.capacity,
+  //           reservation: ra.room.reservation ?? "NONE",
+  //         })),
+  //         reservations: allReservations.map((r) => ({
+  //           id:
+  //             r.userId === input.memberId ? (r.activityId ?? wnc.id) : r.id,
+  //           date: r.date,
+  //           roomName: r.room?.name ?? "",
+  //         })),
+  //       };
+  //     }),
+  //   });
+  // }
+
+  const reservationData: ReservationData[] = userReservations.map((r) => ({
+    id: r.id,
+    slotNumber: r.slotNumber,
+    planningId: r.planningId,
+    slotId: r.slotId,
+  }));
+
+  return {
+    planning: planningData,
+    reservations: reservationData,
+  };
 }
 
 export async function getPlanningsForClubIds(clubIds: ClubId[]) {

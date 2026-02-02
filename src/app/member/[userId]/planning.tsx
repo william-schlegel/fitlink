@@ -1,6 +1,6 @@
 "use client";
 
-import { isBefore, isEqual, startOfToday } from "date-fns";
+import { isBefore, startOfToday } from "date-fns";
 import { useTranslations } from "next-intl";
 
 import { Spinner } from "@/components/ui/shadcn/spinner";
@@ -8,35 +8,10 @@ import { trpc } from "@/lib/trpc/client";
 
 import { Badge, Button } from "@/components/ui/shadcn";
 
+import { ReservationData } from "@/db/dal";
 import { PlanningId, RoomId } from "@/db/types";
+import { isCUID } from "@/lib/utils";
 import { toast } from "sonner";
-
-// type RouterOutputs = inferRouterOutputs<AppRouter>;
-// type MemberDailyPlanning = RouterOutputs["plannings"]["getMemberDailyPlanning"];
-// type PlanningData = NonNullable<MemberDailyPlanning>[number];
-// type ActivityNoCalendar = PlanningData["withNoCalendar"][number];
-
-// // Extract nested types from query results
-// type Activity = ActivityNoCalendar;
-// type RoomReservation = (typeof roomReservationEnum.enumValues)[number];
-
-// // Room type from planning activity
-// type Room = {
-//   id: string;
-//   name: string;
-//   capacity: number;
-//   reservation: RoomReservation | null;
-// };
-// type CalendarData = RouterOutputs["calendars"]["getCalendarForClub"];
-// type DayOpeningTimeData =
-//   NonNullable<CalendarData>["dayOpeningTimes"][number]["dayOpeningTime"];
-// type DayOpeningTime = DayOpeningTimeData & {
-//   workingHours: Array<{
-//     opening: string;
-//     closing: string;
-//   }>;
-// };
-// type OpeningTime = DayOpeningTime["workingHours"][number];
 
 type DailyPlanningProps = {
   memberId: string;
@@ -45,16 +20,16 @@ type DailyPlanningProps = {
 
 export default function DailyPlanning({ memberId, day }: DailyPlanningProps) {
   const t = useTranslations("dashboard");
-  const planning = trpc.plannings.getMemberDailyPlanning.useQuery({
+  const memberPlanning = trpc.plannings.getMemberDailyPlanning.useQuery({
     date: day,
     memberId,
   });
-  if (planning.isLoading) return <Spinner />;
-  if (!planning.data || planning.data.length === 0)
+  if (memberPlanning.isLoading) return <Spinner />;
+  if (!memberPlanning.data || memberPlanning.data.planning.length === 0)
     return <div>{t("no-planning")}</div>;
   return (
     <div className="flex flex-col gap-2">
-      {planning.data.map((plan) => (
+      {memberPlanning.data.planning.map((plan) => (
         <div
           key={plan.id}
           className="flex flex-col items-center rounded border border-secondary bg-card"
@@ -80,13 +55,18 @@ export default function DailyPlanning({ memberId, day }: DailyPlanningProps) {
                   {" - "}
                   <span>{item.roomName}</span>
                 </p>
-                {/* <MakeReservation
-                  roomId={item.roomId}
-                  reservations={activity.reservations}
-                  memberId={memberId}
-                  planningActivityId={activity.id}
-                  day={day}
-                /> */}
+                {item.roomId ? (
+                  <MakeReservation
+                    roomId={item.roomId}
+                    reservations={memberPlanning.data.reservations.filter(
+                      (r) => r.planningId === plan.id,
+                    )}
+                    memberId={memberId}
+                    slotId={item.slotId}
+                    day={day}
+                    planningId={plan.id}
+                  />
+                ) : null}
               </div>
             ))}
             {/* plan.withNoCalendar.map((activity) => (
@@ -106,10 +86,10 @@ export default function DailyPlanning({ memberId, day }: DailyPlanningProps) {
 }
 
 type MakeReservationProps = {
-  roomId: RoomId | null;
+  roomId: RoomId;
   planningId: PlanningId;
   slotId: string;
-  reservations: { id: string; date: Date }[];
+  reservations: ReservationData[];
   memberId: string;
   day: Date;
 };
@@ -141,10 +121,12 @@ function MakeReservation({
       },
     });
 
+  const roomDetails = trpc.sites.getRoomById.useQuery(roomId, {
+    enabled: isCUID(roomId),
+  });
+
   if (isBefore(day, startOfToday())) return null;
   if (!roomId) return null;
-  const roomDetails = trpc.sites.getRoomById.useQuery(roomId);
-
   if (!roomDetails.data) return null;
   const room = roomDetails.data;
 
@@ -162,7 +144,7 @@ function MakeReservation({
           ? t("member.remain", { free, capacity: room.capacity })
           : t("member.waiting-list")}
       </p>
-      {reservations.find((r) => r.id === slotId && isEqual(day, r.date)) ? (
+      {reservations.find((r) => r.slotId === slotId) ? (
         <Badge variant="secondary">{t("member.reserved")}</Badge>
       ) : (
         <Button

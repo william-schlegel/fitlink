@@ -80,14 +80,15 @@ export async function dalUpdateSubscriptionSelection(data: {
   activityGroups: ActivityGroupId[];
   activities: ActivityId[];
 }) {
-  if (!isCUID(data.subscriptionId)) return;
+  if (!isCUID(data.subscriptionId)) return null;
 
-  db.update(subscription)
+  return db
+    .update(subscription)
     .set({
-      sites: data.sites,
-      rooms: data.rooms,
-      activityGroups: data.activityGroups,
-      activities: data.activities,
+      sites: [...data.sites],
+      rooms: [...data.rooms],
+      activityGroups: [...data.activityGroups],
+      activities: [...data.activities],
     })
     .where(eq(subscription.id, data.subscriptionId))
     .returning();

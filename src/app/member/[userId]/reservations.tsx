@@ -1,7 +1,7 @@
 "use client";
 
 import { inferProcedureOutput } from "@trpc/server";
-import { startOfToday } from "date-fns";
+import { startOfDay, startOfToday } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -48,7 +48,7 @@ function Reservations({ userId, day }: { userId: string; day: Date }) {
 
   const queryReservations = trpc.users.getReservationsByUserId.useQuery({
     userId,
-    after: day,
+    after: startOfDay(new Date()),
   });
 
   if (queryReservations.isLoading) return <Spinner />;
