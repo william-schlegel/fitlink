@@ -1,7 +1,8 @@
 import {
-  addDays,
   isAfter,
   isSameDay,
+  isValid,
+  parse,
   startOfDay,
   startOfToday,
 } from "date-fns";
@@ -28,9 +29,8 @@ import {
 } from "@/components/modals/manageEvent";
 import Title from "@/components/title";
 import CardGroup from "@/components/ui/cardGroup";
-import SelectDay from "@/components/ui/selectDay";
+import { SelectDate } from "@/components/ui/selectDay";
 import {
-  Badge,
   Button,
   Card,
   CardContent,
@@ -47,8 +47,8 @@ import {
 import { ClubId, UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
 import { DayName } from "@/lib/dates/data";
-import { getDayNumber, getToday } from "@/lib/dates/serverDayName";
-import { formatDateLocalized } from "@/lib/formatDate";
+import { getDayForDate } from "@/lib/dates/serverDayName";
+import { formatDateAsYYYYMMDD, formatDateLocalized } from "@/lib/formatDate";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getManagerDataForUserId } from "@/server/api/routers/dashboard";
 import { getClubDailyPlanning } from "@/server/api/routers/planning";
@@ -63,7 +63,7 @@ export default async function ManagerClubs({
   searchParams,
 }: {
   params: Promise<{ userId: UserId }>;
-  searchParams: Promise<{ day?: DayName }>;
+  searchParams: Promise<{ day?: string }>;
 }) {
   const user = await getActualUser();
   if (!user) redirect("/", RedirectType.replace);
@@ -88,7 +88,8 @@ export default async function ManagerClubs({
   });
 
   const searchParamsValue = await searchParams;
-  const day = searchParamsValue?.day ?? getToday();
+  const selectedDate = parseSelectedDate(searchParamsValue?.day);
+  const dayName = getDayForDate(selectedDate);
 
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">
@@ -145,17 +146,14 @@ export default async function ManagerClubs({
 
       <section className="grid auto-rows-auto gap-2 lg:grid-cols-2">
         <Card>
-          <CardHeader className="flex items-center justify-between gap-2">
+          <CardHeader>
             <CardTitle className="flex items-center gap-3">
               {t("dashboard.planning")}
-              <SelectDay day={day} redirectTo={`/manager/${userId}`} />
+              <SelectDate
+                day={formatDateAsYYYYMMDD(selectedDate)}
+                redirectTo={`/manager/${userId}`}
+              />
             </CardTitle>
-            <Badge>
-              {formatDateLocalized(getDateForDay(day), {
-                dateFormat: "long",
-                withDay: "long",
-              })}
-            </Badge>
           </CardHeader>
           <CardContent>
             {managerQuery?.clubs?.map((club) => (
@@ -163,7 +161,8 @@ export default async function ManagerClubs({
                 key={club.id}
                 clubId={club.id}
                 userId={userId}
-                day={day}
+                day={dayName}
+                courseDate={selectedDate}
               />
             ))}
           </CardContent>
@@ -221,26 +220,26 @@ export default async function ManagerClubs({
   );
 }
 
-function getDateForDay(day: DayName) {
-  const today = startOfToday();
-  const todayNumber = getDayNumber(getToday());
-  const targetNumber = getDayNumber(day);
-  const diff = (targetNumber - todayNumber + 7) % 7;
-  return addDays(today, diff);
+function parseSelectedDate(value?: string) {
+  if (!value) return startOfToday();
+  const parsed = parse(value, "yyyy-MM-dd", startOfToday());
+  if (!isValid(parsed)) return startOfToday();
+  return startOfDay(parsed);
 }
 
 async function DailyPlanning({
   clubId,
   userId,
   day,
+  courseDate,
 }: {
   clubId: ClubId;
   userId: UserId;
   day: DayName;
+  courseDate: Date;
 }) {
   const t = await getTranslations("dashboard");
   const planning = await getClubDailyPlanning(clubId, day);
-  const courseDate = getDateForDay(day);
   const canEdit =
     isAfter(startOfDay(courseDate), startOfToday()) ||
     isSameDay(courseDate, startOfToday());

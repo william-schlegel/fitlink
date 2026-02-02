@@ -688,7 +688,10 @@
     "language-english": "Switch to English",
     "theme": "Thème",
     "theme-light": "Thème clair",
-    "theme-dark": "Thème sombre"
+    "theme-dark": "Thème sombre",
+    "previousDay": "Hier",
+    "nextDay": "Demain",
+    "selectDate": "Choisir une date"
   },
   "dashboard": {
     "clubs": "{count, plural, =1 {Club} other {Clubs}}",
