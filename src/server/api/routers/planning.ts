@@ -12,12 +12,14 @@ import {
   getClubDailyPlanning,
   getCoachDailyPlanning,
   getCoachPlanningForClub,
+  getCourseForSlotDate,
   getMemberDailyPlanning,
   getPlanningActivityById,
   getPlanningById,
   getPlanningsForClub,
   updatePlanning,
   updatePlanningActivity,
+  upsertCourseForSlotDate,
 } from "@/db/dal";
 import { dayNameEnum } from "@/db/schema/enums";
 import {
@@ -31,7 +33,12 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/lib/trpc/server";
-import { planningItemSchema, planningSchema } from "@/schemas";
+import {
+  courseSlotDateSchema,
+  courseUpsertSchema,
+  planningItemSchema,
+  planningSchema,
+} from "@/schemas";
 
 export {
   getClubDailyPlanning,
@@ -54,6 +61,13 @@ export const planningRouter = createTRPCRouter({
     .query(({ input }) => {
       if (!input.planningId || !input.slotId) return null;
       return getPlanningActivityById(input.planningId, input.slotId);
+    }),
+
+  getCourseForSlotDate: protectedProcedure
+    .input(courseSlotDateSchema)
+    .query(async ({ input }) => {
+      const course = await getCourseForSlotDate(input);
+      return course ?? null;
     }),
 
   createPlanningForClub: protectedProcedure
@@ -109,6 +123,10 @@ export const planningRouter = createTRPCRouter({
     .mutation(({ input }) =>
       updatePlanningActivity(input.planningId, input.item),
     ),
+
+  upsertCourseForSlotDate: protectedProcedure
+    .input(courseUpsertSchema)
+    .mutation(({ input }) => upsertCourseForSlotDate(input)),
 
   deletePlanningActivity: protectedProcedure
     .input(z.object({ planningId: ZodPlanningId, slotId: z.string() }))

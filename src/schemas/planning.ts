@@ -3,6 +3,7 @@ import {
   ZodActivityId,
   ZodCalendarId,
   ZodClubId,
+  ZodCourseId,
   ZodPlanningId,
   ZodRoomId,
   ZodSiteId,
@@ -112,3 +113,28 @@ export type PlanningSearchItemData = z.infer<typeof planningSearchItemSchema>;
 export type PlanningSearchReturnData = z.infer<
   typeof planningSearchReturnSchema
 >;
+
+// ==================== COURSE SCHEMAS ====================
+
+export const courseSlotDateSchema = z.object({
+  planningId: ZodPlanningId,
+  slotId: z.string(),
+  date: z.date(),
+});
+
+export const courseUpsertSchema = z.object({
+  courseId: ZodCourseId.optional(),
+  planningId: ZodPlanningId,
+  slotId: z.string(),
+  date: z.date(),
+  activityId: ZodActivityId,
+  siteId: ZodSiteId.nullable(),
+  roomId: ZodRoomId.nullable(),
+  coachUserId: ZodUserId.nullable(),
+  slotNumber: z.number().optional(),
+  cancelled: z.boolean().optional(),
+  message: z.string().nullable().optional(),
+});
+
+export type CourseSlotDateInput = z.infer<typeof courseSlotDateSchema>;
+export type CourseUpsertInput = z.infer<typeof courseUpsertSchema>;

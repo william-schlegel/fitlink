@@ -1,4 +1,10 @@
-import { startOfToday } from "date-fns";
+import {
+  addDays,
+  isAfter,
+  isSameDay,
+  startOfDay,
+  startOfToday,
+} from "date-fns";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect, RedirectType } from "next/navigation";
@@ -13,6 +19,7 @@ import {
   UserIcon,
 } from "lucide-react";
 
+import { ManageCourse } from "@/components/modals/manageCourse";
 import {
   CreateEvent,
   DeleteEvent,
@@ -21,6 +28,7 @@ import {
 } from "@/components/modals/manageEvent";
 import Title from "@/components/title";
 import CardGroup from "@/components/ui/cardGroup";
+import SelectDay from "@/components/ui/selectDay";
 import {
   Badge,
   Button,
@@ -38,7 +46,8 @@ import {
 } from "@/components/ui/shadcn/item";
 import { ClubId, UserId } from "@/db/types";
 import { getActualUser } from "@/lib/auth/server";
-import { getToday } from "@/lib/dates/serverDayName";
+import { DayName } from "@/lib/dates/data";
+import { getDayNumber, getToday } from "@/lib/dates/serverDayName";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { createTrpcCaller } from "@/lib/trpc/caller";
 import { getManagerDataForUserId } from "@/server/api/routers/dashboard";
@@ -51,8 +60,10 @@ import { getClubDailyPlanning } from "@/server/api/routers/planning";
 
 export default async function ManagerClubs({
   params,
+  searchParams,
 }: {
   params: Promise<{ userId: UserId }>;
+  searchParams: Promise<{ day?: DayName }>;
 }) {
   const user = await getActualUser();
   if (!user) redirect("/", RedirectType.replace);
@@ -75,6 +86,9 @@ export default async function ManagerClubs({
       withFeatures: true,
     },
   });
+
+  const searchParamsValue = await searchParams;
+  const day = searchParamsValue?.day ?? getToday();
 
   return (
     <div className="container mx-auto my-2 space-y-2 p-2">
@@ -132,9 +146,12 @@ export default async function ManagerClubs({
       <section className="grid auto-rows-auto gap-2 lg:grid-cols-2">
         <Card>
           <CardHeader className="flex items-center justify-between gap-2">
-            <CardTitle>{t("dashboard.planning")}</CardTitle>
+            <CardTitle className="flex items-center gap-3">
+              {t("dashboard.planning")}
+              <SelectDay day={day} redirectTo={`/manager/${userId}`} />
+            </CardTitle>
             <Badge>
-              {formatDateLocalized(startOfToday(), {
+              {formatDateLocalized(getDateForDay(day), {
                 dateFormat: "long",
                 withDay: "long",
               })}
@@ -142,7 +159,12 @@ export default async function ManagerClubs({
           </CardHeader>
           <CardContent>
             {managerQuery?.clubs?.map((club) => (
-              <DailyPlanning key={club.id} clubId={club.id} />
+              <DailyPlanning
+                key={club.id}
+                clubId={club.id}
+                userId={userId}
+                day={day}
+              />
             ))}
           </CardContent>
         </Card>
@@ -199,10 +221,29 @@ export default async function ManagerClubs({
   );
 }
 
-async function DailyPlanning({ clubId }: { clubId: ClubId }) {
+function getDateForDay(day: DayName) {
+  const today = startOfToday();
+  const todayNumber = getDayNumber(getToday());
+  const targetNumber = getDayNumber(day);
+  const diff = (targetNumber - todayNumber + 7) % 7;
+  return addDays(today, diff);
+}
+
+async function DailyPlanning({
+  clubId,
+  userId,
+  day,
+}: {
+  clubId: ClubId;
+  userId: UserId;
+  day: DayName;
+}) {
   const t = await getTranslations("dashboard");
-  const day = getToday();
   const planning = await getClubDailyPlanning(clubId, day);
+  const courseDate = getDateForDay(day);
+  const canEdit =
+    isAfter(startOfDay(courseDate), startOfToday()) ||
+    isSameDay(courseDate, startOfToday());
   if (!planning || planning.planningItems.length === 0)
     return (
       <Alert variant="info">
@@ -232,6 +273,24 @@ async function DailyPlanning({ clubId }: { clubId: ClubId }) {
               {" - "}
               <span>{item.coachName}</span>
             </p>
+            {item.siteId && canEdit ? (
+              <div className="mt-2 flex justify-end">
+                <ManageCourse
+                  planningId={planning.id}
+                  slotId={item.slotId}
+                  clubId={clubId}
+                  userId={userId}
+                  siteId={item.siteId}
+                  date={courseDate}
+                  activityId={item.activityId}
+                  coachUserId={item.coachUserId}
+                  roomId={item.roomId}
+                  startTime={item.startTime}
+                  activityName={item.activityName}
+                  siteName={item.siteName}
+                />
+              </div>
+            ) : null}
           </div>
         ))}
       </div>

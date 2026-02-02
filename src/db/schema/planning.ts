@@ -1,6 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   json,
@@ -13,6 +14,7 @@ import {
   ActivityId,
   CalendarId,
   ClubId,
+  CourseId,
   PlanningId,
   ReservationId,
   RoomId,
@@ -133,3 +135,24 @@ export const reservationRelations = relations(reservation, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const course = pgTable(
+  "Course",
+  {
+    id: text("id").primaryKey().$defaultFn(createId).$type<CourseId>(),
+    name: text("name").notNull(),
+    date: timestamp("date").notNull(),
+    planningId: text("planning_id").notNull().$type<PlanningId>(),
+    slotId: text("slot_id").notNull(),
+    slotNumber: integer("slot_number").notNull(),
+    activityId: text("activity_id").notNull().$type<ActivityId>(),
+    siteId: text("site_id").$type<SiteId | null>(),
+    roomId: text("room_id").$type<RoomId | null>(),
+    coachUserId: text("coach_user_id").$type<UserId | null>(),
+    cancelled: boolean("cancelled").default(false),
+    message: text("message"),
+    capacity: integer("capacity").notNull(),
+    reservations: text("reservations").array().$type<ReservationId[]>(),
+  },
+  (table) => [index("course_date_idx").on(table.date)],
+);

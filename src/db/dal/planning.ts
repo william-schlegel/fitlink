@@ -1,10 +1,11 @@
-import { and, asc, eq, inArray, lte } from "drizzle-orm";
+import { endOfDay, startOfDay } from "date-fns";
+import { and, asc, between, eq, inArray, lte } from "drizzle-orm";
 
 import { db } from "@/db";
 import { user } from "@/db/schema/auth";
 import { activity, room, site } from "@/db/schema/club";
 import { dayNameEnum } from "@/db/schema/enums";
-import { planning, reservation } from "@/db/schema/planning";
+import { course, planning, reservation } from "@/db/schema/planning";
 import { getDayName } from "@/lib/dates/days";
 import { isCUID } from "@/lib/utils";
 import {
@@ -18,6 +19,7 @@ import {
   ActivityGroupId,
   ActivityId,
   ClubId,
+  CourseId,
   PlanningId,
   ReservationId,
   RoomId,
@@ -91,6 +93,24 @@ type PlanningFilters = {
   siteIds?: SiteId[];
   activityIds?: ActivityId[];
 };
+
+function getCourseStartDate(baseDate: Date, startTime: string) {
+  const [hours, minutes] = startTime.split(":").map((value) => Number(value));
+  const date = new Date(baseDate);
+  date.setHours(
+    Number.isNaN(hours) ? 0 : hours,
+    Number.isNaN(minutes) ? 0 : minutes,
+    0,
+    0,
+  );
+  return date;
+}
+
+function getTimeString(date: Date) {
+  const hours = `${date.getHours()}`.padStart(2, "0");
+  const minutes = `${date.getMinutes()}`.padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
 
 export async function fillPlanningItems(
   planningItems: PlanningData["planningItems"] | null,
@@ -301,6 +321,26 @@ export async function getMemberDailyPlanning(memberId: UserId, date: Date) {
     ),
   );
   const planningClubs = await getPlanningsForClubIds(clubIds);
+  const planningIds = planningClubs.map((plan) => plan.id);
+  const coursesForDay =
+    planningIds.length > 0
+      ? await db.query.course.findMany({
+          where: and(
+            inArray(course.planningId, planningIds),
+            between(course.date, startOfDay(date), endOfDay(date)),
+          ),
+        })
+      : [];
+  const coursesByPlanningId = new Map<
+    PlanningId,
+    Map<string, typeof course.$inferSelect>
+  >();
+  for (const courseItem of coursesForDay) {
+    const mapForPlanning =
+      coursesByPlanningId.get(courseItem.planningId) ?? new Map();
+    mapForPlanning.set(courseItem.slotId, courseItem);
+    coursesByPlanningId.set(courseItem.planningId, mapForPlanning);
+  }
   const dayName = getDayName(date);
   const planningData: PlanningSearchReturnData[] = [];
 
@@ -343,7 +383,23 @@ export async function getMemberDailyPlanning(memberId: UserId, date: Date) {
       }
     }
 
-    const planItems = await fillPlanningItems(planningClub.planningItems, {
+    const courseOverrides = coursesByPlanningId.get(planningClub.id);
+    const itemsWithOverrides = (planningClub.planningItems ?? []).map(
+      (item) => {
+        const courseOverride = courseOverrides?.get(item.slotId);
+        if (!courseOverride) return item;
+        return {
+          ...item,
+          activityId: courseOverride.activityId,
+          coachUserId: courseOverride.coachUserId,
+          roomId: courseOverride.roomId,
+          siteId: courseOverride.siteId,
+          startTime: getTimeString(courseOverride.date),
+        };
+      },
+    );
+
+    const planItems = await fillPlanningItems(itemsWithOverrides, {
       day: dayName,
       activityIds: Array.from(activityIds),
     });
@@ -548,6 +604,119 @@ export async function getPlanningActivityById(
   return completedItem[0];
 }
 
+// ==================== COURSES ====================
+
+export async function getCourseForSlotDate(data: {
+  planningId: PlanningId;
+  slotId: string;
+  date: Date;
+}) {
+  const found = await db.query.course.findFirst({
+    where: and(
+      eq(course.planningId, data.planningId),
+      eq(course.slotId, data.slotId),
+      between(course.date, startOfDay(data.date), endOfDay(data.date)),
+    ),
+  });
+  return found ?? null;
+}
+
+export async function upsertCourseForSlotDate(data: {
+  courseId?: CourseId;
+  planningId: PlanningId;
+  slotId: string;
+  date: Date;
+  activityId: ActivityId;
+  siteId: SiteId | null;
+  roomId: RoomId | null;
+  coachUserId: UserId | null;
+  slotNumber?: number;
+  cancelled?: boolean;
+  message?: string | null;
+}) {
+  return db.transaction(async (tx) => {
+    const existingById = data.courseId
+      ? await tx.query.course.findFirst({
+          where: and(
+            eq(course.id, data.courseId),
+            eq(course.planningId, data.planningId),
+          ),
+        })
+      : null;
+    const existingBySlotDate = existingById
+      ? null
+      : await tx.query.course.findFirst({
+          where: and(
+            eq(course.planningId, data.planningId),
+            eq(course.slotId, data.slotId),
+            between(course.date, startOfDay(data.date), endOfDay(data.date)),
+          ),
+        });
+    const existing = existingById ?? existingBySlotDate;
+    const activityData = await tx.query.activity.findFirst({
+      where: eq(activity.id, data.activityId),
+      columns: { name: true },
+    });
+    const roomData = data.roomId
+      ? await tx.query.room.findFirst({
+          where: eq(room.id, data.roomId),
+          columns: { capacity: true },
+        })
+      : null;
+    const nextName = activityData?.name ?? "Course";
+    const nextCapacity = roomData?.capacity ?? existing?.capacity ?? 0;
+
+    if (existing) {
+      const updated = await tx
+        .update(course)
+        .set({
+          activityId: data.activityId,
+          siteId: data.siteId,
+          roomId: data.roomId,
+          coachUserId: data.coachUserId,
+          date: data.date,
+          name: nextName,
+          capacity: nextCapacity,
+          cancelled: data.cancelled ?? existing.cancelled,
+          message: data.message ?? existing.message,
+        })
+        .where(eq(course.id, existing.id))
+        .returning();
+      return updated[0];
+    }
+
+    const reservationsForDay = await tx.query.reservation.findMany({
+      where: and(
+        eq(reservation.planningId, data.planningId),
+        eq(reservation.slotId, data.slotId),
+        between(reservation.date, startOfDay(data.date), endOfDay(data.date)),
+      ),
+      columns: { id: true },
+    });
+
+    const created = await tx
+      .insert(course)
+      .values({
+        name: nextName,
+        date: data.date,
+        planningId: data.planningId,
+        slotId: data.slotId,
+        slotNumber: data.slotNumber ?? 0,
+        activityId: data.activityId,
+        siteId: data.siteId,
+        roomId: data.roomId,
+        coachUserId: data.coachUserId,
+        cancelled: data.cancelled ?? false,
+        message: data.message ?? null,
+        capacity: nextCapacity,
+        reservations: reservationsForDay.map((r) => r.id),
+      })
+      .returning();
+
+    return created[0];
+  });
+}
+
 export async function addPlanningActivity(data: {
   planningId: PlanningId;
   item: Omit<PlanningData["planningItems"][number], "slotId">;
@@ -621,16 +790,80 @@ export async function createPlanningReservation(data: {
   slotId: string;
   userId: UserId;
 }) {
-  return db
-    .insert(reservation)
-    .values({
-      date: data.date,
+  return db.transaction(async (tx) => {
+    const created = await tx
+      .insert(reservation)
+      .values({
+        date: data.date,
+        planningId: data.planningId,
+        slotId: data.slotId,
+        userId: data.userId,
+        reservationDate: new Date(),
+      })
+      .returning();
+    const newReservation = created[0];
+    if (!newReservation) return created;
+
+    const plan = await tx.query.planning.findFirst({
+      where: eq(planning.id, data.planningId),
+    });
+    const planItem = plan?.planningItems?.find(
+      (item) => item.slotId === data.slotId,
+    );
+    if (!planItem) return created;
+
+    const courseDate = getCourseStartDate(data.date, planItem.startTime);
+    const existingCourse = await tx.query.course.findFirst({
+      where: and(
+        eq(course.planningId, data.planningId),
+        eq(course.slotId, data.slotId),
+        between(course.date, startOfDay(courseDate), endOfDay(courseDate)),
+      ),
+    });
+    const nextReservations = Array.from(
+      new Set([...(existingCourse?.reservations ?? []), newReservation.id]),
+    );
+
+    if (existingCourse) {
+      await tx
+        .update(course)
+        .set({ reservations: nextReservations })
+        .where(eq(course.id, existingCourse.id));
+      return created;
+    }
+
+    if (!planItem.siteId || !planItem.roomId || !planItem.coachUserId)
+      return created;
+
+    const activityData = await tx.query.activity.findFirst({
+      where: eq(activity.id, planItem.activityId),
+      columns: { name: true },
+    });
+    const roomData = planItem.roomId
+      ? await tx.query.room.findFirst({
+          where: eq(room.id, planItem.roomId),
+          columns: { capacity: true },
+        })
+      : null;
+
+    await tx.insert(course).values({
+      name: activityData?.name ?? "Course",
+      date: courseDate,
       planningId: data.planningId,
       slotId: data.slotId,
-      userId: data.userId,
-      reservationDate: new Date(),
-    })
-    .returning();
+      slotNumber: 0,
+      activityId: planItem.activityId,
+      siteId: planItem.siteId ?? null,
+      roomId: planItem.roomId ?? null,
+      coachUserId: planItem.coachUserId ?? null,
+      cancelled: false,
+      message: null,
+      capacity: roomData?.capacity ?? 0,
+      reservations: nextReservations,
+    });
+
+    return created;
+  });
 }
 
 export async function createActivityReservation(data: {
@@ -654,5 +887,42 @@ export async function createActivityReservation(data: {
 }
 
 export async function deleteReservation(id: ReservationId) {
-  return db.delete(reservation).where(eq(reservation.id, id));
+  return db.transaction(async (tx) => {
+    const existingReservation = await tx.query.reservation.findFirst({
+      where: eq(reservation.id, id),
+    });
+    if (!existingReservation)
+      return tx.delete(reservation).where(eq(reservation.id, id)).returning();
+
+    const deleted = await tx
+      .delete(reservation)
+      .where(eq(reservation.id, id))
+      .returning();
+
+    if (!existingReservation.planningId || !existingReservation.slotId)
+      return deleted;
+
+    const existingCourse = await tx.query.course.findFirst({
+      where: and(
+        eq(course.planningId, existingReservation.planningId),
+        eq(course.slotId, existingReservation.slotId),
+        between(
+          course.date,
+          startOfDay(existingReservation.date),
+          endOfDay(existingReservation.date),
+        ),
+      ),
+    });
+    if (!existingCourse) return deleted;
+
+    const nextReservations = (existingCourse.reservations ?? []).filter(
+      (reservationId) => reservationId !== id,
+    );
+    await tx
+      .update(course)
+      .set({ reservations: nextReservations })
+      .where(eq(course.id, existingCourse.id));
+
+    return deleted;
+  });
 }
