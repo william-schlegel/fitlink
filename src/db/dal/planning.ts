@@ -5,12 +5,12 @@ import { db } from "@/db";
 import { user } from "@/db/schema/auth";
 import { activity, room, site } from "@/db/schema/club";
 import { dayNameEnum } from "@/db/schema/enums";
-import { course, planning, reservation } from "@/db/schema/planning";
+import { course, planning, planningItem, reservation } from "@/db/schema/planning";
 import { getDayName } from "@/lib/dates/days";
 import { isCUID } from "@/lib/utils";
 import {
   CreatePlanningInput,
-  PlanningData,
+  PlanningItemData,
   PlanningSearchReturnData,
   UpdatePlanningInput,
   UpdatePlanningItemInput,
@@ -21,6 +21,7 @@ import {
   ClubId,
   CourseId,
   PlanningId,
+  PlanningItemId,
   ReservationId,
   RoomId,
   SiteId,
@@ -69,6 +70,8 @@ export async function getPlanningById(
     },
   });
   if (!plan) return null;
+  const planningItems = await getPlanningItemsWithRelations([plan.id]);
+  const itemsByPlanningId = groupPlanningItemsByPlanningId(planningItems);
   const returnedData: PlanningSearchReturnData = {
     id: plan.id,
     name: plan.name,
@@ -80,7 +83,7 @@ export async function getPlanningById(
     roomName: plan.room?.name ?? "",
     startDate: plan.startDate,
     endDate: plan.endDate,
-    planningItems: await fillPlanningItems(plan.planningItems),
+    planningItems: await fillPlanningItems(itemsByPlanningId.get(plan.id) ?? []),
   };
 
   return returnedData;
@@ -93,6 +96,52 @@ type PlanningFilters = {
   siteIds?: SiteId[];
   activityIds?: ActivityId[];
 };
+
+type PlanningItemWithRelations = typeof planningItem.$inferSelect & {
+  activity: { name: string } | null;
+  coach: { name: string } | null;
+  room: { name: string } | null;
+  site: { name: string } | null;
+  club: { name: string } | null;
+};
+
+async function getPlanningItemsWithRelations(
+  planningIds: PlanningId[],
+  filter?: PlanningFilters,
+) {
+  if (planningIds.length === 0) return [];
+  const conditions = [inArray(planningItem.planningId, planningIds)];
+  if (filter?.day) conditions.push(eq(planningItem.day, filter.day));
+  if (filter?.coachUserIds?.length)
+    conditions.push(inArray(planningItem.coachUserId, filter.coachUserIds));
+  if (filter?.roomIds?.length)
+    conditions.push(inArray(planningItem.roomId, filter.roomIds));
+  if (filter?.siteIds?.length)
+    conditions.push(inArray(planningItem.siteId, filter.siteIds));
+  if (filter?.activityIds?.length)
+    conditions.push(inArray(planningItem.activityId, filter.activityIds));
+
+  return db.query.planningItem.findMany({
+    where: and(...conditions),
+    with: {
+      activity: { columns: { name: true } },
+      coach: { columns: { name: true } },
+      room: { columns: { name: true } },
+      site: { columns: { name: true } },
+      club: { columns: { name: true } },
+    },
+  });
+}
+
+function groupPlanningItemsByPlanningId(items: PlanningItemWithRelations[]) {
+  const grouped = new Map<PlanningId, PlanningItemWithRelations[]>();
+  for (const item of items) {
+    const bucket = grouped.get(item.planningId) ?? [];
+    bucket.push(item);
+    grouped.set(item.planningId, bucket);
+  }
+  return grouped;
+}
 
 function getCourseStartDate(baseDate: Date, startTime: string) {
   const [hours, minutes] = startTime.split(":").map((value) => Number(value));
@@ -113,101 +162,26 @@ function getTimeString(date: Date) {
 }
 
 export async function fillPlanningItems(
-  planningItems: PlanningData["planningItems"] | null,
-  filter?: PlanningFilters,
+  planningItems: PlanningItemWithRelations[],
 ) {
-  const cache = new Map<string, { name: string }>();
-  if (!planningItems) return [];
-  const planningItemsData: PlanningSearchReturnData["planningItems"] = [];
-  function planFilter(item: PlanningData["planningItems"][number]) {
-    if (filter?.day && item.day !== filter.day) return false;
-    if (
-      filter?.coachUserIds &&
-      item.coachUserId &&
-      !filter.coachUserIds.includes(item.coachUserId)
-    )
-      return false;
-    if (filter?.roomIds && item.roomId && !filter.roomIds.includes(item.roomId))
-      return false;
-    if (filter?.siteIds && item.siteId && !filter.siteIds.includes(item.siteId))
-      return false;
-    if (
-      filter?.activityIds &&
-      item.activityId &&
-      !filter.activityIds.includes(item.activityId)
-    )
-      return false;
-    return true;
-  }
-  await Promise.all(
-    planningItems.filter(planFilter).map(async (item) => {
-      let activityName = "";
-      if (cache.has(item.activityId) && item.activityId) {
-        activityName = cache.get(item.activityId)?.name ?? "";
-      } else {
-        const act = await db.query.activity.findFirst({
-          where: eq(activity.id, item.activityId),
-          columns: { name: true },
-        });
-        activityName = act?.name ?? "";
-        cache.set(item.activityId, { name: activityName });
-      }
-      let coachName = "";
-      if (item.coachUserId)
-        if (cache.has(item.coachUserId)) {
-          coachName = cache.get(item.coachUserId)?.name ?? "";
-        } else {
-          const coach = await db.query.user.findFirst({
-            where: eq(user.id, item.coachUserId),
-            columns: { name: true },
-          });
-          coachName = coach?.name ?? "";
-          cache.set(item.coachUserId, { name: coachName });
-        }
-      let roomName = "";
-      if (item.roomId)
-        if (cache.has(item.roomId)) {
-          roomName = cache.get(item.roomId)?.name ?? "";
-        } else {
-          const r = await db.query.room.findFirst({
-            where: eq(room.id, item.roomId),
-            columns: { name: true },
-          });
-          roomName = r?.name ?? "";
-          cache.set(item.roomId, { name: roomName });
-        }
-      let siteName = "";
-      if (item.siteId)
-        if (cache.has(item.siteId)) {
-          siteName = cache.get(item.siteId)?.name ?? "";
-        } else {
-          const s = await db.query.site.findFirst({
-            where: eq(site.id, item.siteId),
-            columns: { name: true },
-          });
-          siteName = s?.name ?? "";
-          cache.set(item.siteId, { name: siteName });
-        }
-      planningItemsData.push({
-        slotId: item.slotId,
-        activityId: item.activityId,
-        activityName,
-        day: item.day,
-        dayName: item.day,
-        startTime: item.startTime,
-        duration: item.duration,
-        coachUserId: item.coachUserId,
-        coachName,
-        roomId: item.roomId,
-        roomName,
-        siteId: item.siteId,
-        siteName,
-        deleted: item.deleted,
-        noCalendar: item.noCalendar,
-      });
-    }),
-  );
-  return planningItemsData;
+  if (planningItems.length === 0) return [];
+  return planningItems.map((item) => ({
+    id: item.id,
+    activityId: item.activityId,
+    activityName: item.activity?.name ?? "",
+    day: item.day,
+    dayName: item.day,
+    startTime: item.startTime,
+    duration: item.duration,
+    coachUserId: item.coachUserId,
+    coachName: item.coach?.name ?? "",
+    roomId: item.roomId,
+    roomName: item.room?.name ?? "",
+    siteId: item.siteId,
+    siteName: item.site?.name ?? "",
+    deleted: item.deleted,
+    noCalendar: item.noCalendar,
+  }));
 }
 
 export async function getClubDailyPlanning(
@@ -227,10 +201,11 @@ export async function getClubDailyPlanning(
     },
   });
   if (!plan) return null;
+  const planningItems = await getPlanningItemsWithRelations([plan.id], { day });
   return {
     ...plan,
     clubName: plan.club?.name ?? "",
-    planningItems: await fillPlanningItems(plan.planningItems, { day }),
+    planningItems: await fillPlanningItems(planningItems),
   };
 }
 
@@ -248,22 +223,24 @@ export async function getCoachDailyPlanning(
     },
   });
   if (!plan) return null;
+  const planningIds = plan.map((p) => p.id);
+  const planningItems = await getPlanningItemsWithRelations(planningIds, {
+    day,
+    coachUserIds: [coachUserId],
+  });
+  const itemsByPlanningId = groupPlanningItemsByPlanningId(planningItems);
   const plannings: PlanningSearchReturnData[] = [];
-  await Promise.all(
-    plan.map(async (p) => {
-      const planningItems = await fillPlanningItems(p.planningItems, {
-        day,
-        coachUserIds: [coachUserId],
-      });
-      plannings.push({
-        ...p,
-        clubName: p.club?.name ?? "",
-        siteName: p.site?.name ?? "",
-        roomName: p.room?.name ?? "",
-        planningItems,
-      });
-    }),
-  );
+  for (const p of plan) {
+    plannings.push({
+      ...p,
+      clubName: p.club?.name ?? "",
+      siteName: p.site?.name ?? "",
+      roomName: p.room?.name ?? "",
+      planningItems: await fillPlanningItems(
+        itemsByPlanningId.get(p.id) ?? [],
+      ),
+    });
+  }
   return plannings;
 }
 
@@ -281,11 +258,12 @@ export async function getCoachPlanningForClub(
     },
   });
   if (!plan) return null;
+  const planningItems = await getPlanningItemsWithRelations([plan.id], {
+    coachUserIds: [coachUserId],
+  });
   return {
     ...plan,
-    planningItems: await fillPlanningItems(plan.planningItems, {
-      coachUserIds: [coachUserId],
-    }),
+    planningItems: await fillPlanningItems(planningItems),
   };
 }
 
@@ -310,7 +288,7 @@ export type ReservationData = {
   id: ReservationId;
   slotNumber: number | null;
   planningId: PlanningId | null;
-  slotId: string | null;
+  planningItemId: PlanningItemId | null;
 };
 
 export async function getMemberDailyPlanning(memberId: UserId, date: Date) {
@@ -333,15 +311,71 @@ export async function getMemberDailyPlanning(memberId: UserId, date: Date) {
       : [];
   const coursesByPlanningId = new Map<
     PlanningId,
-    Map<string, typeof course.$inferSelect>
+    Map<PlanningItemId, typeof course.$inferSelect>
   >();
   for (const courseItem of coursesForDay) {
     const mapForPlanning =
       coursesByPlanningId.get(courseItem.planningId) ?? new Map();
-    mapForPlanning.set(courseItem.slotId, courseItem);
+    mapForPlanning.set(courseItem.planningItemId, courseItem);
     coursesByPlanningId.set(courseItem.planningId, mapForPlanning);
   }
   const dayName = getDayName(date);
+  const planningItems = await getPlanningItemsWithRelations(planningIds, {
+    day: dayName,
+  });
+  const itemsByPlanningId = groupPlanningItemsByPlanningId(planningItems);
+
+  const overrideActivityIds = new Set<ActivityId>();
+  const overrideSiteIds = new Set<SiteId>();
+  const overrideRoomIds = new Set<RoomId>();
+  const overrideCoachIds = new Set<UserId>();
+  for (const courseItem of coursesForDay) {
+    overrideActivityIds.add(courseItem.activityId);
+    if (courseItem.siteId) overrideSiteIds.add(courseItem.siteId);
+    if (courseItem.roomId) overrideRoomIds.add(courseItem.roomId);
+    if (courseItem.coachUserId) overrideCoachIds.add(courseItem.coachUserId);
+  }
+
+  const [overrideActivities, overrideSites, overrideRooms, overrideCoaches] =
+    await Promise.all([
+      overrideActivityIds.size > 0
+        ? db.query.activity.findMany({
+            where: inArray(activity.id, Array.from(overrideActivityIds)),
+            columns: { id: true, name: true },
+          })
+        : [],
+      overrideSiteIds.size > 0
+        ? db.query.site.findMany({
+            where: inArray(site.id, Array.from(overrideSiteIds)),
+            columns: { id: true, name: true },
+          })
+        : [],
+      overrideRoomIds.size > 0
+        ? db.query.room.findMany({
+            where: inArray(room.id, Array.from(overrideRoomIds)),
+            columns: { id: true, name: true },
+          })
+        : [],
+      overrideCoachIds.size > 0
+        ? db.query.user.findMany({
+            where: inArray(user.id, Array.from(overrideCoachIds)),
+            columns: { id: true, name: true },
+          })
+        : [],
+    ]);
+
+  const overrideActivityNames = new Map(
+    overrideActivities.map((item) => [item.id, item.name]),
+  );
+  const overrideSiteNames = new Map(
+    overrideSites.map((item) => [item.id, item.name]),
+  );
+  const overrideRoomNames = new Map(
+    overrideRooms.map((item) => [item.id, item.name]),
+  );
+  const overrideCoachNames = new Map(
+    overrideCoaches.map((item) => [item.id, item.name]),
+  );
   const planningData: PlanningSearchReturnData[] = [];
 
   for (const planningClub of planningClubs) {
@@ -384,25 +418,37 @@ export async function getMemberDailyPlanning(memberId: UserId, date: Date) {
     }
 
     const courseOverrides = coursesByPlanningId.get(planningClub.id);
-    const itemsWithOverrides = (planningClub.planningItems ?? []).map(
-      (item) => {
-        const courseOverride = courseOverrides?.get(item.slotId);
-        if (!courseOverride) return item;
-        return {
-          ...item,
-          activityId: courseOverride.activityId,
-          coachUserId: courseOverride.coachUserId,
-          roomId: courseOverride.roomId,
-          siteId: courseOverride.siteId,
-          startTime: getTimeString(courseOverride.date),
-        };
-      },
+    const baseItems = await fillPlanningItems(
+      itemsByPlanningId.get(planningClub.id) ?? [],
     );
-
-    const planItems = await fillPlanningItems(itemsWithOverrides, {
-      day: dayName,
-      activityIds: Array.from(activityIds),
+    const itemsWithOverrides = baseItems.map((item) => {
+      const courseOverride = courseOverrides?.get(item.id);
+      if (!courseOverride) return item;
+      const nextActivityId = courseOverride.activityId;
+      const nextCoachId = courseOverride.coachUserId ?? null;
+      const nextRoomId = courseOverride.roomId ?? null;
+      const nextSiteId = courseOverride.siteId ?? null;
+      return {
+        ...item,
+        activityId: nextActivityId,
+        activityName:
+          overrideActivityNames.get(nextActivityId) ?? item.activityName,
+        coachUserId: nextCoachId,
+        coachName: nextCoachId
+          ? overrideCoachNames.get(nextCoachId) ?? ""
+          : "",
+        roomId: nextRoomId,
+        roomName: nextRoomId ? overrideRoomNames.get(nextRoomId) ?? "" : "",
+        siteId: nextSiteId,
+        siteName: nextSiteId ? overrideSiteNames.get(nextSiteId) ?? "" : "",
+        startTime: getTimeString(courseOverride.date),
+      };
     });
+
+    const planItems =
+      activityIds.size === 0
+        ? []
+        : itemsWithOverrides.filter((item) => activityIds.has(item.activityId));
 
     planningData.push({
       clubId: planningClub.clubId,
@@ -477,7 +523,7 @@ export async function getMemberDailyPlanning(memberId: UserId, date: Date) {
     id: r.id,
     slotNumber: r.slotNumber,
     planningId: r.planningId,
-    slotId: r.slotId,
+    planningItemId: r.planningItemId,
   }));
 
   return {
@@ -516,9 +562,10 @@ export async function getPlanningActivitiesWithFilters(
     with: { club: true },
   });
   if (!plan) return null;
+  const planningItems = await getPlanningItemsWithRelations([plan.id], filters);
   return {
     ...plan,
-    planningItems: await fillPlanningItems(plan.planningItems, filters),
+    planningItems: await fillPlanningItems(planningItems),
   };
 }
 
@@ -544,14 +591,31 @@ export async function getActivitiesWithNoCalendar(
 // ==================== PLANNING MUTATIONS ====================
 
 export async function createPlanning(data: CreatePlanningInput) {
-  return db.insert(planning).values(data).returning();
+  const { planningItems, ...planningData } = data;
+  const created = await db.insert(planning).values(planningData).returning();
+  const createdPlanning = created[0];
+  if (!createdPlanning) return created;
+  if (planningItems?.length) {
+    const itemsToInsert = planningItems.map((item) => {
+      const { id, ...rest } = item;
+      return {
+        id: id ?? crypto.randomUUID(),
+        planningId: createdPlanning.id,
+        clubId: createdPlanning.clubId,
+        ...rest,
+      };
+    });
+    await db.insert(planningItem).values(itemsToInsert);
+  }
+  return created;
 }
 
 export async function updatePlanning(data: UpdatePlanningInput) {
   if (!data.id) return null;
+  const { planningItems: _planningItems, ...planningData } = data;
   return db
     .update(planning)
-    .set(data)
+    .set(planningData)
     .where(eq(planning.id, data.id))
     .returning();
 }
@@ -565,6 +629,9 @@ export async function duplicatePlanning(
   });
 
   if (!org) return null;
+  const orgItems = await db.query.planningItem.findMany({
+    where: eq(planningItem.planningId, originalId),
+  });
 
   const newPlanning = await db
     .insert(planning)
@@ -573,14 +640,22 @@ export async function duplicatePlanning(
       name: newData.name ?? org.name,
       startDate: newData.startDate,
       endDate: newData.endDate,
-      planningItems: org.planningItems?.map((item) => ({
-        ...item,
-        slotId: crypto.randomUUID(),
-      })),
     })
     .returning();
+  const createdPlanning = newPlanning[0];
+  if (!createdPlanning) return null;
 
-  return newPlanning[0];
+  if (orgItems.length > 0) {
+    const itemsToInsert = orgItems.map(({ id, planningId, ...rest }) => ({
+      ...rest,
+      id: crypto.randomUUID(),
+      planningId: createdPlanning.id,
+      clubId: createdPlanning.clubId,
+    }));
+    await db.insert(planningItem).values(itemsToInsert);
+  }
+
+  return createdPlanning;
 }
 
 export async function deletePlanning(planningId: PlanningId) {
@@ -591,14 +666,22 @@ export async function deletePlanning(planningId: PlanningId) {
 
 export async function getPlanningActivityById(
   planningId: PlanningId,
-  slotId: string,
+  planningItemId: PlanningItemId,
 ) {
-  if (!planningId || !slotId) return null;
-  const plan = await db.query.planning.findFirst({
-    where: eq(planning.id, planningId),
+  if (!planningId || !planningItemId) return null;
+  const item = await db.query.planningItem.findFirst({
+    where: and(
+      eq(planningItem.id, planningItemId),
+      eq(planningItem.planningId, planningId),
+    ),
+    with: {
+      activity: { columns: { name: true } },
+      coach: { columns: { name: true } },
+      room: { columns: { name: true } },
+      site: { columns: { name: true } },
+      club: { columns: { name: true } },
+    },
   });
-  if (!plan) return null;
-  const item = plan.planningItems?.find((item) => item.slotId === slotId);
   if (!item) return null;
   const completedItem = await fillPlanningItems([item]);
   return completedItem[0];
@@ -608,13 +691,13 @@ export async function getPlanningActivityById(
 
 export async function getCourseForSlotDate(data: {
   planningId: PlanningId;
-  slotId: string;
+  planningItemId: PlanningItemId;
   date: Date;
 }) {
   const found = await db.query.course.findFirst({
     where: and(
       eq(course.planningId, data.planningId),
-      eq(course.slotId, data.slotId),
+      eq(course.planningItemId, data.planningItemId),
       between(course.date, startOfDay(data.date), endOfDay(data.date)),
     ),
   });
@@ -624,7 +707,7 @@ export async function getCourseForSlotDate(data: {
 export async function upsertCourseForSlotDate(data: {
   courseId?: CourseId;
   planningId: PlanningId;
-  slotId: string;
+  planningItemId: PlanningItemId;
   date: Date;
   activityId: ActivityId;
   siteId: SiteId | null;
@@ -648,7 +731,7 @@ export async function upsertCourseForSlotDate(data: {
       : await tx.query.course.findFirst({
           where: and(
             eq(course.planningId, data.planningId),
-            eq(course.slotId, data.slotId),
+            eq(course.planningItemId, data.planningItemId),
             between(course.date, startOfDay(data.date), endOfDay(data.date)),
           ),
         });
@@ -688,7 +771,7 @@ export async function upsertCourseForSlotDate(data: {
     const reservationsForDay = await tx.query.reservation.findMany({
       where: and(
         eq(reservation.planningId, data.planningId),
-        eq(reservation.slotId, data.slotId),
+        eq(reservation.planningItemId, data.planningItemId),
         between(reservation.date, startOfDay(data.date), endOfDay(data.date)),
       ),
       columns: { id: true },
@@ -700,7 +783,7 @@ export async function upsertCourseForSlotDate(data: {
         name: nextName,
         date: data.date,
         planningId: data.planningId,
-        slotId: data.slotId,
+        planningItemId: data.planningItemId,
         slotNumber: data.slotNumber ?? 0,
         activityId: data.activityId,
         siteId: data.siteId,
@@ -719,21 +802,21 @@ export async function upsertCourseForSlotDate(data: {
 
 export async function addPlanningActivity(data: {
   planningId: PlanningId;
-  item: Omit<PlanningData["planningItems"][number], "slotId">;
+  item: Omit<PlanningItemData, "id">;
 }) {
   const plan = await db.query.planning.findFirst({
     where: eq(planning.id, data.planningId),
+    columns: { clubId: true },
   });
   if (!plan) return null;
-  const newItem = {
-    ...data.item,
-    slotId: crypto.randomUUID(),
-  };
-  plan.planningItems?.push(newItem);
   return db
-    .update(planning)
-    .set({ planningItems: plan.planningItems })
-    .where(eq(planning.id, data.planningId))
+    .insert(planningItem)
+    .values({
+      id: crypto.randomUUID(),
+      planningId: data.planningId,
+      clubId: plan.clubId,
+      ...data.item,
+    })
     .returning();
 }
 
@@ -741,44 +824,30 @@ export async function updatePlanningActivity(
   planningId: PlanningId,
   item: UpdatePlanningItemInput,
 ) {
-  const plan = await db.query.planning.findFirst({
-    where: eq(planning.id, planningId),
-  });
-  if (!plan) return null;
-  const itemIndex = plan.planningItems?.findIndex(
-    (i) => i.slotId === item.slotId,
-  );
-  if (itemIndex === undefined || itemIndex < 0) return null;
-  const newItems = [...(plan.planningItems ?? [])];
-  newItems[itemIndex] = {
-    ...newItems[itemIndex],
-    ...item,
-  };
+  if (!item.id) return null;
+  const { id, ...updates } = item;
   return db
-    .update(planning)
-    .set({ planningItems: newItems })
-    .where(eq(planning.id, planningId))
+    .update(planningItem)
+    .set(updates)
+    .where(
+      and(eq(planningItem.id, id), eq(planningItem.planningId, planningId)),
+    )
     .returning();
 }
 
 export async function deletePlanningActivity(
   planningId: PlanningId,
-  slotId: string,
+  planningItemId: PlanningItemId,
 ) {
-  const plan = await db.query.planning.findFirst({
-    where: eq(planning.id, planningId),
-  });
-  if (!plan) return null;
-  const itemToDelete = plan.planningItems?.find(
-    (item) => item.slotId === slotId,
-  );
-  if (!itemToDelete) return plan;
-  itemToDelete.deleted = true;
-
   return db
-    .update(planning)
-    .set({ planningItems: plan.planningItems })
-    .where(eq(planning.id, planningId))
+    .update(planningItem)
+    .set({ deleted: true })
+    .where(
+      and(
+        eq(planningItem.id, planningItemId),
+        eq(planningItem.planningId, planningId),
+      ),
+    )
     .returning();
 }
 
@@ -787,7 +856,7 @@ export async function deletePlanningActivity(
 export async function createPlanningReservation(data: {
   date: Date;
   planningId: PlanningId;
-  slotId: string;
+  planningItemId: PlanningItemId;
   userId: UserId;
 }) {
   return db.transaction(async (tx) => {
@@ -796,7 +865,7 @@ export async function createPlanningReservation(data: {
       .values({
         date: data.date,
         planningId: data.planningId,
-        slotId: data.slotId,
+        planningItemId: data.planningItemId,
         userId: data.userId,
         reservationDate: new Date(),
       })
@@ -804,19 +873,19 @@ export async function createPlanningReservation(data: {
     const newReservation = created[0];
     if (!newReservation) return created;
 
-    const plan = await tx.query.planning.findFirst({
-      where: eq(planning.id, data.planningId),
+    const planItem = await tx.query.planningItem.findFirst({
+      where: and(
+        eq(planningItem.id, data.planningItemId),
+        eq(planningItem.planningId, data.planningId),
+      ),
     });
-    const planItem = plan?.planningItems?.find(
-      (item) => item.slotId === data.slotId,
-    );
     if (!planItem) return created;
 
     const courseDate = getCourseStartDate(data.date, planItem.startTime);
     const existingCourse = await tx.query.course.findFirst({
       where: and(
         eq(course.planningId, data.planningId),
-        eq(course.slotId, data.slotId),
+        eq(course.planningItemId, data.planningItemId),
         between(course.date, startOfDay(courseDate), endOfDay(courseDate)),
       ),
     });
@@ -850,7 +919,7 @@ export async function createPlanningReservation(data: {
       name: activityData?.name ?? "Course",
       date: courseDate,
       planningId: data.planningId,
-      slotId: data.slotId,
+      planningItemId: data.planningItemId,
       slotNumber: 0,
       activityId: planItem.activityId,
       siteId: planItem.siteId ?? null,
@@ -869,7 +938,7 @@ export async function createPlanningReservation(data: {
 export async function createActivityReservation(data: {
   date: Date;
   planningId: PlanningId;
-  slotId: string;
+  planningItemId: PlanningItemId;
   userId: UserId;
   slotNumber: number;
 }) {
@@ -878,7 +947,7 @@ export async function createActivityReservation(data: {
     .values({
       date: data.date,
       planningId: data.planningId,
-      slotId: data.slotId,
+      planningItemId: data.planningItemId,
       userId: data.userId,
       reservationDate: new Date(),
       slotNumber: data.slotNumber,
@@ -899,13 +968,13 @@ export async function deleteReservation(id: ReservationId) {
       .where(eq(reservation.id, id))
       .returning();
 
-    if (!existingReservation.planningId || !existingReservation.slotId)
+    if (!existingReservation.planningId || !existingReservation.planningItemId)
       return deleted;
 
     const existingCourse = await tx.query.course.findFirst({
       where: and(
         eq(course.planningId, existingReservation.planningId),
-        eq(course.slotId, existingReservation.slotId),
+        eq(course.planningItemId, existingReservation.planningItemId),
         between(
           course.date,
           startOfDay(existingReservation.date),

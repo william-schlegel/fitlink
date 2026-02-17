@@ -5,6 +5,7 @@ import {
   ZodClubId,
   ZodCourseId,
   ZodPlanningId,
+  ZodPlanningItemId,
   ZodRoomId,
   ZodSiteId,
   ZodUserId,
@@ -46,7 +47,7 @@ export type UpdateCalendarInput = CalendarData;
  */
 
 export const planningItemSchema = z.object({
-  slotId: z.string(),
+  id: ZodPlanningItemId,
   activityId: ZodActivityId,
   day: z.enum(dayNameEnum.enumValues),
   startTime: z.string(),
@@ -77,7 +78,7 @@ export type PlanningItemData = z.infer<typeof planningItemSchema>;
 export type UpdatePlanningItemInput = Partial<PlanningItemData>;
 
 export const planningSearchItemSchema = z.object({
-  slotId: z.string(),
+  id: ZodPlanningItemId,
   activityId: ZodActivityId,
   activityName: z.string(),
   day: z.enum(dayNameEnum.enumValues),
@@ -118,14 +119,14 @@ export type PlanningSearchReturnData = z.infer<
 
 export const courseSlotDateSchema = z.object({
   planningId: ZodPlanningId,
-  slotId: z.string(),
+  planningItemId: ZodPlanningItemId,
   date: z.date(),
 });
 
 export const courseUpsertSchema = z.object({
   courseId: ZodCourseId.optional(),
   planningId: ZodPlanningId,
-  slotId: z.string(),
+  planningItemId: ZodPlanningItemId,
   date: z.date(),
   activityId: ZodActivityId,
   siteId: ZodSiteId.nullable(),

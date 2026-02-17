@@ -8,8 +8,21 @@ import { useState } from "react";
 import { Trash } from "lucide-react";
 
 import Confirmation from "@/components/ui/confirmation";
-import { getButtonSize } from "@/components/ui/modal";
 import { SelectDate } from "@/components/ui/selectDay";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/shadcn";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { formatDateLocalized } from "@/lib/formatDate";
 import { trpc } from "@/lib/trpc/client";
@@ -97,66 +110,74 @@ function MyReservation({ reservation, memberId, day }: MyReservationProps) {
     deleteReservation.mutate(reservation.id);
   }
 
+  const reservationDate = formatDateLocalized(reservation.date, {
+    dateFormat: "short",
+    withDay: "long",
+  });
+  const startTime = reservation.planningItem?.startTime ?? "--:--";
+  const activityName = reservation.planningItem?.activity?.name ?? "-";
+  const coachName = reservation.planningItem?.coach?.publicName ?? "-";
+  const roomName = reservation.planningItem?.room?.name ?? "-";
+  const siteName = reservation.planningItem?.site?.name ?? "-";
+
   return (
-    <div className="rounded border border-primary bg-card">
-      <div className="flex items-center justify-between gap-4 bg-primary px-3 py-1 text-center text-primary-content">
-        <span>
-          {formatDateLocalized(reservation.date, {
-            dateFormat: "short",
-            withDay: "long",
-          })}
-        </span>
-        <Confirmation
-          message={t("member.reservation-delete-message")}
-          title={t("member.delete-reservation")}
-          buttonIcon={
-            <Trash
-              className={`fill-destructive stroke-destructive ${getButtonSize("icon")}`}
-            />
-          }
-          onConfirm={() => handleDeleteReservation()}
-          buttonSize="icon"
-          variant="ghost"
-        />
-      </div>
-      {/* reservation?.planningActivity ? (
-        <div className="p-2">
-          <div className="space-x-2 text-center">
-            <span className="font-semibold">
-              {reservation.planningActivity?.activity?.name}
+    <Dialog>
+      <DialogTrigger asChild>
+        <button type="button" className="w-full text-left">
+          <Card className="h-full cursor-pointer transition-colors hover:bg-accent/30">
+            <CardHeader>
+              <CardTitle>{activityName}</CardTitle>
+              <CardDescription>{reservationDate}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-1">
+              <p>{startTime}</p>
+              <p className="text-muted-foreground">{coachName}</p>
+              <p className="text-muted-foreground">{roomName}</p>
+            </CardContent>
+          </Card>
+        </button>
+      </DialogTrigger>
+      <DialogContent size="xs">
+        <DialogHeader>
+          <DialogTitle>{activityName}</DialogTitle>
+          <DialogDescription>{reservationDate}</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-2 text-sm">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-muted-foreground">
+              {t("reservation.time")}
             </span>
-            {reservation.planningActivity?.coach?.publicName ? (
-              <span className="text-xs">
-                {"("}
-                {reservation.planningActivity?.coach?.publicName}
-                {")"}
-              </span>
-            ) : null}
+            <span>{startTime}</span>
           </div>
-          <div className="flex justify-between">
-            <span>{reservation.planningActivity?.startTime}</span>
-            <span>{reservation.planningActivity?.room?.name}</span>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-muted-foreground">
+              {t("reservation.coach")}
+            </span>
+            <span>{coachName}</span>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-muted-foreground">
+              {t("reservation.site")}
+            </span>
+            <span>{siteName}</span>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-muted-foreground">
+              {t("reservation.room")}
+            </span>
+            <span>{roomName}</span>
           </div>
         </div>
-      ) : null */}
-      {/* reservation?.activity ? (
-        <div className="p-2">
-          <div className="space-x-2 text-center">
-            <span className="font-semibold">{reservation.activity?.name}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="space-x-2">
-              <span>{format(reservation?.date, "HH:mm")}</span>
-              <span className="text-xs">
-                {"("}
-                {reservation.activity.reservationDuration}
-                {"')"}
-              </span>
-            </span>
-            <span>{reservation.room?.name}</span>
-          </div>
-        </div>
-      ) : null */}
-    </div>
+        <DialogFooter>
+          <Confirmation
+            message={t("member.reservation-delete-message")}
+            title={t("member.delete-reservation")}
+            buttonIcon={<Trash className="size-4" />}
+            onConfirm={() => handleDeleteReservation()}
+            variant="destructive"
+          />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

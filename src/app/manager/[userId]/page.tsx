@@ -257,7 +257,7 @@ async function DailyPlanning({
       <div className="flex shrink-0 flex-wrap items-start gap-2 p-2">
         {planning.planningItems.map((item) => (
           <div
-            key={item.slotId}
+            key={item.id}
             className="border border-border p-2 bg-background text-foreground"
           >
             <p>
@@ -276,7 +276,7 @@ async function DailyPlanning({
               <div className="mt-2 flex justify-end">
                 <ManageCourse
                   planningId={planning.id}
-                  slotId={item.slotId}
+                  planningItemId={item.id}
                   clubId={clubId}
                   userId={userId}
                   siteId={item.siteId}

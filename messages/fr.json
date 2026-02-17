@@ -753,6 +753,12 @@
       "dashboard": "Dashboard du manager/coach",
       "continue-as-coach": "Continuer en tant que coach",
       "continue-as-manager": "Continuer en tant que manager"
+    },
+    "reservation": {
+      "time": "Heure",
+      "coach": "Coach",
+      "site": "Site",
+      "room": "Salle"
     }
   },
   "home": {

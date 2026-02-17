@@ -42,7 +42,7 @@ import { Pencil } from "lucide-react";
 
 type ManageCourseProps = {
   planningId: PlanningId;
-  slotId: string;
+  planningItemId: string;
   clubId: ClubId;
   userId: UserId;
   siteId: SiteId;
@@ -71,7 +71,7 @@ function getTimeString(date: Date) {
 
 export function ManageCourse({
   planningId,
-  slotId,
+  planningItemId,
   clubId,
   userId,
   siteId,
@@ -91,8 +91,8 @@ export function ManageCourse({
   );
 
   const courseQuery = trpc.plannings.getCourseForSlotDate.useQuery(
-    { planningId, slotId, date: baseDate },
-    { enabled: isCUID(planningId) && Boolean(slotId) },
+    { planningId, planningItemId, date: baseDate },
+    { enabled: isCUID(planningId) && Boolean(planningItemId) },
   );
 
   const clubQuery = trpc.clubs.getClubById.useQuery(
@@ -149,7 +149,7 @@ export function ManageCourse({
     onSuccess: (data) => {
       utils.plannings.getCourseForSlotDate.invalidate({
         planningId,
-        slotId,
+        planningItemId,
         date: data?.date ?? baseDate,
       });
       toast.success(t("update-course"));
@@ -172,7 +172,7 @@ export function ManageCourse({
     upsertCourse.mutate({
       courseId: courseQuery.data?.id,
       planningId,
-      slotId,
+      planningItemId,
       date: courseDate,
       activityId: data.activityId,
       siteId,
@@ -209,7 +209,7 @@ export function ManageCourse({
         <FieldSet>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor={`course-date-${slotId}`}>
+              <FieldLabel htmlFor={`course-date-${planningItemId}`}>
                 {t("start-date")}
               </FieldLabel>
               <Controller
@@ -218,7 +218,7 @@ export function ManageCourse({
                 rules={{ required: t("date-mandatory") ?? true }}
                 render={({ field }) => (
                   <Input
-                    id={`course-date-${slotId}`}
+                    id={`course-date-${planningItemId}`}
                     type="date"
                     value={field.value ? formatDateAsYYYYMMDD(field.value) : ""}
                     onChange={(event) =>
@@ -234,11 +234,11 @@ export function ManageCourse({
               {errors.date && <FieldError>{t("date-mandatory")}</FieldError>}
             </Field>
             <Field>
-              <FieldLabel htmlFor={`course-start-${slotId}`}>
+              <FieldLabel htmlFor={`course-start-${planningItemId}`}>
                 {t("start-hour")}
               </FieldLabel>
               <Input
-                id={`course-start-${slotId}`}
+                id={`course-start-${planningItemId}`}
                 type="time"
                 {...register("startTime", {
                   required: t("start-hour-mandatory") ?? true,

@@ -167,8 +167,7 @@ export function PlanningContent({
   }
 
   function handleSaveActivity(data: DropFormData) {
-    const newPlanningItem: PlanningItemData = {
-      slotId: crypto.randomUUID(),
+    const newPlanningItem: Omit<PlanningItemData, "id"> = {
       day: dropData.day,
       siteId: dropData.siteId,
       activityId: dropData.activityId,
@@ -357,7 +356,7 @@ function PlanningActivities({
         <PlanningActivity
           clubId={clubId}
           planningId={planningId}
-          key={slot.activity.slotId}
+          key={slot.activity.id}
           planningActivity={slot.activity}
           position={slot.position}
           nbPosition={slot.nbPosition}
@@ -406,7 +405,7 @@ function PlanningActivity({
       <PopoverContent>
         <PopupActivityDetails
           planningId={planningId}
-          slotId={planningActivity.slotId}
+          planningItemId={planningActivity.id}
           siteId={planningActivity.siteId!}
           clubId={clubId}
           onClose={onClose}
@@ -418,7 +417,7 @@ function PlanningActivity({
 
 type PopupActivityDetailsProps = {
   planningId: PlanningId;
-  slotId: string;
+  planningItemId: string;
   clubId: ClubId;
   siteId: SiteId;
   onClose: () => void;
@@ -426,7 +425,7 @@ type PopupActivityDetailsProps = {
 
 function PopupActivityDetails({
   planningId,
-  slotId,
+  planningItemId,
   clubId,
   siteId,
   onClose,
@@ -434,30 +433,28 @@ function PopupActivityDetails({
   const t = useTranslations("calendar");
 
   const queryPlanning = trpc.plannings.getPlanningActivityById.useQuery(
-    { planningId, slotId },
-    { enabled: Boolean(slotId) },
+    { planningId, planningItemId },
+    { enabled: Boolean(planningItemId) },
   );
   const utils = trpc.useUtils();
   const updatePlanning = trpc.plannings.updatePlanningActivity.useMutation({
-    onSuccess(data) {
-      utils.plannings.getPlanningById.invalidate({ planningId: data?.[0]?.id });
+    onSuccess() {
+      utils.plannings.getPlanningById.invalidate({ planningId });
       toast.success(t("activity-updated"));
     },
   });
   const deletePlanning = trpc.plannings.deletePlanningActivity.useMutation({
-    onSuccess(data) {
-      utils.plannings.getPlanningById.invalidate({
-        planningId: Array.isArray(data) ? data?.[0]?.id : data?.id,
-      });
+    onSuccess() {
+      utils.plannings.getPlanningById.invalidate({ planningId });
       toast.success(t("activity-deleted"));
     },
   });
   function handleSaveActivity(data: DropFormData) {
-    if (slotId)
+    if (planningItemId)
       updatePlanning.mutate({
         planningId,
         item: {
-          slotId,
+          id: planningItemId,
           activityId: data.activityId,
           coachUserId: data.coachUserId ?? null,
           roomId: data.roomId ?? null,
@@ -469,7 +466,8 @@ function PopupActivityDetails({
     onClose();
   }
   function handleDelete() {
-    if (slotId) deletePlanning.mutate({ planningId, slotId });
+    if (planningItemId)
+      deletePlanning.mutate({ planningId, planningItemId });
     onClose();
   }
 

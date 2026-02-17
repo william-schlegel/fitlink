@@ -40,7 +40,7 @@ export default function DailyPlanning({ memberId, day }: DailyPlanningProps) {
           <div className="flex shrink-0 flex-wrap items-start gap-2 p-2">
             {plan.planningItems.map((item) => (
               <div
-                key={item.slotId}
+                key={item.id}
                 className="border border-border bg-card p-2"
               >
                 <p>
@@ -62,7 +62,7 @@ export default function DailyPlanning({ memberId, day }: DailyPlanningProps) {
                       (r) => r.planningId === plan.id,
                     )}
                     memberId={memberId}
-                    slotId={item.slotId}
+                    planningItemId={item.id}
                     day={day}
                     planningId={plan.id}
                   />
@@ -88,14 +88,14 @@ export default function DailyPlanning({ memberId, day }: DailyPlanningProps) {
 type MakeReservationProps = {
   roomId: RoomId;
   planningId: PlanningId;
-  slotId: string;
+  planningItemId: string;
   reservations: ReservationData[];
   memberId: string;
   day: Date;
 };
 function MakeReservation({
   planningId,
-  slotId,
+  planningItemId,
   roomId,
   reservations,
   memberId,
@@ -144,14 +144,14 @@ function MakeReservation({
           ? t("member.remain", { free, capacity: room.capacity })
           : t("member.waiting-list")}
       </p>
-      {reservations.find((r) => r.slotId === slotId) ? (
+      {reservations.find((r) => r.planningItemId === planningItemId) ? (
         <Badge variant="secondary">{t("member.reserved")}</Badge>
       ) : (
         <Button
           onClick={() =>
             createReservation.mutate({
               planningId,
-              slotId,
+              planningItemId,
               memberId,
               date: day,
             })

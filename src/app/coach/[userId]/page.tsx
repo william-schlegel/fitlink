@@ -237,7 +237,7 @@ async function DailyPlanning({
           </div>
           <div className="flex shrink-0 flex-wrap items-start gap-2 p-2">
             {plan.planningItems.map((item) => (
-              <div key={item.slotId} className="border border-border p-2">
+              <div key={item.id} className="border border-border p-2">
                 <p>
                   <span className="text-xs">{item.startTime}</span>
                   {" ("}

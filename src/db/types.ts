@@ -15,6 +15,7 @@ export type RoomId = Brand<string, "RoomId">;
 export type PageId = Brand<string, "PageId">;
 export type CalendarId = Brand<string, "CalendarId">;
 export type PlanningId = Brand<string, "PlanningId">;
+export type PlanningItemId = Brand<string, "PlanningItemId">;
 export type ReservationId = Brand<string, "ReservationId">;
 export type CourseId = Brand<string, "CourseId">;
 export type ActivityId = Brand<string, "ActivityId">;
@@ -31,6 +32,9 @@ export const ZodCoachId = z.string().transform((s) => s as CoachId);
 export const ZodClubId = z.string().transform((s) => s as ClubId);
 export const ZodPageId = z.string().transform((s) => s as PageId);
 export const ZodPlanningId = z.string().transform((s) => s as PlanningId);
+export const ZodPlanningItemId = z
+  .string()
+  .transform((s) => s as PlanningItemId);
 export const ZodSiteId = z.string().transform((s) => s as SiteId);
 export const ZodRoomId = z.string().transform((s) => s as RoomId);
 export const ZodReservationId = z.string().transform((s) => s as ReservationId);

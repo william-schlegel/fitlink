@@ -2,8 +2,9 @@ import { and, asc, between, count, eq, gte, ilike, SQL } from "drizzle-orm";
 
 import { db, TxClient } from "@/db";
 import { user } from "@/db/schema/auth";
+import { activity, room, site } from "@/db/schema/club";
 import { roleEnum } from "@/db/schema/enums";
-import { reservation } from "@/db/schema/planning";
+import { planningItem, reservation } from "@/db/schema/planning";
 import { pricing } from "@/db/schema/subscription";
 import { userCoach, userManager, userMember } from "@/db/schema/user";
 import { endOfDay, startOfDay } from "date-fns";
@@ -195,12 +196,46 @@ export async function getUserSubscriptionsById(userId: UserId) {
 // ==================== USER RESERVATIONS ====================
 
 export async function getReservationsByUserId(userId: UserId, after: Date) {
-  return db.query.reservation.findMany({
-    where: and(eq(reservation.userId, userId), gte(reservation.date, after)),
-    orderBy: [asc(reservation.date)],
-    with: {
-      planning: true,
-    },
+  const rows = await db
+    .select({
+      reservation,
+      planningItem,
+      site,
+      room,
+      activity,
+      userCoach,
+    })
+    .from(reservation)
+    .leftJoin(
+      planningItem,
+      and(
+        eq(reservation.planningItemId, planningItem.id),
+        eq(reservation.planningId, planningItem.planningId),
+      ),
+    )
+    .leftJoin(site, eq(planningItem.siteId, site.id))
+    .leftJoin(room, eq(planningItem.roomId, room.id))
+    .leftJoin(activity, eq(planningItem.activityId, activity.id))
+    .leftJoin(userCoach, eq(userCoach.userId, planningItem.coachUserId))
+    .where(and(eq(reservation.userId, userId), gte(reservation.date, after)))
+    .orderBy(asc(reservation.date));
+
+  return rows.map((row) => {
+    const matchedPlanningItem =
+      row.planningItem && row.planningItem.id ? row.planningItem : null;
+
+    return {
+      ...row.reservation,
+      planningItem: matchedPlanningItem
+        ? {
+            ...matchedPlanningItem,
+            site: row.site ?? null,
+            room: row.room ?? null,
+            activity: row.activity ?? null,
+            coach: row.userCoach ?? null,
+          }
+        : null,
+    };
   });
 }
 

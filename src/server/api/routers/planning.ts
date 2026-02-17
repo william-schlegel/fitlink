@@ -25,6 +25,7 @@ import { dayNameEnum } from "@/db/schema/enums";
 import {
   ZodClubId,
   ZodPlanningId,
+  ZodPlanningItemId,
   ZodReservationId,
   ZodUserId,
 } from "@/db/types";
@@ -57,10 +58,15 @@ export const planningRouter = createTRPCRouter({
     .query(async ({ input }) => getPlanningById(input.planningId)),
 
   getPlanningActivityById: protectedProcedure
-    .input(z.object({ planningId: ZodPlanningId, slotId: z.string() }))
+    .input(
+      z.object({
+        planningId: ZodPlanningId,
+        planningItemId: ZodPlanningItemId,
+      }),
+    )
     .query(({ input }) => {
-      if (!input.planningId || !input.slotId) return null;
-      return getPlanningActivityById(input.planningId, input.slotId);
+      if (!input.planningId || !input.planningItemId) return null;
+      return getPlanningActivityById(input.planningId, input.planningItemId);
     }),
 
   getCourseForSlotDate: protectedProcedure
@@ -103,7 +109,7 @@ export const planningRouter = createTRPCRouter({
     .input(
       z.object({
         planningId: ZodPlanningId,
-        item: planningItemSchema.omit({ slotId: true }),
+        item: planningItemSchema.omit({ id: true }),
       }),
     )
     .mutation(({ input }) =>
@@ -129,9 +135,14 @@ export const planningRouter = createTRPCRouter({
     .mutation(({ input }) => upsertCourseForSlotDate(input)),
 
   deletePlanningActivity: protectedProcedure
-    .input(z.object({ planningId: ZodPlanningId, slotId: z.string() }))
+    .input(
+      z.object({
+        planningId: ZodPlanningId,
+        planningItemId: ZodPlanningItemId,
+      }),
+    )
     .mutation(({ input }) =>
-      deletePlanningActivity(input.planningId, input.slotId),
+      deletePlanningActivity(input.planningId, input.planningItemId),
     ),
 
   getClubDailyPlanning: publicProcedure
@@ -179,7 +190,7 @@ export const planningRouter = createTRPCRouter({
       z.object({
         date: z.date(),
         planningId: ZodPlanningId,
-        slotId: z.string(),
+        planningItemId: ZodPlanningItemId,
         memberId: ZodUserId,
       }),
     )
@@ -187,7 +198,7 @@ export const planningRouter = createTRPCRouter({
       createPlanningReservation({
         date: input.date,
         planningId: input.planningId,
-        slotId: input.slotId,
+        planningItemId: input.planningItemId,
         userId: input.memberId,
       }),
     ),
@@ -201,7 +212,7 @@ export const planningRouter = createTRPCRouter({
       z.object({
         date: z.date(),
         planningId: ZodPlanningId,
-        slotId: z.string(),
+        planningItemId: ZodPlanningItemId,
         memberId: ZodUserId,
         slotNumber: z.number(),
       }),
@@ -210,7 +221,7 @@ export const planningRouter = createTRPCRouter({
       createActivityReservation({
         date: input.date,
         planningId: input.planningId,
-        slotId: input.slotId,
+        planningItemId: input.planningItemId,
         userId: input.memberId,
         slotNumber: input.slotNumber,
       }),

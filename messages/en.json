@@ -747,6 +747,12 @@
       "dashboard": "Manager/coach dashboard",
       "continue-as-coach": "Continue as a coach",
       "continue-as-manager": "Continue as manager"
+    },
+    "reservation": {
+      "time": "Time",
+      "coach": "Coach",
+      "site": "Site",
+      "room": "Room"
     }
   },
   "home": {
